@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::core::{global_resources::KeyBindings, states::OverallState};
+use crate::game::core::{global_resources::KeyBindings, states::OverallState};
 
 pub struct CorePlugin;
 

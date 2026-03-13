@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::core::states::OverallState;
+use crate::game::core::states::OverallState;
 
 pub struct WorldPlugin;
 

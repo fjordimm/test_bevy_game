@@ -3,8 +3,8 @@ use bevy_ecs::schedule::ScheduleLabel;
 use bevy_egui::{EguiContext, EguiMultipassSchedule, egui};
 
 use crate::{
-    core::states::OverallState,
-    menu_state::tags::{MenuStateCameraForEgui, MenuStateEntity},
+    game::core::states::OverallState,
+    game::menu_state::tags::{MenuStateCameraForEgui, MenuStateEntity},
 };
 
 pub struct MenuStatePlugin;
@@ -26,10 +26,7 @@ fn funny1menu(
     let ctx = egui_context.get_mut();
 
     egui::CentralPanel::default().show(ctx, |ui| {
-        ui.heading("This is the menu????");
-        ui.label("Yep it sure is!");
         if ui.button("Play").clicked() {
-            debug!("CLIKEDDDDDDDDD");
             commands.set_state(OverallState::Playing);
         }
     });

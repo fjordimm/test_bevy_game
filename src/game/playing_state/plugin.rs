@@ -3,8 +3,8 @@ use bevy_ecs::schedule::ScheduleLabel;
 use bevy_egui::{EguiContext, EguiMultipassSchedule, egui};
 
 use crate::{
-    core::states::OverallState,
-    playing_state::{
+    game::core::states::OverallState,
+    game::playing_state::{
         player::PlayerPlugin,
         sets::GameSet,
         states::PauseState,
