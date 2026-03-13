@@ -30,23 +30,10 @@ impl Plugin for PlayingStatePlugin {
             .init_state::<PauseState>()
             .add_systems(OnEnter(OverallState::Playing), on_enter_state)
             .add_systems(OnExit(OverallState::Playing), on_exit_state)
-            .add_systems(PlayingStateCameraForEgui, funny1playing)
+            // .add_systems(PlayingStateCameraForEgui, funny1playing)
             .add_plugins(WorldPlugin)
             .add_plugins(PlayerPlugin);
     }
-}
-
-fn funny1playing(
-    // mut commands: Commands,
-    mut egui_context: Single<&mut EguiContext, With<PlayingStateCameraForEgui>>,
-) -> Result {
-    let ctx = egui_context.get_mut();
-
-    egui::Window::new("Sup").show(ctx, |ui| {
-        ui.label("ahahahahah");
-    });
-
-    Ok(())
 }
 
 fn on_enter_state(mut commands: Commands) {
