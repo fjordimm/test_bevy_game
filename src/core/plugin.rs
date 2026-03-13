@@ -1,5 +1,6 @@
-use crate::core::{sets::GameSet, states::GameState};
 use bevy::prelude::*;
+
+use crate::core::{global_resources::KeyBindings, states::OverallState};
 
 pub struct CorePlugin;
 
@@ -7,16 +8,7 @@ impl Plugin for CorePlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .init_state::<GameState>()
-            .configure_sets(
-                Update,
-                (
-                    GameSet::Input,
-                    GameSet::Movement,
-                    GameSet::Physics,
-                    GameSet::World,
-                )
-                    .chain(),
-            );
+            .init_resource::<KeyBindings>()
+            .init_state::<OverallState>();
     }
 }

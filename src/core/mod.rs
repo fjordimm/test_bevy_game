@@ -1,5 +1,6 @@
 mod plugin;
+
+pub mod global_resources;
 pub mod states;
-pub mod sets;
 
 pub use plugin::CorePlugin;

@@ -14,3 +14,4 @@ opt-level = 3
 [dependencies]
 bevy = { version = "0.18.0", features = ["dynamic_linking"] } # TODO: remove dynamic_linking for production
 bevy_ecs = "0.18.0"
+bevy_egui = "0.39.1"

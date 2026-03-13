@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
 #[derive(States, Debug, Clone, Eq, PartialEq, Hash, Default)]
-pub enum OverallState {
+pub enum PauseState {
     #[default]
-    Menu,
-    Playing,
+    Unpaused,
+    Paused,
 }

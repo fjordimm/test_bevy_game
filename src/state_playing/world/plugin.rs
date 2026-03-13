@@ -1,16 +1,19 @@
 use bevy::prelude::*;
 
+use crate::core::states::OverallState;
+
 pub struct WorldPlugin;
 
 impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(Startup, startup);
+            .add_systems(OnEnter(OverallState::Playing), on_enter)
+            .add_systems(OnExit(OverallState::Playing), on_exit);
     }
 }
 
-fn startup(
+fn on_enter(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -27,8 +30,6 @@ fn startup(
         },
         Transform::from_xyz(4.0, 8.0, 4.0),
     ));
-    commands.spawn((
-        Camera3d::default(),
-        Transform::from_xyz(0.0, 0.0, 0.0).looking_at(-Vec3::Z, Vec3::Y),
-    ));
 }
+
+fn on_exit() {}
