@@ -6,4 +6,4 @@ pub mod tags;
 pub mod world;
 pub mod player;
 
-pub use plugin::StatePlayingPlugin;
+pub use plugin::PlayingStatePlugin;

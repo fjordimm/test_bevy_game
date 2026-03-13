@@ -4,18 +4,18 @@ use bevy_egui::{EguiContext, EguiMultipassSchedule, egui};
 
 use crate::{
     core::states::OverallState,
-    state_playing::{
+    playing_state::{
         player::PlayerPlugin,
         sets::GameSet,
         states::PauseState,
-        tags::{StatePlayingCameraForEgui, StatePlayingEntity},
+        tags::{PlayingStateCameraForEgui, PlayingStateEntity},
         world::WorldPlugin,
     },
 };
 
-pub struct StatePlayingPlugin;
+pub struct PlayingStatePlugin;
 
-impl Plugin for StatePlayingPlugin {
+impl Plugin for PlayingStatePlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
@@ -30,7 +30,7 @@ impl Plugin for StatePlayingPlugin {
             .init_state::<PauseState>()
             .add_systems(OnEnter(OverallState::Playing), on_enter_state)
             .add_systems(OnExit(OverallState::Playing), on_exit_state)
-            .add_systems(StatePlayingCameraForEgui, funny1playing)
+            .add_systems(PlayingStateCameraForEgui, funny1playing)
             .add_plugins(WorldPlugin)
             .add_plugins(PlayerPlugin);
     }
@@ -38,7 +38,7 @@ impl Plugin for StatePlayingPlugin {
 
 fn funny1playing(
     // mut commands: Commands,
-    mut egui_context: Single<&mut EguiContext, With<StatePlayingCameraForEgui>>,
+    mut egui_context: Single<&mut EguiContext, With<PlayingStateCameraForEgui>>,
 ) -> Result {
     let ctx = egui_context.get_mut();
 
@@ -50,19 +50,19 @@ fn funny1playing(
 }
 
 fn on_enter_state(mut commands: Commands) {
-    debug!("state_playing on_enter_state");
+    debug!("playing_state on_enter_state");
 
     commands.spawn((
-        StatePlayingEntity,
-        StatePlayingCameraForEgui,
-        EguiMultipassSchedule(StatePlayingCameraForEgui.intern()),
+        PlayingStateEntity,
+        PlayingStateCameraForEgui,
+        EguiMultipassSchedule(PlayingStateCameraForEgui.intern()),
         Camera3d::default(),
         Transform::from_xyz(0.0, 0.0, 0.0).looking_at(-Vec3::Z, Vec3::Y),
     ));
 }
 
-fn on_exit_state(mut commands: Commands, query: Query<Entity, With<StatePlayingEntity>>) {
-    debug!("state_playing on_exit_state");
+fn on_exit_state(mut commands: Commands, query: Query<Entity, With<PlayingStateEntity>>) {
+    debug!("playing_state on_exit_state");
 
     for entity in &query {
         commands.entity(entity).despawn();
