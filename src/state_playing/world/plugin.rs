@@ -8,12 +8,12 @@ impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(OnEnter(OverallState::Playing), on_enter)
-            .add_systems(OnExit(OverallState::Playing), on_exit);
+            .add_systems(OnEnter(OverallState::Playing), on_enter_state)
+            .add_systems(OnExit(OverallState::Playing), on_exit_state);
     }
 }
 
-fn on_enter(
+fn on_enter_state(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -32,4 +32,4 @@ fn on_enter(
     ));
 }
 
-fn on_exit() {}
+fn on_exit_state() {}
