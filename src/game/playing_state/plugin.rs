@@ -2,9 +2,9 @@ use bevy::prelude::*;
 use bevy_ecs::schedule::ScheduleLabel;
 use bevy_egui::{EguiContext, EguiMultipassSchedule, egui};
 
-use crate::{
-    game::core::states::OverallState,
-    game::playing_state::{
+use crate::game::{
+    core::{global_resources::KeyBindings, states::OverallState},
+    playing_state::{
         player::PlayerPlugin,
         sets::GameSet,
         states::PauseState,
@@ -30,7 +30,8 @@ impl Plugin for PlayingStatePlugin {
             .init_state::<PauseState>()
             .add_systems(OnEnter(OverallState::Playing), on_enter_state)
             .add_systems(OnExit(OverallState::Playing), on_exit_state)
-            // .add_systems(PlayingStateCameraForEgui, funny1playing)
+            .add_systems(Update, toggle_pause.run_if(in_state(OverallState::Playing)))
+            .add_systems(PlayingStateCameraForEgui, pause_gui.run_if(in_state(OverallState::Playing)).run_if(in_state(PauseState::Paused)))
             .add_plugins(WorldPlugin)
             .add_plugins(PlayerPlugin);
     }
@@ -54,4 +55,36 @@ fn on_exit_state(mut commands: Commands, query: Query<Entity, With<PlayingStateE
     for entity in &query {
         commands.entity(entity).despawn();
     }
+}
+
+fn toggle_pause(
+    keys: Res<ButtonInput<KeyCode>>,
+    key_bindings: Res<KeyBindings>,
+    pause_state: Res<State<PauseState>>,
+    mut next_pause_state: ResMut<NextState<PauseState>>,
+) {
+    if keys.just_pressed(key_bindings.pause) {
+        next_pause_state.set(match pause_state.get() {
+            PauseState::Unpaused => PauseState::Paused,
+            PauseState::Paused => PauseState::Unpaused,
+        });
+    }
+}
+
+fn pause_gui(
+    mut commands: Commands,
+    mut egui_context: Single<&mut EguiContext, With<PlayingStateCameraForEgui>>,
+) -> Result {
+    let ctx = egui_context.get_mut();
+
+    egui::Window::new("pausemenubaby").show(ctx, |ui| {
+        ui.label("yeppers im paused");
+    });
+    // egui::CentralPanel::default().show(ctx, |ui| {
+    //     if ui.button("Play").clicked() {
+    //         commands.set_state(OverallState::Playing);
+    //     }
+    // });
+
+    Ok(())
 }
