@@ -2,7 +2,10 @@ use bevy::prelude::*;
 use bevy_ecs::schedule::ScheduleLabel;
 use bevy_egui::{EguiContext, EguiMultipassSchedule, egui};
 
-use crate::game::{core::{quit_game, states::OverallState}, main_menu_state::tags::{MainMenuStateCameraForEgui, MainMenuStateEntity}};
+use crate::game::{
+    core::{quit_game, states::OverallState},
+    main_menu_state::tags::{MainMenuStateCameraForEgui, MainMenuStateEntity},
+};
 
 pub struct MainMenuStatePlugin;
 
