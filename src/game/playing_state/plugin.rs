@@ -80,7 +80,7 @@ fn pause_gui(
 ) -> Result {
     let ctx = egui_context.get_mut();
 
-    egui::Area::new("background_overlay".into())
+    egui::Area::new("pause_gui_background".into())
         .fixed_pos(egui::pos2(0.0, 0.0))
         .order(egui::Order::Background)
         .show(ctx, |ui| {
@@ -91,25 +91,21 @@ fn pause_gui(
             );
         });
 
-    egui::Area::new("menu".into())
+    egui::Area::new("pause_gui_menu".into())
         .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
         .order(egui::Order::Foreground)
         .show(ctx, |ui| {
             egui::Frame::NONE
-                .fill(egui::Color32::from_rgb(30, 30, 30))
+                .fill(egui::Color32::from_rgb(34, 58, 51))
                 .corner_radius(egui::CornerRadius::same(12))
                 .inner_margin(egui::Margin::same(32))
                 .show(ui, |ui| {
-                    ui.set_min_width(250.0);
                     ui.vertical_centered(|ui| {
                         ui.heading("Paused");
-                        ui.add_space(20.0);
-
                         if ui.button("Resume").clicked() {
                             next_pause_state.set(PauseState::Unpaused);
                         }
-                        ui.add_space(8.0);
-                        if ui.button("Quit").clicked() {
+                        if ui.button("Exit to Main Menu").clicked() {
                             next_overall_state.set(OverallState::MainMenu)
                         }
                     });

@@ -2,10 +2,7 @@ use bevy::prelude::*;
 use bevy_ecs::schedule::ScheduleLabel;
 use bevy_egui::{EguiContext, EguiMultipassSchedule, egui};
 
-use crate::{
-    game::core::states::OverallState,
-    game::main_menu_state::tags::{MainMenuStateCameraForEgui, MainMenuStateEntity},
-};
+use crate::game::{core::{quit_game, states::OverallState}, main_menu_state::tags::{MainMenuStateCameraForEgui, MainMenuStateEntity}};
 
 pub struct MainMenuStatePlugin;
 
@@ -15,7 +12,7 @@ impl Plugin for MainMenuStatePlugin {
         app
             .add_systems(OnEnter(OverallState::MainMenu), on_enter_state)
             .add_systems(OnExit(OverallState::MainMenu), on_exit_state)
-            .add_systems(MainMenuStateCameraForEgui, gui);
+            .add_systems(MainMenuStateCameraForEgui, main_menu_gui);
     }
 }
 
@@ -38,21 +35,31 @@ fn on_exit_state(mut commands: Commands, query: Query<Entity, With<MainMenuState
     }
 }
 
-fn gui(
+fn main_menu_gui(
     mut commands: Commands,
     mut egui_context: Single<&mut EguiContext, With<MainMenuStateCameraForEgui>>,
 ) -> Result {
     let ctx = egui_context.get_mut();
 
-    egui::CentralPanel::default().show(ctx, |_ui| {
-        egui::Area::new("main_menu".into())
-            .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
-            .show(ctx, |ui| {
-                if ui.button("Play").clicked() {
-                    commands.set_state(OverallState::Playing);
-                }
-            });
-    });
+    egui::Area::new("main_menu_gui_menu".into())
+        .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
+        .order(egui::Order::Foreground)
+        .show(ctx, |ui| {
+            egui::Frame::NONE
+                .fill(egui::Color32::from_rgb(34, 58, 51))
+                .corner_radius(egui::CornerRadius::same(12))
+                .inner_margin(egui::Margin::same(32))
+                .show(ui, |ui| {
+                    ui.vertical_centered(|ui| {
+                        if ui.button("Play").clicked() {
+                            commands.set_state(OverallState::Playing);
+                        }
+                        if ui.button("Quit").clicked() {
+                            quit_game();
+                        }
+                    });
+                });
+        });
 
     Ok(())
 }
