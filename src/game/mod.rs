@@ -1,30 +1,7 @@
-use bevy::{log::LogPlugin, prelude::*};
+mod build_bevy_app;
 
 pub mod core;
 pub mod main_menu_state;
 pub mod playing_state;
 pub mod ui;
-
-pub fn build_bevy_app() -> App {
-    let mut app = App::new();
-
-    #[cfg(debug_assertions)]
-    app.add_plugins(DefaultPlugins.set(LogPlugin {
-        filter: "info,wgpu_core=warn,wgpu_hal=warn,test_bevy_game=trace".into(),
-        level: bevy::log::Level::INFO,
-        ..default()
-    }));
-
-    #[cfg(not(debug_assertions))]
-    app.add_plugins(DefaultPlugins);
-
-    #[rustfmt::skip]
-    app
-        .insert_resource(ClearColor(Color::linear_rgb(0.7, 0.7, 0.0)))
-        .add_plugins(core::CorePlugin)
-        .add_plugins(ui::UiPlugin)
-        .add_plugins(main_menu_state::MainMenuStatePlugin)
-        .add_plugins(playing_state::PlayingStatePlugin);
-
-    app
-}
+pub use build_bevy_app::build_bevy_app;
