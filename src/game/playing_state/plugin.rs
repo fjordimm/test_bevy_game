@@ -37,8 +37,10 @@ impl Plugin for PlayingStatePlugin {
     }
 }
 
-fn on_enter_state(mut commands: Commands) {
+fn on_enter_state(mut commands: Commands, mut next_pause_state: ResMut<NextState<PauseState>>) {
     debug!("playing_state on_enter_state");
+
+    next_pause_state.set(PauseState::Unpaused);
 
     commands.spawn((
         PlayingStateEntity,
@@ -72,19 +74,47 @@ fn toggle_pause(
 }
 
 fn pause_gui(
-    mut commands: Commands,
     mut egui_context: Single<&mut EguiContext, With<PlayingStateCameraForEgui>>,
+    mut next_pause_state: ResMut<NextState<PauseState>>,
+    mut next_overall_state: ResMut<NextState<OverallState>>,
 ) -> Result {
     let ctx = egui_context.get_mut();
 
-    egui::Window::new("pausemenubaby").show(ctx, |ui| {
-        ui.label("yeppers im paused");
-    });
-    // egui::CentralPanel::default().show(ctx, |ui| {
-    //     if ui.button("Play").clicked() {
-    //         commands.set_state(OverallState::Playing);
-    //     }
-    // });
+    egui::Area::new("background_overlay".into())
+        .fixed_pos(egui::pos2(0.0, 0.0))
+        .order(egui::Order::Background)
+        .show(ctx, |ui| {
+            ui.painter().rect_filled(
+                ctx.viewport_rect(),
+                0.0,
+                egui::Color32::from_black_alpha(180),
+            );
+        });
+
+    egui::Area::new("menu".into())
+        .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
+        .order(egui::Order::Foreground)
+        .show(ctx, |ui| {
+            egui::Frame::NONE
+                .fill(egui::Color32::from_rgb(30, 30, 30))
+                .corner_radius(egui::CornerRadius::same(12))
+                .inner_margin(egui::Margin::same(32))
+                .show(ui, |ui| {
+                    ui.set_min_width(250.0);
+                    ui.vertical_centered(|ui| {
+                        ui.heading("Paused");
+                        ui.add_space(20.0);
+
+                        if ui.button("Resume").clicked() {
+                            next_pause_state.set(PauseState::Unpaused);
+                        }
+                        ui.add_space(8.0);
+                        if ui.button("Quit").clicked() {
+                            next_overall_state.set(OverallState::MainMenu)
+                        }
+                    });
+                });
+        });
 
     Ok(())
 }

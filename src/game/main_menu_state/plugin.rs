@@ -44,10 +44,14 @@ fn gui(
 ) -> Result {
     let ctx = egui_context.get_mut();
 
-    egui::CentralPanel::default().show(ctx, |ui| {
-        if ui.button("Play").clicked() {
-            commands.set_state(OverallState::Playing);
-        }
+    egui::CentralPanel::default().show(ctx, |_ui| {
+        egui::Area::new("main_menu".into())
+            .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
+            .show(ctx, |ui| {
+                if ui.button("Play").clicked() {
+                    commands.set_state(OverallState::Playing);
+                }
+            });
     });
 
     Ok(())
