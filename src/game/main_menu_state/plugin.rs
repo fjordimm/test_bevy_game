@@ -13,14 +13,14 @@ impl Plugin for MainMenuStatePlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(OnEnter(OverallState::MainMenu), on_enter_state)
-            .add_systems(OnExit(OverallState::MainMenu), on_exit_state)
+            .add_systems(OnEnter(OverallState::MainMenu), on_enter)
+            .add_systems(OnExit(OverallState::MainMenu), on_exit)
             .add_systems(MainMenuStateCameraForEgui, main_menu_gui);
     }
 }
 
-fn on_enter_state(mut commands: Commands) {
-    debug!("main_menu_state on_enter_state");
+fn on_enter(mut commands: Commands) {
+    debug!("main_menu_state on_enter");
 
     commands.spawn((
         MainMenuStateEntity,
@@ -30,8 +30,8 @@ fn on_enter_state(mut commands: Commands) {
     ));
 }
 
-fn on_exit_state(mut commands: Commands, query: Query<Entity, With<MainMenuStateEntity>>) {
-    debug!("main_menu_state on_exit_state");
+fn on_exit(mut commands: Commands, query: Query<Entity, With<MainMenuStateEntity>>) {
+    debug!("main_menu_state on_exit");
 
     for entity in &query {
         commands.entity(entity).despawn();

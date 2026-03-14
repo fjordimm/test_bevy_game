@@ -29,8 +29,8 @@ impl Plugin for PlayingStatePlugin {
                 ).chain(),
             )
             .init_state::<PauseState>()
-            .add_systems(OnEnter(OverallState::Playing), on_enter_state)
-            .add_systems(OnExit(OverallState::Playing), on_exit_state)
+            .add_systems(OnEnter(OverallState::Playing), on_enter)
+            .add_systems(OnExit(OverallState::Playing), on_exit)
             .add_systems(Update, toggle_pause.run_if(in_state(OverallState::Playing)))
             .add_systems(PlayingStateCameraForEgui, pause_gui.run_if(in_state(OverallState::Playing)).run_if(in_state(PauseState::Paused)))
             .add_plugins(WorldPlugin)
@@ -38,8 +38,8 @@ impl Plugin for PlayingStatePlugin {
     }
 }
 
-fn on_enter_state(mut commands: Commands, mut next_pause_state: ResMut<NextState<PauseState>>) {
-    debug!("playing_state on_enter_state");
+fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<PauseState>>) {
+    debug!("playing_state on_enter");
 
     next_pause_state.set(PauseState::Unpaused);
 
@@ -52,8 +52,8 @@ fn on_enter_state(mut commands: Commands, mut next_pause_state: ResMut<NextState
     ));
 }
 
-fn on_exit_state(mut commands: Commands, query: Query<Entity, With<PlayingStateEntity>>) {
-    debug!("playing_state on_exit_state");
+fn on_exit(mut commands: Commands, query: Query<Entity, With<PlayingStateEntity>>) {
+    debug!("playing_state on_exit");
 
     for entity in &query {
         commands.entity(entity).despawn();
