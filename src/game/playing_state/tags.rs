@@ -1,8 +1,10 @@
 use bevy::prelude::*;
-use bevy_ecs::schedule::ScheduleLabel;
+
+use crate::game::ui::tags::CameraForEgui;
 
 #[derive(Component)]
 pub struct PlayingStateEntity;
 
-#[derive(Component, ScheduleLabel, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Component, Clone, Debug, PartialEq, Eq, Hash)]
+#[require(CameraForEgui)]
 pub struct PlayingStateCameraForEgui;

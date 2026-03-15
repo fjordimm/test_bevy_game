@@ -1,6 +1,4 @@
 use bevy::prelude::*;
-use bevy_ecs::schedule::ScheduleLabel;
-use bevy_egui::EguiMultipassSchedule;
 
 use crate::game::{
     core::{global_resources::KeyBindings, states::OverallState},
@@ -11,7 +9,7 @@ use crate::game::{
         states::PauseState,
         tags::{PlayingStateCameraForEgui, PlayingStateEntity},
         world::WorldPlugin,
-    },
+    }, ui::tags::CameraForEgui,
 };
 
 pub struct PlayingStatePlugin;
@@ -35,7 +33,7 @@ impl Plugin for PlayingStatePlugin {
                     .run_if(in_state(OverallState::Playing))
                     .in_set(PlayingStateOrdering::Ui)
             )
-            .add_systems(PlayingStateCameraForEgui,
+            .add_systems(CameraForEgui,
                 pause_gui
                     .run_if(in_state(OverallState::Playing))
                     .in_set(PlayingStateOrdering::Ui)
@@ -53,14 +51,13 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
         PlayingStateEntity,
         PlayingStateCameraForEgui,
         CameraForPlayer,
-        EguiMultipassSchedule(PlayingStateCameraForEgui.intern()),
         Camera3d::default(),
         Transform::from_xyz(0.0, 0.0, 7.0).looking_at(-Vec3::Z, Vec3::Y),
     ));
 }
 
-fn on_exit(mut commands: Commands, query: Query<Entity, With<PlayingStateEntity>>) {
-    for entity in &query {
+fn on_exit(mut commands: Commands, all_entities: Query<Entity, With<PlayingStateEntity>>) {
+    for entity in &all_entities {
         commands.entity(entity).despawn();
     }
 }
