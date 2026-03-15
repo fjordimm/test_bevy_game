@@ -1,3 +1,4 @@
+mod main_menu_gui;
 mod plugin;
 
 pub mod tags;
