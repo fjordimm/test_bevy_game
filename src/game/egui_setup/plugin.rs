@@ -2,11 +2,11 @@ use bevy::prelude::*;
 use bevy_ecs::schedule::ScheduleLabel;
 use bevy_egui::{EguiContext, EguiMultipassSchedule, EguiPlugin};
 
-use crate::game::ui::tags::CameraForEgui;
+use crate::game::egui_setup::tags::CameraForEgui;
 
-pub struct UiPlugin;
+pub struct EguiSetupPlugin;
 
-impl Plugin for UiPlugin {
+impl Plugin for EguiSetupPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app

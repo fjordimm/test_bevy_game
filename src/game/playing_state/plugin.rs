@@ -10,7 +10,7 @@ use crate::game::{
         tags::{PlayingStateCameraForEgui, PlayingStateEntity},
         world::WorldPlugin,
     },
-    ui::tags::CameraForEgui,
+    egui_setup::tags::CameraForEgui,
 };
 
 pub struct PlayingStatePlugin;

@@ -7,7 +7,7 @@ use crate::game::{
         states::{MouseMode, OverallState},
     },
     main_menu_state::tags::{MainMenuStateCameraForEgui, MainMenuStateEntity},
-    ui::tags::CameraForEgui,
+    egui_setup::tags::CameraForEgui,
 };
 
 pub struct MainMenuStatePlugin;

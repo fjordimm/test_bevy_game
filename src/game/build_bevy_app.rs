@@ -1,6 +1,6 @@
 use bevy::{log::LogPlugin, prelude::*, window::PrimaryWindow};
 
-use crate::game::{core, main_menu_state, playing_state, ui};
+use crate::game::{core, main_menu_state, playing_state, egui_setup};
 
 const DEBUG_BACKGROUND_COLOR: Color = Color::linear_rgb(1.0, 1.0, 0.0);
 
@@ -28,7 +28,7 @@ pub fn build_bevy_app() -> App {
         .insert_resource(ClearColor(DEBUG_BACKGROUND_COLOR))
         .add_systems(Startup, set_window_maximized)
         .add_plugins(core::CorePlugin)
-        .add_plugins(ui::UiPlugin)
+        .add_plugins(egui_setup::EguiSetupPlugin)
         .add_plugins(main_menu_state::MainMenuStatePlugin)
         .add_plugins(playing_state::PlayingStatePlugin);
 
