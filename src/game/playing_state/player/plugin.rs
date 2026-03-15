@@ -1,11 +1,12 @@
-use bevy::{
-    prelude::*,
-    window::{CursorGrabMode, CursorOptions, PrimaryWindow},
-};
+use bevy::{input::mouse::MouseMotion, prelude::*, window::PrimaryWindow};
 
 use crate::game::{
-    core::states::OverallState,
-    playing_state::{player::resources::PlayerMovementSettings, states::PauseState},
+    core::states::{MouseMode, OverallState},
+    playing_state::{
+        player::{resources::PlayerMovementSettings, tags::CameraForPlayer},
+        sets::PlayingStateOrdering,
+        states::PauseState,
+    },
 };
 
 pub struct PlayerPlugin;
@@ -15,10 +16,30 @@ impl Plugin for PlayerPlugin {
         #[rustfmt::skip]
         app
             .init_resource::<PlayerMovementSettings>()
-            .add_systems(OnEnter(OverallState::Playing), on_enter)
-            .add_systems(OnExit(OverallState::Playing), on_exit)
-            .add_systems(OnEnter(PauseState::Unpaused), on_enter_unpaused.run_if(in_state(OverallState::Playing)))
-            .add_systems(OnExit(PauseState::Unpaused), on_exit_unpaused.run_if(in_state(OverallState::Playing)));
+            .add_systems(OnEnter(OverallState::Playing),
+                on_enter
+                    .in_set(PlayingStateOrdering::WorldOnEnter)
+            )
+            .add_systems(OnExit(OverallState::Playing),
+                on_exit
+                    .in_set(PlayingStateOrdering::WorldOnExit)
+            )
+            .add_systems(OnEnter(PauseState::Unpaused),
+                on_enter_unpaused
+                    .run_if(in_state(OverallState::Playing))
+                    .in_set(PlayingStateOrdering::Ui),
+            )
+            .add_systems(OnExit(PauseState::Unpaused),
+                on_exit_unpaused
+                    .run_if(in_state(OverallState::Playing))
+                    .in_set(PlayingStateOrdering::Ui),
+            )
+            .add_systems(Update,
+                cursor_controls_camera_look
+                    .run_if(in_state(OverallState::Playing))
+                    .in_set(PlayingStateOrdering::WorldPlayer)
+                    .run_if(in_state(MouseMode::Grabbed)),
+            );
     }
 }
 
@@ -26,12 +47,30 @@ fn on_enter() {}
 
 fn on_exit() {}
 
-fn on_enter_unpaused(mut primary_cursor_options: Single<&mut CursorOptions, With<PrimaryWindow>>) {
-    primary_cursor_options.grab_mode = CursorGrabMode::Confined;
-    primary_cursor_options.visible = false;
+fn on_enter_unpaused(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
+    next_mouse_mode.set(MouseMode::Grabbed);
 }
 
-fn on_exit_unpaused(mut primary_cursor_options: Single<&mut CursorOptions, With<PrimaryWindow>>) {
-    primary_cursor_options.grab_mode = CursorGrabMode::None;
-    primary_cursor_options.visible = true;
+fn on_exit_unpaused(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
+    next_mouse_mode.set(MouseMode::Free);
+}
+
+fn cursor_controls_camera_look(
+    movement_settings: Res<PlayerMovementSettings>,
+    window: Single<&mut Window, With<PrimaryWindow>>,
+    mut mouse_motion: MessageReader<MouseMotion>,
+    mut camera_trans: Single<&mut Transform, With<CameraForPlayer>>,
+) {
+    for ev in mouse_motion.read() {
+        let (mut yaw, mut pitch, _) = camera_trans.rotation.to_euler(EulerRot::YXZ);
+        let window_scale = window.height().min(window.width());
+
+        pitch -= (movement_settings.look_sensitivity * ev.delta.y * window_scale).to_radians();
+        yaw -= (movement_settings.look_sensitivity * ev.delta.x * window_scale).to_radians();
+
+        pitch = pitch.clamp(-1.54, 1.54);
+
+        camera_trans.rotation =
+            Quat::from_axis_angle(Vec3::Y, yaw) * Quat::from_axis_angle(Vec3::X, pitch);
+    }
 }

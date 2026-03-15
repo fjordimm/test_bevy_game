@@ -6,3 +6,10 @@ pub enum OverallState {
     MainMenu,
     Playing,
 }
+
+#[derive(States, Debug, Clone, Eq, PartialEq, Hash, Default)]
+pub enum MouseMode {
+    #[default]
+    Free,
+    Grabbed,
+}

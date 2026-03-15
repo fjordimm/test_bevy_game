@@ -6,8 +6,8 @@ use crate::game::{
     core::{global_resources::KeyBindings, states::OverallState},
     playing_state::{
         pause_gui::pause_gui,
-        player::PlayerPlugin,
-        sets::GameSet,
+        player::{PlayerPlugin, tags::CameraForPlayer},
+        sets::{PLAYING_STATE_SET_ORDER, PlayingStateOrdering},
         states::PauseState,
         tags::{PlayingStateCameraForEgui, PlayingStateEntity},
         world::WorldPlugin,
@@ -20,21 +20,39 @@ impl Plugin for PlayingStatePlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .configure_sets(
-                Update, (
-                    GameSet::Input,
-                    GameSet::Movement,
-                    GameSet::Physics,
-                    GameSet::World,
-                ).chain(),
-            )
             .init_state::<PauseState>()
-            .add_systems(OnEnter(OverallState::Playing), on_enter)
-            .add_systems(OnExit(OverallState::Playing), on_exit)
-            .add_systems(Update, toggle_pause.run_if(in_state(OverallState::Playing)))
-            .add_systems(PlayingStateCameraForEgui, pause_gui.run_if(in_state(OverallState::Playing)).run_if(in_state(PauseState::Paused)))
+            .configure_sets(Update, PLAYING_STATE_SET_ORDER.chain())
+            .add_systems(OnEnter(OverallState::Playing),
+                on_enter
+                    .in_set(PlayingStateOrdering::WorldOnEnter)
+            )
+            .add_systems(OnExit(OverallState::Playing),
+                on_exit
+                    .in_set(PlayingStateOrdering::WorldOnExit)
+            )
+            .add_systems(Update,
+                toggle_pause
+                    .run_if(in_state(OverallState::Playing))
+                    .in_set(PlayingStateOrdering::Ui)
+            )
+            .add_systems(PlayingStateCameraForEgui,
+                pause_gui
+                    .run_if(in_state(OverallState::Playing))
+                    .in_set(PlayingStateOrdering::Ui)
+                    .run_if(in_state(PauseState::Paused))
+            )
             .add_plugins(WorldPlugin)
-            .add_plugins(PlayerPlugin);
+            .add_plugins(PlayerPlugin)
+            .add_systems(Update, funny1);
+    }
+}
+
+fn funny1(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut next_overall_state: ResMut<NextState<OverallState>>,
+) {
+    if keys.just_pressed(KeyCode::KeyP) {
+        next_overall_state.set(OverallState::MainMenu);
     }
 }
 
@@ -46,9 +64,10 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
     commands.spawn((
         PlayingStateEntity,
         PlayingStateCameraForEgui,
+        CameraForPlayer,
         EguiMultipassSchedule(PlayingStateCameraForEgui.intern()),
         Camera3d::default(),
-        Transform::from_xyz(0.0, 0.0, 0.0).looking_at(-Vec3::Z, Vec3::Y),
+        Transform::from_xyz(0.0, 0.0, 7.0).looking_at(-Vec3::Z, Vec3::Y),
     ));
 }
 

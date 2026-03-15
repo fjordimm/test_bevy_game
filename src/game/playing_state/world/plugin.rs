@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::core::states::OverallState;
+use crate::game::{core::states::OverallState, playing_state::sets::PlayingStateOrdering};
 
 pub struct WorldPlugin;
 
@@ -8,8 +8,14 @@ impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(OnEnter(OverallState::Playing), on_enter)
-            .add_systems(OnExit(OverallState::Playing), on_exit);
+            .add_systems(OnEnter(OverallState::Playing),
+                on_enter
+                    .in_set(PlayingStateOrdering::WorldOnEnter)
+            )
+            .add_systems(OnExit(OverallState::Playing),
+                on_exit
+                    .in_set(PlayingStateOrdering::WorldOnExit)
+            );
     }
 }
 

@@ -3,7 +3,7 @@ use bevy_ecs::schedule::ScheduleLabel;
 use bevy_egui::{EguiContext, EguiMultipassSchedule, egui};
 
 use crate::game::{
-    core::{quit_game, states::OverallState},
+    core::{quit_game, states::{MouseMode, OverallState}},
     main_menu_state::tags::{MainMenuStateCameraForEgui, MainMenuStateEntity},
 };
 
@@ -19,8 +19,10 @@ impl Plugin for MainMenuStatePlugin {
     }
 }
 
-fn on_enter(mut commands: Commands) {
+fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
     debug!("main_menu_state on_enter");
+
+    next_mouse_mode.set(MouseMode::Free);
 
     commands.spawn((
         MainMenuStateEntity,
@@ -39,8 +41,8 @@ fn on_exit(mut commands: Commands, query: Query<Entity, With<MainMenuStateEntity
 }
 
 fn main_menu_gui(
-    mut commands: Commands,
     mut egui_context: Single<&mut EguiContext, With<MainMenuStateCameraForEgui>>,
+    mut next_overall_state: ResMut<NextState<OverallState>>,
 ) -> Result {
     let ctx = egui_context.get_mut();
 
@@ -55,7 +57,7 @@ fn main_menu_gui(
                 .show(ui, |ui| {
                     ui.vertical_centered(|ui| {
                         if ui.button("Play").clicked() {
-                            commands.set_state(OverallState::Playing);
+                            next_overall_state.set(OverallState::Playing);
                         }
                         if ui.button("Quit").clicked() {
                             quit_game();
