@@ -27,19 +27,33 @@ impl Plugin for PlayerPlugin {
             .add_systems(OnEnter(PauseState::Unpaused),
                 on_enter_unpaused
                     .run_if(in_state(OverallState::Playing))
-                    .in_set(PlayingStateOrdering::Ui),
+                    .in_set(PlayingStateOrdering::Ui)
             )
             .add_systems(OnExit(PauseState::Unpaused),
                 on_exit_unpaused
                     .run_if(in_state(OverallState::Playing))
-                    .in_set(PlayingStateOrdering::Ui),
+                    .in_set(PlayingStateOrdering::Ui)
             )
             .add_systems(Update,
                 cursor_controls_camera_look
                     .run_if(in_state(OverallState::Playing))
                     .in_set(PlayingStateOrdering::WorldPlayer)
-                    .run_if(in_state(MouseMode::Grabbed)),
+                    .run_if(in_state(MouseMode::Grabbed))
+            )
+            .add_systems(Update,
+                funny1
+                    .run_if(in_state(OverallState::Playing))
+                    .in_set(PlayingStateOrdering::Ui)
             );
+    }
+}
+
+fn funny1(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut next_overall_state: ResMut<NextState<OverallState>>,
+) {
+    if keys.just_pressed(KeyCode::KeyP) {
+        next_overall_state.set(OverallState::MainMenu);
     }
 }
 

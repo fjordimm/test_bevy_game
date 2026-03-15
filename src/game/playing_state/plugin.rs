@@ -42,23 +42,11 @@ impl Plugin for PlayingStatePlugin {
                     .run_if(in_state(PauseState::Paused))
             )
             .add_plugins(WorldPlugin)
-            .add_plugins(PlayerPlugin)
-            .add_systems(Update, funny1);
-    }
-}
-
-fn funny1(
-    keys: Res<ButtonInput<KeyCode>>,
-    mut next_overall_state: ResMut<NextState<OverallState>>,
-) {
-    if keys.just_pressed(KeyCode::KeyP) {
-        next_overall_state.set(OverallState::MainMenu);
+            .add_plugins(PlayerPlugin);
     }
 }
 
 fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<PauseState>>) {
-    debug!("playing_state on_enter");
-
     next_pause_state.set(PauseState::Unpaused);
 
     commands.spawn((
@@ -72,8 +60,6 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
 }
 
 fn on_exit(mut commands: Commands, query: Query<Entity, With<PlayingStateEntity>>) {
-    debug!("playing_state on_exit");
-
     for entity in &query {
         commands.entity(entity).despawn();
     }

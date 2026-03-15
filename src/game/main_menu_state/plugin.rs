@@ -20,8 +20,6 @@ impl Plugin for MainMenuStatePlugin {
 }
 
 fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
-    debug!("main_menu_state on_enter");
-
     next_mouse_mode.set(MouseMode::Free);
 
     commands.spawn((
@@ -33,8 +31,6 @@ fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseM
 }
 
 fn on_exit(mut commands: Commands, query: Query<Entity, With<MainMenuStateEntity>>) {
-    debug!("main_menu_state on_exit");
-
     for entity in &query {
         commands.entity(entity).despawn();
     }
