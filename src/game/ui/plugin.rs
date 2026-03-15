@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use bevy_ecs::schedule::ScheduleLabel;
-use bevy_egui::{EguiContext, EguiMultipassSchedule, EguiPlugin, egui};
+use bevy_egui::{EguiContext, EguiMultipassSchedule, EguiPlugin};
 
-use crate::game::{playing_state::sets::PlayingStateOrdering, ui::tags::CameraForEgui};
+use crate::game::ui::tags::CameraForEgui;
 
 pub struct UiPlugin;
 

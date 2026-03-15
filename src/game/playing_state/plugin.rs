@@ -9,7 +9,8 @@ use crate::game::{
         states::PauseState,
         tags::{PlayingStateCameraForEgui, PlayingStateEntity},
         world::WorldPlugin,
-    }, ui::tags::CameraForEgui,
+    },
+    ui::tags::CameraForEgui,
 };
 
 pub struct PlayingStatePlugin;
