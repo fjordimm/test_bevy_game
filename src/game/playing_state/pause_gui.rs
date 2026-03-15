@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_egui::{EguiContext, egui};
 
 use crate::game::{
-    core::states::OverallState, playing_state::states::PauseState, egui_setup::tags::CameraForEgui,
+    core::states::OverallState, egui_setup::tags::CameraForEgui, playing_state::states::PauseState,
 };
 
 pub fn pause_gui(

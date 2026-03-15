@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::{global_resources::KeyBindings, states::OverallState},
+    egui_setup::tags::CameraForEgui,
     playing_state::{
         pause_gui::pause_gui,
         player::{PlayerPlugin, tags::CameraForPlayer},
@@ -10,7 +11,6 @@ use crate::game::{
         tags::{PlayingStateCameraForEgui, PlayingStateEntity},
         world::WorldPlugin,
     },
-    egui_setup::tags::CameraForEgui,
 };
 
 pub struct PlayingStatePlugin;

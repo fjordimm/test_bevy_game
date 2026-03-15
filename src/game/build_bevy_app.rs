@@ -1,6 +1,6 @@
 use bevy::{log::LogPlugin, prelude::*, window::PrimaryWindow};
 
-use crate::game::{core, main_menu_state, playing_state, egui_setup};
+use crate::game::{core, egui_setup, main_menu_state, playing_state};
 
 const DEBUG_BACKGROUND_COLOR: Color = Color::linear_rgb(1.0, 1.0, 0.0);
 
