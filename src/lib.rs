@@ -1,4 +1,5 @@
 pub mod game;
+pub mod gui;
 
 pub fn build_app() -> bevy::app::App {
     game::build_bevy_app()

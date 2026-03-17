@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs::schedule::ScheduleLabel;
-use bevy_egui::{EguiContext, EguiMultipassSchedule, EguiPlugin};
+use bevy_egui::{EguiContext, EguiMultipassSchedule, EguiPlugin, egui::{FontFamily, FontId, TextStyle}};
 
 use crate::game::egui_setup::tags::CameraForEgui;
 
@@ -33,6 +33,8 @@ fn on_creation_of_egui_context(mut egui_contexts: Query<&mut EguiContext, Added<
 
         ctx.style_mut(|style| {
             style.animation_time = 0.0;
+            
+            style.text_styles.insert(TextStyle::Button, FontId::new(24.0, FontFamily::Proportional));
         });
     }
 }
