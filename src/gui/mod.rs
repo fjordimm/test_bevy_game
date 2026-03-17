@@ -1,3 +1,3 @@
 mod menu_frame;
 
-pub use menu_frame::MenuFrame;
+pub use menu_frame::MenuRegion;

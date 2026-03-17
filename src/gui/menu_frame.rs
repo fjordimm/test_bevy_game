@@ -1,20 +1,23 @@
 use bevy::prelude::*;
 use bevy_egui::egui::{self, Context, Ui};
 
-pub struct MenuFrame;
+pub struct MenuRegion;
 
-impl MenuFrame {
-    pub fn show(self, ctx: &Context, ui: &mut Ui, add_contents: impl FnOnce(&mut Ui)) {
-        let style = ctx.style();
+impl MenuRegion {
+    pub fn show(self, ctx: &Context, add_contents: impl FnOnce(&mut Ui)) {
+        // let style = ctx.style();
 
-        egui::Frame::NONE
-            .fill(style.visuals.text_color())
-            .corner_radius(egui::CornerRadius::same(12))
-            .inner_margin(egui::Margin::same(32))
-            .show(ui, add_contents);
-
-        egui::Window::new("Yeeeee").show(ctx, |_| {});
-
-        // debug!("{:?}", style.visuals.panel_fill);
+        egui::Window::new("menu_region")
+            .title_bar(false)
+            .resizable(false)
+            .movable(false)
+            .anchor(egui::Align2::CENTER_CENTER, egui::vec2(0.0, 0.0))
+            .order(egui::Order::Foreground)
+            .frame(
+                egui::Frame::NONE
+                    .fill(egui::Color32::from_rgb(34, 58, 51))
+                    .corner_radius(egui::CornerRadius::same(12)),
+            )
+            .show(ctx, add_contents);
     }
 }
