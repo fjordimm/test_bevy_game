@@ -16,11 +16,11 @@ impl Plugin for MainMenuStatePlugin {
         #[rustfmt::skip]
         app
             .add_systems(OnEnter(OverallState::MainMenu), on_enter)
-            .add_systems(OnExit(OverallState::MainMenu), on_exit);
-        // .add_systems(CameraForEgui,
-        //     main_menu_gui
-        //         .run_if(in_state(OverallState::MainMenu))
-        // );
+            .add_systems(OnExit(OverallState::MainMenu), on_exit)
+            .add_systems(CameraForEgui,
+                main_menu_gui
+                    .run_if(in_state(OverallState::MainMenu))
+            );
     }
 }
 
@@ -31,28 +31,6 @@ fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseM
         MainMenuStateEntity,
         MainMenuStateCameraForEgui,
         Camera2d::default(),
-    ));
-
-    commands.spawn((
-        Node {
-            width: percent(100),
-            height: percent(100),
-            display: Display::Flex,
-            flex_direction: FlexDirection::Column,
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            row_gap: px(10),
-            ..default()
-        },
-        TabGroup::default(),
-        children![
-            (
-                Text::new("Bluh")
-            ),
-            (
-                
-            )
-        ]
     ));
 }
 
