@@ -1,12 +1,8 @@
-use bevy::{input_focus::tab_navigation::TabGroup, prelude::*};
+use bevy::prelude::*;
 
 use crate::game::{
     core::states::{MouseMode, OverallState},
-    egui_setup::tags::CameraForEgui,
-    main_menu_state::{
-        main_menu_gui::main_menu_gui,
-        tags::{MainMenuStateCameraForEgui, MainMenuStateEntity},
-    },
+    main_menu_state::tags::MainMenuStateEntity,
 };
 
 pub struct MainMenuStatePlugin;
@@ -16,22 +12,14 @@ impl Plugin for MainMenuStatePlugin {
         #[rustfmt::skip]
         app
             .add_systems(OnEnter(OverallState::MainMenu), on_enter)
-            .add_systems(OnExit(OverallState::MainMenu), on_exit)
-            .add_systems(CameraForEgui,
-                main_menu_gui
-                    .run_if(in_state(OverallState::MainMenu))
-            );
+            .add_systems(OnExit(OverallState::MainMenu), on_exit);
     }
 }
 
 fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
     next_mouse_mode.set(MouseMode::Free);
 
-    commands.spawn((
-        MainMenuStateEntity,
-        MainMenuStateCameraForEgui,
-        Camera2d::default(),
-    ));
+    commands.spawn((MainMenuStateEntity, Camera2d::default()));
 }
 
 fn on_exit(mut commands: Commands, query: Query<Entity, With<MainMenuStateEntity>>) {

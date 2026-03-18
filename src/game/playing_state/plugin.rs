@@ -2,13 +2,11 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::{global_resources::KeyBindings, states::OverallState},
-    egui_setup::tags::CameraForEgui,
     playing_state::{
-        pause_gui::pause_gui,
         player::{PlayerPlugin, tags::CameraForPlayer},
         sets::{PLAYING_STATE_SET_ORDER, PlayingStateOrdering},
         states::PauseState,
-        tags::{PlayingStateCameraForEgui, PlayingStateEntity},
+        tags::PlayingStateEntity,
         world::WorldPlugin,
     },
 };
@@ -34,12 +32,6 @@ impl Plugin for PlayingStatePlugin {
                     .run_if(in_state(OverallState::Playing))
                     .in_set(PlayingStateOrdering::Ui)
             )
-            .add_systems(CameraForEgui,
-                pause_gui
-                    .run_if(in_state(OverallState::Playing))
-                    .in_set(PlayingStateOrdering::Ui)
-                    .run_if(in_state(PauseState::Paused))
-            )
             .add_plugins(WorldPlugin)
             .add_plugins(PlayerPlugin);
     }
@@ -50,7 +42,6 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
 
     commands.spawn((
         PlayingStateEntity,
-        PlayingStateCameraForEgui,
         CameraForPlayer,
         Camera3d::default(),
         Transform::from_xyz(0.0, 0.0, 7.0).looking_at(-Vec3::Z, Vec3::Y),
