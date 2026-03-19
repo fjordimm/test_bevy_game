@@ -5,7 +5,7 @@ use crate::{
         core::states::{MouseMode, OverallState},
         main_menu_state::tags::MainMenuStateEntity,
     },
-    gui::{Div, GuiNode, ScreenDiv},
+    gui::{GuiDiv, GuiNode, GuiScreenDiv, GuiText},
 };
 
 pub struct MainMenuStatePlugin;
@@ -24,9 +24,13 @@ fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseM
 
     commands.spawn((MainMenuStateEntity, Camera2d::default()));
 
-    ScreenDiv::new(
+    GuiScreenDiv::new(
         Color::srgb(0.0, 0.0, 0.1),
-        vec![Box::new(Div::new(Color::srgb(0.0, 0.0, 0.3), vec![]))],
+        FlexDirection::Column,
+        vec![Box::new(GuiDiv::new(
+            FlexDirection::Column,
+            vec![Box::new(GuiText::new("dog"))],
+        ))],
     )
     .spawn(&mut commands);
 

@@ -1,40 +1,39 @@
 use bevy::prelude::*;
 
-use crate::gui::GuiNode;
+use crate::gui::{self, GuiNode};
 
-pub struct Div {
-    color: Color,
+pub struct GuiDiv {
+    flex_direction: FlexDirection,
     children: Vec<Box<dyn GuiNode>>,
 }
 
-impl Div {
-    pub fn new(color: Color, children: Vec<Box<dyn GuiNode>>) -> Self {
+impl GuiDiv {
+    pub fn new(flex_direction: FlexDirection, children: Vec<Box<dyn GuiNode>>) -> Self {
         Self {
-            color: color,
+            flex_direction: flex_direction,
             children: children,
         }
     }
 }
 
-impl GuiNode for Div {
+impl GuiNode for GuiDiv {
     fn spawn(&self, commands: &mut Commands) -> Entity {
         let entity = commands
             .spawn((
                 Node {
                     display: Display::Flex,
-                    flex_direction: FlexDirection::Column,
+                    flex_direction: self.flex_direction,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
-                    row_gap: px(10),
-                    padding: UiRect::all(px(10)),
+                    row_gap: px(gui::constants::MAIN_PADDING),
+                    padding: UiRect::all(px(gui::constants::MAIN_PADDING)),
+                    border: UiRect::all(px(gui::constants::DIV_BORDER_SIZE)),
                     ..default()
                 },
-                BackgroundColor(self.color),
+                BackgroundColor(gui::constants::DIV_MAIN_COLOR),
+                BorderColor::all(gui::constants::DIV_BORDER_COLOR),
             ))
             .id();
-
-        let text = commands.spawn(Text::new("Heeeee")).id();
-        commands.entity(entity).add_child(text);
 
         for child in &self.children {
             let child_entity = child.spawn(commands);
