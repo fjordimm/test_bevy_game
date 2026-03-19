@@ -4,7 +4,7 @@ use crate::game::{
     core::{global_resources::KeyBindings, states::OverallState},
     playing_state::{
         player::{PlayerPlugin, tags::CameraForPlayer},
-        sets::{PLAYING_STATE_SET_ORDER, PlayingStateOrdering},
+        sets::{PLAYING_STATE_ORDERING_ORDER, PlayingStateOrdering},
         states::PauseState,
         tags::PlayingStateEntity,
         world::WorldPlugin,
@@ -17,8 +17,8 @@ impl Plugin for PlayingStatePlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
+            .configure_sets(Update, PLAYING_STATE_ORDERING_ORDER.chain())
             .init_state::<PauseState>()
-            .configure_sets(Update, PLAYING_STATE_SET_ORDER.chain())
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
                     .in_set(PlayingStateOrdering::WorldOnEnter)

@@ -27,9 +27,7 @@ pub fn build_bevy_app() -> App {
         .add_plugins(default_plugins)
         .insert_resource(ClearColor(DEBUG_BACKGROUND_COLOR))
         .add_systems(Startup, set_window_maximized)
-        .add_plugins(core::CorePlugin)
-        .add_plugins(main_menu_state::MainMenuStatePlugin)
-        .add_plugins(playing_state::PlayingStatePlugin);
+        .add_plugins(core::CorePlugin);
 
     app
 }

@@ -1,7 +1,9 @@
 use bevy::input::keyboard::KeyCode;
+use bevy::prelude::Handle;
+use bevy::prelude::Font;
 use bevy_ecs::resource::Resource;
 
-#[derive(Resource)]
+#[derive(Resource, Debug)]
 pub struct KeyBindings {
     pub pause: KeyCode,
     pub move_forward: KeyCode,
@@ -24,4 +26,9 @@ impl Default for KeyBindings {
             move_down: KeyCode::ShiftLeft,
         }
     }
+}
+
+#[derive(Resource, Debug)]
+pub struct GlobalFonts {
+    pub sans: Handle<Font>,
 }

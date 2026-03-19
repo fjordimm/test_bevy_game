@@ -4,11 +4,15 @@ use crate::gui::GuiParent;
 
 pub struct GuiText {
     text: String,
+    font: Handle<Font>,
 }
 
 impl GuiText {
-    pub fn new(text: impl Into<String>) -> Self {
-        Self { text: text.into() }
+    pub fn new(text: impl Into<String>, font: Handle<Font>) -> Self {
+        Self {
+            text: text.into(),
+            font,
+        }
     }
 }
 
@@ -24,7 +28,10 @@ impl GuiParent for GuiText {
                 },
                 Text::new(&self.text),
                 TextColor(Color::WHITE),
-                TextFont::default(),
+                TextFont {
+                    font: self.font.clone(),
+                    ..default()
+                },
             ))
             .id()
     }

@@ -5,10 +5,11 @@ use bevy::{
 
 use crate::game::{
     core::{
-        global_resources::KeyBindings,
+        global_resources::{GlobalFonts, KeyBindings},
         states::{MouseMode, OverallState},
     },
-    playing_state::sets::PlayingStateOrdering,
+    main_menu_state::MainMenuStatePlugin,
+    playing_state::{PlayingStatePlugin, sets::PlayingStateOrdering},
 };
 
 pub struct CorePlugin;
@@ -18,8 +19,9 @@ impl Plugin for CorePlugin {
         #[rustfmt::skip]
         app
             .init_resource::<KeyBindings>()
-            .init_state::<OverallState>()
             .init_state::<MouseMode>()
+            .init_state::<OverallState>()
+            .add_systems(Startup, load_global_fonts)
             .add_systems(OnEnter(MouseMode::Grabbed),
                 on_enter_mouse_grabbed
                     .in_set(PlayingStateOrdering::Ui)
@@ -27,8 +29,17 @@ impl Plugin for CorePlugin {
             .add_systems(OnExit(MouseMode::Grabbed),
                 on_exit_mouse_grabbed
                     .in_set(PlayingStateOrdering::Ui)
-            );
+            )
+            .add_plugins(MainMenuStatePlugin)
+            .add_plugins(PlayingStatePlugin);
     }
+}
+
+fn load_global_fonts(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let bluh = asset_server.load("fonts/Oswald-VariableFont_wght.ttf");
+    commands.insert_resource(GlobalFonts { sans: bluh });
+
+    commands.set_state(OverallState::MainMenu);
 }
 
 fn on_enter_mouse_grabbed(mut cursor_options: Single<&mut CursorOptions, With<PrimaryWindow>>) {

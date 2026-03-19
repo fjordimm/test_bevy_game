@@ -10,18 +10,18 @@ pub enum PlayingStateOrdering {
     Ui,
 }
 
-pub const PLAYING_STATE_SET_ORDER: (
+pub const PLAYING_STATE_ORDERING_ORDER: (
     PlayingStateOrdering,
     PlayingStateOrdering,
     PlayingStateOrdering,
     PlayingStateOrdering,
     PlayingStateOrdering,
-    // PlayingStateSet,
+    PlayingStateOrdering,
 ) = (
     PlayingStateOrdering::WorldOnEnter,
     PlayingStateOrdering::WorldPlayer,
     PlayingStateOrdering::World,
     PlayingStateOrdering::WorldOnExit,
-    // PlayingStateSet::Physics,
+    PlayingStateOrdering::Physics,
     PlayingStateOrdering::Ui,
 );
