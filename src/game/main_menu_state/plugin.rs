@@ -1,8 +1,11 @@
-use bevy::{input_focus::tab_navigation::TabGroup, prelude::*};
+use bevy::prelude::*;
 
-use crate::game::{
-    core::states::{MouseMode, OverallState},
-    main_menu_state::tags::MainMenuStateEntity,
+use crate::{
+    game::{
+        core::states::{MouseMode, OverallState},
+        main_menu_state::tags::MainMenuStateEntity,
+    },
+    gui::{Div, GuiNode, ScreenDiv},
 };
 
 pub struct MainMenuStatePlugin;
@@ -21,62 +24,68 @@ fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseM
 
     commands.spawn((MainMenuStateEntity, Camera2d::default()));
 
-    let maindiv = commands
-        .spawn((
-            Node {
-                width: percent(100),
-                height: percent(100),
-                display: Display::Flex,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                row_gap: px(10),
-                ..default()
-            },
-            BackgroundColor(Color::srgb(0.0, 0.0, 0.1)),
-            TabGroup::default(),
-        ))
-        .id();
+    ScreenDiv::new(
+        Color::srgb(0.0, 0.0, 0.1),
+        vec![Box::new(Div::new(Color::srgb(0.0, 0.0, 0.3), vec![]))],
+    )
+    .spawn(&mut commands);
 
-    let menudiv = commands
-        .spawn((
-            Node {
-                display: Display::Flex,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                row_gap: px(10),
-                padding: UiRect::all(px(10)),
-                ..default()
-            },
-            BackgroundColor(Color::srgb(0.0, 0.0, 0.3)),
-            TabGroup::default(),
-        ))
-        .id();
-    commands.entity(maindiv).add_child(menudiv);
+    // let maindiv = commands
+    //     .spawn((
+    //         Node {
+    //             width: percent(100),
+    //             height: percent(100),
+    //             display: Display::Flex,
+    //             justify_content: JustifyContent::Center,
+    //             align_items: AlignItems::Center,
+    //             row_gap: px(10),
+    //             ..default()
+    //         },
+    //         BackgroundColor(Color::srgb(0.0, 0.0, 0.1)),
+    //         TabGroup::default(),
+    //     ))
+    //     .id();
 
-    let playbutton = commands
-        .spawn((
-            Button,
-            Node {
-                display: Display::Flex,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                padding: UiRect::all(px(10)),
-                ..default()
-            },
-            BackgroundColor(Color::srgb(0.0, 0.0, 0.5)),
-            children![(Text::new("Play"))],
-        ))
-        .id();
-    commands.entity(menudiv).add_child(playbutton);
+    // let menudiv = commands
+    //     .spawn((
+    //         Node {
+    //             display: Display::Flex,
+    //             justify_content: JustifyContent::Center,
+    //             align_items: AlignItems::Center,
+    //             row_gap: px(10),
+    //             padding: UiRect::all(px(10)),
+    //             ..default()
+    //         },
+    //         BackgroundColor(Color::srgb(0.0, 0.0, 0.3)),
+    //         TabGroup::default(),
+    //     ))
+    //     .id();
+    // commands.entity(maindiv).add_child(menudiv);
 
-    commands.entity(playbutton).observe(
-        |on_click: On<Pointer<Click>>, qs: Query<&Transform, With<Camera2d>>| {
-            debug!("{:?}", on_click);
-            for q in &qs {
-                debug!("{:?}", q);
-            }
-        },
-    );
+    // let playbutton = commands
+    //     .spawn((
+    //         Button,
+    //         Node {
+    //             display: Display::Flex,
+    //             justify_content: JustifyContent::Center,
+    //             align_items: AlignItems::Center,
+    //             padding: UiRect::all(px(10)),
+    //             ..default()
+    //         },
+    //         BackgroundColor(Color::srgb(0.0, 0.0, 0.5)),
+    //         children![(Text::new("Play"))],
+    //     ))
+    //     .id();
+    // commands.entity(menudiv).add_child(playbutton);
+
+    // commands.entity(playbutton).observe(
+    //     |on_click: On<Pointer<Click>>, qs: Query<&Transform, With<Camera2d>>| {
+    //         debug!("{:?}", on_click);
+    //         for q in &qs {
+    //             debug!("{:?}", q);
+    //         }
+    //     },
+    // );
 }
 
 fn on_exit(mut commands: Commands, query: Query<Entity, With<MainMenuStateEntity>>) {
