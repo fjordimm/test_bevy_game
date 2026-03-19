@@ -4,6 +4,7 @@ mod gui_screen_div;
 mod gui_text;
 
 pub mod constants;
+pub mod fonts;
 pub use gui_div::GuiDiv;
 pub use gui_parent::GuiParent;
 pub use gui_screen_div::GuiScreenDiv;

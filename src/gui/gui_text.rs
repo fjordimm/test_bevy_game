@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::gui::GuiParent;
+use crate::gui::{GuiParent, fonts::GuiFont};
 
 pub struct GuiText {
     text: String,
@@ -25,6 +25,7 @@ impl GuiParent for GuiText {
                 Text::new(&self.text),
                 TextColor(Color::WHITE),
                 TextFont::default(),
+                GuiFont::Serif,
             ))
             .id()
     }

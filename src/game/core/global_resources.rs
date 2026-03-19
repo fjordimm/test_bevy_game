@@ -31,4 +31,5 @@ impl Default for KeyBindings {
 #[derive(Resource, Debug)]
 pub struct GlobalFonts {
     pub sans: Handle<Font>,
+    pub serif: Handle<Font>,
 }
