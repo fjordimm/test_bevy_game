@@ -13,21 +13,6 @@ impl Plugin for MainMenuStatePlugin {
         app
             .add_systems(OnEnter(OverallState::MainMenu), on_enter)
             .add_systems(OnExit(OverallState::MainMenu), on_exit);
-            // .add_systems(Update,
-            //     play_button_on_press
-            //         .run_if(in_state(OverallState::MainMenu))
-            // );
-    }
-}
-
-#[derive(Component)]
-struct PlayButton;
-
-fn play_button_on_press(
-    interactions: Query<&Interaction, (Changed<Interaction>, With<PlayButton>)>,
-) {
-    for thing in &interactions {
-        debug!("{:?}", thing);
     }
 }
 
@@ -36,19 +21,24 @@ fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseM
 
     commands.spawn((MainMenuStateEntity, Camera2d::default()));
 
-    commands.spawn((
-        Node {
-            width: percent(100),
-            height: percent(100),
-            display: Display::Flex,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            row_gap: px(10),
-            ..default()
-        },
-        BackgroundColor(Color::srgb(0.0, 0.0, 0.1)),
-        TabGroup::default(),
-        children![(
+    let maindiv = commands
+        .spawn((
+            Node {
+                width: percent(100),
+                height: percent(100),
+                display: Display::Flex,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                row_gap: px(10),
+                ..default()
+            },
+            BackgroundColor(Color::srgb(0.0, 0.0, 0.1)),
+            TabGroup::default(),
+        ))
+        .id();
+
+    let menudiv = commands
+        .spawn((
             Node {
                 display: Display::Flex,
                 justify_content: JustifyContent::Center,
@@ -59,23 +49,34 @@ fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseM
             },
             BackgroundColor(Color::srgb(0.0, 0.0, 0.3)),
             TabGroup::default(),
-            children![(
-                PlayButton,
-                Button,
-                Node {
-                    display: Display::Flex,
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    padding: UiRect::all(px(10)),
-                    ..default()
-                },
-                BackgroundColor(Color::srgb(0.0, 0.0, 0.5)),
-                children![(Text::new("Play"))]
-            )],
-        )],
-    )).observe(|on_click: On<Pointer<Click>>| {
-        debug!("{:?}", on_click);
-    });
+        ))
+        .id();
+    commands.entity(maindiv).add_child(menudiv);
+
+    let playbutton = commands
+        .spawn((
+            Button,
+            Node {
+                display: Display::Flex,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                padding: UiRect::all(px(10)),
+                ..default()
+            },
+            BackgroundColor(Color::srgb(0.0, 0.0, 0.5)),
+            children![(Text::new("Play"))],
+        ))
+        .id();
+    commands.entity(menudiv).add_child(playbutton);
+
+    commands.entity(playbutton).observe(
+        |on_click: On<Pointer<Click>>, qs: Query<&Transform, With<Camera2d>>| {
+            debug!("{:?}", on_click);
+            for q in &qs {
+                debug!("{:?}", q);
+            }
+        },
+    );
 }
 
 fn on_exit(mut commands: Commands, query: Query<Entity, With<MainMenuStateEntity>>) {
