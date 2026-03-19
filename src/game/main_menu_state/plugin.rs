@@ -5,7 +5,7 @@ use crate::{
         core::states::{MouseMode, OverallState},
         main_menu_state::tags::MainMenuStateEntity,
     },
-    gui::{GuiDiv, GuiNode, GuiScreenDiv, GuiText},
+    gui::{GuiDiv, GuiParent, GuiScreenDiv, GuiText},
 };
 
 pub struct MainMenuStatePlugin;
