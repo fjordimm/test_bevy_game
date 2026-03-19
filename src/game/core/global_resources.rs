@@ -1,6 +1,6 @@
 use bevy::input::keyboard::KeyCode;
-use bevy::prelude::Handle;
 use bevy::prelude::Font;
+use bevy::prelude::Handle;
 use bevy_ecs::resource::Resource;
 
 #[derive(Resource, Debug)]

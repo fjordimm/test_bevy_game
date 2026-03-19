@@ -39,13 +39,10 @@ fn on_enter(
         vec![Box::new(GuiDiv::new(
             FlexDirection::Column,
             vec![
-                Box::new(GuiText::new("thingy", global_fonts.sans.clone())),
+                Box::new(GuiText::new("thingy")),
                 Box::new(GuiDiv::new(
                     FlexDirection::Column,
-                    vec![
-                        Box::new(GuiText::new("one", global_fonts.sans.clone())),
-                        Box::new(GuiText::new("two", global_fonts.sans.clone())),
-                    ],
+                    vec![Box::new(GuiText::new("one")), Box::new(GuiText::new("two"))],
                 )),
             ],
         ))],

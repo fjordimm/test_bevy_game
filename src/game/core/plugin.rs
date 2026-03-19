@@ -21,23 +21,25 @@ impl Plugin for CorePlugin {
             .init_resource::<KeyBindings>()
             .init_state::<MouseMode>()
             .init_state::<OverallState>()
-            .add_systems(Startup, load_global_fonts)
-            .add_systems(OnEnter(MouseMode::Grabbed),
-                on_enter_mouse_grabbed
-                    .in_set(PlayingStateOrdering::Ui)
-            )
-            .add_systems(OnExit(MouseMode::Grabbed),
-                on_exit_mouse_grabbed
-                    .in_set(PlayingStateOrdering::Ui)
-            )
+            .add_systems(Startup, load_global_resources)
+            .add_systems(Update, funny)
+            .add_systems(OnEnter(MouseMode::Grabbed), on_enter_mouse_grabbed)
+            .add_systems(OnExit(MouseMode::Grabbed), on_exit_mouse_grabbed)
             .add_plugins(MainMenuStatePlugin)
             .add_plugins(PlayingStatePlugin);
     }
 }
 
-fn load_global_fonts(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let bluh = asset_server.load("fonts/Oswald-VariableFont_wght.ttf");
-    commands.insert_resource(GlobalFonts { sans: bluh });
+fn funny(mut query: Query<&mut TextFont, Added<Text>>, global_fonts: Res<GlobalFonts>) {
+    for mut e in &mut query {
+        e.font = global_fonts.sans.clone();
+    }
+}
+
+fn load_global_resources(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(GlobalFonts {
+        sans: asset_server.load("fonts/Oswald-VariableFont_wght.ttf"),
+    });
 
     commands.set_state(OverallState::MainMenu);
 }
