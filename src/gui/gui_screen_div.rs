@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::gui::{self, GuiNode};
+use crate::gui::{GuiNode, constants::MAIN_PADDING};
 
 pub struct GuiScreenDiv {
     color: Color,
@@ -33,7 +33,7 @@ impl GuiNode for GuiScreenDiv {
                     flex_direction: self.flex_direction,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
-                    row_gap: px(gui::constants::MAIN_PADDING),
+                    row_gap: px(MAIN_PADDING),
                     ..default()
                 },
                 BackgroundColor(self.color),

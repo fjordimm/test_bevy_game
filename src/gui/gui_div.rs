@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::gui::{self, GuiNode};
+use crate::gui::{
+    GuiNode,
+    constants::{DIV_BORDER_COLOR, DIV_BORDER_SIZE, DIV_MAIN_COLOR, MAIN_PADDING},
+};
 
 pub struct GuiDiv {
     flex_direction: FlexDirection,
@@ -25,13 +28,13 @@ impl GuiNode for GuiDiv {
                     flex_direction: self.flex_direction,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
-                    row_gap: px(gui::constants::MAIN_PADDING),
-                    padding: UiRect::all(px(gui::constants::MAIN_PADDING)),
-                    border: UiRect::all(px(gui::constants::DIV_BORDER_SIZE)),
+                    row_gap: px(MAIN_PADDING),
+                    padding: UiRect::all(px(MAIN_PADDING)),
+                    border: UiRect::all(px(DIV_BORDER_SIZE)),
                     ..default()
                 },
-                BackgroundColor(gui::constants::DIV_MAIN_COLOR),
-                BorderColor::all(gui::constants::DIV_BORDER_COLOR),
+                BackgroundColor(DIV_MAIN_COLOR),
+                BorderColor::all(DIV_BORDER_COLOR),
             ))
             .id();
 
