@@ -1,1 +1,2 @@
 - Add TabGroups to gui stuff
+- Mark all the gui stuff with proper tags (MainMenuState or PlayingState)

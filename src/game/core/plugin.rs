@@ -3,16 +3,14 @@ use bevy::{
     window::{CursorGrabMode, CursorOptions, PrimaryWindow},
 };
 
-use crate::{
-    game::{
-        core::{
-            global_resources::KeyBindings,
-            states::{MouseMode, OverallState},
-        },
-        main_menu_state::MainMenuStatePlugin,
-        playing_state::PlayingStatePlugin,
+use crate::game::{
+    core::{
+        global_resources::KeyBindings,
+        states::{MouseMode, OverallState},
     },
     gui,
+    main_menu_state::MainMenuStatePlugin,
+    playing_state::PlayingStatePlugin,
 };
 
 pub struct CorePlugin;

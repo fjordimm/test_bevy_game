@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::gui::fonts::GuiFont;
+use crate::game::gui::fonts::GuiFont;
 
 pub const DIV_MAIN_COLOR: Color = Color::srgb(0.0, 0.0, 0.3);
 pub const DIV_BORDER_COLOR: Color = Color::srgb(0.0, 0.0, 0.45);

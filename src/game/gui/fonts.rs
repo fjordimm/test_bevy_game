@@ -1,6 +1,12 @@
 use crate::game::core::global_resources::GlobalFonts;
 use bevy::prelude::*;
 
+#[derive(Component)]
+pub enum GuiFont {
+    Sans,
+    Serif,
+}
+
 pub fn make_global_fonts_resource(asset_server: Res<AssetServer>) -> GlobalFonts {
     GlobalFonts {
         sans: asset_server.load("fonts/Cabin-VariableFont_wdth,wght.ttf"),
@@ -18,10 +24,4 @@ pub fn apply_gui_fonts(
             GuiFont::Serif => global_fonts.serif.clone(),
         };
     }
-}
-
-#[derive(Component)]
-pub enum GuiFont {
-    Sans,
-    Serif,
 }

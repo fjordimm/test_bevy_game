@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::gui::{
+use crate::game::gui::{
     GuiParent,
     constants::{DIV_BORDER_COLOR, DIV_BORDER_SIZE, DIV_MAIN_COLOR, MAIN_PADDING},
 };

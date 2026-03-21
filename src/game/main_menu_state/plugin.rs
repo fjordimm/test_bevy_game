@@ -1,14 +1,12 @@
 use bevy::prelude::*;
 
-use crate::{
-    game::{
-        core::{
-            global_resources::GlobalFonts,
-            states::{MouseMode, OverallState},
-        },
-        main_menu_state::tags::MainMenuStateEntity,
+use crate::game::{
+    core::{
+        global_resources::GlobalFonts,
+        states::{MouseMode, OverallState},
     },
     gui::{GuiDiv, GuiParent, GuiScreenDiv, GuiText},
+    main_menu_state::{main_menu_gui, tags::MainMenuStateEntity},
 };
 
 pub struct MainMenuStatePlugin;
@@ -22,32 +20,12 @@ impl Plugin for MainMenuStatePlugin {
     }
 }
 
-fn on_enter(
-    mut commands: Commands,
-    mut next_mouse_mode: ResMut<NextState<MouseMode>>,
-    global_fonts: Res<GlobalFonts>,
-) {
+fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
     next_mouse_mode.set(MouseMode::Free);
 
     commands.spawn((MainMenuStateEntity, Camera2d::default()));
 
-    debug!("{:?}", global_fonts);
-
-    GuiScreenDiv::new(
-        Color::srgb(0.0, 0.0, 0.1),
-        FlexDirection::Column,
-        vec![Box::new(GuiDiv::new(
-            FlexDirection::Column,
-            vec![
-                Box::new(GuiText::new("thingy")),
-                Box::new(GuiDiv::new(
-                    FlexDirection::Column,
-                    vec![Box::new(GuiText::new("one")), Box::new(GuiText::new("two"))],
-                )),
-            ],
-        ))],
-    )
-    .spawn(&mut commands);
+    main_menu_gui(&mut commands);
 
     // let maindiv = commands
     //     .spawn((
