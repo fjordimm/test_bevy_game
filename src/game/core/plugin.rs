@@ -6,11 +6,11 @@ use bevy::{
 use crate::{
     game::{
         core::{
-            global_resources::{GlobalFonts, KeyBindings},
+            global_resources::KeyBindings,
             states::{MouseMode, OverallState},
         },
         main_menu_state::MainMenuStatePlugin,
-        playing_state::{PlayingStatePlugin, sets::PlayingStateOrdering},
+        playing_state::PlayingStatePlugin,
     },
     gui,
 };

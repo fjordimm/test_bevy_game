@@ -3,8 +3,8 @@ use bevy::prelude::*;
 
 pub fn make_global_fonts_resource(asset_server: Res<AssetServer>) -> GlobalFonts {
     GlobalFonts {
-        sans: asset_server.load("fonts/Oswald-VariableFont_wght.ttf"),
-        serif: asset_server.load("fonts/Merriweather-VariableFont_opsz,wdth,wght.ttf"),
+        sans: asset_server.load("fonts/Cabin-VariableFont_wdth,wght.ttf"),
+        serif: asset_server.load("fonts/SortsMillGoudy-Regular.ttf"),
     }
 }
 
