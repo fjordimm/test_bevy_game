@@ -1,11 +1,7 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    core::{
-        global_resources::GlobalFonts,
-        states::{MouseMode, OverallState},
-    },
-    gui::{GuiDiv, GuiParent, GuiScreenDiv, GuiText},
+    core::states::{MouseMode, OverallState},
     main_menu_state::{main_menu_gui, tags::MainMenuStateEntity},
 };
 

@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 
 use crate::game::gui::{
-    GuiParent, GuiText, constants::{DIV_BORDER_COLOR, DIV_BORDER_SIZE, DIV_MAIN_COLOR, MAIN_PADDING}
+    GuiParent, GuiText,
+    constants::{DIV_BORDER_COLOR, DIV_BORDER_SIZE, DIV_MAIN_COLOR, MAIN_PADDING},
 };
 
 pub struct GuiButton {
