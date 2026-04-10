@@ -3,6 +3,11 @@ name = "test_bevy_game"
 version = "0.1.0"
 edition = "2024"
 
+# Features
+
+[features]
+# none yet
+
 # Optimization
 
 [profile.dev]

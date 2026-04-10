@@ -1,18 +1,18 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiParent, constants::MAIN_PADDING};
+use crate::game::gui::{GuiNode, constants::MAIN_PADDING};
 
 pub struct GuiScreenDiv {
     color: Color,
     flex_direction: FlexDirection,
-    children: Vec<Box<dyn GuiParent>>,
+    children: Vec<Box<dyn GuiNode>>,
 }
 
 impl GuiScreenDiv {
     pub fn new(
         color: Color,
         flex_direction: FlexDirection,
-        children: Vec<Box<dyn GuiParent>>,
+        children: Vec<Box<dyn GuiNode>>,
     ) -> Self {
         Self {
             color: color,
@@ -22,7 +22,7 @@ impl GuiScreenDiv {
     }
 }
 
-impl GuiParent for GuiScreenDiv {
+impl GuiNode for GuiScreenDiv {
     fn spawn(&self, commands: &mut Commands) -> Entity {
         let entity = commands
             .spawn((

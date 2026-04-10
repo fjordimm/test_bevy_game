@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiButton, GuiDiv, GuiParent, GuiScreenDiv, GuiText};
+use crate::game::gui::{GuiButton, GuiDiv, GuiNode, GuiScreenDiv, GuiText};
+
+#[derive(Event)]
+pub struct ClickMeButtonEv;
 
 pub fn main_menu_gui(mut commands: &mut Commands) {
     GuiScreenDiv::new(
@@ -15,7 +18,7 @@ pub fn main_menu_gui(mut commands: &mut Commands) {
                     vec![
                         Box::new(GuiText::new("one")),
                         Box::new(GuiText::new("two")),
-                        Box::new(GuiButton::new("clickme")),
+                        Box::new(GuiButton::new("clickme", Some(ClickMeButtonEv))),
                     ],
                 )),
             ],

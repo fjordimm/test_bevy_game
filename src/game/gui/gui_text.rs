@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiParent, constants::MAIN_FONT};
+use crate::game::gui::{GuiNode, constants::MAIN_FONT};
 
 pub struct GuiText {
     text: String,
@@ -12,7 +12,7 @@ impl GuiText {
     }
 }
 
-impl GuiParent for GuiText {
+impl GuiNode for GuiText {
     fn spawn(&self, commands: &mut Commands) -> Entity {
         commands
             .spawn((

@@ -20,8 +20,12 @@ fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseM
     next_mouse_mode.set(MouseMode::Free);
 
     commands.spawn((MainMenuStateEntity, Camera2d::default()));
-
+    
     main_menu_gui(&mut commands);
+
+    // main_menu_gui(&mut commands);
+
+
 
     // let maindiv = commands
     //     .spawn((

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
 
-pub trait GuiParent {
+pub trait GuiNode {
     fn spawn(&self, commands: &mut Commands) -> Entity;
 }
