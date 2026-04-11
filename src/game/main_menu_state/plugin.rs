@@ -2,7 +2,11 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::states::{MouseMode, OverallState},
-    main_menu_state::{main_menu_gui::{self, MainMenuGuiPlugin}, tags::MainMenuStateEntity},
+    gui::GuiNode,
+    main_menu_state::{
+        main_menu_gui::{self, MainMenuGuiPlugin},
+        tags::MainMenuStateEntity,
+    },
 };
 
 pub struct MainMenuStatePlugin;
@@ -22,7 +26,8 @@ fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseM
 
     commands.spawn((MainMenuStateEntity, Camera2d::default()));
 
-    main_menu_gui::make_main_menu_gui(&mut commands);
+    let menu_gui = main_menu_gui::make_main_menu_gui().spawn(&mut commands);
+    commands.entity(menu_gui).insert(MainMenuStateEntity);
 }
 
 fn on_exit(mut commands: Commands, query: Query<Entity, With<MainMenuStateEntity>>) {
