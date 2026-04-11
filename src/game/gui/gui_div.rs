@@ -24,7 +24,7 @@ impl GuiNode for GuiDiv {
                     display: Display::Flex,
                     flex_direction: self.flex_direction,
                     justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
+                    align_items: AlignItems::Stretch,
                     row_gap: px(MAIN_PADDING),
                     padding: UiRect::all(px(MAIN_PADDING)),
                     border_radius: BorderRadius::all(px(BORDER_RADIUS)),

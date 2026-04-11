@@ -5,16 +5,6 @@ use crate::game::{
     gui::{self, GuiButton, GuiDiv, GuiScreenDiv, GuiText},
 };
 
-pub mod interactions {
-    use bevy_ecs::event::Event;
-
-    #[derive(Event)]
-    pub struct PlayButtonEv;
-
-    #[derive(Event)]
-    pub struct QuitButtonEv;
-}
-
 pub struct MainMenuGuiPlugin;
 
 impl Plugin for MainMenuGuiPlugin {
@@ -24,6 +14,16 @@ impl Plugin for MainMenuGuiPlugin {
             .add_observer(play_button_observer)
             .add_observer(quit_button_observer);
     }
+}
+
+pub mod interactions {
+    use bevy_ecs::event::Event;
+
+    #[derive(Event)]
+    pub struct PlayButtonEv;
+
+    #[derive(Event)]
+    pub struct QuitButtonEv;
 }
 
 fn play_button_observer(_: On<interactions::PlayButtonEv>, mut commands: Commands) {
