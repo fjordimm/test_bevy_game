@@ -1,15 +1,18 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    core::states::OverallState,
-    gui::{self, GuiButton, GuiDiv, GuiNode, GuiScreenDiv, GuiText},
+    core::{quit_game, states::OverallState},
+    gui::{self, GuiButton, GuiDiv, GuiScreenDiv, GuiText},
 };
 
 pub mod interactions {
     use bevy_ecs::event::Event;
 
     #[derive(Event)]
-    pub struct ClickMeButtonEv;
+    pub struct PlayButtonEv;
+
+    #[derive(Event)]
+    pub struct QuitButtonEv;
 }
 
 pub struct MainMenuGuiPlugin;
@@ -18,13 +21,17 @@ impl Plugin for MainMenuGuiPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_observer(funny);
+            .add_observer(play_button_observer)
+            .add_observer(quit_button_observer);
     }
 }
 
-fn funny(_: On<interactions::ClickMeButtonEv>, mut commands: Commands) {
-    debug!("Button was clicked.");
+fn play_button_observer(_: On<interactions::PlayButtonEv>, mut commands: Commands) {
     commands.set_state(OverallState::Playing);
+}
+
+fn quit_button_observer(_: On<interactions::QuitButtonEv>) {
+    quit_game();
 }
 
 pub fn make_main_menu_gui() -> GuiScreenDiv {
@@ -35,17 +42,8 @@ pub fn make_main_menu_gui() -> GuiScreenDiv {
             FlexDirection::Column,
             vec![
                 Box::new(GuiText::h1("Main Menu")),
-                Box::new(GuiDiv::new(
-                    FlexDirection::Column,
-                    vec![
-                        Box::new(GuiText::regular("one")),
-                        Box::new(GuiText::regular("two")),
-                        Box::new(GuiButton::new(
-                            "clickme",
-                            Some(|| interactions::ClickMeButtonEv),
-                        )),
-                    ],
-                )),
+                Box::new(GuiButton::new("Play", Some(|| interactions::PlayButtonEv))),
+                Box::new(GuiButton::new("Quit", Some(|| interactions::QuitButtonEv))),
             ],
         ))],
     )
