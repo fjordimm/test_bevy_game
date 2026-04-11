@@ -11,7 +11,7 @@ where
     for<'a> E::Trigger<'a>: Default,
 {
     text: String,
-    on_click_event: Option<E>,
+    event_supplier: Option<fn() -> E>,
 }
 
 impl<E> GuiButton<E>
@@ -19,10 +19,10 @@ where
     E: Event,
     for<'a> E::Trigger<'a>: Default,
 {
-    pub fn new(text: impl Into<String>, on_click_event: Option<E>) -> Self {
+    pub fn new(text: impl Into<String>, event_supplier: Option<fn() -> E>) -> Self {
         Self {
             text: text.into(),
-            on_click_event: on_click_event,
+            event_supplier: event_supplier,
         }
     }
 }
@@ -53,10 +53,13 @@ where
             commands.entity(entity).add_child(child_entity);
         }
 
-        if let Some(event) = &self.on_click_event {
-            // debug!("{:?}", event);
-            debug!("hiiiiiiii");
-            commands.trigger(*event);
+        if let Some(event_supplier) = &self.event_supplier {
+            let es = event_supplier.clone();
+            commands
+                .entity(entity)
+                .observe(move |_: On<Pointer<Click>>, mut commands: Commands| {
+                    commands.trigger(es());
+                });
         }
 
         // match &self.on_click_event {

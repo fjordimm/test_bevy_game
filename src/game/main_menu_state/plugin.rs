@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::states::{MouseMode, OverallState},
-    main_menu_state::{main_menu_gui, tags::MainMenuStateEntity},
+    main_menu_state::{main_menu_gui::{self, MainMenuGuiPlugin}, tags::MainMenuStateEntity},
 };
 
 pub struct MainMenuStatePlugin;
@@ -12,7 +12,8 @@ impl Plugin for MainMenuStatePlugin {
         #[rustfmt::skip]
         app
             .add_systems(OnEnter(OverallState::MainMenu), on_enter)
-            .add_systems(OnExit(OverallState::MainMenu), on_exit);
+            .add_systems(OnExit(OverallState::MainMenu), on_exit)
+            .add_plugins(MainMenuGuiPlugin);
     }
 }
 
@@ -20,10 +21,8 @@ fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseM
     next_mouse_mode.set(MouseMode::Free);
 
     commands.spawn((MainMenuStateEntity, Camera2d::default()));
-    
-    main_menu_gui(&mut commands);
 
-    // main_menu_gui(&mut commands);
+    main_menu_gui::make_main_menu_gui(&mut commands);
 
 
 

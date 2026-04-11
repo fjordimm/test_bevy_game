@@ -2,10 +2,28 @@ use bevy::prelude::*;
 
 use crate::game::gui::{GuiButton, GuiDiv, GuiNode, GuiScreenDiv, GuiText};
 
-#[derive(Event)]
-pub struct ClickMeButtonEv;
+pub mod interactions {
+    use bevy_ecs::event::Event;
 
-pub fn main_menu_gui(mut commands: &mut Commands) {
+    #[derive(Event)]
+    pub struct ClickMeButtonEv;
+}
+
+pub struct MainMenuGuiPlugin;
+
+impl Plugin for MainMenuGuiPlugin {
+    fn build(&self, app: &mut App) {
+        #[rustfmt::skip]
+        app
+            .add_observer(funny);
+    }
+}
+
+fn funny(_: On<interactions::ClickMeButtonEv>) {
+    debug!("Ahheyeyeeee");
+}
+
+pub fn make_main_menu_gui(mut commands: &mut Commands) {
     GuiScreenDiv::new(
         Color::srgb(0.0, 0.0, 0.1),
         FlexDirection::Column,
@@ -18,7 +36,7 @@ pub fn main_menu_gui(mut commands: &mut Commands) {
                     vec![
                         Box::new(GuiText::new("one")),
                         Box::new(GuiText::new("two")),
-                        Box::new(GuiButton::new("clickme", Some(ClickMeButtonEv))),
+                        Box::new(GuiButton::new("clickme", Some(|| interactions::ClickMeButtonEv))),
                     ],
                 )),
             ],
