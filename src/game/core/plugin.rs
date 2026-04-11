@@ -8,7 +8,7 @@ use crate::game::{
         global_resources::KeyBindings,
         states::{MouseMode, OverallState},
     },
-    gui,
+    gui::{self, plugin::GuiPlugin},
     main_menu_state::MainMenuStatePlugin,
     playing_state::PlayingStatePlugin,
 };
@@ -26,6 +26,7 @@ impl Plugin for CorePlugin {
             .add_systems(Update, gui::fonts::apply_gui_fonts)
             .add_systems(OnEnter(MouseMode::Grabbed), on_enter_mouse_grabbed)
             .add_systems(OnExit(MouseMode::Grabbed), on_exit_mouse_grabbed)
+            .add_plugins(GuiPlugin)
             .add_plugins(MainMenuStatePlugin)
             .add_plugins(PlayingStatePlugin);
     }

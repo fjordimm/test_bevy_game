@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiNode, constants::MAIN_FONT};
+use crate::game::gui::{GuiNode, constants::*};
 
 pub struct GuiText {
     text: String,

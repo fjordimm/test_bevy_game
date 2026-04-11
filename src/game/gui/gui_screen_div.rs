@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiNode, constants::MAIN_PADDING};
+use crate::game::gui::{GuiNode, constants::*};
 
 pub struct GuiScreenDiv {
     color: Color,

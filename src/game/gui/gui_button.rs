@@ -1,9 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{
-    GuiNode, GuiText,
-    constants::{DIV_BORDER_COLOR, DIV_BORDER_SIZE, DIV_MAIN_COLOR, MAIN_PADDING},
-};
+use crate::game::gui::{GuiNode, GuiText, constants::*};
 
 pub struct GuiButton<E>
 where
@@ -27,6 +24,9 @@ where
     }
 }
 
+#[derive(Component)]
+pub struct GuiButtonTag;
+
 impl<E> GuiNode for GuiButton<E>
 where
     E: Event,
@@ -35,16 +35,18 @@ where
     fn spawn(&self, commands: &mut Commands) -> Entity {
         let entity = commands
             .spawn((
+                GuiButtonTag,
+                Button,
                 Node {
                     display: Display::Flex,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     padding: UiRect::all(px(MAIN_PADDING)),
-                    border: UiRect::all(px(DIV_BORDER_SIZE)),
+                    border_radius: BorderRadius::all(px(BORDER_RADIUS)),
                     ..default()
                 },
-                BackgroundColor(DIV_MAIN_COLOR),
-                BorderColor::all(DIV_BORDER_COLOR),
+                main_box_shadow(),
+                BackgroundColor(BUTTON_COLOR_MAIN),
             ))
             .id();
 
@@ -53,27 +55,34 @@ where
             commands.entity(entity).add_child(child_entity);
         }
 
-        if let Some(event_supplier) = &self.event_supplier {
-            let es = event_supplier.clone();
-            commands
-                .entity(entity)
-                .observe(move |_: On<Pointer<Click>>, mut commands: Commands| {
-                    commands.trigger(es());
-                });
+        if let Some(event_supplier_) = &self.event_supplier {
+            let event_supplier = event_supplier_.clone();
+            commands.entity(entity).observe(
+                move |_: On<Pointer<Click>>, mut commands: Commands| {
+                    commands.trigger(event_supplier());
+                },
+            );
         }
 
-        // match &self.on_click_event {
-        //     Some(p_event) => {
-        //         let event = Arc::clone(p_event);
-        //         commands
-        //             .entity(entity)
-        //             .observe(move |_: On<Pointer<Click>>, mut commands: Commands| {
-        //                 commands.trigger((*event).clone());
-        //             });
-        //     }
-        //     _ => {}
-        // }
-
         entity
+    }
+}
+
+pub fn update_style(
+    mut query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (With<GuiButtonTag>, Changed<Interaction>),
+    >,
+) {
+    for (interaction, mut color) in &mut query {
+        *color = what_style(interaction);
+    }
+}
+
+fn what_style(interaction: &Interaction) -> BackgroundColor {
+    match interaction {
+        Interaction::None => BackgroundColor(BUTTON_COLOR_MAIN),
+        Interaction::Hovered => BackgroundColor(BUTTON_COLOR_HOVER),
+        Interaction::Pressed => BackgroundColor(BUTTON_COLOR_PRESSED),
     }
 }
