@@ -51,7 +51,7 @@ where
             .id();
 
         {
-            let child_entity = GuiText::new(&self.text).spawn(commands);
+            let child_entity = GuiText::regular(&self.text).spawn(commands);
             commands.entity(entity).add_child(child_entity);
         }
 

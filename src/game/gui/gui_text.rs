@@ -4,11 +4,36 @@ use crate::game::gui::{GuiNode, constants::*};
 
 pub struct GuiText {
     text: String,
+    size: f32,
 }
 
 impl GuiText {
-    pub fn new(text: impl Into<String>) -> Self {
-        Self { text: text.into() }
+    pub fn regular(text: impl Into<String>) -> Self {
+        Self {
+            text: text.into(),
+            size: TEXT_SIZE_REGULAR,
+        }
+    }
+
+    pub fn h1(text: impl Into<String>) -> Self {
+        Self {
+            text: text.into(),
+            size: TEXT_SIZE_H1,
+        }
+    }
+
+    pub fn h2(text: impl Into<String>) -> Self {
+        Self {
+            text: text.into(),
+            size: TEXT_SIZE_H2,
+        }
+    }
+
+    pub fn h3(text: impl Into<String>) -> Self {
+        Self {
+            text: text.into(),
+            size: TEXT_SIZE_H3,
+        }
     }
 }
 
@@ -24,7 +49,10 @@ impl GuiNode for GuiText {
                 },
                 Text::new(&self.text),
                 TextColor(Color::WHITE),
-                TextFont::default(),
+                TextFont {
+                    font_size: self.size,
+                    ..default()
+                },
                 MAIN_FONT,
             ))
             .id()

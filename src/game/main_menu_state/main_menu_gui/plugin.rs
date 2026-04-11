@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiButton, GuiDiv, GuiNode, GuiScreenDiv, GuiText};
+use crate::game::gui::{self, GuiButton, GuiDiv, GuiNode, GuiScreenDiv, GuiText};
 
 pub mod interactions {
     use bevy_ecs::event::Event;
@@ -20,22 +20,22 @@ impl Plugin for MainMenuGuiPlugin {
 }
 
 fn funny(_: On<interactions::ClickMeButtonEv>) {
-    debug!("Ahheyeyeeee");
+    debug!("Button was clicked.");
 }
 
 pub fn make_main_menu_gui(mut commands: &mut Commands) {
     GuiScreenDiv::new(
-        Color::srgb(0.0, 0.0, 0.1),
+        gui::constants::MAIN_COLOR,
         FlexDirection::Column,
         vec![Box::new(GuiDiv::new(
             FlexDirection::Column,
             vec![
-                Box::new(GuiText::new("thingy")),
+                Box::new(GuiText::h1("Main Menu")),
                 Box::new(GuiDiv::new(
                     FlexDirection::Column,
                     vec![
-                        Box::new(GuiText::new("one")),
-                        Box::new(GuiText::new("two")),
+                        Box::new(GuiText::regular("one")),
+                        Box::new(GuiText::regular("two")),
                         Box::new(GuiButton::new("clickme", Some(|| interactions::ClickMeButtonEv))),
                     ],
                 )),
