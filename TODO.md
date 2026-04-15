@@ -1,3 +1,4 @@
 - Add TabGroups to gui stuff
 - Mark all the gui stuff with proper tags (MainMenuState or PlayingState)
     - Make some debug tool to make warnings when there are objects without one of these tags
+- Maybe make the children argument of gui elements take a vec of plain things instead of a vec of boxes

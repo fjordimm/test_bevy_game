@@ -1,4 +1,5 @@
 use bevy::{
+    diagnostic::FrameTimeDiagnosticsPlugin,
     prelude::*,
     window::{CursorGrabMode, CursorOptions, PrimaryWindow},
 };
@@ -8,6 +9,7 @@ use crate::game::{
         global_resources::KeyBindings,
         states::{MouseMode, OverallState},
     },
+    debug_menu::DebugMenuPlugin,
     gui::{self, plugin::GuiPlugin},
     main_menu_state::MainMenuStatePlugin,
     playing_state::PlayingStatePlugin,
@@ -19,6 +21,9 @@ impl Plugin for CorePlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
+            // External Plugins
+            .add_plugins(FrameTimeDiagnosticsPlugin::new(120))
+            // Relevant Stuff
             .init_resource::<KeyBindings>()
             .init_state::<MouseMode>()
             .init_state::<OverallState>()
@@ -27,6 +32,7 @@ impl Plugin for CorePlugin {
             .add_systems(OnEnter(MouseMode::Grabbed), on_enter_mouse_grabbed)
             .add_systems(OnExit(MouseMode::Grabbed), on_exit_mouse_grabbed)
             .add_plugins(GuiPlugin)
+            .add_plugins(DebugMenuPlugin)
             .add_plugins(MainMenuStatePlugin)
             .add_plugins(PlayingStatePlugin);
     }
