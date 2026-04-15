@@ -1,4 +1,4 @@
-mod pause_gui;
+mod pause_menu;
 mod plugin;
 
 pub mod player;

@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::game::{
     core::{global_resources::KeyBindings, states::OverallState},
     playing_state::{
+        pause_menu::PauseMenuPlugin,
         player::{PlayerPlugin, tags::CameraForPlayer},
         sets::{PLAYING_STATE_ORDERING_ORDER, PlayingStateOrdering},
         states::PauseState,
@@ -32,6 +33,7 @@ impl Plugin for PlayingStatePlugin {
                     .run_if(in_state(OverallState::Playing))
                     .in_set(PlayingStateOrdering::Ui)
             )
+            .add_plugins(PauseMenuPlugin)
             .add_plugins(WorldPlugin)
             .add_plugins(PlayerPlugin);
     }
