@@ -1,6 +1,6 @@
 use bevy::{prelude::*, ui::UiSystems};
 
-use crate::game::gui::gui_button;
+use crate::game::gui::{GuiNode, gui_button};
 
 pub struct GuiPlugin;
 
@@ -14,3 +14,28 @@ impl Plugin for GuiPlugin {
             );
     }
 }
+
+pub trait CollectionOfGuiItems {
+    fn foreach(&self, f: impl FnMut(&dyn GuiNode));
+}
+
+macro_rules! impl_collectionofguiitems {
+    () => {};
+
+    ($h:ident $(,$t:ident)*) => {
+        #[allow(non_snake_case)]
+        impl<$($t: GuiNode),*> CollectionOfGuiItems for ($($t,)*) {
+            #[allow(unused_variables, unused_mut)]
+            fn foreach(&self, mut f: impl FnMut(&dyn GuiNode)) {
+                let ($($t,)*) = self;
+                $(f($t);)*
+            }
+        }
+
+
+    };
+}
+
+impl_collectionofguiitems!();
+impl_collectionofguiitems!(A);
+impl_collectionofguiitems!(A, B);

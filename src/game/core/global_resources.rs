@@ -32,4 +32,5 @@ impl Default for KeyBindings {
 pub struct GlobalFonts {
     pub sans: Handle<Font>,
     pub serif: Handle<Font>,
+    pub mono: Handle<Font>,
 }

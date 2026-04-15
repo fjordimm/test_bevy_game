@@ -35,16 +35,21 @@ fn quit_button_observer(_: On<interactions::QuitButtonEv>) {
 }
 
 pub fn make_main_menu_gui() -> GuiScreenDiv {
+    // GuiScreenDiv::new(
+    //     gui::constants::MAIN_COLOR,
+    //     FlexDirection::Column,
+    //     vec![Box::new(GuiDiv::new(
+    //         FlexDirection::Column,
+    //         vec![
+    //             Box::new(GuiText::h1("Main Menu")),
+    //             Box::new(GuiButton::new("Play", Some(|| interactions::PlayButtonEv))),
+    //             Box::new(GuiButton::new("Quit", Some(|| interactions::QuitButtonEv))),
+    //         ],
+    //     ))],
+    // )
     GuiScreenDiv::new(
         gui::constants::MAIN_COLOR,
         FlexDirection::Column,
-        vec![Box::new(GuiDiv::new(
-            FlexDirection::Column,
-            vec![
-                Box::new(GuiText::h1("Main Menu")),
-                Box::new(GuiButton::new("Play", Some(|| interactions::PlayButtonEv))),
-                Box::new(GuiButton::new("Quit", Some(|| interactions::QuitButtonEv))),
-            ],
-        ))],
+        (GuiText::h1("Main Menu")),
     )
 }

@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiNode, constants::*};
+use crate::game::gui::{GuiNode, constants::*, fonts::GameFont};
 
 pub struct GuiText {
     text: String,
+    font: GameFont,
     size: f32,
 }
 
@@ -11,6 +12,7 @@ impl GuiText {
     pub fn regular(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
+            font: MAIN_FONT,
             size: TEXT_SIZE_REGULAR,
         }
     }
@@ -18,6 +20,7 @@ impl GuiText {
     pub fn h1(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
+            font: MAIN_FONT,
             size: TEXT_SIZE_H1,
         }
     }
@@ -25,6 +28,7 @@ impl GuiText {
     pub fn h2(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
+            font: MAIN_FONT,
             size: TEXT_SIZE_H2,
         }
     }
@@ -32,7 +36,16 @@ impl GuiText {
     pub fn h3(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
+            font: MAIN_FONT,
             size: TEXT_SIZE_H3,
+        }
+    }
+
+    pub fn small_mono(text: impl Into<String>) -> Self {
+        Self {
+            text: text.into(),
+            font: GameFont::Mono,
+            size: TEXT_SIZE_SMALL_MONO,
         }
     }
 }
@@ -53,7 +66,7 @@ impl GuiNode for GuiText {
                     font_size: self.size,
                     ..default()
                 },
-                MAIN_FONT,
+                self.font,
             ))
             .id()
     }

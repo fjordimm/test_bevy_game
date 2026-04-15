@@ -31,24 +31,24 @@ impl Plugin for PauseMenuPlugin {
 struct PauseMenuTag;
 
 fn spawn_pause_menu(mut commands: Commands) {
-    let pause_menu = GuiScreenDiv::new(
-        gui::constants::PAUSE_MENU_BG_COLOR,
-        FlexDirection::Column,
-        vec![Box::new(GuiDiv::new(
-            FlexDirection::Column,
-            vec![
-                Box::new(GuiText::h1("Pause Menu")),
-                Box::new(GuiButton::new(
-                    "Continue",
-                    Some(|| interactions::ContinueButtonEv),
-                )),
-                Box::new(GuiButton::new("Exit", Some(|| interactions::ExitButtonEv))),
-            ],
-        ))],
-    )
-    .spawn(&mut commands);
-    commands.entity(pause_menu).insert(PlayingStateEntity);
-    commands.entity(pause_menu).insert(PauseMenuTag);
+    // let pause_menu = GuiScreenDiv::new(
+    //     gui::constants::PAUSE_MENU_BG_COLOR,
+    //     FlexDirection::Column,
+    //     vec![Box::new(GuiDiv::new(
+    //         FlexDirection::Column,
+    //         vec![
+    //             Box::new(GuiText::regular("Pause Menu")),
+    //             Box::new(GuiButton::new(
+    //                 "Continue",
+    //                 Some(|| interactions::ContinueButtonEv),
+    //             )),
+    //             Box::new(GuiButton::new("Exit", Some(|| interactions::ExitButtonEv))),
+    //         ],
+    //     ))],
+    // )
+    // .spawn(&mut commands);
+    // commands.entity(pause_menu).insert(PlayingStateEntity);
+    // commands.entity(pause_menu).insert(PauseMenuTag);
 }
 
 fn despawn_pause_menu(mut commands: Commands, query: Query<Entity, With<PauseMenuTag>>) {
