@@ -26,10 +26,10 @@ impl Plugin for DebugMenuPlugin {
 }
 
 fn add_debug_menu_gui() {
-    GuiDiv::new(
-        FlexDirection::Column,
-        vec![Box::new(GuiText::h1("Debug Menu"))],
-    );
+    // GuiDiv::new(
+    //     FlexDirection::Column,
+    //     vec![Box::new(GuiText::h1("Debug Menu"))],
+    // );
 }
 
 fn update_debug_menu(diag: Res<DiagnosticsStore>) {

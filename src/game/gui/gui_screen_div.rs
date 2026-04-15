@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiNode, constants::*};
+use crate::game::gui::{GuiNode, constants::*, plugin::CollectionOfGuiItems};
 
 pub struct GuiScreenDiv {
     color: Color,
@@ -9,15 +9,15 @@ pub struct GuiScreenDiv {
 }
 
 impl GuiScreenDiv {
-    pub fn new(
+    pub fn new<C: Into<CollectionOfGuiItems>>(
         color: Color,
         flex_direction: FlexDirection,
-        children: Vec<Box<dyn GuiNode>>,
+        children: C,
     ) -> Self {
         Self {
             color: color,
             flex_direction: flex_direction,
-            children: children,
+            children: children.into().0,
         }
     }
 }

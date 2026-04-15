@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiNode, constants::*};
+use crate::game::gui::{GuiNode, constants::*, plugin::CollectionOfGuiItems};
 
 pub struct GuiDiv {
     flex_direction: FlexDirection,
@@ -8,10 +8,10 @@ pub struct GuiDiv {
 }
 
 impl GuiDiv {
-    pub fn new(flex_direction: FlexDirection, children: Vec<Box<dyn GuiNode>>) -> Self {
+    pub fn new<C: Into<CollectionOfGuiItems>>(flex_direction: FlexDirection, children: C) -> Self {
         Self {
             flex_direction: flex_direction,
-            children: children,
+            children: children.into().0,
         }
     }
 }

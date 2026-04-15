@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiNode, GuiText, constants::*};
+use crate::game::gui::{GuiNode, GuiText, constants::*, plugin::CollectionOfGuiItems};
 
 pub struct GuiButton<E>
 where
     E: Event,
     for<'a> E::Trigger<'a>: Default,
 {
-    text: String,
     event_supplier: Option<fn() -> E>,
+    children: Vec<Box<dyn GuiNode>>,
 }
 
 impl<E> GuiButton<E>
@@ -16,10 +16,20 @@ where
     E: Event,
     for<'a> E::Trigger<'a>: Default,
 {
-    pub fn new(text: impl Into<String>, event_supplier: Option<fn() -> E>) -> Self {
+    pub fn new<C: Into<CollectionOfGuiItems>>(
+        event_supplier: Option<fn() -> E>,
+        children: C,
+    ) -> Self {
         Self {
-            text: text.into(),
             event_supplier: event_supplier,
+            children: children.into().0,
+        }
+    }
+
+    pub fn plain(event_supplier: Option<fn() -> E>, text: impl Into<String>) -> Self {
+        Self {
+            event_supplier: event_supplier,
+            children: vec![Box::new(GuiText::regular(text))],
         }
     }
 }
@@ -50,8 +60,8 @@ where
             ))
             .id();
 
-        {
-            let child_entity = GuiText::regular(&self.text).spawn(commands);
+        for child in &self.children {
+            let child_entity = child.spawn(commands);
             commands.entity(entity).add_child(child_entity);
         }
 

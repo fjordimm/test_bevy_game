@@ -15,27 +15,31 @@ impl Plugin for GuiPlugin {
     }
 }
 
-pub trait CollectionOfGuiItems {
-    fn foreach(&self, f: impl FnMut(&dyn GuiNode));
-}
+pub struct CollectionOfGuiItems(pub Vec<Box<dyn GuiNode>>);
 
-macro_rules! impl_collectionofguiitems {
-    () => {};
+macro_rules! impl_tuple_to_collectionofguiitems {
+    () => {
+        impl Into<CollectionOfGuiItems> for () {
+            fn into(self) -> CollectionOfGuiItems {
+                CollectionOfGuiItems(vec![])
+            }
+        }
+    };
 
     ($h:ident $(,$t:ident)*) => {
-        #[allow(non_snake_case)]
-        impl<$($t: GuiNode),*> CollectionOfGuiItems for ($($t,)*) {
-            #[allow(unused_variables, unused_mut)]
-            fn foreach(&self, mut f: impl FnMut(&dyn GuiNode)) {
-                let ($($t,)*) = self;
-                $(f($t);)*
+        #[allow(non_snake_case, unused_variables, unused_mut)]
+        impl<$h: GuiNode + 'static $(, $t: GuiNode + 'static)*> Into<CollectionOfGuiItems> for ($h, $($t,)*) {
+            fn into(self) -> CollectionOfGuiItems {
+                let ($h, $($t,)*) = self;
+                CollectionOfGuiItems(vec![
+                    Box::new($h),
+                    $(Box::new($t),)*
+                ])
             }
         }
 
-
+        impl_tuple_to_collectionofguiitems!($($t),*);
     };
 }
 
-impl_collectionofguiitems!();
-impl_collectionofguiitems!(A);
-impl_collectionofguiitems!(A, B);
+impl_tuple_to_collectionofguiitems!(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12);

@@ -34,22 +34,25 @@ fn quit_button_observer(_: On<interactions::QuitButtonEv>) {
     quit_game();
 }
 
+macro_rules! children {
+    () => {
+        21
+    };
+}
+
 pub fn make_main_menu_gui() -> GuiScreenDiv {
-    // GuiScreenDiv::new(
-    //     gui::constants::MAIN_COLOR,
-    //     FlexDirection::Column,
-    //     vec![Box::new(GuiDiv::new(
-    //         FlexDirection::Column,
-    //         vec![
-    //             Box::new(GuiText::h1("Main Menu")),
-    //             Box::new(GuiButton::new("Play", Some(|| interactions::PlayButtonEv))),
-    //             Box::new(GuiButton::new("Quit", Some(|| interactions::QuitButtonEv))),
-    //         ],
-    //     ))],
-    // )
+    debug!("{:?}", children!());
+
     GuiScreenDiv::new(
         gui::constants::MAIN_COLOR,
         FlexDirection::Column,
-        (GuiText::h1("Main Menu")),
+        (GuiDiv::new(
+            FlexDirection::Column,
+            (
+                GuiText::h1("Main Menu"),
+                GuiButton::plain(Some(|| interactions::PlayButtonEv), "Play"),
+                GuiButton::plain(Some(|| interactions::QuitButtonEv), "Quit"),
+            ),
+        ),),
     )
 }
