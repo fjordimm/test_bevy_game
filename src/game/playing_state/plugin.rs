@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::{global_resources::KeyBindings, states::OverallState},
-    gui::{constants::MAIN_COLOR, gui_root_template},
+    gui::gui_root_template,
     playing_state::{
         pause_menu::PauseMenuPlugin,
         player::{PlayerPlugin, tags::CameraForPlayer},

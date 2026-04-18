@@ -3,7 +3,10 @@ use bevy::prelude::*;
 use crate::game::{
     core::states::OverallState,
     gui::{self, GuiButton, GuiDiv, GuiNode, GuiScreenDiv, GuiText},
-    playing_state::{PlayingStateGuiRoot, sets::PlayingStateOrdering, states::PauseState, tags::PlayingStateEntity},
+    playing_state::{
+        PlayingStateGuiRoot, sets::PlayingStateOrdering, states::PauseState,
+        tags::PlayingStateEntity,
+    },
 };
 
 pub struct PauseMenuPlugin;

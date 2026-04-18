@@ -57,7 +57,8 @@ where
                 },
                 main_box_shadow(),
                 BackgroundColor(BUTTON_COLOR_MAIN),
-            )).id();
+            ))
+            .id();
         if let Some(par) = parent {
             commands.entity(par).add_child(entity);
         }

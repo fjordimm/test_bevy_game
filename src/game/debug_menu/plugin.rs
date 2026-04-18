@@ -6,7 +6,6 @@ use bevy::{
     time::common_conditions::on_timer,
 };
 
-use crate::game::gui::{GuiDiv, GuiText};
 
 pub struct DebugMenuPlugin;
 
@@ -15,7 +14,7 @@ impl Plugin for DebugMenuPlugin {
         #[rustfmt::skip]
         app
             .add_systems(Update,
-                add_debug_menu_gui
+                spawn_debug_menu
                     .run_if(run_once)
             )
             .add_systems(Update,
@@ -25,7 +24,7 @@ impl Plugin for DebugMenuPlugin {
     }
 }
 
-fn add_debug_menu_gui() {
+fn spawn_debug_menu() {
     // GuiDiv::new(
     //     FlexDirection::Column,
     //     vec![Box::new(GuiText::h1("Debug Menu"))],

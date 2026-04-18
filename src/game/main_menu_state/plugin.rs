@@ -36,7 +36,11 @@ fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseM
     commands.entity(menu_gui).insert(MainMenuStateEntity);
 }
 
-fn on_exit(mut commands: Commands, query: Query<Entity, With<MainMenuStateEntity>>, gui_root: Res<MainMenuStateGuiRoot>) {
+fn on_exit(
+    mut commands: Commands,
+    query: Query<Entity, With<MainMenuStateEntity>>,
+    gui_root: Res<MainMenuStateGuiRoot>,
+) {
     for entity in &query {
         commands.entity(entity).despawn();
     }
