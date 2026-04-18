@@ -1,7 +1,9 @@
 - Add TabGroups to gui stuff
 - Mark all the gui stuff with proper tags (MainMenuState or PlayingState)
     - Make some debug tool to make warnings when there are objects without one of these tags
+    - Maybe make a thing that automatically marks any newly created objects?
 - Maybe make the children argument of gui elements take a vec of plain things instead of a vec of boxes
+- Add VSync as an option in user settings. Right now it is disabled (see present_mode in build_bevy_app.rs)
 
 Currently on:
 - Making a debug menu

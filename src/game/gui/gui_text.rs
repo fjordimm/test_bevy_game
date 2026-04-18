@@ -9,6 +9,14 @@ pub struct GuiText {
 }
 
 impl GuiText {
+    pub fn custom(text: impl Into<String>, font: GameFont, size: f32) -> Self {
+        Self {
+            text: text.into(),
+            font: font,
+            size: size,
+        }
+    }
+
     pub fn regular(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
@@ -51,8 +59,8 @@ impl GuiText {
 }
 
 impl GuiNode for GuiText {
-    fn spawn(&self, commands: &mut Commands) -> Entity {
-        commands
+    fn spawn(&self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
+        let entity = commands
             .spawn((
                 Node {
                     display: Display::Flex,
@@ -68,6 +76,11 @@ impl GuiNode for GuiText {
                 },
                 self.font,
             ))
-            .id()
+            .id();
+        if let Some(par) = parent {
+            commands.entity(par).add_child(entity);
+        }
+
+        entity
     }
 }

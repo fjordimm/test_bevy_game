@@ -34,15 +34,7 @@ fn quit_button_observer(_: On<interactions::QuitButtonEv>) {
     quit_game();
 }
 
-macro_rules! children {
-    () => {
-        21
-    };
-}
-
 pub fn make_main_menu_gui() -> GuiScreenDiv {
-    debug!("{:?}", children!());
-
     GuiScreenDiv::new(
         gui::constants::MAIN_COLOR,
         FlexDirection::Column,

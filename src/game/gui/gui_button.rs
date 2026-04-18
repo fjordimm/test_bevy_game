@@ -42,7 +42,7 @@ where
     E: Event,
     for<'a> E::Trigger<'a>: Default,
 {
-    fn spawn(&self, commands: &mut Commands) -> Entity {
+    fn spawn(&self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         let entity = commands
             .spawn((
                 GuiButtonTag,
@@ -57,11 +57,13 @@ where
                 },
                 main_box_shadow(),
                 BackgroundColor(BUTTON_COLOR_MAIN),
-            ))
-            .id();
+            )).id();
+        if let Some(par) = parent {
+            commands.entity(par).add_child(entity);
+        }
 
         for child in &self.children {
-            let child_entity = child.spawn(commands);
+            let child_entity = child.spawn(commands, None);
             commands.entity(entity).add_child(child_entity);
         }
 

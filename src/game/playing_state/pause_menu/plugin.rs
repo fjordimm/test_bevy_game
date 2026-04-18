@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::game::{
     core::states::OverallState,
     gui::{self, GuiButton, GuiDiv, GuiNode, GuiScreenDiv, GuiText},
-    playing_state::{sets::PlayingStateOrdering, states::PauseState, tags::PlayingStateEntity},
+    playing_state::{PlayingStateGuiRoot, sets::PlayingStateOrdering, states::PauseState, tags::PlayingStateEntity},
 };
 
 pub struct PauseMenuPlugin;
@@ -30,7 +30,7 @@ impl Plugin for PauseMenuPlugin {
 #[derive(Component)]
 struct PauseMenuTag;
 
-fn spawn_pause_menu(mut commands: Commands) {
+fn spawn_pause_menu(mut commands: Commands, gui_root: Res<PlayingStateGuiRoot>) {
     let pause_menu = GuiScreenDiv::new(
         gui::constants::PAUSE_MENU_BG_COLOR,
         FlexDirection::Column,
@@ -43,7 +43,7 @@ fn spawn_pause_menu(mut commands: Commands) {
             ),
         ),),
     )
-    .spawn(&mut commands);
+    .spawn(&mut commands, Some(gui_root.0));
     commands.entity(pause_menu).insert(PlayingStateEntity);
     commands.entity(pause_menu).insert(PauseMenuTag);
 }
@@ -58,10 +58,10 @@ pub mod interactions {
     use bevy_ecs::event::Event;
 
     #[derive(Event)]
-    pub struct ExitButtonEv;
+    pub struct ContinueButtonEv;
 
     #[derive(Event)]
-    pub struct ContinueButtonEv;
+    pub struct ExitButtonEv;
 }
 
 fn continue_button_observer(_: On<interactions::ContinueButtonEv>, mut commands: Commands) {

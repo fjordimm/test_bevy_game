@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::{global_resources::KeyBindings, states::OverallState},
+    gui::{constants::MAIN_COLOR, gui_root_template},
     playing_state::{
         pause_menu::PauseMenuPlugin,
         player::{PlayerPlugin, tags::CameraForPlayer},
@@ -39,6 +40,9 @@ impl Plugin for PlayingStatePlugin {
     }
 }
 
+#[derive(Resource)]
+pub struct PlayingStateGuiRoot(pub Entity);
+
 fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<PauseState>>) {
     next_pause_state.set(PauseState::Unpaused);
 
@@ -48,12 +52,21 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
         Camera3d::default(),
         Transform::from_xyz(0.0, 0.0, 7.0).looking_at(-Vec3::Z, Vec3::Y),
     ));
+
+    let gui_root = commands.spawn(gui_root_template()).id();
+    commands.insert_resource(PlayingStateGuiRoot(gui_root));
 }
 
-fn on_exit(mut commands: Commands, all_entities: Query<Entity, With<PlayingStateEntity>>) {
+fn on_exit(
+    mut commands: Commands,
+    all_entities: Query<Entity, With<PlayingStateEntity>>,
+    gui_root: Res<PlayingStateGuiRoot>,
+) {
     for entity in &all_entities {
         commands.entity(entity).despawn();
     }
+
+    commands.entity(gui_root.0).despawn();
 }
 
 fn toggle_pause(

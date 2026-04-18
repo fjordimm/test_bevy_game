@@ -11,6 +11,7 @@ pub fn build_bevy_app() -> App {
     let default_plugins = default_plugins.set(WindowPlugin {
         primary_window: Some(Window {
             title: String::from("Test Bevy Game"),
+            present_mode: bevy::window::PresentMode::Immediate,
             ..default()
         }),
         ..default()

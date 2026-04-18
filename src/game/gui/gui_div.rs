@@ -17,7 +17,7 @@ impl GuiDiv {
 }
 
 impl GuiNode for GuiDiv {
-    fn spawn(&self, commands: &mut Commands) -> Entity {
+    fn spawn(&self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         let entity = commands
             .spawn((
                 Node {
@@ -34,9 +34,12 @@ impl GuiNode for GuiDiv {
                 BackgroundColor(MAIN_COLOR),
             ))
             .id();
+        if let Some(par) = parent {
+            commands.entity(par).add_child(entity);
+        }
 
         for child in &self.children {
-            let child_entity = child.spawn(commands);
+            let child_entity = child.spawn(commands, None);
             commands.entity(entity).add_child(child_entity);
         }
 
