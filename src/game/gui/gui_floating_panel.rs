@@ -3,19 +3,13 @@ use bevy::prelude::*;
 use crate::game::gui::{GuiNode, constants::*, plugin::CollectionOfGuiItems};
 
 pub struct GuiFloatingPanel {
-    color: Color,
     flex_direction: FlexDirection,
     children: Vec<Box<dyn GuiNode>>,
 }
 
 impl GuiFloatingPanel {
-    pub fn new<C: Into<CollectionOfGuiItems>>(
-        color: Color,
-        flex_direction: FlexDirection,
-        children: C,
-    ) -> Self {
+    pub fn new<C: Into<CollectionOfGuiItems>>(flex_direction: FlexDirection, children: C) -> Self {
         Self {
-            color: color,
             flex_direction: flex_direction,
             children: children.into().0,
         }
@@ -28,16 +22,17 @@ impl GuiNode for GuiFloatingPanel {
             .spawn((
                 Node {
                     position_type: PositionType::Absolute,
-                    width: Val::Vw(100.0),
-                    height: Val::Vh(100.0),
                     display: Display::Flex,
                     flex_direction: self.flex_direction,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     row_gap: px(MAIN_PADDING),
+                    padding: UiRect::all(px(MAIN_PADDING)),
+                    border_radius: BorderRadius::all(px(BORDER_RADIUS)),
                     ..default()
                 },
-                BackgroundColor(self.color),
+                main_box_shadow(),
+                BackgroundColor(MAIN_COLOR),
             ))
             .id();
         if let Some(par) = parent {

@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::game::gui::fonts::GameFont;
 
 pub const MAIN_COLOR: Color = Color::hsv(185.0, 0.1, 0.15);
-pub const PAUSE_MENU_BG_COLOR: Color = Color::hsva(185.0, 0.1, 0.15, 0.3);
+pub const PAUSE_MENU_BG_COLOR: Color = Color::hsva(0.0, 0.0, 0.0, 0.5);
 pub const BORDER_RADIUS: i32 = 6;
 pub const MAIN_PADDING: i32 = 10;
 pub const MAIN_FONT: GameFont = GameFont::Sans;

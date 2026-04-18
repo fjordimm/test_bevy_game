@@ -1,12 +1,9 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    core::states::OverallState,
+    core::{GlobalGuiRoot, states::OverallState},
     gui::{self, GuiButton, GuiDiv, GuiNode, GuiScreenDiv, GuiText},
-    playing_state::{
-        PlayingStateGuiRoot, sets::PlayingStateOrdering, states::PauseState,
-        tags::PlayingStateEntity,
-    },
+    playing_state::{sets::PlayingStateOrdering, states::PauseState, tags::PlayingStateEntity},
 };
 
 pub struct PauseMenuPlugin;
@@ -33,7 +30,7 @@ impl Plugin for PauseMenuPlugin {
 #[derive(Component)]
 struct PauseMenuTag;
 
-fn spawn_pause_menu(mut commands: Commands, gui_root: Res<PlayingStateGuiRoot>) {
+fn spawn_pause_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
     let pause_menu = GuiScreenDiv::new(
         gui::constants::PAUSE_MENU_BG_COLOR,
         FlexDirection::Column,
@@ -47,8 +44,9 @@ fn spawn_pause_menu(mut commands: Commands, gui_root: Res<PlayingStateGuiRoot>) 
         ),),
     )
     .spawn(&mut commands, Some(gui_root.0));
-    commands.entity(pause_menu).insert(PlayingStateEntity);
+    commands.entity(pause_menu).insert(ZIndex(1000));
     commands.entity(pause_menu).insert(PauseMenuTag);
+    commands.entity(pause_menu).insert(PlayingStateEntity);
 }
 
 fn despawn_pause_menu(mut commands: Commands, query: Query<Entity, With<PauseMenuTag>>) {

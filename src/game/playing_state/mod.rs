@@ -6,5 +6,4 @@ pub mod sets;
 pub mod states;
 pub mod tags;
 pub mod world;
-pub use plugin::PlayingStateGuiRoot;
 pub use plugin::PlayingStatePlugin;

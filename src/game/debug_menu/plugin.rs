@@ -6,6 +6,10 @@ use bevy::{
     time::common_conditions::on_timer,
 };
 
+use crate::game::{
+    core::GlobalGuiRoot,
+    gui::{GuiFloatingPanel, GuiNode, GuiText},
+};
 
 pub struct DebugMenuPlugin;
 
@@ -24,11 +28,11 @@ impl Plugin for DebugMenuPlugin {
     }
 }
 
-fn spawn_debug_menu() {
-    // GuiDiv::new(
-    //     FlexDirection::Column,
-    //     vec![Box::new(GuiText::h1("Debug Menu"))],
-    // );
+fn spawn_debug_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
+    let debug_menu =
+        GuiFloatingPanel::new(FlexDirection::Column, (GuiText::small_mono("howdy ho"),))
+            .spawn(&mut commands, Some(gui_root.0));
+    commands.entity(debug_menu).insert(ZIndex(2000));
 }
 
 fn update_debug_menu(diag: Res<DiagnosticsStore>) {
