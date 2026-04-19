@@ -1,6 +1,6 @@
 use bevy::{prelude::*, ui::UiSystems};
 
-use crate::game::gui::{GuiNode, gui_button};
+use crate::game::gui::{GuiNode, gui_button, gui_floating_panel};
 
 pub struct GuiPlugin;
 
@@ -9,7 +9,7 @@ impl Plugin for GuiPlugin {
         #[rustfmt::skip]
         app
             .add_systems(Update,
-                gui_button::update_style
+                (gui_button::update, gui_floating_panel::update)
                     .after(UiSystems::Focus)
             );
     }
@@ -17,7 +17,7 @@ impl Plugin for GuiPlugin {
 
 pub struct CollectionOfGuiItems(pub Vec<Box<dyn GuiNode>>);
 
-macro_rules! impl_tuple_to_collectionofguiitems {
+macro_rules! impl_tuple_into_collectionofguiitems {
     () => {
         impl Into<CollectionOfGuiItems> for () {
             fn into(self) -> CollectionOfGuiItems {
@@ -38,8 +38,8 @@ macro_rules! impl_tuple_to_collectionofguiitems {
             }
         }
 
-        impl_tuple_to_collectionofguiitems!($($t),*);
+        impl_tuple_into_collectionofguiitems!($($t),*);
     };
 }
 
-impl_tuple_to_collectionofguiitems!(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12);
+impl_tuple_into_collectionofguiitems!(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12);

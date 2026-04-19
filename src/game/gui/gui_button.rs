@@ -34,9 +34,6 @@ where
     }
 }
 
-#[derive(Component)]
-pub struct GuiButtonTag;
-
 impl<E> GuiNode for GuiButton<E>
 where
     E: Event,
@@ -81,7 +78,10 @@ where
     }
 }
 
-pub fn update_style(
+#[derive(Component)]
+pub struct GuiButtonTag;
+
+pub fn update(
     mut query: Query<
         (&Interaction, &mut BackgroundColor),
         (With<GuiButtonTag>, Changed<Interaction>),

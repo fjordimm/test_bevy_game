@@ -35,8 +35,8 @@ fn spawn_debug_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
     commands.entity(debug_menu).insert(ZIndex(2000));
 }
 
-fn update_debug_menu(diag: Res<DiagnosticsStore>) {
-    if let Some(fps) = diag.get_measurement(&FrameTimeDiagnosticsPlugin::FPS) {
-        debug!("{:?}", fps.value);
-    }
+fn update_debug_menu(_diag: Res<DiagnosticsStore>) {
+    // if let Some(fps) = diag.get_measurement(&FrameTimeDiagnosticsPlugin::FPS) {
+    //     debug!("{:?}", fps.value);
+    // }
 }
