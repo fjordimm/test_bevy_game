@@ -1,16 +1,25 @@
-use bevy::{input::mouse::MouseMotion, prelude::*};
+use bevy::prelude::*;
 
 use crate::game::gui::{GuiNode, constants::*, plugin::CollectionOfGuiItems};
 
 pub struct GuiFloatingPanel {
     flex_direction: FlexDirection,
+    pos_x: f32,
+    pos_y: f32,
     children: Vec<Box<dyn GuiNode>>,
 }
 
 impl GuiFloatingPanel {
-    pub fn new<C: Into<CollectionOfGuiItems>>(flex_direction: FlexDirection, children: C) -> Self {
+    pub fn new<C: Into<CollectionOfGuiItems>>(
+        flex_direction: FlexDirection,
+        pos_x: f32,
+        pos_y: f32,
+        children: C,
+    ) -> Self {
         Self {
             flex_direction: flex_direction,
+            pos_x: pos_x,
+            pos_y: pos_y,
             children: children.into().0,
         }
     }
@@ -24,8 +33,8 @@ impl GuiNode for GuiFloatingPanel {
                 Node {
                     position_type: PositionType::Absolute,
                     overflow: Overflow::hidden(),
-                    left: px(100),
-                    top: px(100),
+                    left: px(self.pos_x),
+                    top: px(self.pos_y),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::Center,
@@ -87,7 +96,7 @@ pub struct GuiFloatingPanelHandleTag {
 }
 
 pub fn update(
-    mut interaction_query: Query<(&Interaction, &GuiFloatingPanelHandleTag), Changed<Interaction>>,
+    interaction_query: Query<(&Interaction, &GuiFloatingPanelHandleTag), Changed<Interaction>>,
     mut window_being_dragged: Local<Option<Entity>>,
     mut window_query: Query<&mut Node, With<GuiFloatingPanelTag>>,
     mut mouse_motion: MessageReader<CursorMoved>,
@@ -114,9 +123,13 @@ pub fn update(
         if let Ok(mut target_node) = window_query.get_mut(target_window) {
             if let Val::Px(ref mut x) = target_node.left {
                 *x += delta_x;
+            } else {
+                target_node.left = px(0.0);
             }
             if let Val::Px(ref mut y) = target_node.top {
                 *y += delta_y;
+            } else {
+                target_node.top = px(0.0);
             }
         }
     }

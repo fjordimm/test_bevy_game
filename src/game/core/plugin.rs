@@ -3,6 +3,8 @@ use bevy::{
     prelude::*,
     window::{CursorGrabMode, CursorOptions, PrimaryWindow},
 };
+use bevy_prng::{ChaCha8Rng, WyRand};
+use bevy_rand::plugin::EntropyPlugin;
 
 use crate::game::{
     core::{
@@ -23,6 +25,7 @@ impl Plugin for CorePlugin {
         app
             // External Plugins
             .add_plugins(FrameTimeDiagnosticsPlugin::new(120))
+            .add_plugins(EntropyPlugin::<WyRand>::default())
             // Relevant Stuff
             .init_resource::<KeyBindings>()
             .init_state::<MouseMode>()

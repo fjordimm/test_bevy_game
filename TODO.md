@@ -4,6 +4,8 @@
     - Maybe make a thing that automatically marks any newly created objects?
 - Maybe make the children argument of gui elements take a vec of plain things instead of a vec of boxes
 - Add VSync as an option in user settings. Right now it is disabled (see present_mode in build_bevy_app.rs)
+- Switch to the better way of using randomization. See: https://docs.rs/bevy_rand/latest/bevy_rand/. And actually more imporantly: https://docs.rs/bevy_rand/latest/bevy_rand/tutorial/index.html
 
 Currently on:
 - Making a debug menu
+    - Make an X button for it.
