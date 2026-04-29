@@ -1,6 +1,5 @@
 use bevy::input::keyboard::KeyCode;
-use bevy::prelude::Font;
-use bevy::prelude::Handle;
+use bevy::prelude::*;
 use bevy_ecs::resource::Resource;
 
 #[derive(Resource, Debug)]
@@ -34,3 +33,6 @@ pub struct GlobalFonts {
     pub serif: Handle<Font>,
     pub mono: Handle<Font>,
 }
+
+#[derive(Resource)]
+pub struct GlobalGuiRoot(pub Entity);

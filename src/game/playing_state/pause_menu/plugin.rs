@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    core::{GlobalGuiRoot, states::OverallState},
+    core::{global_resources::GlobalGuiRoot, states::OverallState},
     gui::{self, GuiButton, GuiDiv, GuiNode, GuiScreenDiv, GuiText},
     playing_state::{sets::PlayingStateOrdering, states::PauseState, tags::PlayingStateEntity},
 };

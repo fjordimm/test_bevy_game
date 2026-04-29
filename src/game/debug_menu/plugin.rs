@@ -1,12 +1,12 @@
 use std::time::Duration;
 
 use bevy::{diagnostic::DiagnosticsStore, prelude::*, time::common_conditions::on_timer};
-use bevy_prng::{ChaCha8Rng, WyRand};
+use bevy_prng::WyRand;
 use bevy_rand::global::GlobalRng;
 use rand_core::Rng;
 
 use crate::game::{
-    core::GlobalGuiRoot,
+    core::global_resources::GlobalGuiRoot,
     gui::{GuiFloatingPanel, GuiNode, GuiText},
     util::warned_ok,
 };

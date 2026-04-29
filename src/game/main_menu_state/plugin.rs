@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::{
-        GlobalGuiRoot,
+        global_resources::GlobalGuiRoot,
         states::{MouseMode, OverallState},
     },
     gui::GuiNode,

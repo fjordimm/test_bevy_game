@@ -9,3 +9,5 @@
 Currently on:
 - Making a debug menu
     - Make an X button for it.
+- Instead of Single or Query::single for things that are only supposed to have one instance, use a resource.
+- Naming convention change: instead of `thing_query`, use `thing_q`.
