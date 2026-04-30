@@ -9,3 +9,5 @@
 Currently on:
 - Making a debug menu
     - Make an X button for it.
+    - Make them show up in the right order.
+- Document the allocations for z-indexes (in src/game/gui/z_indexing.md)
