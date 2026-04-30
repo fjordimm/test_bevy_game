@@ -7,6 +7,7 @@ use crate::game::{
         sets::PlayingStateOrdering,
         states::PauseState,
     },
+    util::warned_ok,
 };
 
 pub struct PlayerPlugin;
@@ -71,20 +72,25 @@ fn on_exit_unpaused(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
 
 fn cursor_controls_camera_look(
     movement_settings: Res<PlayerMovementSettings>,
-    window: Single<&mut Window, With<PrimaryWindow>>,
+    window_q: Query<&mut Window, With<PrimaryWindow>>,
     mut mouse_motion: MessageReader<MouseMotion>,
-    mut camera_trans: Single<&mut Transform, With<CameraForPlayer>>,
+    mut camera_trans_q: Query<&mut Transform, With<CameraForPlayer>>,
 ) {
-    for ev in mouse_motion.read() {
-        let (mut yaw, mut pitch, _) = camera_trans.rotation.to_euler(EulerRot::YXZ);
-        let window_scale = window.height().min(window.width());
+    if let (Some(window), Some(mut camera_trans)) = (
+        warned_ok!(window_q.single()),
+        warned_ok!(camera_trans_q.single_mut()),
+    ) {
+        for ev in mouse_motion.read() {
+            let (mut yaw, mut pitch, _) = camera_trans.rotation.to_euler(EulerRot::YXZ);
+            let window_scale = window.height().min(window.width());
 
-        pitch -= (movement_settings.look_sensitivity * ev.delta.y * window_scale).to_radians();
-        yaw -= (movement_settings.look_sensitivity * ev.delta.x * window_scale).to_radians();
+            pitch -= (movement_settings.look_sensitivity * ev.delta.y * window_scale).to_radians();
+            yaw -= (movement_settings.look_sensitivity * ev.delta.x * window_scale).to_radians();
 
-        pitch = pitch.clamp(-1.54, 1.54);
+            pitch = pitch.clamp(-1.54, 1.54);
 
-        camera_trans.rotation =
-            Quat::from_axis_angle(Vec3::Y, yaw) * Quat::from_axis_angle(Vec3::X, pitch);
+            camera_trans.rotation =
+                Quat::from_axis_angle(Vec3::Y, yaw) * Quat::from_axis_angle(Vec3::X, pitch);
+        }
     }
 }

@@ -31,16 +31,16 @@ impl Plugin for DebugMenuPlugin {
 fn spawn_debug_menu(
     mut commands: Commands,
     gui_root: Res<GlobalGuiRoot>,
-    window_query: Query<&Window>,
-    mut rng_query: Query<&mut WyRand, With<GlobalRng>>,
+    window_q: Query<&Window>,
+    mut rng_q: Query<&mut WyRand, With<GlobalRng>>,
 ) {
-    if let Some(mut rng) = warned_ok!(rng_query.single_mut()) {
+    if let Some(mut rng) = warned_ok!(rng_q.single_mut()) {
         debug!("um: {}", rng.next_u32());
     }
 
     let mut pos_x = 10.0;
     let mut pos_y = 10.0;
-    if let Some(window) = warned_ok!(window_query.single()) {
+    if let Some(window) = warned_ok!(window_q.single()) {
         pos_x = window.width() / 2.0;
         pos_y = window.height() / 2.0;
     }

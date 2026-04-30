@@ -38,8 +38,8 @@ fn on_enter(
     commands.entity(menu_gui).insert(MainMenuStateEntity);
 }
 
-fn on_exit(mut commands: Commands, all_entities: Query<Entity, With<MainMenuStateEntity>>) {
-    for entity in &all_entities {
+fn on_exit(mut commands: Commands, all_entities_q: Query<Entity, With<MainMenuStateEntity>>) {
+    for entity in &all_entities_q {
         commands.entity(entity).despawn();
     }
 }

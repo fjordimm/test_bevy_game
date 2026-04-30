@@ -50,8 +50,8 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
     ));
 }
 
-fn on_exit(mut commands: Commands, all_entities: Query<Entity, With<PlayingStateEntity>>) {
-    for entity in &all_entities {
+fn on_exit(mut commands: Commands, all_entities_q: Query<Entity, With<PlayingStateEntity>>) {
+    for entity in &all_entities_q {
         commands.entity(entity).despawn();
     }
 }

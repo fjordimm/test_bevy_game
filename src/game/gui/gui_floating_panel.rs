@@ -96,12 +96,12 @@ pub struct GuiFloatingPanelHandleTag {
 }
 
 pub fn update(
-    interaction_query: Query<(&Interaction, &GuiFloatingPanelHandleTag), Changed<Interaction>>,
+    interaction_q: Query<(&Interaction, &GuiFloatingPanelHandleTag), Changed<Interaction>>,
     mut window_being_dragged: Local<Option<Entity>>,
-    mut window_query: Query<&mut Node, With<GuiFloatingPanelTag>>,
+    mut window_q: Query<&mut Node, With<GuiFloatingPanelTag>>,
     mut mouse_motion: MessageReader<CursorMoved>,
 ) {
-    for (interaction, handle) in &interaction_query {
+    for (interaction, handle) in &interaction_q {
         match *interaction {
             Interaction::Pressed => {
                 *window_being_dragged = Some(handle.parent);
@@ -120,7 +120,7 @@ pub fn update(
             delta_y += msg.delta.map(|d| d.y).unwrap_or(0.0);
         }
 
-        if let Ok(mut target_node) = window_query.get_mut(target_window) {
+        if let Ok(mut target_node) = window_q.get_mut(target_window) {
             if let Val::Px(ref mut x) = target_node.left {
                 *x += delta_x;
             } else {
