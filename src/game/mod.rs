@@ -1,8 +1,8 @@
 mod build_bevy_app;
 
 pub mod core;
-pub mod debug_menu;
 pub mod gui;
+pub mod main_debug_menu;
 pub mod main_menu_state;
 pub mod playing_state;
 pub mod util;

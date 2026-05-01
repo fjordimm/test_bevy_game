@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::gui::{GuiNode, constants::*, plugin::CollectionOfGuiItems};
 
+// Note: if there are multiple floating panels, they will not order themselves
 pub struct GuiFloatingPanel {
     flex_direction: FlexDirection,
     pos_x: f32,

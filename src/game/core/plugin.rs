@@ -11,8 +11,8 @@ use crate::game::{
         global_resources::{GlobalGuiRoot, KeyBindings},
         states::{MouseMode, OverallState},
     },
-    debug_menu::DebugMenuPlugin,
     gui::{self, gui_root_template, plugin::GuiPlugin},
+    main_debug_menu::MainDebugMenuPlugin,
     main_menu_state::MainMenuStatePlugin,
     playing_state::PlayingStatePlugin,
     util::warned_ok,
@@ -36,7 +36,7 @@ impl Plugin for CorePlugin {
             .add_systems(OnEnter(MouseMode::Grabbed), on_enter_mouse_grabbed)
             .add_systems(OnExit(MouseMode::Grabbed), on_exit_mouse_grabbed)
             .add_plugins(GuiPlugin)
-            .add_plugins(DebugMenuPlugin)
+            .add_plugins(MainDebugMenuPlugin)
             .add_plugins(MainMenuStatePlugin)
             .add_plugins(PlayingStatePlugin);
     }

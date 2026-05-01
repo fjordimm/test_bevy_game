@@ -11,24 +11,24 @@ use crate::game::{
     util::warned_ok,
 };
 
-pub struct DebugMenuPlugin;
+pub struct MainDebugMenuPlugin;
 
-impl Plugin for DebugMenuPlugin {
+impl Plugin for MainDebugMenuPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
             .add_systems(Update,
-                spawn_debug_menu
+                spawn_main_debug_menu
                     .run_if(run_once)
             )
             .add_systems(Update,
-                update_debug_menu
+                update_main_debug_menu
                     .run_if(on_timer(Duration::from_secs(1)))
             );
     }
 }
 
-fn spawn_debug_menu(
+fn spawn_main_debug_menu(
     mut commands: Commands,
     gui_root: Res<GlobalGuiRoot>,
     window_q: Query<&Window>,
@@ -45,17 +45,17 @@ fn spawn_debug_menu(
         pos_y = window.height() / 2.0;
     }
 
-    let debug_menu = GuiFloatingPanel::new(
+    let main_debug_menu = GuiFloatingPanel::new(
         FlexDirection::Column,
         pos_x,
         pos_y,
         (GuiText::small_mono("howdy ho"),),
     )
     .spawn(&mut commands, Some(gui_root.0));
-    commands.entity(debug_menu).insert(ZIndex(2000));
+    commands.entity(main_debug_menu).insert(ZIndex(4000));
 }
 
-fn update_debug_menu(_diag: Res<DiagnosticsStore>) {
+fn update_main_debug_menu(_diag: Res<DiagnosticsStore>) {
     // if let Some(fps) = diag.get_measurement(&FrameTimeDiagnosticsPlugin::FPS) {
     //     debug!("{:?}", fps.value);
     // }

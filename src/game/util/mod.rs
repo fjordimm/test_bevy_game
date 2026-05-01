@@ -33,3 +33,4 @@ macro_rules! warned_some {
 }
 
 pub(crate) use warned_ok;
+pub(crate) use warned_some;

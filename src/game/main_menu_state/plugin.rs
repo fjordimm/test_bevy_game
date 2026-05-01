@@ -34,7 +34,7 @@ fn on_enter(
     commands.spawn((MainMenuStateEntity, Camera2d::default()));
 
     let menu_gui = main_menu_gui::make_main_menu_gui().spawn(&mut commands, Some(gui_root.0));
-    commands.entity(menu_gui).insert(ZIndex(0));
+    commands.entity(menu_gui).insert(ZIndex(3001));
     commands.entity(menu_gui).insert(MainMenuStateEntity);
 }
 

@@ -44,7 +44,7 @@ fn spawn_pause_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
         ),),
     )
     .spawn(&mut commands, Some(gui_root.0));
-    commands.entity(pause_menu).insert(ZIndex(1000));
+    commands.entity(pause_menu).insert(ZIndex(3000));
     commands.entity(pause_menu).insert(PauseMenuTag);
     commands.entity(pause_menu).insert(PlayingStateEntity);
 }
