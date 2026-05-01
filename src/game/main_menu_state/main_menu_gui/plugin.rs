@@ -40,10 +40,13 @@ pub fn make_main_menu_gui() -> GuiScreenDiv {
         FlexDirection::Column,
         (GuiDiv::new(
             FlexDirection::Column,
+            JustifyContent::Center,
+            AlignItems::Stretch,
+            None,
             (
                 GuiText::h1("Main Menu"),
-                GuiButton::plain(Some(|| interactions::PlayButtonEv), "Play"),
-                GuiButton::plain(Some(|| interactions::QuitButtonEv), "Quit"),
+                GuiButton::new_regular(|| interactions::PlayButtonEv, "Play"),
+                GuiButton::new_regular(|| interactions::QuitButtonEv, "Quit"),
             ),
         ),),
     )

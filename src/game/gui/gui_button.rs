@@ -16,19 +16,36 @@ where
     E: Event,
     for<'a> E::Trigger<'a>: Default,
 {
-    pub fn new<C: Into<CollectionOfGuiItems>>(
-        event_supplier: Option<fn() -> E>,
-        children: C,
-    ) -> Self {
+    pub fn new<C: Into<CollectionOfGuiItems>>(event_supplier: fn() -> E, children: C) -> Self {
         Self {
-            event_supplier: event_supplier,
+            event_supplier: Some(event_supplier),
             children: children.into().0,
         }
     }
 
-    pub fn plain(event_supplier: Option<fn() -> E>, text: impl Into<String>) -> Self {
+    pub fn new_regular(event_supplier: fn() -> E, text: impl Into<String>) -> Self {
         Self {
-            event_supplier: event_supplier,
+            event_supplier: Some(event_supplier),
+            children: vec![Box::new(GuiText::regular(text))],
+        }
+    }
+}
+
+#[doc(hidden)]
+#[derive(Event)]
+pub struct _GuiButtonDummyGeneric;
+
+impl GuiButton<_GuiButtonDummyGeneric> {
+    pub fn new_no_event<C: Into<CollectionOfGuiItems>>(children: C) -> Self {
+        Self {
+            event_supplier: None,
+            children: children.into().0,
+        }
+    }
+
+    pub fn new_regular_no_event(text: impl Into<String>) -> Self {
+        Self {
+            event_supplier: None,
             children: vec![Box::new(GuiText::regular(text))],
         }
     }
@@ -45,11 +62,11 @@ where
                 GuiButtonTag,
                 Button,
                 Node {
+                    border_radius: BorderRadius::all(px(BORDER_RADIUS)),
                     display: Display::Flex,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     padding: UiRect::all(px(MAIN_PADDING)),
-                    border_radius: BorderRadius::all(px(BORDER_RADIUS)),
                     ..default()
                 },
                 main_box_shadow(),

@@ -49,6 +49,14 @@ impl GuiText {
         }
     }
 
+    pub fn small(text: impl Into<String>) -> Self {
+        Self {
+            text: text.into(),
+            font: MAIN_FONT,
+            size: TEXT_SIZE_SMALL,
+        }
+    }
+
     pub fn small_mono(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),

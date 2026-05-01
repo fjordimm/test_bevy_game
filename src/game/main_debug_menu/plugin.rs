@@ -46,9 +46,9 @@ fn spawn_main_debug_menu(
     }
 
     let main_debug_menu = GuiFloatingPanel::new(
-        FlexDirection::Column,
         pos_x,
         pos_y,
+        (GuiText::small("Debug Menu"),),
         (GuiText::small_mono("howdy ho"),),
     )
     .spawn(&mut commands, Some(gui_root.0));
