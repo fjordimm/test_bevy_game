@@ -23,7 +23,7 @@ impl GuiScreenDiv {
 }
 
 impl GuiNode for GuiScreenDiv {
-    fn spawn(&self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
+    fn spawn(self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         let entity = commands
             .spawn((
                 Node {
@@ -44,11 +44,15 @@ impl GuiNode for GuiScreenDiv {
             commands.entity(par).add_child(entity);
         }
 
-        for child in &self.children {
-            let child_entity = child.spawn(commands, None);
+        for child in self.children {
+            let child_entity = child.spawn_dyn(commands, None);
             commands.entity(entity).add_child(child_entity);
         }
 
         entity
+    }
+
+    fn spawn_dyn(self: Box<Self>, commands: &mut Commands, parent: Option<Entity>) -> Entity {
+        self.spawn(commands, parent)
     }
 }

@@ -10,3 +10,4 @@ Currently on:
 - Making a debug menu
     - Make an X button for it.
     - Make windows show up in the right order.
+- Make gui children be able to take any Entity.

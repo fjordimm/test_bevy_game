@@ -48,8 +48,8 @@ fn spawn_main_debug_menu(
     let main_debug_menu = GuiFloatingPanel::new(
         pos_x,
         pos_y,
-        (GuiText::small("Debug Menu"),),
-        (GuiText::small_mono("howdy ho"),),
+        (GuiText::new_small("Debug Menu"),),
+        (GuiText::new_small_mono("howdy ho"),),
     )
     .spawn(&mut commands, Some(gui_root.0));
     commands.entity(main_debug_menu).insert(ZIndex(4000));

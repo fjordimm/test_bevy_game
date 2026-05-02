@@ -38,9 +38,8 @@ fn spawn_pause_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
             FlexDirection::Column,
             JustifyContent::Center,
             AlignItems::Stretch,
-            None,
             (
-                GuiText::h1("Pause Menu"),
+                GuiText::new_h1("Pause Menu"),
                 GuiButton::new_regular(|| interactions::ContinueButtonEv, "Continue"),
                 GuiButton::new_regular(|| interactions::ExitButtonEv, "Exit"),
             ),

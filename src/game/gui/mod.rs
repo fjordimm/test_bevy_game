@@ -5,6 +5,7 @@ mod gui_node;
 mod gui_root_template;
 mod gui_screen_div;
 mod gui_text;
+mod gui_entity;
 
 pub mod constants;
 pub mod fonts;
@@ -16,3 +17,4 @@ pub use gui_node::GuiNode;
 pub use gui_root_template::gui_root_template;
 pub use gui_screen_div::GuiScreenDiv;
 pub use gui_text::GuiText;
+pub use gui_entity::GuiEntity;

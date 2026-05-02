@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiButton, GuiDiv, GuiNode, constants::*, plugin::CollectionOfGuiItems};
+use crate::game::gui::{GuiButton, GuiEntity, GuiNode, constants::*, plugin::CollectionOfGuiItems};
 
 // Note: if there are multiple floating panels, they will not order themselves
 pub struct GuiFloatingPanel {
@@ -27,7 +27,7 @@ impl GuiFloatingPanel {
 }
 
 impl GuiNode for GuiFloatingPanel {
-    fn spawn(&self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
+    fn spawn(self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         let entity = commands
             .spawn((
                 GuiFloatingPanelTag,
@@ -89,8 +89,8 @@ impl GuiNode for GuiFloatingPanel {
             .id();
         commands.entity(title_bar).add_child(title_bar_main_part);
 
-        for child in &self.title_bar_children {
-            let child_entity = child.spawn(commands, None);
+        for child in self.title_bar_children {
+            let child_entity = child.spawn_dyn(commands, None);
             commands.entity(title_bar_main_part).add_child(child_entity);
         }
 
@@ -113,13 +113,15 @@ impl GuiNode for GuiFloatingPanel {
             .id();
         commands.entity(title_bar).add_child(title_bar_button_part);
 
-        let x_button = GuiButton::new_no_event((GuiDiv::new(
-            FlexDirection::Column,
-            JustifyContent::Center,
-            AlignItems::Center,
-            Some((30, 30)),
-            (),
-        ),))
+        let x_button = GuiButton::new_unstyled_eventless((GuiEntity::new((
+            Node {
+                border_radius: BorderRadius::all(px(BORDER_RADIUS)),
+                width: px(30),
+                height: px(30),
+                ..default()
+            },
+            BackgroundColor(Color::hsv(0.0, 1.0, 1.0)),
+        )),))
         .spawn(commands, None);
         commands.entity(title_bar_button_part).add_child(x_button);
 
@@ -136,12 +138,16 @@ impl GuiNode for GuiFloatingPanel {
             .id();
         commands.entity(entity).add_child(main_content_div);
 
-        for child in &self.children {
-            let child_entity = child.spawn(commands, None);
+        for child in self.children {
+            let child_entity = child.spawn_dyn(commands, None);
             commands.entity(main_content_div).add_child(child_entity);
         }
 
         entity
+    }
+
+    fn spawn_dyn(self: Box<Self>, commands: &mut Commands, parent: Option<Entity>) -> Entity {
+        self.spawn(commands, parent)
     }
 }
 

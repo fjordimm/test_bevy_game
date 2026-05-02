@@ -7,6 +7,7 @@ where
     E: Event,
     for<'a> E::Trigger<'a>: Default,
 {
+    unstyled: bool,
     event_supplier: Option<fn() -> E>,
     children: Vec<Box<dyn GuiNode>>,
 }
@@ -18,6 +19,7 @@ where
 {
     pub fn new<C: Into<CollectionOfGuiItems>>(event_supplier: fn() -> E, children: C) -> Self {
         Self {
+            unstyled: false,
             event_supplier: Some(event_supplier),
             children: children.into().0,
         }
@@ -25,8 +27,20 @@ where
 
     pub fn new_regular(event_supplier: fn() -> E, text: impl Into<String>) -> Self {
         Self {
+            unstyled: false,
             event_supplier: Some(event_supplier),
-            children: vec![Box::new(GuiText::regular(text))],
+            children: vec![Box::new(GuiText::new_regular(text))],
+        }
+    }
+
+    pub fn new_unstyled<C: Into<CollectionOfGuiItems>>(
+        event_supplier: fn() -> E,
+        children: C,
+    ) -> Self {
+        Self {
+            unstyled: true,
+            event_supplier: Some(event_supplier),
+            children: children.into().0,
         }
     }
 }
@@ -36,17 +50,27 @@ where
 pub struct _GuiButtonDummyGeneric;
 
 impl GuiButton<_GuiButtonDummyGeneric> {
-    pub fn new_no_event<C: Into<CollectionOfGuiItems>>(children: C) -> Self {
+    pub fn new_eventless<C: Into<CollectionOfGuiItems>>(children: C) -> Self {
         Self {
+            unstyled: false,
             event_supplier: None,
             children: children.into().0,
         }
     }
 
-    pub fn new_regular_no_event(text: impl Into<String>) -> Self {
+    pub fn new_regular_eventless(text: impl Into<String>) -> Self {
         Self {
+            unstyled: false,
             event_supplier: None,
-            children: vec![Box::new(GuiText::regular(text))],
+            children: vec![Box::new(GuiText::new_regular(text))],
+        }
+    }
+
+    pub fn new_unstyled_eventless<C: Into<CollectionOfGuiItems>>(children: C) -> Self {
+        Self {
+            unstyled: true,
+            event_supplier: None,
+            children: children.into().0,
         }
     }
 }
@@ -56,29 +80,45 @@ where
     E: Event,
     for<'a> E::Trigger<'a>: Default,
 {
-    fn spawn(&self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
-        let entity = commands
-            .spawn((
-                GuiButtonTag,
-                Button,
-                Node {
-                    border_radius: BorderRadius::all(px(BORDER_RADIUS)),
-                    display: Display::Flex,
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    padding: UiRect::all(px(MAIN_PADDING)),
-                    ..default()
-                },
-                main_box_shadow(),
-                BackgroundColor(BUTTON_COLOR_MAIN),
-            ))
-            .id();
+    fn spawn(self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
+        let entity = match self.unstyled {
+            false => commands
+                .spawn((
+                    GuiButtonTag,
+                    Button,
+                    Node {
+                        border_radius: BorderRadius::all(px(BORDER_RADIUS)),
+                        display: Display::Flex,
+                        flex_direction: FlexDirection::Column,
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        padding: UiRect::all(px(MAIN_PADDING)),
+                        ..default()
+                    },
+                    main_box_shadow(),
+                    BackgroundColor(BUTTON_COLOR_MAIN),
+                ))
+                .id(),
+            true => commands
+                .spawn((
+                    GuiButtonTag,
+                    Button,
+                    Node {
+                        display: Display::Flex,
+                        flex_direction: FlexDirection::Column,
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                ))
+                .id(),
+        };
         if let Some(par) = parent {
             commands.entity(par).add_child(entity);
         }
 
-        for child in &self.children {
-            let child_entity = child.spawn(commands, None);
+        for child in self.children {
+            let child_entity = child.spawn_dyn(commands, None);
             commands.entity(entity).add_child(child_entity);
         }
 
@@ -92,6 +132,10 @@ where
         }
 
         entity
+    }
+
+    fn spawn_dyn(self: Box<Self>, commands: &mut Commands, parent: Option<Entity>) -> Entity {
+        self.spawn(commands, parent)
     }
 }
 

@@ -9,7 +9,7 @@ pub struct GuiText {
 }
 
 impl GuiText {
-    pub fn custom(text: impl Into<String>, font: GameFont, size: f32) -> Self {
+    pub fn new(text: impl Into<String>, font: GameFont, size: f32) -> Self {
         Self {
             text: text.into(),
             font: font,
@@ -17,7 +17,7 @@ impl GuiText {
         }
     }
 
-    pub fn regular(text: impl Into<String>) -> Self {
+    pub fn new_regular(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
             font: MAIN_FONT,
@@ -25,7 +25,7 @@ impl GuiText {
         }
     }
 
-    pub fn h1(text: impl Into<String>) -> Self {
+    pub fn new_h1(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
             font: MAIN_FONT,
@@ -33,7 +33,7 @@ impl GuiText {
         }
     }
 
-    pub fn h2(text: impl Into<String>) -> Self {
+    pub fn new_h2(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
             font: MAIN_FONT,
@@ -41,7 +41,7 @@ impl GuiText {
         }
     }
 
-    pub fn h3(text: impl Into<String>) -> Self {
+    pub fn new_h3(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
             font: MAIN_FONT,
@@ -49,7 +49,7 @@ impl GuiText {
         }
     }
 
-    pub fn small(text: impl Into<String>) -> Self {
+    pub fn new_small(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
             font: MAIN_FONT,
@@ -57,7 +57,7 @@ impl GuiText {
         }
     }
 
-    pub fn small_mono(text: impl Into<String>) -> Self {
+    pub fn new_small_mono(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
             font: GameFont::Mono,
@@ -67,7 +67,7 @@ impl GuiText {
 }
 
 impl GuiNode for GuiText {
-    fn spawn(&self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
+    fn spawn(self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         let entity = commands
             .spawn((
                 Node {
@@ -90,5 +90,9 @@ impl GuiNode for GuiText {
         }
 
         entity
+    }
+
+    fn spawn_dyn(self: Box<Self>, commands: &mut Commands, parent: Option<Entity>) -> Entity {
+        self.spawn(commands, parent)
     }
 }

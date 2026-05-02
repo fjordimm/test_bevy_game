@@ -1,0 +1,32 @@
+// Used for when you want a custom gui element (an Entity that should at least have a Node component).
+
+use bevy::prelude::*;
+
+use crate::game::gui::{GuiNode, constants::*};
+
+pub struct GuiEntity<B: Bundle> {
+    content: Box<B>,
+}
+
+impl<B: Bundle> GuiEntity<B> {
+    pub fn new(content: B) -> Self {
+        Self {
+            content: Box::new(content),
+        }
+    }
+}
+
+impl<B: Bundle> GuiNode for GuiEntity<B> {
+    fn spawn(self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
+        let entity = commands.spawn(*self.content).id();
+        if let Some(par) = parent {
+            commands.entity(par).add_child(entity);
+        }
+
+        entity
+    }
+
+    fn spawn_dyn(self: Box<Self>, commands: &mut Commands, parent: Option<Entity>) -> Entity {
+        self.spawn(commands, parent)
+    }
+}

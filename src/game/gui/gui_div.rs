@@ -6,7 +6,6 @@ pub struct GuiDiv {
     flex_direction: FlexDirection,
     justify_content: JustifyContent,
     align_items: AlignItems,
-    size: Option<(i32, i32)>,
     children: Vec<Box<dyn GuiNode>>,
 }
 
@@ -15,14 +14,12 @@ impl GuiDiv {
         flex_direction: FlexDirection,
         justify_content: JustifyContent,
         align_items: AlignItems,
-        size: Option<(i32, i32)>,
         children: C,
     ) -> Self {
         Self {
             flex_direction: flex_direction,
             justify_content: justify_content,
             align_items: align_items,
-            size: size,
             children: children.into().0,
         }
     }
@@ -32,25 +29,16 @@ impl GuiDiv {
             flex_direction: FlexDirection::Column,
             justify_content: JustifyContent::FlexStart,
             align_items: AlignItems::FlexStart,
-            size: None,
             children: children.into().0,
         }
     }
 }
 
 impl GuiNode for GuiDiv {
-    fn spawn(&self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
+    fn spawn(self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         let entity = commands
             .spawn((
                 Node {
-                    width: match self.size {
-                        None => default(),
-                        Some(size) => px(size.0),
-                    },
-                    height: match self.size {
-                        None => default(),
-                        Some(size) => px(size.1),
-                    },
                     border_radius: BorderRadius::all(px(BORDER_RADIUS)),
                     display: Display::Flex,
                     flex_direction: self.flex_direction,
@@ -68,11 +56,15 @@ impl GuiNode for GuiDiv {
             commands.entity(par).add_child(entity);
         }
 
-        for child in &self.children {
-            let child_entity = child.spawn(commands, None);
+        for child in self.children {
+            let child_entity = child.spawn_dyn(commands, None);
             commands.entity(entity).add_child(child_entity);
         }
 
         entity
+    }
+
+    fn spawn_dyn(self: Box<Self>, commands: &mut Commands, parent: Option<Entity>) -> Entity {
+        self.spawn(commands, parent)
     }
 }
