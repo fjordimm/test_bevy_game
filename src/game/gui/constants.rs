@@ -28,3 +28,8 @@ pub const TEXT_SIZE_SMALL_MONO: f32 = 14.0;
 pub const BUTTON_COLOR_MAIN: Color = Color::hsv(185.0, 0.1, 0.25);
 pub const BUTTON_COLOR_HOVER: Color = Color::hsv(185.0, 0.1, 0.2);
 pub const BUTTON_COLOR_PRESSED: Color = Color::hsv(185.0, 0.1, 0.15);
+
+pub const X_BUTTON_COLOR_MAIN: Color = Color::hsv(0.0, 0.5, 0.5);
+pub const X_BUTTON_COLOR_HOVER: Color = Color::hsv(0.0, 0.5, 0.4);
+pub const X_BUTTON_COLOR_PRESSED: Color = Color::hsv(0.0, 0.5, 0.3);
+pub const X_BUTTON_SIZE: i32 = 10;

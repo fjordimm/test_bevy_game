@@ -7,7 +7,7 @@ use rand_core::Rng;
 
 use crate::game::{
     core::global_resources::GlobalGuiRoot,
-    gui::{GuiFloatingPanel, GuiNode, GuiText},
+    gui::{GuiDiv, GuiFloatingPanel, GuiNode, GuiText},
     util::warned_ok,
 };
 
@@ -49,7 +49,12 @@ fn spawn_main_debug_menu(
         pos_x,
         pos_y,
         (GuiText::new_small("Debug Menu"),),
-        (GuiText::new_small_mono("howdy ho"),),
+        (GuiDiv::new(
+            FlexDirection::Column,
+            JustifyContent::FlexStart,
+            AlignItems::FlexStart,
+            (GuiText::new_small_mono("howdy ho"),),
+        ),),
     )
     .spawn(&mut commands, Some(gui_root.0));
     commands.entity(main_debug_menu).insert(ZIndex(4000));

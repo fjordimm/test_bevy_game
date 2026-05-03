@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiButton, GuiEntity, GuiNode, constants::*, plugin::CollectionOfGuiItems};
+use crate::game::gui::{GuiColoredButton, GuiNode, constants::*, plugin::CollectionOfGuiItems};
 
 // Note: if there are multiple floating panels, they will not order themselves
 pub struct GuiFloatingPanel {
@@ -71,21 +71,18 @@ impl GuiNode for GuiFloatingPanel {
         commands.entity(entity).add_child(title_bar);
 
         let title_bar_main_part = commands
-            .spawn((
-                Node {
-                    justify_self: JustifySelf::Stretch,
-                    border_radius: BorderRadius::top_left(px(BORDER_RADIUS)),
-                    min_height: percent(100),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::FlexStart,
-                    align_items: AlignItems::Center,
-                    row_gap: px(MINOR_PADDING),
-                    padding: UiRect::all(px(MINOR_PADDING)),
-                    ..default()
-                },
-                BackgroundColor(Color::hsv(90.0, 1.0, 1.0)),
-            ))
+            .spawn((Node {
+                justify_self: JustifySelf::Stretch,
+                border_radius: BorderRadius::top_left(px(BORDER_RADIUS)),
+                min_height: percent(100),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::FlexStart,
+                align_items: AlignItems::Center,
+                row_gap: px(MINOR_PADDING),
+                padding: UiRect::all(px(MINOR_PADDING)),
+                ..default()
+            },))
             .id();
         commands.entity(title_bar).add_child(title_bar_main_part);
 
@@ -95,33 +92,30 @@ impl GuiNode for GuiFloatingPanel {
         }
 
         let title_bar_button_part = commands
-            .spawn((
-                Node {
-                    justify_self: JustifySelf::End,
-                    border_radius: BorderRadius::top_right(px(BORDER_RADIUS)),
-                    min_height: percent(100),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::FlexStart,
-                    align_items: AlignItems::Center,
-                    row_gap: px(MINOR_PADDING),
-                    padding: UiRect::all(px(MINOR_PADDING)),
-                    ..default()
-                },
-                BackgroundColor(Color::hsv(270.0, 1.0, 1.0)),
-            ))
+            .spawn((Node {
+                justify_self: JustifySelf::End,
+                border_radius: BorderRadius::top_right(px(BORDER_RADIUS)),
+                min_height: percent(100),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::FlexStart,
+                align_items: AlignItems::Center,
+                row_gap: px(MINOR_PADDING),
+                padding: UiRect::all(px(MINOR_PADDING)),
+                ..default()
+            },))
             .id();
         commands.entity(title_bar).add_child(title_bar_button_part);
 
-        let x_button = GuiButton::new_unstyled_eventless((GuiEntity::new((
-            Node {
-                border_radius: BorderRadius::all(px(BORDER_RADIUS)),
-                width: px(30),
-                height: px(30),
-                ..default()
-            },
-            BackgroundColor(Color::hsv(0.0, 1.0, 1.0)),
-        )),))
+        let x_button = GuiColoredButton::new_eventless(
+            (X_BUTTON_SIZE, X_BUTTON_SIZE),
+            (
+                X_BUTTON_COLOR_MAIN,
+                X_BUTTON_COLOR_HOVER,
+                X_BUTTON_COLOR_PRESSED,
+            ),
+            (),
+        )
         .spawn(commands, None);
         commands.entity(title_bar_button_part).add_child(x_button);
 

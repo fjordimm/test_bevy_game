@@ -6,6 +6,7 @@ mod gui_root_template;
 mod gui_screen_div;
 mod gui_text;
 mod gui_entity;
+mod gui_colored_button;
 
 pub mod constants;
 pub mod fonts;
@@ -18,3 +19,4 @@ pub use gui_root_template::gui_root_template;
 pub use gui_screen_div::GuiScreenDiv;
 pub use gui_text::GuiText;
 pub use gui_entity::GuiEntity;
+pub use gui_colored_button::GuiColoredButton;
