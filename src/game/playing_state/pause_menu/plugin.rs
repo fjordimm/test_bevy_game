@@ -2,7 +2,10 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::{global_resources::GlobalGuiRoot, states::OverallState},
-    gui::{self, GuiButton, GuiDiv, GuiNode, GuiScreenDiv, GuiText},
+    gui::{
+        self, GuiButton, GuiDiv, GuiDivStyle, GuiNode, GuiScreenDiv, GuiText,
+        constants::MAIN_PADDING,
+    },
     playing_state::{sets::PlayingStateOrdering, states::PauseState, tags::PlayingStateEntity},
 };
 
@@ -35,6 +38,10 @@ fn spawn_pause_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
         gui::constants::PAUSE_MENU_BG_COLOR,
         FlexDirection::Column,
         (GuiDiv::new(
+            GuiDivStyle::Regular,
+            false,
+            UiRect::all(px(MAIN_PADDING)),
+            MAIN_PADDING,
             FlexDirection::Column,
             JustifyContent::Center,
             AlignItems::Stretch,

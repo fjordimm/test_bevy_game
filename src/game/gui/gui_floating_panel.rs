@@ -1,6 +1,17 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiColoredButton, GuiNode, constants::*, plugin::CollectionOfGuiItems};
+use crate::game::gui::{
+    GuiButton, GuiDiv, GuiDivStyle, GuiNode, constants::*, gui_button::GuiButtonStyle,
+    plugin::CollectionOfGuiItems,
+};
+
+#[derive(Component)]
+pub struct GuiFloatingPanelTag;
+
+#[derive(Component)]
+pub struct GuiFloatingPanelTitleBarTag {
+    pub parent: Entity,
+}
 
 // Note: if there are multiple floating panels, they will not order themselves
 pub struct GuiFloatingPanel {
@@ -34,7 +45,6 @@ impl GuiNode for GuiFloatingPanel {
                 Node {
                     position_type: PositionType::Absolute,
                     border_radius: BorderRadius::all(px(BORDER_RADIUS)),
-                    overflow: Overflow::hidden(),
                     left: px(self.pos_x),
                     top: px(self.pos_y),
                     display: Display::Flex,
@@ -58,14 +68,14 @@ impl GuiNode for GuiFloatingPanel {
                 Node {
                     border_radius: BorderRadius::top(px(BORDER_RADIUS)),
                     width: percent(100),
-                    min_height: px(MAIN_PADDING),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Row,
                     justify_content: JustifyContent::FlexStart,
                     align_items: AlignItems::Center,
+                    padding: UiRect::all(px(MINOR_PADDING)),
                     ..default()
                 },
-                BackgroundColor(BUTTON_COLOR_MAIN),
+                BackgroundColor(Color::hsv(180.0, 1.0, 0.4)),
             ))
             .id();
         commands.entity(entity).add_child(title_bar);
@@ -74,13 +84,13 @@ impl GuiNode for GuiFloatingPanel {
             .spawn((Node {
                 justify_self: JustifySelf::Stretch,
                 border_radius: BorderRadius::top_left(px(BORDER_RADIUS)),
+                width: percent(100),
                 min_height: percent(100),
                 display: Display::Flex,
                 flex_direction: FlexDirection::Row,
                 justify_content: JustifyContent::FlexStart,
                 align_items: AlignItems::Center,
                 row_gap: px(MINOR_PADDING),
-                padding: UiRect::all(px(MINOR_PADDING)),
                 ..default()
             },))
             .id();
@@ -92,45 +102,37 @@ impl GuiNode for GuiFloatingPanel {
         }
 
         let title_bar_button_part = commands
-            .spawn((Node {
-                justify_self: JustifySelf::End,
-                border_radius: BorderRadius::top_right(px(BORDER_RADIUS)),
-                min_height: percent(100),
-                display: Display::Flex,
-                flex_direction: FlexDirection::Row,
-                justify_content: JustifyContent::FlexStart,
-                align_items: AlignItems::Center,
-                row_gap: px(MINOR_PADDING),
-                padding: UiRect::all(px(MINOR_PADDING)),
-                ..default()
-            },))
+            .spawn((
+                Node {
+                    justify_self: JustifySelf::End,
+                    border_radius: BorderRadius::top_right(px(BORDER_RADIUS)),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::FlexStart,
+                    align_items: AlignItems::Center,
+                    row_gap: px(MINOR_PADDING),
+                    ..default()
+                },
+                BackgroundColor(Color::hsv(90.0, 1.0, 1.0)),
+            ))
             .id();
         commands.entity(title_bar).add_child(title_bar_button_part);
 
-        let x_button = GuiColoredButton::new_eventless(
-            (X_BUTTON_SIZE, X_BUTTON_SIZE),
-            (
-                X_BUTTON_COLOR_MAIN,
-                X_BUTTON_COLOR_HOVER,
-                X_BUTTON_COLOR_PRESSED,
-            ),
+        // x button
+        GuiButton::new_eventless(GuiButtonStyle::XButton, ())
+            .spawn(commands, Some(title_bar_button_part));
+
+        let main_content_div = GuiDiv::new(
+            GuiDivStyle::None,
+            true,
+            UiRect::all(px(MAIN_PADDING)),
+            MAIN_PADDING,
+            FlexDirection::Column,
+            JustifyContent::FlexStart,
+            AlignItems::FlexStart,
             (),
         )
-        .spawn(commands, None);
-        commands.entity(title_bar_button_part).add_child(x_button);
-
-        let main_content_div = commands
-            .spawn(Node {
-                display: Display::Flex,
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                row_gap: px(MAIN_PADDING),
-                padding: UiRect::all(px(MAIN_PADDING)),
-                ..default()
-            })
-            .id();
-        commands.entity(entity).add_child(main_content_div);
+        .spawn(commands, Some(entity));
 
         for child in self.children {
             let child_entity = child.spawn_dyn(commands, None);
@@ -143,14 +145,6 @@ impl GuiNode for GuiFloatingPanel {
     fn spawn_dyn(self: Box<Self>, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         self.spawn(commands, parent)
     }
-}
-
-#[derive(Component)]
-pub struct GuiFloatingPanelTag;
-
-#[derive(Component)]
-pub struct GuiFloatingPanelTitleBarTag {
-    pub parent: Entity,
 }
 
 pub fn update(

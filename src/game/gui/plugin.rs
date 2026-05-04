@@ -1,6 +1,6 @@
 use bevy::{prelude::*, ui::UiSystems};
 
-use crate::game::gui::{GuiNode, gui_button, gui_colored_button, gui_floating_panel};
+use crate::game::gui::{GuiNode, gui_button, gui_floating_panel};
 
 pub struct GuiPlugin;
 
@@ -9,7 +9,7 @@ impl Plugin for GuiPlugin {
         #[rustfmt::skip]
         app
             .add_systems(Update,
-                (gui_button::update, gui_colored_button::update, gui_floating_panel::update)
+                (gui_button::update, gui_floating_panel::update)
                     .after(UiSystems::Focus)
             );
     }

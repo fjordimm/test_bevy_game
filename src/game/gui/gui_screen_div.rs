@@ -28,8 +28,8 @@ impl GuiNode for GuiScreenDiv {
             .spawn((
                 Node {
                     position_type: PositionType::Absolute,
-                    width: Val::Vw(100.0),
-                    height: Val::Vh(100.0),
+                    width: vw(100),
+                    height: vh(100),
                     display: Display::Flex,
                     flex_direction: self.flex_direction,
                     justify_content: JustifyContent::Center,

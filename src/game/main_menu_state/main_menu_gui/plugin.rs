@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::{quit_game, states::OverallState},
-    gui::{self, GuiButton, GuiDiv, GuiScreenDiv, GuiText},
+    gui::{self, GuiButton, GuiDiv, GuiDivStyle, GuiScreenDiv, GuiText, constants::*},
 };
 
 pub struct MainMenuGuiPlugin;
@@ -39,6 +39,10 @@ pub fn make_main_menu_gui() -> GuiScreenDiv {
         gui::constants::MAIN_COLOR,
         FlexDirection::Column,
         (GuiDiv::new(
+            GuiDivStyle::Regular,
+            false,
+            UiRect::all(px(MAIN_PADDING)),
+            MAIN_PADDING,
             FlexDirection::Column,
             JustifyContent::Center,
             AlignItems::Stretch,

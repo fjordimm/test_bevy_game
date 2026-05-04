@@ -2,12 +2,22 @@ use bevy::prelude::*;
 
 use crate::game::gui::{GuiNode, GuiText, constants::*, plugin::CollectionOfGuiItems};
 
+pub enum GuiButtonStyle {
+    Regular,
+    XButton,
+}
+
+#[derive(Component)]
+pub struct GuiButtonTag {
+    pub style: GuiButtonStyle,
+}
+
 pub struct GuiButton<E>
 where
     E: Event,
     for<'a> E::Trigger<'a>: Default,
 {
-    unstyled: bool,
+    style: GuiButtonStyle,
     event_supplier: Option<fn() -> E>,
     children: Vec<Box<dyn GuiNode>>,
 }
@@ -17,9 +27,13 @@ where
     E: Event,
     for<'a> E::Trigger<'a>: Default,
 {
-    pub fn new<C: Into<CollectionOfGuiItems>>(event_supplier: fn() -> E, children: C) -> Self {
+    pub fn new<C: Into<CollectionOfGuiItems>>(
+        style: GuiButtonStyle,
+        event_supplier: fn() -> E,
+        children: C,
+    ) -> Self {
         Self {
-            unstyled: false,
+            style: style,
             event_supplier: Some(event_supplier),
             children: children.into().0,
         }
@@ -27,20 +41,9 @@ where
 
     pub fn new_regular(event_supplier: fn() -> E, text: impl Into<String>) -> Self {
         Self {
-            unstyled: false,
+            style: GuiButtonStyle::Regular,
             event_supplier: Some(event_supplier),
             children: vec![Box::new(GuiText::new_regular(text))],
-        }
-    }
-
-    pub fn new_unstyled<C: Into<CollectionOfGuiItems>>(
-        event_supplier: fn() -> E,
-        children: C,
-    ) -> Self {
-        Self {
-            unstyled: true,
-            event_supplier: Some(event_supplier),
-            children: children.into().0,
         }
     }
 }
@@ -50,9 +53,12 @@ where
 pub struct _GuiButtonDummyGeneric;
 
 impl GuiButton<_GuiButtonDummyGeneric> {
-    pub fn new_eventless<C: Into<CollectionOfGuiItems>>(children: C) -> Self {
+    pub fn new_eventless<C: Into<CollectionOfGuiItems>>(
+        style: GuiButtonStyle,
+        children: C,
+    ) -> Self {
         Self {
-            unstyled: false,
+            style: style,
             event_supplier: None,
             children: children.into().0,
         }
@@ -60,17 +66,9 @@ impl GuiButton<_GuiButtonDummyGeneric> {
 
     pub fn new_regular_eventless(text: impl Into<String>) -> Self {
         Self {
-            unstyled: false,
+            style: GuiButtonStyle::Regular,
             event_supplier: None,
             children: vec![Box::new(GuiText::new_regular(text))],
-        }
-    }
-
-    pub fn new_unstyled_eventless<C: Into<CollectionOfGuiItems>>(children: C) -> Self {
-        Self {
-            unstyled: true,
-            event_supplier: None,
-            children: children.into().0,
         }
     }
 }
@@ -81,38 +79,42 @@ where
     for<'a> E::Trigger<'a>: Default,
 {
     fn spawn(self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
-        let entity = match self.unstyled {
-            false => commands
-                .spawn((
-                    GuiButtonTag,
-                    Button,
-                    Node {
-                        border_radius: BorderRadius::all(px(BORDER_RADIUS)),
-                        display: Display::Flex,
-                        flex_direction: FlexDirection::Column,
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        padding: UiRect::all(px(MAIN_PADDING)),
-                        ..default()
-                    },
-                    main_box_shadow(),
-                    BackgroundColor(BUTTON_COLOR_MAIN),
-                ))
-                .id(),
-            true => commands
-                .spawn((
-                    GuiButtonTag,
-                    Button,
-                    Node {
-                        display: Display::Flex,
-                        flex_direction: FlexDirection::Column,
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
-                ))
-                .id(),
-        };
+        let entity = match self.style {
+            GuiButtonStyle::Regular => commands.spawn((
+                GuiButtonTag { style: self.style },
+                Button,
+                Node {
+                    border_radius: BorderRadius::all(px(BORDER_RADIUS)),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    padding: UiRect::all(px(MAIN_PADDING)),
+                    ..default()
+                },
+                main_box_shadow(),
+                BackgroundColor(BUTTON_COLOR_MAIN),
+            )),
+            GuiButtonStyle::XButton => commands.spawn((
+                GuiButtonTag { style: self.style },
+                Button,
+                Node {
+                    border_radius: BorderRadius::all(px(BORDER_RADIUS)),
+                    min_width: px(X_BUTTON_SIZE),
+                    max_width: px(X_BUTTON_SIZE),
+                    min_height: px(X_BUTTON_SIZE),
+                    max_height: px(X_BUTTON_SIZE),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                main_box_shadow(),
+                BackgroundColor(BUTTON_COLOR_MAIN),
+            )),
+        }
+        .id();
         if let Some(par) = parent {
             commands.entity(par).add_child(entity);
         }
@@ -139,24 +141,25 @@ where
     }
 }
 
-#[derive(Component)]
-pub struct GuiButtonTag;
-
 pub fn update(
-    mut query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (With<GuiButtonTag>, Changed<Interaction>),
-    >,
+    mut query: Query<(&Interaction, &GuiButtonTag, &mut BackgroundColor), Changed<Interaction>>,
 ) {
-    for (interaction, mut color) in &mut query {
-        *color = what_style(interaction);
+    for (interaction, tag, mut color) in &mut query {
+        *color = what_style(interaction, tag);
     }
 }
 
-fn what_style(interaction: &Interaction) -> BackgroundColor {
-    match interaction {
-        Interaction::None => BackgroundColor(BUTTON_COLOR_MAIN),
-        Interaction::Hovered => BackgroundColor(BUTTON_COLOR_HOVER),
-        Interaction::Pressed => BackgroundColor(BUTTON_COLOR_PRESSED),
+fn what_style(interaction: &Interaction, tag: &GuiButtonTag) -> BackgroundColor {
+    match tag.style {
+        GuiButtonStyle::Regular => match interaction {
+            Interaction::None => BackgroundColor(BUTTON_COLOR_MAIN),
+            Interaction::Hovered => BackgroundColor(BUTTON_COLOR_HOVER),
+            Interaction::Pressed => BackgroundColor(BUTTON_COLOR_PRESSED),
+        },
+        GuiButtonStyle::XButton => match interaction {
+            Interaction::None => BackgroundColor(X_BUTTON_COLOR_MAIN),
+            Interaction::Hovered => BackgroundColor(X_BUTTON_COLOR_HOVER),
+            Interaction::Pressed => BackgroundColor(X_BUTTON_COLOR_PRESSED),
+        },
     }
 }
