@@ -64,7 +64,7 @@ fn despawn_pause_menu(mut commands: Commands, query: Query<Entity, With<PauseMen
     }
 }
 
-pub mod interactions {
+mod interactions {
     use bevy_ecs::event::Event;
 
     #[derive(Event, Clone)]

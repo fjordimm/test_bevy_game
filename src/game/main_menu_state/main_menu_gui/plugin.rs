@@ -16,7 +16,7 @@ impl Plugin for MainMenuGuiPlugin {
     }
 }
 
-pub mod interactions {
+mod interactions {
     use bevy_ecs::event::Event;
 
     #[derive(Event, Clone)]

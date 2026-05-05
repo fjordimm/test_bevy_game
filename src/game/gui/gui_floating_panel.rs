@@ -189,7 +189,7 @@ impl GuiNode for GuiFloatingPanel {
     }
 }
 
-pub mod interactions {
+mod interactions {
     use bevy_ecs::{entity::Entity, event::Event};
 
     #[derive(Event, Clone)]
