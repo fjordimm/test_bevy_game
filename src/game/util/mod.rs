@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 macro_rules! warned_ok {
     ($input:expr) => {
         if let Ok(input) = $input {
