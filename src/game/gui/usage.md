@@ -1,4 +1,10 @@
-# Z-Indexing GUI elements
+# Usage
+
+## General Usage
+
+All instances of GUI elements (that aren't children of other GUI elements) should be created once at the beginning of the game, should be set as a child of the resource GlobalGuiRoot, and should never be deleted. Instead of being deleted, they can be hidden; usually swapped betwen Display::Flex and Display::None.
+
+## Z-Indexing GUI elements
 
 - 1000-1999: In-game gui elements (hotbar, health, etc.)
     - The rest is reserved (for now)
