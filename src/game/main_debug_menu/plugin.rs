@@ -6,8 +6,12 @@ use bevy_rand::global::GlobalRng;
 use rand_core::Rng;
 
 use crate::game::{
-    core::global_resources::GlobalGuiRoot,
-    gui::{GuiDiv, GuiDivStyle, GuiFloatingPanel, GuiNode, GuiText, constants::MAIN_PADDING},
+    core::global_resources::{GlobalGuiRoot, KeyBindings},
+    gui::{
+        GuiDiv, GuiDivStyle, GuiFloatingPanel, GuiFloatingPanelTag, GuiNode, GuiText,
+        constants::MAIN_PADDING,
+    },
+    playing_state::sets::PlayingStateOrdering,
     util::warned_ok,
 };
 
@@ -24,9 +28,16 @@ impl Plugin for MainDebugMenuPlugin {
             .add_systems(Update,
                 update_main_debug_menu
                     .run_if(on_timer(Duration::from_secs(1)))
+            )
+            .add_systems(Update,
+                toggle_main_debug_menu
+                    .in_set(PlayingStateOrdering::Ui)
             );
     }
 }
+
+#[derive(Component)]
+pub struct MainDebugMenuTag;
 
 fn spawn_main_debug_menu(
     mut commands: Commands,
@@ -62,10 +73,26 @@ fn spawn_main_debug_menu(
     )
     .spawn(&mut commands, Some(gui_root.0));
     commands.entity(main_debug_menu).insert(ZIndex(4000));
+    commands.entity(main_debug_menu).insert(MainDebugMenuTag);
 }
 
 fn update_main_debug_menu(_diag: Res<DiagnosticsStore>) {
     // if let Some(fps) = diag.get_measurement(&FrameTimeDiagnosticsPlugin::FPS) {
     //     debug!("{:?}", fps.value);
     // }
+}
+
+fn toggle_main_debug_menu(
+    keys: Res<ButtonInput<KeyCode>>,
+    key_bindings: Res<KeyBindings>,
+    mut main_debug_menu_q: Query<&mut GuiFloatingPanelTag, With<MainDebugMenuTag>>,
+) {
+    if keys.just_pressed(key_bindings.open_main_debug_menu) {
+        for mut panel in &mut main_debug_menu_q {
+            panel.is_active = match panel.is_active {
+                false => true,
+                true => false,
+            }
+        }
+    }
 }

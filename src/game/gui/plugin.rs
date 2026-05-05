@@ -9,9 +9,15 @@ impl Plugin for GuiPlugin {
         #[rustfmt::skip]
         app
             .add_observer(gui_floating_panel::minimize_button_observer)
+            .add_observer(gui_floating_panel::x_button_observer)
             .add_systems(Update,
-                (gui_button::update, gui_floating_panel::update_drag_panel, gui_floating_panel::update_minimized)
-                    .after(UiSystems::Focus)
+                (
+                    gui_button::update,
+                    gui_floating_panel::update_drag_panel,
+                    gui_floating_panel::update_is_minimized,
+                    gui_floating_panel::update_is_active,
+                )
+                    .after(UiSystems::Focus),
             );
     }
 }
