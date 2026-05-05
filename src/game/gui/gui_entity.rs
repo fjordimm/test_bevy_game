@@ -1,8 +1,8 @@
-// Used for when you want a custom gui element (an Entity that should at least have a Node component).
+// Used for when you want a custom gui element (an Entity that should have some GUI component, i.e. Node, Text, etc.).
 
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiNode, constants::*};
+use crate::game::gui::GuiNode;
 
 pub struct GuiEntity<B: Bundle> {
     content: Box<B>,

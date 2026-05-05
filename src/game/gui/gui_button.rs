@@ -4,7 +4,7 @@ use crate::game::gui::{GuiNode, GuiText, constants::*, plugin::CollectionOfGuiIt
 
 pub enum GuiButtonStyle {
     Regular,
-    XButton,
+    TitleBarButton,
 }
 
 #[derive(Component)]
@@ -12,24 +12,26 @@ pub struct GuiButtonTag {
     pub style: GuiButtonStyle,
 }
 
-pub struct GuiButton<E>
+pub struct GuiButton<E, F>
 where
-    E: Event,
+    E: Event + Clone,
     for<'a> E::Trigger<'a>: Default,
+    F: Fn() -> E,
 {
     style: GuiButtonStyle,
-    event_supplier: Option<fn() -> E>,
+    event_supplier: Option<F>,
     children: Vec<Box<dyn GuiNode>>,
 }
 
-impl<E> GuiButton<E>
+impl<E, F> GuiButton<E, F>
 where
-    E: Event,
+    E: Event + Clone,
     for<'a> E::Trigger<'a>: Default,
+    F: Fn() -> E,
 {
     pub fn new<C: Into<CollectionOfGuiItems>>(
         style: GuiButtonStyle,
-        event_supplier: fn() -> E,
+        event_supplier: F,
         children: C,
     ) -> Self {
         Self {
@@ -39,7 +41,7 @@ where
         }
     }
 
-    pub fn new_regular(event_supplier: fn() -> E, text: impl Into<String>) -> Self {
+    pub fn new_regular(event_supplier: F, text: impl Into<String>) -> Self {
         Self {
             style: GuiButtonStyle::Regular,
             event_supplier: Some(event_supplier),
@@ -49,10 +51,10 @@ where
 }
 
 #[doc(hidden)]
-#[derive(Event)]
+#[derive(Event, Clone)]
 pub struct _GuiButtonDummyGeneric;
 
-impl GuiButton<_GuiButtonDummyGeneric> {
+impl GuiButton<_GuiButtonDummyGeneric, fn() -> _GuiButtonDummyGeneric> {
     pub fn new_eventless<C: Into<CollectionOfGuiItems>>(
         style: GuiButtonStyle,
         children: C,
@@ -73,10 +75,11 @@ impl GuiButton<_GuiButtonDummyGeneric> {
     }
 }
 
-impl<E> GuiNode for GuiButton<E>
+impl<E, F> GuiNode for GuiButton<E, F>
 where
-    E: Event,
+    E: Event + Clone,
     for<'a> E::Trigger<'a>: Default,
+    F: Fn() -> E,
 {
     fn spawn(self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         let entity = match self.style {
@@ -95,15 +98,15 @@ where
                 main_box_shadow(),
                 BackgroundColor(BUTTON_COLOR_MAIN),
             )),
-            GuiButtonStyle::XButton => commands.spawn((
+            GuiButtonStyle::TitleBarButton => commands.spawn((
                 GuiButtonTag { style: self.style },
                 Button,
                 Node {
                     border_radius: BorderRadius::all(px(BORDER_RADIUS)),
-                    min_width: px(X_BUTTON_SIZE),
-                    max_width: px(X_BUTTON_SIZE),
-                    min_height: px(X_BUTTON_SIZE),
-                    max_height: px(X_BUTTON_SIZE),
+                    min_width: px(TITLE_BAR_BUTTON_SIZE),
+                    max_width: px(TITLE_BAR_BUTTON_SIZE),
+                    min_height: px(TITLE_BAR_BUTTON_SIZE),
+                    max_height: px(TITLE_BAR_BUTTON_SIZE),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::Center,
@@ -124,11 +127,11 @@ where
             commands.entity(entity).add_child(child_entity);
         }
 
-        if let Some(event_supplier_) = &self.event_supplier {
-            let event_supplier = event_supplier_.clone();
+        if let Some(event_supplier) = self.event_supplier {
+            let ev = event_supplier();
             commands.entity(entity).observe(
                 move |_: On<Pointer<Click>>, mut commands: Commands| {
-                    commands.trigger(event_supplier());
+                    commands.trigger(ev.clone());
                 },
             );
         }
@@ -156,10 +159,10 @@ fn what_style(interaction: &Interaction, tag: &GuiButtonTag) -> BackgroundColor 
             Interaction::Hovered => BackgroundColor(BUTTON_COLOR_HOVER),
             Interaction::Pressed => BackgroundColor(BUTTON_COLOR_PRESSED),
         },
-        GuiButtonStyle::XButton => match interaction {
-            Interaction::None => BackgroundColor(X_BUTTON_COLOR_MAIN),
-            Interaction::Hovered => BackgroundColor(X_BUTTON_COLOR_HOVER),
-            Interaction::Pressed => BackgroundColor(X_BUTTON_COLOR_PRESSED),
+        GuiButtonStyle::TitleBarButton => match interaction {
+            Interaction::None => BackgroundColor(TITLE_BAR_BUTTON_COLOR_MAIN),
+            Interaction::Hovered => BackgroundColor(TITLE_BAR_BUTTON_COLOR_HOVER),
+            Interaction::Pressed => BackgroundColor(TITLE_BAR_BUTTON_COLOR_PRESSED),
         },
     }
 }

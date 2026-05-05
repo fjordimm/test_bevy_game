@@ -70,12 +70,6 @@ impl GuiNode for GuiText {
     fn spawn(self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         let entity = commands
             .spawn((
-                Node {
-                    display: Display::Flex,
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    ..default()
-                },
                 Text::new(&self.text),
                 TextColor(Color::WHITE),
                 TextFont {

@@ -1,37 +1,50 @@
+/*
+    Note: if there are multiple floating panels, they will not order themselves
+*/
+
 use bevy::prelude::*;
 
 use crate::game::gui::{
-    GuiButton, GuiDiv, GuiDivStyle, GuiNode, constants::*, gui_button::GuiButtonStyle,
+    GuiButton, GuiDiv, GuiDivStyle, GuiNode, GuiText, constants::*, gui_button::GuiButtonStyle,
     plugin::CollectionOfGuiItems,
 };
 
 #[derive(Component)]
-pub struct GuiFloatingPanelTag;
-
-#[derive(Component)]
-pub struct GuiFloatingPanelTitleBarTag {
-    pub parent: Entity,
+pub struct GuiFloatingPanelTag {
+    active: bool,
+    minimized: bool,
 }
 
-// Note: if there are multiple floating panels, they will not order themselves
+#[derive(Component)]
+pub struct GuiFloatingPanelTitleBarTag;
+
+#[derive(Component)]
+pub struct GuiFloatingPanelMinimizeButtonTag;
+
+#[derive(Component)]
+pub struct GuiFloatingPanelXButtonTag;
+
+#[derive(Component)]
+pub struct GuiFloatingPanelMainContentTag;
+
 pub struct GuiFloatingPanel {
     pos_x: f32,
     pos_y: f32,
-    title_bar_children: Vec<Box<dyn GuiNode>>,
+    title: String,
     children: Vec<Box<dyn GuiNode>>,
 }
 
 impl GuiFloatingPanel {
-    pub fn new<C1: Into<CollectionOfGuiItems>, C2: Into<CollectionOfGuiItems>>(
+    pub fn new<C: Into<CollectionOfGuiItems>>(
         pos_x: f32,
         pos_y: f32,
-        title_bar_children: C1,
-        children: C2,
+        title: impl Into<String>,
+        children: C,
     ) -> Self {
         Self {
             pos_x: pos_x,
             pos_y: pos_y,
-            title_bar_children: title_bar_children.into().0,
+            title: title.into(),
             children: children.into().0,
         }
     }
@@ -41,7 +54,10 @@ impl GuiNode for GuiFloatingPanel {
     fn spawn(self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         let entity = commands
             .spawn((
-                GuiFloatingPanelTag,
+                GuiFloatingPanelTag {
+                    active: true,
+                    minimized: false,
+                },
                 Node {
                     position_type: PositionType::Absolute,
                     border_radius: BorderRadius::all(px(BORDER_RADIUS)),
@@ -50,7 +66,7 @@ impl GuiNode for GuiFloatingPanel {
                     display: Display::Flex,
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
+                    align_items: AlignItems::Stretch,
                     ..default()
                 },
                 main_box_shadow(),
@@ -63,68 +79,26 @@ impl GuiNode for GuiFloatingPanel {
 
         let title_bar = commands
             .spawn((
-                GuiFloatingPanelTitleBarTag { parent: entity },
+                GuiFloatingPanelTitleBarTag,
                 Button,
                 Node {
                     border_radius: BorderRadius::top(px(BORDER_RADIUS)),
-                    width: percent(100),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Row,
                     justify_content: JustifyContent::FlexStart,
-                    align_items: AlignItems::Center,
+                    align_items: AlignItems::Stretch,
                     padding: UiRect::all(px(MINOR_PADDING)),
+                    column_gap: px(MAIN_PADDING),
                     ..default()
                 },
-                BackgroundColor(Color::hsv(180.0, 1.0, 0.4)),
+                BackgroundColor(BUTTON_COLOR_MAIN),
             ))
             .id();
         commands.entity(entity).add_child(title_bar);
 
-        let title_bar_main_part = commands
-            .spawn((Node {
-                justify_self: JustifySelf::Stretch,
-                border_radius: BorderRadius::top_left(px(BORDER_RADIUS)),
-                width: percent(100),
-                min_height: percent(100),
-                display: Display::Flex,
-                flex_direction: FlexDirection::Row,
-                justify_content: JustifyContent::FlexStart,
-                align_items: AlignItems::Center,
-                row_gap: px(MINOR_PADDING),
-                ..default()
-            },))
-            .id();
-        commands.entity(title_bar).add_child(title_bar_main_part);
-
-        for child in self.title_bar_children {
-            let child_entity = child.spawn_dyn(commands, None);
-            commands.entity(title_bar_main_part).add_child(child_entity);
-        }
-
-        let title_bar_button_part = commands
-            .spawn((
-                Node {
-                    justify_self: JustifySelf::End,
-                    border_radius: BorderRadius::top_right(px(BORDER_RADIUS)),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::FlexStart,
-                    align_items: AlignItems::Center,
-                    row_gap: px(MINOR_PADDING),
-                    ..default()
-                },
-                BackgroundColor(Color::hsv(90.0, 1.0, 1.0)),
-            ))
-            .id();
-        commands.entity(title_bar).add_child(title_bar_button_part);
-
-        // x button
-        GuiButton::new_eventless(GuiButtonStyle::XButton, ())
-            .spawn(commands, Some(title_bar_button_part));
-
         let main_content_div = GuiDiv::new(
             GuiDivStyle::None,
-            true,
+            false,
             UiRect::all(px(MAIN_PADDING)),
             MAIN_PADDING,
             FlexDirection::Column,
@@ -133,11 +107,79 @@ impl GuiNode for GuiFloatingPanel {
             (),
         )
         .spawn(commands, Some(entity));
+        commands
+            .entity(main_content_div)
+            .insert(GuiFloatingPanelMainContentTag);
 
         for child in self.children {
             let child_entity = child.spawn_dyn(commands, None);
             commands.entity(main_content_div).add_child(child_entity);
         }
+
+        let title_bar_main_part = commands
+            .spawn((Node {
+                flex_grow: 1.0,
+                border_radius: BorderRadius::top_left(px(BORDER_RADIUS)),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::FlexStart,
+                align_items: AlignItems::Center,
+                padding: UiRect::left(px(MINOR_PADDING)),
+                column_gap: px(MINOR_PADDING),
+                ..default()
+            },))
+            .id();
+        commands.entity(title_bar).add_child(title_bar_main_part);
+
+        GuiText::new_small(self.title).spawn(commands, Some(title_bar_main_part));
+
+        let title_bar_button_part = commands
+            .spawn((Node {
+                border_radius: BorderRadius::top_right(px(BORDER_RADIUS)),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Row,
+                justify_content: JustifyContent::FlexStart,
+                align_items: AlignItems::Center,
+                column_gap: px(MINOR_PADDING),
+                ..default()
+            },))
+            .id();
+        commands.entity(title_bar).add_child(title_bar_button_part);
+
+        let minimize_button = GuiButton::new(
+            GuiButtonStyle::TitleBarButton,
+            || interactions::MinimizeButtonEv { panel_div: entity },
+            (GuiDiv::new(
+                GuiDivStyle::None,
+                false,
+                UiRect::bottom(px(3)),
+                0,
+                FlexDirection::Column,
+                JustifyContent::Center,
+                AlignItems::Center,
+                (GuiText::new_small("_"),),
+            ),),
+        )
+        .spawn(commands, Some(title_bar_button_part));
+        commands
+            .entity(minimize_button)
+            .insert(GuiFloatingPanelMinimizeButtonTag);
+
+        let x_button = GuiButton::new_eventless(
+            GuiButtonStyle::TitleBarButton,
+            (GuiDiv::new(
+                GuiDivStyle::None,
+                false,
+                UiRect::bottom(px(3)),
+                0,
+                FlexDirection::Column,
+                JustifyContent::Center,
+                AlignItems::Center,
+                (GuiText::new_small("x"),),
+            ),),
+        )
+        .spawn(commands, Some(title_bar_button_part));
+        commands.entity(x_button).insert(GuiFloatingPanelXButtonTag);
 
         entity
     }
@@ -147,24 +189,48 @@ impl GuiNode for GuiFloatingPanel {
     }
 }
 
-pub fn update(
-    interaction_q: Query<(&Interaction, &GuiFloatingPanelTitleBarTag), Changed<Interaction>>,
-    mut window_being_dragged: Local<Option<Entity>>,
-    mut window_q: Query<&mut Node, With<GuiFloatingPanelTag>>,
+pub mod interactions {
+    use bevy_ecs::{entity::Entity, event::Event};
+
+    #[derive(Event, Clone)]
+    pub struct MinimizeButtonEv {
+        pub panel_div: Entity,
+    }
+}
+
+pub fn minimize_button_observer(
+    ev: On<interactions::MinimizeButtonEv>,
+    mut panel_q: Query<&mut GuiFloatingPanelTag>,
+) {
+    if let Ok(ref mut panel) = panel_q.get_mut(ev.panel_div) {
+        panel.minimized = match panel.minimized {
+            true => false,
+            false => true,
+        }
+    }
+}
+
+pub fn update_drag_panel(
+    interaction_q: Query<
+        (&Interaction, &ChildOf),
+        (Changed<Interaction>, With<GuiFloatingPanelTitleBarTag>),
+    >,
+    mut panel_being_dragged: Local<Option<Entity>>,
+    mut panel_q: Query<&mut Node, With<GuiFloatingPanelTag>>,
     mut mouse_motion: MessageReader<CursorMoved>,
 ) {
-    for (interaction, title_bar) in &interaction_q {
+    for (interaction, childof) in &interaction_q {
         match *interaction {
             Interaction::Pressed => {
-                *window_being_dragged = Some(title_bar.parent);
+                *panel_being_dragged = Some(childof.0);
             }
             _ => {
-                *window_being_dragged = None;
+                *panel_being_dragged = None;
             }
         }
     }
 
-    if let Some(target_window) = *window_being_dragged {
+    if let Some(target_panel) = *panel_being_dragged {
         let mut delta_x = 0.0;
         let mut delta_y = 0.0;
         for msg in mouse_motion.read() {
@@ -172,16 +238,30 @@ pub fn update(
             delta_y += msg.delta.map(|d| d.y).unwrap_or(0.0);
         }
 
-        if let Ok(mut target_node) = window_q.get_mut(target_window) {
-            if let Val::Px(ref mut x) = target_node.left {
+        if let Ok(mut panel) = panel_q.get_mut(target_panel) {
+            if let Val::Px(ref mut x) = panel.left {
                 *x += delta_x;
             } else {
-                target_node.left = px(0.0);
+                panel.left = px(0.0);
             }
-            if let Val::Px(ref mut y) = target_node.top {
+            if let Val::Px(ref mut y) = panel.top {
                 *y += delta_y;
             } else {
-                target_node.top = px(0.0);
+                panel.top = px(0.0);
+            }
+        }
+    }
+}
+
+pub fn update_minimized(
+    mut main_content_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelMainContentTag>>,
+    parent_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
+) {
+    for (childof, ref mut main_content_node) in &mut main_content_q {
+        if let Ok(panel) = parent_q.get(childof.0) {
+            main_content_node.display = match panel.minimized {
+                false => Display::Flex,
+                true => Display::None,
             }
         }
     }

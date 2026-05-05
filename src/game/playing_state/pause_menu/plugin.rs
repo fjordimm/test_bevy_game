@@ -67,10 +67,10 @@ fn despawn_pause_menu(mut commands: Commands, query: Query<Entity, With<PauseMen
 pub mod interactions {
     use bevy_ecs::event::Event;
 
-    #[derive(Event)]
+    #[derive(Event, Clone)]
     pub struct ContinueButtonEv;
 
-    #[derive(Event)]
+    #[derive(Event, Clone)]
     pub struct ExitButtonEv;
 }
 

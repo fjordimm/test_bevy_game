@@ -8,8 +8,9 @@ impl Plugin for GuiPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
+            .add_observer(gui_floating_panel::minimize_button_observer)
             .add_systems(Update,
-                (gui_button::update, gui_floating_panel::update)
+                (gui_button::update, gui_floating_panel::update_drag_panel, gui_floating_panel::update_minimized)
                     .after(UiSystems::Focus)
             );
     }

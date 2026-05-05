@@ -41,14 +41,14 @@ fn spawn_main_debug_menu(
     let mut pos_x = 10.0;
     let mut pos_y = 10.0;
     if let Some(window) = warned_ok!(window_q.single()) {
-        pos_x = window.width() / 2.0;
-        pos_y = window.height() / 2.0;
+        pos_x = window.width() / 4.0;
+        pos_y = window.height() / 4.0;
     }
 
     let main_debug_menu = GuiFloatingPanel::new(
         pos_x,
         pos_y,
-        (GuiText::new_small("Debug Menu"),),
+        "Debug Menu",
         (GuiDiv::new(
             GuiDivStyle::None,
             true,
@@ -57,7 +57,7 @@ fn spawn_main_debug_menu(
             FlexDirection::Column,
             JustifyContent::FlexStart,
             AlignItems::FlexStart,
-            (GuiText::new_small_mono("howdy ho"),),
+            (GuiText::new_small_mono("hello"),),
         ),),
     )
     .spawn(&mut commands, Some(gui_root.0));

@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::game::gui::fonts::GameFont;
 
 pub const MAIN_COLOR: Color = Color::hsv(185.0, 0.1, 0.15);
-pub const PAUSE_MENU_BG_COLOR: Color = Color::hsva(0.0, 0.0, 0.0, 0.5);
+pub const PAUSE_MENU_BG_COLOR: Color = Color::hsva(0.0, 0.0, 0.0, 0.75);
 pub const BORDER_RADIUS: i32 = 6;
 pub const MAIN_PADDING: i32 = 10;
 pub const MINOR_PADDING: i32 = 5;
@@ -29,7 +29,7 @@ pub const BUTTON_COLOR_MAIN: Color = Color::hsv(185.0, 0.1, 0.25);
 pub const BUTTON_COLOR_HOVER: Color = Color::hsv(185.0, 0.1, 0.2);
 pub const BUTTON_COLOR_PRESSED: Color = Color::hsv(185.0, 0.1, 0.15);
 
-pub const X_BUTTON_COLOR_MAIN: Color = Color::hsv(0.0, 0.5, 0.5);
-pub const X_BUTTON_COLOR_HOVER: Color = Color::hsv(0.0, 0.5, 0.4);
-pub const X_BUTTON_COLOR_PRESSED: Color = Color::hsv(0.0, 0.5, 0.3);
-pub const X_BUTTON_SIZE: i32 = 20;
+pub const TITLE_BAR_BUTTON_COLOR_MAIN: Color = BUTTON_COLOR_PRESSED;
+pub const TITLE_BAR_BUTTON_COLOR_HOVER: Color = BUTTON_COLOR_HOVER;
+pub const TITLE_BAR_BUTTON_COLOR_PRESSED: Color = BUTTON_COLOR_MAIN;
+pub const TITLE_BAR_BUTTON_SIZE: i32 = 20;

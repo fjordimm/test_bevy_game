@@ -19,10 +19,10 @@ impl Plugin for MainMenuGuiPlugin {
 pub mod interactions {
     use bevy_ecs::event::Event;
 
-    #[derive(Event)]
+    #[derive(Event, Clone)]
     pub struct PlayButtonEv;
 
-    #[derive(Event)]
+    #[derive(Event, Clone)]
     pub struct QuitButtonEv;
 }
 
