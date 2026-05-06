@@ -24,7 +24,7 @@ fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseM
 }
 
 fn on_exit(mut commands: Commands, all_entities_q: Query<Entity, With<MainMenuStateEntity>>) {
-    for entity in &all_entities_q {
+    all_entities_q.iter().for_each(|entity| {
         commands.entity(entity).despawn();
-    }
+    });
 }

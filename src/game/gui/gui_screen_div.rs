@@ -81,10 +81,12 @@ impl GuiNode for GuiScreenDiv {
 pub fn update_is_active(
     mut screen_div_q: Query<(&GuiScreenDivTag, &mut Node), Changed<GuiScreenDivTag>>,
 ) {
-    for (screen_div, mut screen_div_node) in &mut screen_div_q {
-        screen_div_node.display = match screen_div.is_active {
-            false => Display::None,
-            true => Display::Flex,
-        }
-    }
+    screen_div_q
+        .iter_mut()
+        .for_each(|(screen_div, mut screen_div_node)| {
+            screen_div_node.display = match screen_div.is_active {
+                false => Display::None,
+                true => Display::Flex,
+            }
+        });
 }

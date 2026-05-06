@@ -14,5 +14,3 @@ Currently on:
 - Figure out randomness.
 - Make a debug menu
     - Make it resizable
-- Figure out / be consistent for when to use `for ___ in &mut ___` vs `for ___ in ___`, especially with queries.
-- Figure out when to use `ref mut` vs `mut`.

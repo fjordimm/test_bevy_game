@@ -252,24 +252,24 @@ pub fn update_panel_dragged(
     mut panel_q: Query<&mut Node, With<GuiFloatingPanelTag>>,
     mut mouse_motion: MessageReader<CursorMoved>,
 ) {
-    for (interaction, childof) in &interaction_q {
-        match *interaction {
+    interaction_q
+        .iter()
+        .for_each(|(interaction, childof)| match *interaction {
             Interaction::Pressed => {
                 *panel_being_dragged = Some(childof.0);
             }
             _ => {
                 *panel_being_dragged = None;
             }
-        }
-    }
+        });
 
     if let Some(target_panel) = *panel_being_dragged {
         let mut delta_x = 0.0;
         let mut delta_y = 0.0;
-        for msg in mouse_motion.read() {
+        mouse_motion.read().for_each(|msg| {
             delta_x += msg.delta.map(|d| d.x).unwrap_or(0.0);
             delta_y += msg.delta.map(|d| d.y).unwrap_or(0.0);
-        }
+        });
 
         if let Ok(mut panel) = panel_q.get_mut(target_panel) {
             if let Val::Px(ref mut x) = panel.left {
@@ -290,37 +290,41 @@ pub fn update_content_from_is_minimized(
     mut main_content_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelMainContentTag>>,
     panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
 ) {
-    for (childof, mut main_content_node) in &mut main_content_q {
-        if let Ok(panel) = panel_q.get(childof.0) {
-            main_content_node.display = match panel.is_minimized {
-                false => Display::Flex,
-                true => Display::None,
+    main_content_q
+        .iter_mut()
+        .for_each(|(childof, mut main_content_node)| {
+            if let Ok(panel) = panel_q.get(childof.0) {
+                main_content_node.display = match panel.is_minimized {
+                    false => Display::Flex,
+                    true => Display::None,
+                }
             }
-        }
-    }
+        });
 }
 
 pub fn update_title_bar_from_is_minimized(
-    title_bar_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelTitleBarTag>>,
+    mut title_bar_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelTitleBarTag>>,
     panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
 ) {
-    for (childof, mut title_bar_node) in title_bar_q {
-        if let Ok(panel) = panel_q.get(childof.0) {
-            title_bar_node.border_radius = match panel.is_minimized {
-                false => BorderRadius::top(px(BORDER_RADIUS)),
-                true => BorderRadius::all(px(BORDER_RADIUS)),
+    title_bar_q
+        .iter_mut()
+        .for_each(|(childof, mut title_bar_node)| {
+            if let Ok(panel) = panel_q.get(childof.0) {
+                title_bar_node.border_radius = match panel.is_minimized {
+                    false => BorderRadius::top(px(BORDER_RADIUS)),
+                    true => BorderRadius::all(px(BORDER_RADIUS)),
+                }
             }
-        }
-    }
+        });
 }
 
 pub fn update_panel_from_is_active(
     mut panel_q: Query<(&GuiFloatingPanelTag, &mut Node), Changed<GuiFloatingPanelTag>>,
 ) {
-    for (panel, mut panel_node) in &mut panel_q {
+    panel_q.iter_mut().for_each(|(panel, mut panel_node)| {
         panel_node.display = match panel.is_active {
             false => Display::None,
             true => Display::Flex,
         }
-    }
+    });
 }

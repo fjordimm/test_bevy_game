@@ -147,9 +147,9 @@ where
 pub fn update(
     mut query: Query<(&Interaction, &GuiButtonTag, &mut BackgroundColor), Changed<Interaction>>,
 ) {
-    for (interaction, tag, mut color) in &mut query {
+    query.iter_mut().for_each(|(interaction, tag, mut color)| {
         *color = what_style(interaction, tag);
-    }
+    });
 }
 
 fn what_style(interaction: &Interaction, tag: &GuiButtonTag) -> BackgroundColor {

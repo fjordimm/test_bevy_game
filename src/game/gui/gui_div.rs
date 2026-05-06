@@ -115,10 +115,10 @@ impl GuiNode for GuiDiv {
 }
 
 pub fn update_is_active(mut div_q: Query<(&GuiDivTag, &mut Node), Changed<GuiDivTag>>) {
-    for (div, mut div_node) in &mut div_q {
+    div_q.iter_mut().for_each(|(div, mut div_node)| {
         div_node.display = match div.is_active {
             false => Display::None,
             true => Display::Flex,
         }
-    }
+    });
 }

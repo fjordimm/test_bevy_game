@@ -66,7 +66,7 @@ fn cursor_controls_camera_look(
         warned_ok!(window_q.single()),
         warned_ok!(camera_trans_q.single_mut()),
     ) {
-        for ev in mouse_motion.read() {
+        mouse_motion.read().for_each(|ev| {
             let (mut yaw, mut pitch, _) = camera_trans.rotation.to_euler(EulerRot::YXZ);
             let window_scale = window.height().min(window.width());
 
@@ -77,6 +77,6 @@ fn cursor_controls_camera_look(
 
             camera_trans.rotation =
                 Quat::from_axis_angle(Vec3::Y, yaw) * Quat::from_axis_angle(Vec3::X, pitch);
-        }
+        });
     }
 }

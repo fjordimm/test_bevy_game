@@ -95,11 +95,11 @@ fn toggle_main_debug_menu(
     mut main_debug_menu_q: Query<&mut GuiFloatingPanelTag, With<MainDebugMenuTag>>,
 ) {
     if keys.just_pressed(key_bindings.open_main_debug_menu) {
-        for mut panel in &mut main_debug_menu_q {
+        main_debug_menu_q.iter_mut().for_each(|mut panel| {
             panel.is_active = match panel.is_active {
                 false => true,
                 true => false,
             }
-        }
+        });
     }
 }

@@ -33,8 +33,8 @@ pub fn build_bevy_app() -> App {
     app
 }
 
-fn set_window_maximized(mut windows: Query<&mut Window, With<PrimaryWindow>>) {
-    for mut window in windows.iter_mut() {
+fn set_window_maximized(mut window_q: Query<&mut Window, With<PrimaryWindow>>) {
+    window_q.iter_mut().for_each(|mut window| {
         window.set_maximized(true);
-    }
+    });
 }

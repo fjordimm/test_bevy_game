@@ -18,13 +18,13 @@ pub fn make_global_fonts_resource(asset_server: Res<AssetServer>) -> GlobalFonts
 
 pub fn apply_gui_fonts(
     global_fonts: Res<GlobalFonts>,
-    mut query: Query<(&mut TextFont, &GameFont), (Added<Text>, With<GameFont>)>,
+    mut font_q: Query<(&mut TextFont, &GameFont), (Added<Text>, With<GameFont>)>,
 ) {
-    for (mut text_font, gui_font) in &mut query {
+    font_q.iter_mut().for_each(|(mut text_font, gui_font)| {
         text_font.font = match gui_font {
             GameFont::Sans => global_fonts.sans.clone(),
             GameFont::Serif => global_fonts.serif.clone(),
             GameFont::Mono => global_fonts.mono.clone(),
         };
-    }
+    });
 }
