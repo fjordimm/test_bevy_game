@@ -2,6 +2,7 @@ mod plugin;
 mod quit_game;
 
 pub mod global_resources;
+pub mod sets;
 pub mod states;
 pub use plugin::CorePlugin;
 pub use quit_game::quit_game;

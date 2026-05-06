@@ -4,9 +4,12 @@
 
 use bevy::prelude::*;
 
-use crate::game::gui::{
-    GuiButton, GuiDiv, GuiDivStyle, GuiNode, GuiText, constants::*, gui_button::GuiButtonStyle,
-    plugin::CollectionOfGuiItems,
+use crate::game::{
+    gui::{
+        GuiButton, GuiDiv, GuiDivStyle, GuiNode, GuiText, constants::*, gui_button::GuiButtonStyle,
+        plugin::CollectionOfGuiItems,
+    },
+    util::DummyOnCreation,
 };
 
 #[derive(Component)]
@@ -28,6 +31,7 @@ pub struct GuiFloatingPanelXButtonTag;
 pub struct GuiFloatingPanelMainContentTag;
 
 pub struct GuiFloatingPanel {
+    starts_active: bool,
     pos_x: f32,
     pos_y: f32,
     title: String,
@@ -36,12 +40,14 @@ pub struct GuiFloatingPanel {
 
 impl GuiFloatingPanel {
     pub fn new<C: Into<CollectionOfGuiItems>>(
+        starts_active: bool,
         pos_x: f32,
         pos_y: f32,
         title: impl Into<String>,
         children: C,
     ) -> Self {
         Self {
+            starts_active: starts_active,
             pos_x: pos_x,
             pos_y: pos_y,
             title: title.into(),
@@ -181,6 +187,15 @@ impl GuiNode for GuiFloatingPanel {
         )
         .spawn(commands, Some(title_bar_button_part));
         commands.entity(x_button).insert(GuiFloatingPanelXButtonTag);
+
+        commands.add_observer(
+            move |ent: On<DummyOnCreation>, mut query: Query<&mut GuiFloatingPanelTag>| {
+                if let Ok(mut screen_div) = query.get_mut(ent.0) {
+                    screen_div.is_active = self.starts_active;
+                }
+            },
+        );
+        commands.trigger(DummyOnCreation(entity));
 
         entity
     }

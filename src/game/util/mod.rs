@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+use bevy::prelude::*;
+
 macro_rules! warned_ok {
     ($input:expr) => {
         if let Ok(input) = $input {
@@ -16,6 +18,8 @@ macro_rules! warned_ok {
         }
     };
 }
+
+pub(crate) use warned_ok;
 
 macro_rules! warned_some {
     ($input:expr) => {
@@ -34,5 +38,7 @@ macro_rules! warned_some {
     };
 }
 
-pub(crate) use warned_ok;
 pub(crate) use warned_some;
+
+#[derive(Event)]
+pub struct DummyOnCreation(pub Entity);

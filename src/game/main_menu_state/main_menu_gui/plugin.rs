@@ -1,8 +1,15 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    core::{quit_game, states::OverallState},
-    gui::{self, GuiButton, GuiDiv, GuiDivStyle, GuiScreenDiv, GuiText, constants::*},
+    core::{
+        global_resources::GlobalGuiRoot, quit_game, sets::GlobalStartupOrdering,
+        states::OverallState,
+    },
+    gui::{
+        self, GuiButton, GuiDiv, GuiDivStyle, GuiNode, GuiScreenDiv, GuiScreenDivTag, GuiText,
+        constants::*,
+    },
+    util::warned_ok,
 };
 
 pub struct MainMenuGuiPlugin;
@@ -11,8 +18,54 @@ impl Plugin for MainMenuGuiPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
+            .add_systems(Startup,
+                spawn_main_menu_gui
+                    .in_set(GlobalStartupOrdering::GuiSpawning)
+            )
+            .add_systems(OnEnter(OverallState::MainMenu), update_main_menu_gui_hiddenness)
+            .add_systems(OnExit(OverallState::MainMenu), update_main_menu_gui_hiddenness)
             .add_observer(play_button_observer)
             .add_observer(quit_button_observer);
+    }
+}
+
+#[derive(Component)]
+struct MainMenuGuiTag;
+
+fn spawn_main_menu_gui(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
+    let main_menu_gui = GuiScreenDiv::new(
+        false,
+        gui::constants::MAIN_COLOR,
+        FlexDirection::Column,
+        (GuiDiv::new(
+            GuiDivStyle::Regular,
+            false,
+            UiRect::all(px(MAIN_PADDING)),
+            MAIN_PADDING,
+            FlexDirection::Column,
+            JustifyContent::Center,
+            AlignItems::Stretch,
+            (
+                GuiText::new_h1("Main Menu"),
+                GuiButton::new_regular(|| interactions::PlayButtonEv, "Play"),
+                GuiButton::new_regular(|| interactions::QuitButtonEv, "Quit"),
+            ),
+        ),),
+    )
+    .spawn(&mut commands, Some(gui_root.0));
+    commands.entity(main_menu_gui).insert(ZIndex(3001));
+    commands.entity(main_menu_gui).insert(MainMenuGuiTag);
+}
+
+fn update_main_menu_gui_hiddenness(
+    mut main_menu_gui_q: Query<&mut GuiScreenDivTag, With<MainMenuGuiTag>>,
+    overall_state: Res<State<OverallState>>,
+) {
+    if let Some(ref mut screen_div) = warned_ok!(main_menu_gui_q.single_mut()) {
+        screen_div.is_active = match overall_state.get() {
+            OverallState::MainMenu => true,
+            _ => false,
+        }
     }
 }
 
@@ -32,25 +85,4 @@ fn play_button_observer(_: On<interactions::PlayButtonEv>, mut commands: Command
 
 fn quit_button_observer(_: On<interactions::QuitButtonEv>) {
     quit_game();
-}
-
-pub fn make_main_menu_gui() -> GuiScreenDiv {
-    GuiScreenDiv::new(
-        gui::constants::MAIN_COLOR,
-        FlexDirection::Column,
-        (GuiDiv::new(
-            GuiDivStyle::Regular,
-            false,
-            UiRect::all(px(MAIN_PADDING)),
-            MAIN_PADDING,
-            FlexDirection::Column,
-            JustifyContent::Center,
-            AlignItems::Stretch,
-            (
-                GuiText::new_h1("Main Menu"),
-                GuiButton::new_regular(|| interactions::PlayButtonEv, "Play"),
-                GuiButton::new_regular(|| interactions::QuitButtonEv, "Quit"),
-            ),
-        ),),
-    )
 }

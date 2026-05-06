@@ -1,6 +1,14 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiNode, constants::*, plugin::CollectionOfGuiItems};
+use crate::game::{
+    gui::{GuiNode, constants::*, plugin::CollectionOfGuiItems},
+    util::DummyOnCreation,
+};
+
+#[derive(Component)]
+pub struct GuiDivTag {
+    pub is_active: bool,
+}
 
 pub enum GuiDivStyle {
     None,
@@ -8,6 +16,7 @@ pub enum GuiDivStyle {
 }
 
 pub struct GuiDiv {
+    starts_active: bool,
     style: GuiDivStyle,
     expand: bool,
     padding: UiRect,
@@ -30,6 +39,7 @@ impl GuiDiv {
         children: C,
     ) -> Self {
         Self {
+            starts_active: true,
             style: style,
             expand: expand,
             padding: padding,
@@ -45,18 +55,22 @@ impl GuiDiv {
 impl GuiNode for GuiDiv {
     fn spawn(self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         let entity = match self.style {
-            GuiDivStyle::None => commands.spawn((Node {
-                width: if self.expand { percent(100) } else { Val::Auto },
-                height: if self.expand { percent(100) } else { Val::Auto },
-                display: Display::Flex,
-                flex_direction: self.flex_direction,
-                justify_content: self.justify_content,
-                align_items: self.align_items,
-                padding: self.padding,
-                row_gap: px(self.gap),
-                ..default()
-            },)),
+            GuiDivStyle::None => commands.spawn((
+                GuiDivTag { is_active: true },
+                Node {
+                    width: if self.expand { percent(100) } else { Val::Auto },
+                    height: if self.expand { percent(100) } else { Val::Auto },
+                    display: Display::Flex,
+                    flex_direction: self.flex_direction,
+                    justify_content: self.justify_content,
+                    align_items: self.align_items,
+                    padding: self.padding,
+                    row_gap: px(self.gap),
+                    ..default()
+                },
+            )),
             GuiDivStyle::Regular => commands.spawn((
+                GuiDivTag { is_active: true },
                 Node {
                     border_radius: BorderRadius::all(px(BORDER_RADIUS)),
                     width: if self.expand { percent(100) } else { Val::Auto },
@@ -83,10 +97,28 @@ impl GuiNode for GuiDiv {
             commands.entity(entity).add_child(child_entity);
         }
 
+        commands.add_observer(
+            move |ent: On<DummyOnCreation>, mut query: Query<&mut GuiDivTag>| {
+                if let Ok(mut screen_div) = query.get_mut(ent.0) {
+                    screen_div.is_active = self.starts_active;
+                }
+            },
+        );
+        commands.trigger(DummyOnCreation(entity));
+
         entity
     }
 
     fn spawn_dyn(self: Box<Self>, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         self.spawn(commands, parent)
+    }
+}
+
+pub fn update_is_active(mut div_q: Query<(&GuiDivTag, &mut Node), Changed<GuiDivTag>>) {
+    for (div, mut div_node) in &mut div_q {
+        div_node.display = match div.is_active {
+            false => Display::None,
+            true => Display::Flex,
+        }
     }
 }

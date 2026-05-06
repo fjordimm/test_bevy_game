@@ -14,3 +14,5 @@ Currently on:
     - Make an X button for it.
     - Make windows show up in the right order.
 - Make gui children be able to take any Entity.
+- Figure out / be consistent for when to use `for ___ in &mut ___` vs `for ___ in ___`, especially with queries.
+- Figure out when to use `ref mut` vs `mut`.

@@ -6,7 +6,10 @@ use bevy_rand::global::GlobalRng;
 use rand_core::Rng;
 
 use crate::game::{
-    core::global_resources::{GlobalGuiRoot, KeyBindings},
+    core::{
+        global_resources::{GlobalGuiRoot, KeyBindings},
+        sets::GlobalStartupOrdering,
+    },
     gui::{
         GuiDiv, GuiDivStyle, GuiFloatingPanel, GuiFloatingPanelTag, GuiNode, GuiText,
         constants::MAIN_PADDING,
@@ -21,9 +24,9 @@ impl Plugin for MainDebugMenuPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(Update,
+            .add_systems(Startup,
                 spawn_main_debug_menu
-                    .run_if(run_once)
+                    .in_set(GlobalStartupOrdering::GuiSpawning)
             )
             .add_systems(Update,
                 update_main_debug_menu
@@ -57,6 +60,7 @@ fn spawn_main_debug_menu(
     }
 
     let main_debug_menu = GuiFloatingPanel::new(
+        true,
         pos_x,
         pos_y,
         "Debug Menu",

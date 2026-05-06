@@ -1,6 +1,6 @@
 use bevy::{prelude::*, ui::UiSystems};
 
-use crate::game::gui::{GuiNode, gui_button, gui_floating_panel};
+use crate::game::gui::{GuiNode, gui_button, gui_div, gui_floating_panel, gui_screen_div};
 
 pub struct GuiPlugin;
 
@@ -13,6 +13,8 @@ impl Plugin for GuiPlugin {
             .add_systems(Update,
                 (
                     gui_button::update,
+                    gui_div::update_is_active,
+                    gui_screen_div::update_is_active,
                     gui_floating_panel::update_drag_panel,
                     gui_floating_panel::update_is_minimized,
                     gui_floating_panel::update_is_active,
