@@ -6,8 +6,8 @@ use bevy::prelude::*;
 
 use crate::game::{
     gui::{
-        GuiButton, GuiDiv, GuiDivStyle, GuiNode, GuiText, constants::*, gui_button::GuiButtonStyle,
-        plugin::CollectionOfGuiItems,
+        GuiButton, GuiDiv, GuiDivStyle, GuiIcon, GuiNode, GuiText, constants::*,
+        gui_button::GuiButtonStyle, images::UiIconOption, plugin::CollectionOfGuiItems,
     },
     util::DummyOnCreation,
 };
@@ -66,9 +66,9 @@ impl GuiNode for GuiFloatingPanel {
                 },
                 Node {
                     position_type: PositionType::Absolute,
-                    border_radius: BorderRadius::all(px(BORDER_RADIUS)),
                     left: px(self.pos_x),
                     top: px(self.pos_y),
+                    border_radius: BorderRadius::all(px(BORDER_RADIUS)),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::Center,
@@ -155,15 +155,10 @@ impl GuiNode for GuiFloatingPanel {
         let minimize_button = GuiButton::new(
             GuiButtonStyle::TitleBarButton,
             || interactions::MinimizeButtonEv { panel_div: entity },
-            (GuiDiv::new(
-                GuiDivStyle::None,
-                false,
-                UiRect::bottom(px(3)),
-                0,
-                FlexDirection::Column,
-                JustifyContent::Center,
-                AlignItems::Center,
-                (GuiText::new_small("_"),),
+            (GuiIcon::new(
+                UiIconOption::Minimize,
+                TITLE_BAR_BUTTON_ICON_SIZE,
+                TITLE_BAR_BUTTON_ICON_SIZE,
             ),),
         )
         .spawn(commands, Some(title_bar_button_part));
@@ -174,19 +169,34 @@ impl GuiNode for GuiFloatingPanel {
         let x_button = GuiButton::new(
             GuiButtonStyle::TitleBarButton,
             || interactions::XButtonEv { panel_div: entity },
-            (GuiDiv::new(
-                GuiDivStyle::None,
-                false,
-                UiRect::bottom(px(3)),
-                0,
-                FlexDirection::Column,
-                JustifyContent::Center,
-                AlignItems::Center,
-                (GuiText::new_small("x"),),
+            (GuiIcon::new(
+                UiIconOption::X,
+                TITLE_BAR_BUTTON_ICON_SIZE,
+                TITLE_BAR_BUTTON_ICON_SIZE,
             ),),
         )
         .spawn(commands, Some(title_bar_button_part));
         commands.entity(x_button).insert(GuiFloatingPanelXButtonTag);
+
+        let corner_resizer_div = commands
+            .spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    right: px(3),
+                    bottom: px(3),
+                    width: px(16),
+                    height: px(16),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BackgroundColor(Color::hsv(0.0, 1.0, 1.0)),
+            ))
+            .id();
+        commands.entity(entity).add_child(corner_resizer_div);
+        // GuiIcon::new(UiIconOption::CornerResizer, 16, 16).spawn(commands, Some(entity));
 
         commands.add_observer(
             move |ent: On<DummyOnCreation>, mut query: Query<&mut GuiFloatingPanelTag>| {

@@ -9,6 +9,7 @@
 - Make the camera cursor movement proportional to the window size.
 - When dragging floating panels around, they should order themselves correctly (most recently dragged goes on top).
 - Get rid of the yellow background color.
+- Make different GUI sizes.
 
 Currently on:
 - Be consistent on when to use the 'Tag' suffix.

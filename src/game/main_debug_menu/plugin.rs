@@ -75,10 +75,7 @@ fn spawn_main_debug_menu(
             FlexDirection::Column,
             JustifyContent::FlexStart,
             AlignItems::FlexStart,
-            (
-                GuiText::new_small_mono("hello"),
-                GuiIcon::new(UiIconOption::CornerResize, 32, 32),
-            ),
+            (GuiText::new_small_mono("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n"),),
         ),),
     )
     .spawn(&mut commands, Some(gui_root.0));

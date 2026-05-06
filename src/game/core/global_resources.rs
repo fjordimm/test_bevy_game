@@ -13,7 +13,7 @@ pub struct Fonts {
 pub struct UiIcons {
     pub x: Handle<Image>,
     pub minimize: Handle<Image>,
-    pub corner_resize: Handle<Image>,
+    pub corner_resizer: Handle<Image>,
 }
 
 #[derive(Resource, Debug)]
