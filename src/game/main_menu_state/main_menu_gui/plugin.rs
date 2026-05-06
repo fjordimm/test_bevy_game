@@ -9,6 +9,7 @@ use crate::game::{
         self, GuiButton, GuiDiv, GuiDivStyle, GuiNode, GuiScreenDiv, GuiScreenDivTag, GuiText,
         constants::*,
     },
+    playing_state::sets::PlayingStateOrdering,
     util::warned_ok,
 };
 
@@ -22,8 +23,14 @@ impl Plugin for MainMenuGuiPlugin {
                 spawn_main_menu_gui
                     .in_set(GlobalStartupOrdering::GuiSpawning)
             )
-            .add_systems(OnEnter(OverallState::MainMenu), update_main_menu_gui_hiddenness)
-            .add_systems(OnExit(OverallState::MainMenu), update_main_menu_gui_hiddenness)
+            .add_systems(OnEnter(OverallState::MainMenu),
+                update_main_menu_gui_hiddenness
+                    .in_set(PlayingStateOrdering::Ui)
+            )
+            .add_systems(OnExit(OverallState::MainMenu),
+                update_main_menu_gui_hiddenness
+                    .in_set(PlayingStateOrdering::Ui)
+            )
             .add_observer(play_button_observer)
             .add_observer(quit_button_observer);
     }
@@ -61,7 +68,7 @@ fn update_main_menu_gui_hiddenness(
     mut main_menu_gui_q: Query<&mut GuiScreenDivTag, With<MainMenuGuiTag>>,
     overall_state: Res<State<OverallState>>,
 ) {
-    if let Some(ref mut screen_div) = warned_ok!(main_menu_gui_q.single_mut()) {
+    if let Some(mut screen_div) = warned_ok!(main_menu_gui_q.single_mut()) {
         screen_div.is_active = match overall_state.get() {
             OverallState::MainMenu => true,
             _ => false,

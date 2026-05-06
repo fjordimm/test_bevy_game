@@ -6,7 +6,7 @@ use crate::game::{
         self, GuiButton, GuiDiv, GuiDivStyle, GuiNode, GuiScreenDiv, GuiScreenDivTag, GuiText,
         constants::MAIN_PADDING,
     },
-    playing_state::states::PauseState,
+    playing_state::{sets::PlayingStateOrdering, states::PauseState},
     util::warned_ok,
 };
 
@@ -20,10 +20,22 @@ impl Plugin for PauseMenuPlugin {
                 spawn_pause_menu
                     .in_set(GlobalStartupOrdering::GuiSpawning)
             )
-            .add_systems(OnEnter(OverallState::Playing), update_pause_menu_hiddenness)
-            .add_systems(OnExit(OverallState::Playing), update_pause_menu_hiddenness)
-            .add_systems(OnEnter(PauseState::Paused), update_pause_menu_hiddenness)
-            .add_systems(OnExit(PauseState::Paused), update_pause_menu_hiddenness)
+            .add_systems(OnEnter(OverallState::Playing),
+                update_pause_menu_hiddenness
+                    .in_set(PlayingStateOrdering::Ui)
+            )
+            .add_systems(OnExit(OverallState::Playing),
+                update_pause_menu_hiddenness
+                    .in_set(PlayingStateOrdering::Ui)
+            )
+            .add_systems(OnEnter(PauseState::Paused),
+                update_pause_menu_hiddenness
+                    .in_set(PlayingStateOrdering::Ui)
+            )
+            .add_systems(OnExit(PauseState::Paused),
+                update_pause_menu_hiddenness
+                    .in_set(PlayingStateOrdering::Ui)
+            )
             .add_observer(exit_button_observer)
             .add_observer(continue_button_observer);
     }
@@ -62,7 +74,7 @@ fn update_pause_menu_hiddenness(
     overall_state: Res<State<OverallState>>,
     pause_state: Res<State<PauseState>>,
 ) {
-    if let Some(ref mut screen_div) = warned_ok!(pause_menu_q.single_mut()) {
+    if let Some(mut screen_div) = warned_ok!(pause_menu_q.single_mut()) {
         screen_div.is_active = match overall_state.get() {
             OverallState::Playing => match pause_state.get() {
                 PauseState::Paused => true,

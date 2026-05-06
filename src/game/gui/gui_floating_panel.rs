@@ -223,7 +223,7 @@ pub fn minimize_button_observer(
     ev: On<interactions::MinimizeButtonEv>,
     mut panel_q: Query<&mut GuiFloatingPanelTag>,
 ) {
-    if let Ok(ref mut panel) = panel_q.get_mut(ev.panel_div) {
+    if let Ok(mut panel) = panel_q.get_mut(ev.panel_div) {
         panel.is_minimized = match panel.is_minimized {
             true => false,
             false => true,
@@ -235,7 +235,7 @@ pub fn x_button_observer(
     ev: On<interactions::XButtonEv>,
     mut panel_q: Query<&mut GuiFloatingPanelTag>,
 ) {
-    if let Ok(ref mut panel) = panel_q.get_mut(ev.panel_div) {
+    if let Ok(mut panel) = panel_q.get_mut(ev.panel_div) {
         panel.is_active = match panel.is_active {
             true => false,
             false => true,
@@ -290,7 +290,7 @@ pub fn update_is_minimized(
     mut main_content_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelMainContentTag>>,
     parent_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
 ) {
-    for (childof, ref mut main_content_node) in &mut main_content_q {
+    for (childof, mut main_content_node) in &mut main_content_q {
         if let Ok(panel) = parent_q.get(childof.0) {
             main_content_node.display = match panel.is_minimized {
                 false => Display::Flex,

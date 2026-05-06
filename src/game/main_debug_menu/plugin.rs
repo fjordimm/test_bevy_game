@@ -30,6 +30,7 @@ impl Plugin for MainDebugMenuPlugin {
             )
             .add_systems(Update,
                 update_main_debug_menu
+                    .in_set(PlayingStateOrdering::Ui)
                     .run_if(on_timer(Duration::from_secs(1)))
             )
             .add_systems(Update,
@@ -40,7 +41,7 @@ impl Plugin for MainDebugMenuPlugin {
 }
 
 #[derive(Component)]
-pub struct MainDebugMenuTag;
+struct MainDebugMenuTag;
 
 fn spawn_main_debug_menu(
     mut commands: Commands,
@@ -55,8 +56,10 @@ fn spawn_main_debug_menu(
     let mut pos_x = 10.0;
     let mut pos_y = 10.0;
     if let Some(window) = warned_ok!(window_q.single()) {
-        pos_x = window.width() / 4.0;
-        pos_y = window.height() / 4.0;
+        // pos_x = window.width() / 4.0;
+        // pos_y = window.height() / 4.0;
+        pos_x = 100.0;
+        pos_y = 100.0;
     }
 
     let main_debug_menu = GuiFloatingPanel::new(

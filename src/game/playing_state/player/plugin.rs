@@ -40,21 +40,7 @@ impl Plugin for PlayerPlugin {
                     .run_if(in_state(OverallState::Playing))
                     .in_set(PlayingStateOrdering::WorldPlayer)
                     .run_if(in_state(MouseMode::Grabbed))
-            )
-            .add_systems(Update,
-                funny1
-                    .run_if(in_state(OverallState::Playing))
-                    .in_set(PlayingStateOrdering::Ui)
             );
-    }
-}
-
-fn funny1(
-    keys: Res<ButtonInput<KeyCode>>,
-    mut next_overall_state: ResMut<NextState<OverallState>>,
-) {
-    if keys.just_pressed(KeyCode::KeyP) {
-        next_overall_state.set(OverallState::MainMenu);
     }
 }
 
