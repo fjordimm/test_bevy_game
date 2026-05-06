@@ -15,9 +15,10 @@ impl Plugin for GuiPlugin {
                     gui_button::update,
                     gui_div::update_is_active,
                     gui_screen_div::update_is_active,
-                    gui_floating_panel::update_drag_panel,
-                    gui_floating_panel::update_is_minimized,
-                    gui_floating_panel::update_is_active,
+                    gui_floating_panel::update_panel_dragged,
+                    gui_floating_panel::update_content_from_is_minimized,
+                    gui_floating_panel::update_title_bar_from_is_minimized,
+                    gui_floating_panel::update_panel_from_is_active,
                 )
                     .after(UiSystems::Focus),
             );

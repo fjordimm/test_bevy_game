@@ -55,7 +55,7 @@ fn spawn_main_debug_menu(
 
     let mut pos_x = 10.0;
     let mut pos_y = 10.0;
-    if let Some(window) = warned_ok!(window_q.single()) {
+    if let Some(_window) = warned_ok!(window_q.single()) {
         // pos_x = window.width() / 4.0;
         // pos_y = window.height() / 4.0;
         pos_x = 100.0;

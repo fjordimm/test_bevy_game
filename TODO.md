@@ -10,10 +10,9 @@
 - When dragging floating panels around, they should order themselves correctly (most recently dragged goes on top).
 
 Currently on:
-- Rename all the gui stuff, it doesn't need the suffix 'Tag'.
-- Figuring out randomness
-- Fixing bug with toggling debug menu in playing state.
-- Making a debug menu
+- Be consistent on when to use the 'Tag' suffix.
+- Figure out randomness.
+- Make a debug menu
     - Make it resizable
 - Figure out / be consistent for when to use `for ___ in &mut ___` vs `for ___ in ___`, especially with queries.
 - Figure out when to use `ref mut` vs `mut`.
