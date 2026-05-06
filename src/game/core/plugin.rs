@@ -34,14 +34,15 @@ impl Plugin for CorePlugin {
             .init_state::<OverallState>()
             .configure_sets(Startup, GLOBAL_STARTUP_ORDERING_ORDER.chain())
             .add_systems(Startup,
-                global_startup
+                startup_stuff
                     .in_set(GlobalStartupOrdering::CoreUseOnly)
             )
             .add_systems(Update,
                 start_game
                     .run_if(run_once)
             )
-            .add_systems(Update, gui::fonts::apply_gui_fonts)
+            .add_systems(Update, gui::fonts::apply_fonts)
+            .add_systems(Update, gui::images::apply_ui_icons)
             .add_systems(OnEnter(MouseMode::Grabbed), on_enter_mouse_grabbed)
             .add_systems(OnExit(MouseMode::Grabbed), on_exit_mouse_grabbed)
             .add_plugins(GuiPlugin)
@@ -51,8 +52,9 @@ impl Plugin for CorePlugin {
     }
 }
 
-fn global_startup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.insert_resource(gui::fonts::make_global_fonts_resource(asset_server));
+fn startup_stuff(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(gui::fonts::make_fonts_resource(&asset_server));
+    commands.insert_resource(gui::images::make_ui_icons_resource(&asset_server));
 
     let gui_root = commands.spawn(gui_root_template()).id();
     commands.insert_resource(GlobalGuiRoot(gui_root));

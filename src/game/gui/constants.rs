@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 
-use crate::game::gui::fonts::GameFont;
+use crate::game::gui::fonts::FontOption;
 
 pub const MAIN_COLOR: Color = Color::hsv(185.0, 0.1, 0.15);
 pub const PAUSE_MENU_BG_COLOR: Color = Color::hsva(0.0, 0.0, 0.0, 0.75);
 pub const BORDER_RADIUS: i32 = 6;
 pub const MAIN_PADDING: i32 = 10;
 pub const MINOR_PADDING: i32 = 5;
-pub const MAIN_FONT: GameFont = GameFont::Sans;
+pub const MAIN_FONT: FontOption = FontOption::Sans;
 pub fn main_box_shadow() -> BoxShadow {
     BoxShadow::new(
         Color::srgba(0.0, 0.0, 0.0, 0.5),

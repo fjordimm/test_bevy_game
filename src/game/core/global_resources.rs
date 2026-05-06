@@ -3,6 +3,20 @@ use bevy::prelude::*;
 use bevy_ecs::resource::Resource;
 
 #[derive(Resource, Debug)]
+pub struct Fonts {
+    pub sans: Handle<Font>,
+    pub serif: Handle<Font>,
+    pub mono: Handle<Font>,
+}
+
+#[derive(Resource, Debug)]
+pub struct UiIcons {
+    pub x: Handle<Image>,
+    pub minimize: Handle<Image>,
+    pub corner_resize: Handle<Image>,
+}
+
+#[derive(Resource, Debug)]
 pub struct KeyBindings {
     pub pause: KeyCode,
     pub move_forward: KeyCode,
@@ -27,13 +41,6 @@ impl Default for KeyBindings {
             open_main_debug_menu: KeyCode::KeyP,
         }
     }
-}
-
-#[derive(Resource, Debug)]
-pub struct GlobalFonts {
-    pub sans: Handle<Font>,
-    pub serif: Handle<Font>,
-    pub mono: Handle<Font>,
 }
 
 #[derive(Resource)]

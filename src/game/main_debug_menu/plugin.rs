@@ -11,8 +11,8 @@ use crate::game::{
         sets::GlobalStartupOrdering,
     },
     gui::{
-        GuiDiv, GuiDivStyle, GuiFloatingPanel, GuiFloatingPanelTag, GuiNode, GuiText,
-        constants::MAIN_PADDING,
+        GuiDiv, GuiDivStyle, GuiFloatingPanel, GuiFloatingPanelTag, GuiIcon, GuiNode, GuiText,
+        constants::MAIN_PADDING, images::UiIconOption,
     },
     playing_state::sets::PlayingStateOrdering,
     util::warned_ok,
@@ -75,7 +75,10 @@ fn spawn_main_debug_menu(
             FlexDirection::Column,
             JustifyContent::FlexStart,
             AlignItems::FlexStart,
-            (GuiText::new_small_mono("hello"),),
+            (
+                GuiText::new_small_mono("hello"),
+                GuiIcon::new(UiIconOption::CornerResize, 32, 32),
+            ),
         ),),
     )
     .spawn(&mut commands, Some(gui_root.0));

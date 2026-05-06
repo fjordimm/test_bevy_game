@@ -1,15 +1,15 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiNode, constants::*, fonts::GameFont};
+use crate::game::gui::{GuiNode, constants::*, fonts::FontOption};
 
 pub struct GuiText {
     text: String,
-    font: GameFont,
+    font: FontOption,
     size: f32,
 }
 
 impl GuiText {
-    pub fn new(text: impl Into<String>, font: GameFont, size: f32) -> Self {
+    pub fn new(text: impl Into<String>, font: FontOption, size: f32) -> Self {
         Self {
             text: text.into(),
             font: font,
@@ -60,7 +60,7 @@ impl GuiText {
     pub fn new_small_mono(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
-            font: GameFont::Mono,
+            font: FontOption::Mono,
             size: TEXT_SIZE_SMALL_MONO,
         }
     }

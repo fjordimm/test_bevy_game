@@ -1,30 +1,30 @@
-use crate::game::core::global_resources::GlobalFonts;
+use crate::game::core::global_resources::Fonts;
 use bevy::prelude::*;
 
 #[derive(Component, Debug, Clone, Copy)]
-pub enum GameFont {
+pub enum FontOption {
     Sans,
     Serif,
     Mono,
 }
 
-pub fn make_global_fonts_resource(asset_server: Res<AssetServer>) -> GlobalFonts {
-    GlobalFonts {
+pub fn make_fonts_resource(asset_server: &Res<AssetServer>) -> Fonts {
+    Fonts {
         sans: asset_server.load("fonts/Cabin-VariableFont_wdth,wght.ttf"),
         serif: asset_server.load("fonts/SortsMillGoudy-Regular.ttf"),
         mono: asset_server.load("fonts/IBMPlexMono-Regular.ttf"),
     }
 }
 
-pub fn apply_gui_fonts(
-    global_fonts: Res<GlobalFonts>,
-    mut font_q: Query<(&mut TextFont, &GameFont), (Added<Text>, With<GameFont>)>,
+pub fn apply_fonts(
+    fonts_res: Res<Fonts>,
+    mut font_q: Query<(&mut TextFont, &FontOption), (Added<Text>, With<FontOption>)>,
 ) {
     font_q.iter_mut().for_each(|(mut text_font, gui_font)| {
         text_font.font = match gui_font {
-            GameFont::Sans => global_fonts.sans.clone(),
-            GameFont::Serif => global_fonts.serif.clone(),
-            GameFont::Mono => global_fonts.mono.clone(),
+            FontOption::Sans => fonts_res.sans.clone(),
+            FontOption::Serif => fonts_res.serif.clone(),
+            FontOption::Mono => fonts_res.mono.clone(),
         };
     });
 }

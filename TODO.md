@@ -8,6 +8,7 @@
 - Make floating panels move correctly when the window is resized.
 - Make the camera cursor movement proportional to the window size.
 - When dragging floating panels around, they should order themselves correctly (most recently dragged goes on top).
+- Get rid of the yellow background color.
 
 Currently on:
 - Be consistent on when to use the 'Tag' suffix.
