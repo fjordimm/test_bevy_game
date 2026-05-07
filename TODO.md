@@ -10,6 +10,7 @@
 - When dragging floating panels around, they should order themselves correctly (most recently dragged goes on top).
 - Get rid of the yellow background color.
 - Make different GUI sizes.
+- Make a better system for changing the cursor type (right now it's just done locally for the floating panel corner resizer).
 
 Currently on:
 - Be consistent on when to use the 'Tag' suffix.

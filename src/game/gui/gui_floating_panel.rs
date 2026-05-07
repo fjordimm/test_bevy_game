@@ -2,14 +2,17 @@
     Note: if there are multiple floating panels, they will not order themselves
 */
 
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    window::{CursorIcon, PrimaryWindow, SystemCursorIcon},
+};
 
 use crate::game::{
     gui::{
         GuiButton, GuiDiv, GuiDivStyle, GuiIcon, GuiNode, GuiText, constants::*,
         gui_button::GuiButtonStyle, images::UiIconOption, plugin::CollectionOfGuiItems,
     },
-    util::TempOnCreation,
+    util::{TempOnCreation, warned_ok},
 };
 
 #[derive(Component)]
@@ -32,6 +35,9 @@ pub struct GuiFloatingPanelMainContentTag;
 
 #[derive(Component)]
 pub struct GuiFloatingPanelResizerTag;
+
+#[derive(Component)]
+pub struct GuiFloatingPanelResizerDivTag;
 
 pub struct GuiFloatingPanel {
     starts_active: bool,
@@ -182,23 +188,24 @@ impl GuiNode for GuiFloatingPanel {
         commands.entity(x_button).insert(GuiFloatingPanelXButtonTag);
 
         let corner_resizer_div = commands
-            .spawn((Node {
-                position_type: PositionType::Absolute,
-                right: px(CORNER_RESIZER_PADDING),
-                bottom: px(CORNER_RESIZER_PADDING),
-                width: px(CORNER_RESIZER_SIZE),
-                height: px(CORNER_RESIZER_SIZE),
-                display: Display::Flex,
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                ..default()
-            },))
+            .spawn((
+                GuiFloatingPanelResizerDivTag,
+                Node {
+                    position_type: PositionType::Absolute,
+                    right: px(CORNER_RESIZER_PADDING),
+                    bottom: px(CORNER_RESIZER_PADDING),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+            ))
             .id();
         commands.entity(entity).add_child(corner_resizer_div);
 
-        let corner_resizer_button = GuiButton::new(
-            GuiButtonStyle::TitleBarButton,
+        let corner_resizer = GuiButton::new(
+            GuiButtonStyle::CornerResizer,
             || interactions::CornerResizerEv { panel_div: entity },
             (GuiIcon::new(
                 UiIconOption::CornerResizer,
@@ -208,7 +215,7 @@ impl GuiNode for GuiFloatingPanel {
         )
         .spawn(commands, Some(corner_resizer_div));
         commands
-            .entity(corner_resizer_button)
+            .entity(corner_resizer)
             .insert(GuiFloatingPanelResizerTag);
 
         commands.add_observer(
@@ -346,7 +353,21 @@ pub fn update_title_bar_from_is_minimized(
         });
 }
 
-// pub fn update_
+pub fn update_resizer_from_is_minimized(
+    mut resizer_div_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelResizerDivTag>>,
+    panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
+) {
+    resizer_div_q
+        .iter_mut()
+        .for_each(|(childof, mut resizer_div_node)| {
+            if let Ok(panel) = panel_q.get(childof.0) {
+                resizer_div_node.display = match panel.is_minimized {
+                    false => Display::Flex,
+                    true => Display::None,
+                }
+            }
+        });
+}
 
 pub fn update_panel_from_is_active(
     mut panel_q: Query<(&GuiFloatingPanelTag, &mut Node), Changed<GuiFloatingPanelTag>>,
@@ -357,4 +378,34 @@ pub fn update_panel_from_is_active(
             true => Display::Flex,
         }
     });
+}
+
+pub fn update_cursor_from_resizer_interaction(
+    mut commands: Commands,
+    interaction_q: Query<
+        (&Interaction, Entity),
+        (With<GuiFloatingPanelResizerTag>, Changed<Interaction>),
+    >,
+    mut button_last_interacted_with: Local<Option<Entity>>,
+    window_q: Query<Entity, With<PrimaryWindow>>,
+) {
+    if let Some(mut window) = warned_ok!(window_q.single()) {
+        interaction_q.iter().for_each(|(interaction, button_id)| {
+            if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
+                commands
+                    .entity(window)
+                    .insert(CursorIcon::from(SystemCursorIcon::SeResize));
+
+                *button_last_interacted_with = Some(button_id);
+            } else {
+                if let Some(button_last_interacted_with) = *button_last_interacted_with {
+                    if button_last_interacted_with == button_id {
+                        commands
+                            .entity(window)
+                            .insert(CursorIcon::from(SystemCursorIcon::Default));
+                    }
+                }
+            }
+        });
+    }
 }

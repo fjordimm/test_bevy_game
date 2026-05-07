@@ -18,7 +18,9 @@ impl Plugin for GuiPlugin {
                     gui_floating_panel::update_panel_dragged,
                     gui_floating_panel::update_content_from_is_minimized,
                     gui_floating_panel::update_title_bar_from_is_minimized,
+                    gui_floating_panel::update_resizer_from_is_minimized,
                     gui_floating_panel::update_panel_from_is_active,
+                    gui_floating_panel::update_cursor_from_resizer_interaction,
                 )
                     .after(UiSystems::Focus),
             );
