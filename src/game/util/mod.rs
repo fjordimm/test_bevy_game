@@ -41,4 +41,14 @@ macro_rules! warned_some {
 pub(crate) use warned_some;
 
 #[derive(Event)]
-pub struct DummyOnCreation(pub Entity);
+pub struct TempOnCreation(pub Entity);
+
+// For when you need to use an event, but don't want it to do anything.
+// That means you should never observe this event, as it may be unpredictable.
+#[derive(Event)]
+pub struct DummyEventToTrigger;
+
+// For when you need to use an event, but don't want it to ever activate.
+// That means you should never trigger this event.
+#[derive(Event)]
+pub struct DummyEventToObserve;

@@ -11,8 +11,8 @@ use crate::game::{
         sets::GlobalStartupOrdering,
     },
     gui::{
-        GuiDiv, GuiDivStyle, GuiFloatingPanel, GuiFloatingPanelTag, GuiIcon, GuiNode, GuiText,
-        constants::MAIN_PADDING, images::UiIconOption,
+        GuiDiv, GuiDivStyle, GuiFloatingPanel, GuiFloatingPanelTag, GuiNode, GuiText,
+        constants::MAIN_PADDING,
     },
     playing_state::sets::PlayingStateOrdering,
     util::warned_ok,

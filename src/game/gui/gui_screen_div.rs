@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::{
     gui::{GuiNode, constants::*, plugin::CollectionOfGuiItems},
-    util::DummyOnCreation,
+    util::TempOnCreation,
 };
 
 #[derive(Component)]
@@ -62,13 +62,13 @@ impl GuiNode for GuiScreenDiv {
         }
 
         commands.add_observer(
-            move |ent: On<DummyOnCreation>, mut query: Query<&mut GuiScreenDivTag>| {
+            move |ent: On<TempOnCreation>, mut query: Query<&mut GuiScreenDivTag>| {
                 if let Ok(mut screen_div) = query.get_mut(ent.0) {
                     screen_div.is_active = self.starts_active;
                 }
             },
         );
-        commands.trigger(DummyOnCreation(entity));
+        commands.trigger(TempOnCreation(entity));
 
         entity
     }

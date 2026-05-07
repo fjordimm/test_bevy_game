@@ -3,11 +3,6 @@ name = "test_bevy_game"
 version = "0.1.0"
 edition = "2024"
 
-# Features
-
-[features]
-# none yet
-
 # Optimization
 
 [profile.dev]
@@ -17,7 +12,10 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy = { version = "0.18.0", features = ["dynamic_linking"] } # TODO: remove dynamic_linking for production
+bevy = { version = "0.18.0", features = [
+    "dev",
+    "dynamic_linking",
+] } # TODO: remove dynamic_linking for production
 bevy_ecs = "0.18.0"
 rand_core = "0.10"
 bevy_rand = "0.14"
