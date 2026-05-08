@@ -75,8 +75,8 @@ impl GuiNode for GuiFloatingPanel {
                 },
                 Node {
                     position_type: PositionType::Absolute,
-                    // left: px(self.pos_x),
-                    // top: px(self.pos_y),
+                    left: px(self.pos_x),
+                    top: px(self.pos_y),
                     border_radius: BorderRadius::all(px(BORDER_RADIUS)),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Column,
