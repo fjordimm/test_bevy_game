@@ -10,10 +10,7 @@ use crate::game::{
         global_resources::{GlobalGuiRoot, KeyBindings},
         sets::GlobalStartupOrdering,
     },
-    gui::{
-        GuiDiv, GuiDivStyle, GuiFloatingPanel, GuiFloatingPanelTag, GuiNode, GuiText,
-        constants::MAIN_PADDING,
-    },
+    gui::{GuiFloatingPanel, GuiFloatingPanelTag, GuiNode, GuiText},
     playing_state::sets::PlayingStateOrdering,
     util::warned_ok,
 };

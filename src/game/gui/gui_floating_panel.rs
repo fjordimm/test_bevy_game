@@ -20,6 +20,7 @@ use crate::game::{
 pub struct GuiFloatingPanelTag {
     pub is_active: bool,
     pub is_minimized: bool,
+    title_bar_div: Entity,
     main_content_div: Entity,
 }
 
@@ -33,12 +34,7 @@ pub struct GuiFloatingPanelMinimizeButtonTag;
 pub struct GuiFloatingPanelXButtonTag;
 
 #[derive(Component)]
-pub struct GuiFloatingPanelMainContentTag {
-    pub inner_div: Entity,
-}
-
-#[derive(Component)]
-pub struct GuiFloatingPanelMainContentInnerTag;
+pub struct GuiFloatingPanelMainContentTag;
 
 #[derive(Component)]
 pub struct GuiFloatingPanelResizerTag;
@@ -79,6 +75,7 @@ impl GuiNode for GuiFloatingPanel {
                 GuiFloatingPanelTag {
                     is_active: true, // Only temporary
                     is_minimized: false,
+                    title_bar_div: Entity::PLACEHOLDER, // Only temporary
                     main_content_div: Entity::PLACEHOLDER, // Only temporary
                 },
                 Node {
@@ -105,7 +102,6 @@ impl GuiNode for GuiFloatingPanel {
                 GuiFloatingPanelTitleBarTag,
                 Button,
                 Node {
-                    align_self: AlignSelf::FlexStart, // Only temporary
                     border_radius: BorderRadius::top(px(BORDER_RADIUS)),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Row,
@@ -123,9 +119,9 @@ impl GuiNode for GuiFloatingPanel {
 
         let main_content_div_inner = commands
             .spawn((
-                GuiFloatingPanelMainContentInnerTag,
                 Node {
                     flex_grow: 1.0,
+                    align_self: AlignSelf::Stretch,
                     overflow: Overflow::scroll(),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Column,
@@ -140,9 +136,7 @@ impl GuiNode for GuiFloatingPanel {
 
         let main_content_div = commands
             .spawn((
-                GuiFloatingPanelMainContentTag {
-                    inner_div: main_content_div_inner,
-                },
+                GuiFloatingPanelMainContentTag,
                 Node {
                     display: Display::Flex,
                     flex_direction: FlexDirection::Column,
@@ -227,7 +221,7 @@ impl GuiNode for GuiFloatingPanel {
             .id();
         commands.entity(title_bar).add_child(title_bar_main_part);
 
-        let title = GuiText::new_small(self.title).spawn(commands, Some(title_bar_main_part));
+        GuiText::new_small(self.title).spawn(commands, Some(title_bar_main_part));
 
         let title_bar_button_part = commands
             .spawn((Node {
@@ -297,6 +291,7 @@ impl GuiNode for GuiFloatingPanel {
             move |me: On<TempOnCreation>, mut query: Query<&mut GuiFloatingPanelTag>| {
                 if let Ok(mut panel) = query.get_mut(me.0) {
                     panel.is_active = self.starts_active;
+                    panel.title_bar_div = title_bar;
                     panel.main_content_div = main_content_div;
                 }
             },
@@ -309,20 +304,6 @@ impl GuiNode for GuiFloatingPanel {
     fn spawn_dyn(self: Box<Self>, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         self.spawn(commands, parent)
     }
-}
-
-pub fn compute_min_width(
-    mut commands: Commands,
-    title_bar_q: Query<
-        (Entity, &ComputedNode),
-        (With<GuiFloatingPanelTitleBarTag>, With<WaitOneFrame>),
-    >,
-) {
-    title_bar_q.iter().for_each(|(entity, computed_node)| {
-        debug!("Thingy malingy: {}", computed_node.size);
-
-        commands.entity(entity).remove::<WaitOneFrame>();
-    });
 }
 
 mod interactions {
@@ -466,6 +447,45 @@ pub fn update_panel_resized(
     }
 }
 
+pub fn update_panel_resized_enforce_min_width(
+    panel_q: Query<&GuiFloatingPanelTag>,
+    title_bar_q: Query<&ComputedNode, With<GuiFloatingPanelTitleBarTag>>,
+    mut main_content_div_q: Query<(&ComputedNode, &mut Node), With<GuiFloatingPanelMainContentTag>>,
+) {
+    panel_q.iter().for_each(|panel| {
+        if let Some(title_bar_computed_node) = warned_ok!(title_bar_q.get(panel.title_bar_div)) {
+            if let Some((main_content_div_computed_node, mut main_content_div_node)) =
+                warned_ok!(main_content_div_q.get_mut(panel.main_content_div))
+            {
+                if main_content_div_computed_node.size.x < title_bar_computed_node.size.x {
+                    main_content_div_node.width = px(title_bar_computed_node.size.x
+                        * title_bar_computed_node.inverse_scale_factor);
+                }
+            }
+        }
+
+        // let title_bar_width =
+        //     if let Some(computed_node) = warned_ok!(title_bar_q.get(panel.title_bar_div)) {
+        //         computed_node.size.x
+        //     } else {
+        //         0.0
+        //     };
+
+        // let main_content_div_width = if let Some(computed_node) =
+        //     warned_ok!(main_content_div_q.get(panel.main_content_div))
+        // {
+        //     computed_node.size.x
+        // } else {
+        //     0.0
+        // };
+
+        // if main_content_div_width < title_bar_width {
+        //     debug!("Ahhhhhhh oh nooooooooooooooooooo");
+        // }
+    });
+}
+
+// TODO: optimize
 pub fn update_content_from_is_minimized(
     mut main_content_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelMainContentTag>>,
     panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
@@ -482,6 +502,7 @@ pub fn update_content_from_is_minimized(
         });
 }
 
+// TODO: optimize
 pub fn update_title_bar_from_is_minimized(
     mut title_bar_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelTitleBarTag>>,
     panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
@@ -498,6 +519,7 @@ pub fn update_title_bar_from_is_minimized(
         });
 }
 
+// TODO: optimize
 pub fn update_resizer_from_is_minimized(
     mut resizer_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelResizerTag>>,
     panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,

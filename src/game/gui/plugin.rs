@@ -21,6 +21,7 @@ impl Plugin for GuiPlugin {
                     gui_screen_div::update_is_active,
                     gui_floating_panel::update_panel_dragged,
                     gui_floating_panel::update_panel_resized,
+                    gui_floating_panel::update_panel_resized_enforce_min_width,
                     gui_floating_panel::update_content_from_is_minimized,
                     gui_floating_panel::update_title_bar_from_is_minimized,
                     gui_floating_panel::update_resizer_from_is_minimized,
@@ -28,10 +29,6 @@ impl Plugin for GuiPlugin {
                     gui_floating_panel::update_cursor_from_resizer_interaction,
                 )
                     .after(UiSystems::Focus),
-            )
-            .add_systems(Update,
-                (gui_floating_panel::compute_min_width,)
-                    .after(UiSystems::Layout)
             );
     }
 }
