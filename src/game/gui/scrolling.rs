@@ -4,7 +4,7 @@ use bevy::{
     prelude::*,
 };
 
-use crate::game::util::warned_ok;
+use crate::game::{gui::constants::*, util::warned_ok};
 
 #[derive(EntityEvent)]
 #[entity_event(propagate, auto_propagate)]
@@ -12,9 +12,6 @@ pub struct GuiScroll {
     entity: Entity,
     delta: Vec2,
 }
-
-// TODO: this is just a temporary value
-const LINE_HEIGHT: f32 = 21.0;
 
 pub fn send_scroll_events(
     mut commands: Commands,
@@ -26,7 +23,7 @@ pub fn send_scroll_events(
         let mut delta = -Vec2::new(mouse_wheel.x, mouse_wheel.y);
 
         if mouse_wheel.unit == MouseScrollUnit::Line {
-            delta *= LINE_HEIGHT;
+            delta *= SCROLL_INTERVAL;
         }
 
         if keyboard_input.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {

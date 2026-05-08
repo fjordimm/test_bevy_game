@@ -41,10 +41,7 @@ pub struct GuiFloatingPanelXButtonTag;
 pub struct GuiFloatingPanelMainContentTag;
 
 #[derive(Component)]
-pub struct GuiFloatingPanelMainContentInnerTag {
-    h_scrollbar: Entity,
-    v_scrollbar: Entity,
-}
+pub struct GuiFloatingPanelMainContentInnerTag;
 
 #[derive(Component)]
 pub struct GuiFloatingPanelResizerTag;
@@ -155,10 +152,7 @@ impl GuiNode for GuiFloatingPanel {
 
         let main_content_div_inner = commands
             .spawn((
-                GuiFloatingPanelMainContentInnerTag {
-                    h_scrollbar: Entity::PLACEHOLDER,
-                    v_scrollbar: Entity::PLACEHOLDER,
-                },
+                GuiFloatingPanelMainContentInnerTag,
                 Interaction::default(),
                 Node {
                     flex_grow: 1.0,
@@ -185,6 +179,53 @@ impl GuiNode for GuiFloatingPanel {
                 .entity(main_content_div_inner)
                 .add_child(child_entity);
         }
+
+        let h_scrollbar = commands
+            .spawn((
+                GuiFloatingPanelHScrollbarTag,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: px(0),
+                    right: px(MAIN_PADDING),
+                    bottom: px(0),
+                    height: px(SCROLLBAR_WIDTH),
+                    display: Display::None,
+                    ..default()
+                },
+                Scrollbar {
+                    target: main_content_div_inner,
+                    orientation: ControlOrientation::Horizontal,
+                    min_thumb_length: SCROLLBAR_THUMB_MIN_HEIGHT,
+                },
+                BackgroundColor(Color::hsv(0.0, 0.5, 0.5)),
+                Children::spawn(Spawn((
+                    CoreScrollbarThumb,
+                    Node {
+                        position_type: PositionType::Absolute,
+                        height: px(SCROLLBAR_WIDTH),
+                        display: Display::Flex,
+                        flex_direction: FlexDirection::Row,
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        padding: UiRect::all(px(
+                            (SCROLLBAR_WIDTH - SCROLLBAR_THUMB_WIDTH) as f32 / 2.0
+                        )),
+                        ..default()
+                    },
+                    BackgroundColor(Color::hsv(180.0, 1.0, 0.5)),
+                    Children::spawn(Spawn((
+                        Node {
+                            flex_grow: 1.0,
+                            height: px(SCROLLBAR_THUMB_WIDTH),
+                            border_radius: BorderRadius::all(px(SCROLLBAR_THUMB_WIDTH)),
+                            ..default()
+                        },
+                        BackgroundColor(Color::hsv(180.0, 1.0, 0.1)),
+                    ))),
+                ))),
+            ))
+            .id();
+        commands.entity(main_content_div).add_child(h_scrollbar);
 
         let v_scrollbar = commands
             .spawn((
@@ -314,18 +355,6 @@ impl GuiNode for GuiFloatingPanel {
         )
         .spawn(commands, Some(corner_resizer));
 
-        // TODO: remove
-        commands.entity(main_content_div_inner).observe(
-            move |me: On<TempOnCreation>,
-                  mut query: Query<&mut GuiFloatingPanelMainContentInnerTag>| {
-                if let Ok(mut main_content_inner) = query.get_mut(me.0) {
-                    // main_content_inner.h_scrollbar = // TODO
-                    main_content_inner.v_scrollbar = v_scrollbar;
-                }
-            },
-        );
-        commands.trigger(TempOnCreation(main_content_div_inner));
-
         commands.entity(entity).observe(
             move |me: On<TempOnCreation>, mut query: Query<&mut GuiFloatingPanelTag>| {
                 if let Ok(mut panel) = query.get_mut(me.0) {
@@ -334,7 +363,7 @@ impl GuiNode for GuiFloatingPanel {
                     panel.main_content_div = main_content_div;
                     panel.main_content_div_inner = main_content_div_inner;
                     panel.resizer = corner_resizer;
-                    // panel.h_scrollbar = ; // TODO
+                    panel.h_scrollbar = h_scrollbar;
                     panel.v_scrollbar = v_scrollbar;
                 }
             },
@@ -499,11 +528,24 @@ pub fn update_panel_resized(
     panel_q: Query<&GuiFloatingPanelTag>,
     mut main_content_q: Query<(&mut Node, &ComputedNode), With<GuiFloatingPanelMainContentTag>>,
     main_content_inner_q: Query<&ComputedNode, With<GuiFloatingPanelMainContentInnerTag>>,
+    mut h_scrollbar_q: Query<
+        &mut Node,
+        (
+            With<GuiFloatingPanelHScrollbarTag>,
+            (
+                Without<GuiFloatingPanelMainContentTag>, // to resolve query conflict
+                Without<GuiFloatingPanelVScrollbarTag>,  // to resolve query conflict
+            ),
+        ),
+    >,
     mut v_scrollbar_q: Query<
         &mut Node,
         (
             With<GuiFloatingPanelVScrollbarTag>,
-            Without<GuiFloatingPanelMainContentTag>, // to resolve query conflict
+            (
+                Without<GuiFloatingPanelMainContentTag>, // to resolve query conflict
+                Without<GuiFloatingPanelHScrollbarTag>,  // to resolve query conflict
+            ),
         ),
     >,
     mut mouse_motion: MessageReader<CursorMoved>,
@@ -532,6 +574,16 @@ pub fn update_panel_resized(
             if let Some(computed_node) =
                 warned_ok!(main_content_inner_q.get(panel.main_content_div_inner))
             {
+                if let Some(mut h_scrollbar_node) =
+                    warned_ok!(h_scrollbar_q.get_mut(panel.h_scrollbar))
+                {
+                    h_scrollbar_node.display =
+                        match computed_node.content_size.x - computed_node.size.x > 0.0 {
+                            false => Display::None,
+                            true => Display::Flex,
+                        }
+                }
+
                 if let Some(mut v_scrollbar_node) =
                     warned_ok!(v_scrollbar_q.get_mut(panel.v_scrollbar))
                 {
