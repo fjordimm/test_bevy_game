@@ -40,7 +40,7 @@ macro_rules! warned_some {
 
 pub(crate) use warned_some;
 
-#[derive(Event)]
+#[derive(EntityEvent)]
 pub struct TempOnCreation(pub Entity);
 
 // For when you need to use an event, but don't want it to do anything.
@@ -52,3 +52,16 @@ pub struct DummyEventToTrigger;
 // That means you should never trigger this event.
 #[derive(Event)]
 pub struct DummyEventToObserve;
+
+pub fn get_entity_components(world: &World, entity: Entity) -> String {
+    let mut ret = String::from("-----Entity-----");
+
+    if let Some(components) = warned_ok!(world.inspect_entity(entity)) {
+        components.into_iter().for_each(|component_info| {
+            ret.push_str("\n    ");
+            ret.push_str(&component_info.name().as_string());
+        });
+    }
+
+    ret
+}

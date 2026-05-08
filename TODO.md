@@ -16,6 +16,7 @@
 - Possible optimization: don't use commands.entity(...) but use EntityCommands directly, wherever possible.
 
 Currently on:
+- Be consistent with `commands: Commands` vs `commands: &Commands`.
 - Be consistent on when to use the 'Tag' suffix.
 - Figure out randomness.
 - Make a debug menu.

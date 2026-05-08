@@ -69,14 +69,17 @@ impl GuiFloatingPanel {
     }
 }
 
+#[derive(Component)]
+pub struct WaitOneFrame;
+
 impl GuiNode for GuiFloatingPanel {
     fn spawn(self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         let entity = commands
             .spawn((
                 GuiFloatingPanelTag {
-                    is_active: true,
+                    is_active: true, // Only temporary
                     is_minimized: false,
-                    main_content_div: Entity::PLACEHOLDER,
+                    main_content_div: Entity::PLACEHOLDER, // Only temporary
                 },
                 Node {
                     position_type: PositionType::Absolute,
@@ -102,6 +105,7 @@ impl GuiNode for GuiFloatingPanel {
                 GuiFloatingPanelTitleBarTag,
                 Button,
                 Node {
+                    align_self: AlignSelf::FlexStart, // Only temporary
                     border_radius: BorderRadius::top(px(BORDER_RADIUS)),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Row,
@@ -112,6 +116,7 @@ impl GuiNode for GuiFloatingPanel {
                     ..default()
                 },
                 BackgroundColor(BUTTON_COLOR_MAIN),
+                WaitOneFrame,
             ))
             .id();
         commands.entity(entity).add_child(title_bar);
@@ -222,7 +227,7 @@ impl GuiNode for GuiFloatingPanel {
             .id();
         commands.entity(title_bar).add_child(title_bar_main_part);
 
-        GuiText::new_small(self.title).spawn(commands, Some(title_bar_main_part));
+        let title = GuiText::new_small(self.title).spawn(commands, Some(title_bar_main_part));
 
         let title_bar_button_part = commands
             .spawn((Node {
@@ -288,7 +293,7 @@ impl GuiNode for GuiFloatingPanel {
         )
         .spawn(commands, Some(corner_resizer));
 
-        commands.add_observer(
+        commands.entity(entity).observe(
             move |me: On<TempOnCreation>, mut query: Query<&mut GuiFloatingPanelTag>| {
                 if let Ok(mut panel) = query.get_mut(me.0) {
                     panel.is_active = self.starts_active;
@@ -304,6 +309,20 @@ impl GuiNode for GuiFloatingPanel {
     fn spawn_dyn(self: Box<Self>, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         self.spawn(commands, parent)
     }
+}
+
+pub fn compute_min_width(
+    mut commands: Commands,
+    title_bar_q: Query<
+        (Entity, &ComputedNode),
+        (With<GuiFloatingPanelTitleBarTag>, With<WaitOneFrame>),
+    >,
+) {
+    title_bar_q.iter().for_each(|(entity, computed_node)| {
+        debug!("Thingy malingy: {}", computed_node.size);
+
+        commands.entity(entity).remove::<WaitOneFrame>();
+    });
 }
 
 mod interactions {
@@ -399,8 +418,7 @@ pub fn update_panel_resized(
     >,
     mut panel_being_resized: Local<Option<Entity>>,
     panel_q: Query<&GuiFloatingPanelTag>,
-    mut main_content_div_q: Query<(&GuiFloatingPanelMainContentTag, &mut Node, &ComputedNode)>,
-    main_content_div_inner_q: Query<&ComputedNode, With<GuiFloatingPanelMainContentInnerTag>>,
+    mut main_content_div_q: Query<(&mut Node, &ComputedNode)>,
     mut mouse_motion: MessageReader<CursorMoved>,
 ) {
     interaction_q
@@ -423,17 +441,9 @@ pub fn update_panel_resized(
                 delta_y += msg.delta.map(|d| d.y).unwrap_or(0.0);
             });
 
-            if let Some((main_content_div, mut main_content_div_node, computed_node)) =
+            if let Some((mut main_content_div_node, computed_node)) =
                 warned_ok!(main_content_div_q.get_mut(panel.main_content_div))
             {
-                let min_width = if let Some(inner) =
-                    warned_ok!(main_content_div_inner_q.get(main_content_div.inner_div))
-                {
-                    inner.size.x * inner.inverse_scale_factor
-                } else {
-                    0.0
-                };
-
                 if !matches!(main_content_div_node.width, Val::Px(_)) {
                     main_content_div_node.width =
                         px(computed_node.size.x * computed_node.inverse_scale_factor);
@@ -446,10 +456,6 @@ pub fn update_panel_resized(
 
                 if let Val::Px(ref mut width) = main_content_div_node.width {
                     *width += delta_x;
-
-                    if *width < min_width {
-                        *width = min_width;
-                    }
                 }
 
                 if let Val::Px(ref mut height) = main_content_div_node.height {

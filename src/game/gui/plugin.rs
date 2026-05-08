@@ -1,6 +1,10 @@
 use bevy::{prelude::*, ui::UiSystems};
 
-use crate::game::gui::{GuiNode, gui_button, gui_div, gui_floating_panel, gui_screen_div};
+use crate::game::gui::{
+    GuiNode, gui_button, gui_div,
+    gui_floating_panel::{self},
+    gui_screen_div,
+};
 
 pub struct GuiPlugin;
 
@@ -24,6 +28,10 @@ impl Plugin for GuiPlugin {
                     gui_floating_panel::update_cursor_from_resizer_interaction,
                 )
                     .after(UiSystems::Focus),
+            )
+            .add_systems(Update,
+                (gui_floating_panel::compute_min_width,)
+                    .after(UiSystems::Layout)
             );
     }
 }

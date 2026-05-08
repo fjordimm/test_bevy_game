@@ -61,7 +61,7 @@ impl GuiNode for GuiScreenDiv {
             commands.entity(entity).add_child(child_entity);
         }
 
-        commands.add_observer(
+        commands.entity(entity).observe(
             move |ent: On<TempOnCreation>, mut query: Query<&mut GuiScreenDivTag>| {
                 if let Ok(mut screen_div) = query.get_mut(ent.0) {
                     screen_div.is_active = self.starts_active;
