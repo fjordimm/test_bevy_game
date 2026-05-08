@@ -1,10 +1,8 @@
-use std::time::Duration;
-
-use bevy::{prelude::*, time::common_conditions::on_timer, ui::UiSystems};
+use bevy::{prelude::*, ui::UiSystems};
 
 use crate::game::gui::{
     GuiNode, gui_button, gui_div,
-    gui_floating_panel::{self, GuiFloatingPanelMainContentTag},
+    gui_floating_panel::{self},
     gui_screen_div, scrolling,
 };
 
@@ -23,25 +21,18 @@ impl Plugin for GuiPlugin {
                     gui_button::update,
                     gui_div::update_is_active,
                     gui_screen_div::update_is_active,
+                    gui_floating_panel::update_panel_from_is_active,
+                    gui_floating_panel::update_main_content_from_is_minimized,
+                    gui_floating_panel::update_title_bar_from_is_minimized,
+                    gui_floating_panel::update_resizer_from_is_minimized,
                     gui_floating_panel::update_panel_dragged,
                     gui_floating_panel::update_panel_resized,
                     gui_floating_panel::update_panel_resized_enforce_min_width,
-                    gui_floating_panel::update_content_from_is_minimized,
-                    gui_floating_panel::update_title_bar_from_is_minimized,
-                    gui_floating_panel::update_resizer_from_is_minimized,
-                    gui_floating_panel::update_panel_from_is_active,
                     gui_floating_panel::update_cursor_from_resizer_interaction,
                 )
                     .after(UiSystems::Focus),
-            )
-            .add_systems(Update, funny1.run_if(on_timer(Duration::from_secs(1))));
+            );
     }
-}
-
-fn funny1(query: Query<&Node, With<GuiFloatingPanelMainContentTag>>) {
-    query.iter().for_each(|node| {
-        debug!("{:?}", node.width);
-    });
 }
 
 pub struct CollectionOfGuiItems(pub Vec<Box<dyn GuiNode>>);

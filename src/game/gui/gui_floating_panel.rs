@@ -11,7 +11,7 @@ use bevy::{
 use crate::game::{
     gui::{
         GuiButton, GuiIcon, GuiNode, GuiText, constants::*, gui_button::GuiButtonStyle,
-        images::UiIconOption, plugin::CollectionOfGuiItems,
+        images::UiIconOption, plugin::CollectionOfGuiItems, scrolling::ShowVScrollbar,
     },
     util::{TempOnCreation, warned_ok},
 };
@@ -22,6 +22,9 @@ pub struct GuiFloatingPanelTag {
     pub is_minimized: bool,
     title_bar_div: Entity,
     main_content_div: Entity,
+    resizer: Entity,
+    h_scrollbar: Entity,
+    v_scrollbar: Entity,
 }
 
 #[derive(Component)]
@@ -37,10 +40,19 @@ pub struct GuiFloatingPanelXButtonTag;
 pub struct GuiFloatingPanelMainContentTag;
 
 #[derive(Component)]
-pub struct GuiFloatingPanelMainContentInnerTag;
+pub struct GuiFloatingPanelMainContentInnerTag {
+    h_scrollbar: Entity,
+    v_scrollbar: Entity,
+}
 
 #[derive(Component)]
 pub struct GuiFloatingPanelResizerTag;
+
+#[derive(Component)]
+pub struct GuiFloatingPanelHScrollbarTag;
+
+#[derive(Component)]
+pub struct GuiFloatingPanelVScrollbarTag;
 
 pub struct GuiFloatingPanel {
     starts_active: bool,
@@ -80,6 +92,9 @@ impl GuiNode for GuiFloatingPanel {
                     is_minimized: false,
                     title_bar_div: Entity::PLACEHOLDER, // Only temporary
                     main_content_div: Entity::PLACEHOLDER, // Only temporary
+                    resizer: Entity::PLACEHOLDER,       // Only temporary
+                    h_scrollbar: Entity::PLACEHOLDER,   // Only temporary
+                    v_scrollbar: Entity::PLACEHOLDER,   // Only temporary
                 },
                 Node {
                     position_type: PositionType::Absolute,
@@ -138,7 +153,10 @@ impl GuiNode for GuiFloatingPanel {
 
         let main_content_div_inner = commands
             .spawn((
-                GuiFloatingPanelMainContentInnerTag,
+                GuiFloatingPanelMainContentInnerTag {
+                    h_scrollbar: Entity::PLACEHOLDER,
+                    v_scrollbar: Entity::PLACEHOLDER,
+                },
                 Interaction::default(),
                 Node {
                     flex_grow: 1.0,
@@ -155,7 +173,6 @@ impl GuiNode for GuiFloatingPanel {
                 ScrollPosition::default(),
             ))
             .id();
-
         commands
             .entity(main_content_div)
             .add_child(main_content_div_inner);
@@ -169,12 +186,14 @@ impl GuiNode for GuiFloatingPanel {
 
         let v_scrollbar = commands
             .spawn((
+                GuiFloatingPanelVScrollbarTag,
                 Node {
                     position_type: PositionType::Absolute,
                     top: px(0),
                     bottom: px(MAIN_PADDING),
                     right: px(0),
                     width: px(SCROLLBAR_WIDTH),
+                    display: Display::Flex,
                     ..default()
                 },
                 Scrollbar {
@@ -211,6 +230,7 @@ impl GuiNode for GuiFloatingPanel {
             ))
             .id();
         commands.entity(main_content_div).add_child(v_scrollbar);
+        commands.entity(v_scrollbar).observe(on_show_v_scrollbar);
 
         let title_bar_main_part = commands
             .spawn((Node {
@@ -293,12 +313,27 @@ impl GuiNode for GuiFloatingPanel {
         )
         .spawn(commands, Some(corner_resizer));
 
+        // GuiFloatingPanelMainContentInnerTag
+        commands.entity(main_content_div_inner).observe(
+            move |me: On<TempOnCreation>,
+                  mut query: Query<&mut GuiFloatingPanelMainContentInnerTag>| {
+                if let Ok(mut main_content_inner) = query.get_mut(me.0) {
+                    // main_content_inner.h_scrollbar = // TODO
+                    main_content_inner.v_scrollbar = v_scrollbar;
+                }
+            },
+        );
+        commands.trigger(TempOnCreation(main_content_div_inner));
+
         commands.entity(entity).observe(
             move |me: On<TempOnCreation>, mut query: Query<&mut GuiFloatingPanelTag>| {
                 if let Ok(mut panel) = query.get_mut(me.0) {
                     panel.is_active = self.starts_active;
                     panel.title_bar_div = title_bar;
                     panel.main_content_div = main_content_div;
+                    panel.resizer = corner_resizer;
+                    // panel.h_scrollbar = ; // TODO
+                    panel.v_scrollbar = v_scrollbar;
                 }
             },
         );
@@ -309,6 +344,23 @@ impl GuiNode for GuiFloatingPanel {
 
     fn spawn_dyn(self: Box<Self>, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         self.spawn(commands, parent)
+    }
+}
+
+fn on_show_v_scrollbar(
+    ev: On<ShowVScrollbar>,
+    container_q: Query<&GuiFloatingPanelMainContentInnerTag>,
+    mut scrollbar_q: Query<&mut Node, With<GuiFloatingPanelVScrollbarTag>>,
+) {
+    debug!("got event");
+
+    if let Ok(container) = container_q.get(ev.entity) {
+        if let Some(mut scrollbar) = warned_ok!(scrollbar_q.get_mut(container.v_scrollbar)) {
+            scrollbar.display = match ev.show {
+                false => Display::None,
+                true => Display::Flex,
+            }
+        }
     }
 }
 
@@ -349,6 +401,75 @@ pub fn x_button_observer(
         }
     }
 }
+
+pub fn update_panel_from_is_active(
+    mut panel_q: Query<(&GuiFloatingPanelTag, &mut Node), Changed<GuiFloatingPanelTag>>,
+) {
+    panel_q.iter_mut().for_each(|(panel, mut panel_node)| {
+        panel_node.display = match panel.is_active {
+            false => Display::None,
+            true => Display::Flex,
+        }
+    });
+}
+
+pub fn update_main_content_from_is_minimized(
+    panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
+    mut main_content_q: Query<&mut Node, With<GuiFloatingPanelMainContentTag>>,
+) {
+    panel_q.iter().for_each(|panel| {
+        if let Some(mut main_content_node) =
+            warned_ok!(main_content_q.get_mut(panel.main_content_div))
+        {
+            main_content_node.display = match panel.is_minimized {
+                false => Display::Flex,
+                true => Display::None,
+            }
+        }
+    });
+}
+
+pub fn update_title_bar_from_is_minimized(
+    panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
+    mut title_bar_q: Query<&mut Node, With<GuiFloatingPanelTitleBarTag>>,
+) {
+    panel_q.iter().for_each(|panel| {
+        if let Some(mut title_bar_node) = warned_ok!(title_bar_q.get_mut(panel.title_bar_div)) {
+            title_bar_node.border_radius = match panel.is_minimized {
+                false => BorderRadius::top(px(BORDER_RADIUS)),
+                true => BorderRadius::all(px(BORDER_RADIUS)),
+            }
+        }
+    });
+}
+
+pub fn update_resizer_from_is_minimized(
+    panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
+    mut resizer_q: Query<&mut Node, With<GuiFloatingPanelResizerTag>>,
+) {
+    panel_q.iter().for_each(|panel| {
+        if let Some(mut resizer_node) = warned_ok!(resizer_q.get_mut(panel.resizer)) {
+            resizer_node.display = match panel.is_minimized {
+                false => Display::Flex,
+                true => Display::None,
+            }
+        }
+    });
+}
+
+// pub fn update_scrollbars_from_is_minimized(
+//     panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
+//     mut v_scrollbar_q: Query<&mut Node, With<GuiFloatingPanelVScrollbarTag>>,
+// ) {
+//     panel_q.iter().for_each(|panel| {
+//         if let Some(mut v_scrollbar_node) = warned_ok!(v_scrollbar_q.get_mut(panel.v_scrollbar)) {
+//             v_scrollbar_node.display = match panel.is_minimized {
+//                 false => Display::Flex,
+//                 true => Display::None,
+//             }
+//         }
+//     });
+// }
 
 pub fn update_panel_dragged(
     interaction_q: Query<
@@ -474,68 +595,6 @@ pub fn update_panel_resized_enforce_min_width(
                     }
                 }
             }
-        }
-    });
-}
-
-// TODO: optimize
-pub fn update_content_from_is_minimized(
-    mut main_content_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelMainContentTag>>,
-    panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
-) {
-    main_content_q
-        .iter_mut()
-        .for_each(|(childof, mut main_content_node)| {
-            if let Ok(panel) = panel_q.get(childof.0) {
-                main_content_node.display = match panel.is_minimized {
-                    false => Display::Flex,
-                    true => Display::None,
-                }
-            }
-        });
-}
-
-// TODO: optimize
-pub fn update_title_bar_from_is_minimized(
-    mut title_bar_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelTitleBarTag>>,
-    panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
-) {
-    title_bar_q
-        .iter_mut()
-        .for_each(|(childof, mut title_bar_node)| {
-            if let Ok(panel) = panel_q.get(childof.0) {
-                title_bar_node.border_radius = match panel.is_minimized {
-                    false => BorderRadius::top(px(BORDER_RADIUS)),
-                    true => BorderRadius::all(px(BORDER_RADIUS)),
-                }
-            }
-        });
-}
-
-// TODO: optimize
-pub fn update_resizer_from_is_minimized(
-    mut resizer_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelResizerTag>>,
-    panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
-) {
-    resizer_q
-        .iter_mut()
-        .for_each(|(childof, mut resizer_node)| {
-            if let Ok(panel) = panel_q.get(childof.0) {
-                resizer_node.display = match panel.is_minimized {
-                    false => Display::Flex,
-                    true => Display::None,
-                }
-            }
-        });
-}
-
-pub fn update_panel_from_is_active(
-    mut panel_q: Query<(&GuiFloatingPanelTag, &mut Node), Changed<GuiFloatingPanelTag>>,
-) {
-    panel_q.iter_mut().for_each(|(panel, mut panel_node)| {
-        panel_node.display = match panel.is_active {
-            false => Display::None,
-            true => Display::Flex,
         }
     });
 }

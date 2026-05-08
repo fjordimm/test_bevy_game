@@ -4,13 +4,25 @@ use bevy::{
     prelude::*,
 };
 
-use crate::game::util::warned_ok;
+use crate::game::{gui::gui_floating_panel::GuiFloatingPanelMainContentInnerTag, util::warned_ok};
 
 #[derive(EntityEvent)]
 #[entity_event(propagate, auto_propagate)]
 pub struct GuiScroll {
     entity: Entity,
     delta: Vec2,
+}
+
+#[derive(EntityEvent)]
+pub struct ShowHScrollbar {
+    pub entity: Entity,
+    pub show: bool,
+}
+
+#[derive(EntityEvent)]
+pub struct ShowVScrollbar {
+    pub entity: Entity,
+    pub show: bool,
 }
 
 // TODO: this is just a temporary value
@@ -43,13 +55,24 @@ pub fn send_scroll_events(
 
 pub fn on_scroll_handler(
     mut scroll: On<GuiScroll>,
-    mut query: Query<(&mut ScrollPosition, &Node, &ComputedNode)>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut ScrollPosition, &Node, &ComputedNode)>,
 ) {
-    if let Some((mut scroll_position, node, computed_node)) =
+    if let Some((entity, mut scroll_position, node, computed_node)) =
         warned_ok!(query.get_mut(scroll.entity))
     {
         let max_offset = (computed_node.content_size() - computed_node.size())
             * computed_node.inverse_scale_factor();
+
+        commands.trigger(ShowHScrollbar {
+            entity,
+            show: max_offset.x >= 0.0,
+        });
+
+        commands.trigger(ShowVScrollbar {
+            entity,
+            show: max_offset.y >= 0.0,
+        });
 
         let delta = &mut scroll.delta;
         if node.overflow.x == OverflowAxis::Scroll && delta.x != 0.0 {
