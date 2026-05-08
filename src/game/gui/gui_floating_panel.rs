@@ -11,7 +11,7 @@ use bevy::{
 use crate::game::{
     gui::{
         GuiButton, GuiIcon, GuiNode, GuiText, constants::*, gui_button::GuiButtonStyle,
-        images::UiIconOption, plugin::CollectionOfGuiItems, scrolling::ShowVScrollbar,
+        images::UiIconOption, plugin::CollectionOfGuiItems,
     },
     util::{TempOnCreation, warned_ok},
 };
@@ -22,6 +22,7 @@ pub struct GuiFloatingPanelTag {
     pub is_minimized: bool,
     title_bar_div: Entity,
     main_content_div: Entity,
+    main_content_div_inner: Entity,
     resizer: Entity,
     h_scrollbar: Entity,
     v_scrollbar: Entity,
@@ -92,6 +93,7 @@ impl GuiNode for GuiFloatingPanel {
                     is_minimized: false,
                     title_bar_div: Entity::PLACEHOLDER, // Only temporary
                     main_content_div: Entity::PLACEHOLDER, // Only temporary
+                    main_content_div_inner: Entity::PLACEHOLDER, // Only temporary
                     resizer: Entity::PLACEHOLDER,       // Only temporary
                     h_scrollbar: Entity::PLACEHOLDER,   // Only temporary
                     v_scrollbar: Entity::PLACEHOLDER,   // Only temporary
@@ -193,7 +195,7 @@ impl GuiNode for GuiFloatingPanel {
                     bottom: px(MAIN_PADDING),
                     right: px(0),
                     width: px(SCROLLBAR_WIDTH),
-                    display: Display::Flex,
+                    display: Display::None,
                     ..default()
                 },
                 Scrollbar {
@@ -230,7 +232,6 @@ impl GuiNode for GuiFloatingPanel {
             ))
             .id();
         commands.entity(main_content_div).add_child(v_scrollbar);
-        commands.entity(v_scrollbar).observe(on_show_v_scrollbar);
 
         let title_bar_main_part = commands
             .spawn((Node {
@@ -313,7 +314,7 @@ impl GuiNode for GuiFloatingPanel {
         )
         .spawn(commands, Some(corner_resizer));
 
-        // GuiFloatingPanelMainContentInnerTag
+        // TODO: remove
         commands.entity(main_content_div_inner).observe(
             move |me: On<TempOnCreation>,
                   mut query: Query<&mut GuiFloatingPanelMainContentInnerTag>| {
@@ -331,6 +332,7 @@ impl GuiNode for GuiFloatingPanel {
                     panel.is_active = self.starts_active;
                     panel.title_bar_div = title_bar;
                     panel.main_content_div = main_content_div;
+                    panel.main_content_div_inner = main_content_div_inner;
                     panel.resizer = corner_resizer;
                     // panel.h_scrollbar = ; // TODO
                     panel.v_scrollbar = v_scrollbar;
@@ -344,23 +346,6 @@ impl GuiNode for GuiFloatingPanel {
 
     fn spawn_dyn(self: Box<Self>, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         self.spawn(commands, parent)
-    }
-}
-
-fn on_show_v_scrollbar(
-    ev: On<ShowVScrollbar>,
-    container_q: Query<&GuiFloatingPanelMainContentInnerTag>,
-    mut scrollbar_q: Query<&mut Node, With<GuiFloatingPanelVScrollbarTag>>,
-) {
-    debug!("got event");
-
-    if let Ok(container) = container_q.get(ev.entity) {
-        if let Some(mut scrollbar) = warned_ok!(scrollbar_q.get_mut(container.v_scrollbar)) {
-            scrollbar.display = match ev.show {
-                false => Display::None,
-                true => Display::Flex,
-            }
-        }
     }
 }
 
@@ -457,20 +442,6 @@ pub fn update_resizer_from_is_minimized(
     });
 }
 
-// pub fn update_scrollbars_from_is_minimized(
-//     panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
-//     mut v_scrollbar_q: Query<&mut Node, With<GuiFloatingPanelVScrollbarTag>>,
-// ) {
-//     panel_q.iter().for_each(|panel| {
-//         if let Some(mut v_scrollbar_node) = warned_ok!(v_scrollbar_q.get_mut(panel.v_scrollbar)) {
-//             v_scrollbar_node.display = match panel.is_minimized {
-//                 false => Display::Flex,
-//                 true => Display::None,
-//             }
-//         }
-//     });
-// }
-
 pub fn update_panel_dragged(
     interaction_q: Query<
         (&Interaction, &ChildOf),
@@ -526,7 +497,15 @@ pub fn update_panel_resized(
     >,
     mut panel_being_resized: Local<Option<Entity>>,
     panel_q: Query<&GuiFloatingPanelTag>,
-    mut main_content_div_q: Query<(&mut Node, &ComputedNode)>,
+    mut main_content_q: Query<(&mut Node, &ComputedNode), With<GuiFloatingPanelMainContentTag>>,
+    main_content_inner_q: Query<&ComputedNode, With<GuiFloatingPanelMainContentInnerTag>>,
+    mut v_scrollbar_q: Query<
+        &mut Node,
+        (
+            With<GuiFloatingPanelVScrollbarTag>,
+            Without<GuiFloatingPanelMainContentTag>, // to resolve query conflict
+        ),
+    >,
     mut mouse_motion: MessageReader<CursorMoved>,
 ) {
     interaction_q
@@ -549,24 +528,40 @@ pub fn update_panel_resized(
                 delta_y += msg.delta.map(|d| d.y).unwrap_or(0.0);
             });
 
-            if let Some((mut main_content_div_node, computed_node)) =
-                warned_ok!(main_content_div_q.get_mut(panel.main_content_div))
+            // Show/hide the scrollbars
+            if let Some(computed_node) =
+                warned_ok!(main_content_inner_q.get(panel.main_content_div_inner))
             {
-                if !matches!(main_content_div_node.width, Val::Px(_)) {
-                    main_content_div_node.width =
-                        px(computed_node.size.x * computed_node.inverse_scale_factor);
+                if let Some(mut v_scrollbar_node) =
+                    warned_ok!(v_scrollbar_q.get_mut(panel.v_scrollbar))
+                {
+                    v_scrollbar_node.display =
+                        match computed_node.content_size.y - computed_node.size.y > 0.0 {
+                            false => Display::None,
+                            true => Display::Flex,
+                        }
+                }
+            }
+
+            // Resize the main content div
+            if let Some((mut main_content_node, computed_node)) =
+                warned_ok!(main_content_q.get_mut(panel.main_content_div))
+            {
+                if !matches!(main_content_node.width, Val::Px(_)) {
+                    main_content_node.width =
+                        px(computed_node.size.x * computed_node.inverse_scale_factor + 1.0);
                 }
 
-                if !matches!(main_content_div_node.height, Val::Px(_)) {
-                    main_content_div_node.height =
-                        px(computed_node.size.y * computed_node.inverse_scale_factor);
+                if !matches!(main_content_node.height, Val::Px(_)) {
+                    main_content_node.height =
+                        px(computed_node.size.y * computed_node.inverse_scale_factor + 1.0);
                 }
 
-                if let Val::Px(ref mut width) = main_content_div_node.width {
+                if let Val::Px(ref mut width) = main_content_node.width {
                     *width += delta_x;
                 }
 
-                if let Val::Px(ref mut height) = main_content_div_node.height {
+                if let Val::Px(ref mut height) = main_content_node.height {
                     *height += delta_y;
                 }
             }
@@ -587,9 +582,9 @@ pub fn update_panel_resized_enforce_min_width(
                 // so that it doesn't do it when the panel is minimized
                 if main_content_div_computed_node.size.x > 0.0 {
                     if main_content_div_computed_node.size.x < title_bar_computed_node.size.x {
-                        main_content_div_node.min_width = px(title_bar_computed_node.size.x
-                            * title_bar_computed_node.inverse_scale_factor
-                            - 1.0);
+                        // main_content_div_node.min_width = px(title_bar_computed_node.size.x
+                        //     * title_bar_computed_node.inverse_scale_factor
+                        //     - 1.0); // TODO: should I include this or not?
                         main_content_div_node.width = px(title_bar_computed_node.size.x
                             * title_bar_computed_node.inverse_scale_factor);
                     }
