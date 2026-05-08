@@ -7,6 +7,7 @@ mod gui_node;
 mod gui_root_template;
 mod gui_screen_div;
 mod gui_text;
+mod scrolling;
 
 pub mod constants;
 pub mod fonts;

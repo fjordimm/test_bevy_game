@@ -1,9 +1,7 @@
 use bevy::{prelude::*, ui::UiSystems};
 
 use crate::game::gui::{
-    GuiNode, gui_button, gui_div,
-    gui_floating_panel::{self},
-    gui_screen_div,
+    GuiNode, gui_button, gui_div, gui_floating_panel, gui_screen_div, scrolling,
 };
 
 pub struct GuiPlugin;
@@ -12,6 +10,8 @@ impl Plugin for GuiPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
+            .add_systems(Update, scrolling::send_scroll_events)
+            .add_observer(scrolling::on_scroll_handler)
             .add_observer(gui_floating_panel::minimize_button_observer)
             .add_observer(gui_floating_panel::x_button_observer)
             .add_systems(Update,
@@ -26,6 +26,7 @@ impl Plugin for GuiPlugin {
                     gui_floating_panel::update_title_bar_from_is_minimized,
                     gui_floating_panel::update_resizer_from_is_minimized,
                     gui_floating_panel::update_panel_from_is_active,
+                    // gui_floating_panel::update_main_content_from_mouse_scroll,
                     gui_floating_panel::update_cursor_from_resizer_interaction,
                 )
                     .after(UiSystems::Focus),

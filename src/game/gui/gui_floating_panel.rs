@@ -2,6 +2,8 @@
     Note: if there are multiple floating panels, they will not order themselves
 */
 
+use std::ops::Add;
+
 use bevy::{
     prelude::*,
     ui_widgets::{ControlOrientation, CoreScrollbarThumb, Scrollbar},
@@ -35,6 +37,9 @@ pub struct GuiFloatingPanelXButtonTag;
 
 #[derive(Component)]
 pub struct GuiFloatingPanelMainContentTag;
+
+#[derive(Component)]
+pub struct GuiFloatingPanelMainContentInnerTag;
 
 #[derive(Component)]
 pub struct GuiFloatingPanelResizerTag;
@@ -119,6 +124,8 @@ impl GuiNode for GuiFloatingPanel {
 
         let main_content_div_inner = commands
             .spawn((
+                GuiFloatingPanelMainContentInnerTag,
+                Interaction::default(),
                 Node {
                     flex_grow: 1.0,
                     align_self: AlignSelf::Stretch,
@@ -131,6 +138,7 @@ impl GuiNode for GuiFloatingPanel {
                     ..default()
                 },
                 BackgroundColor(Color::hsv(270.0, 1.0, 0.7)),
+                ScrollPosition::default(),
             ))
             .id();
 
@@ -458,32 +466,14 @@ pub fn update_panel_resized_enforce_min_width(
                 warned_ok!(main_content_div_q.get_mut(panel.main_content_div))
             {
                 if main_content_div_computed_node.size.x < title_bar_computed_node.size.x {
-                    main_content_div_node.min_width = px((title_bar_computed_node.size.x - 1.0)
-                        * title_bar_computed_node.inverse_scale_factor);
+                    main_content_div_node.min_width = px(title_bar_computed_node.size.x
+                        * title_bar_computed_node.inverse_scale_factor
+                        - 1.0);
                     main_content_div_node.width = px(title_bar_computed_node.size.x
                         * title_bar_computed_node.inverse_scale_factor);
                 }
             }
         }
-
-        // let title_bar_width =
-        //     if let Some(computed_node) = warned_ok!(title_bar_q.get(panel.title_bar_div)) {
-        //         computed_node.size.x
-        //     } else {
-        //         0.0
-        //     };
-
-        // let main_content_div_width = if let Some(computed_node) =
-        //     warned_ok!(main_content_div_q.get(panel.main_content_div))
-        // {
-        //     computed_node.size.x
-        // } else {
-        //     0.0
-        // };
-
-        // if main_content_div_width < title_bar_width {
-        //     debug!("Ahhhhhhh oh nooooooooooooooooooo");
-        // }
     });
 }
 
@@ -548,6 +538,21 @@ pub fn update_panel_from_is_active(
         }
     });
 }
+
+// pub fn update_main_content_from_mouse_scroll(
+//     mut main_content_inner_q: Query<
+//         (&Interaction, &mut ScrollPosition),
+//         With<GuiFloatingPanelMainContentInnerTag>,
+//     >,
+// ) {
+//     main_content_inner_q
+//         .iter_mut()
+//         .for_each(|(interaction, mut scroll_position)| {
+//             if *interaction == Interaction::Hovered {
+//                 scroll_position.y += 1.0;
+//             }
+//         });
+// }
 
 pub fn update_cursor_from_resizer_interaction(
     mut commands: Commands,
