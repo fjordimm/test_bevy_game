@@ -16,7 +16,7 @@
 - Possible optimization: don't use commands.entity(...) but use EntityCommands directly, wherever possible.
 
 Currently on:
-- Change all the i32 to f32 in constants
+- Change all the i32 to f32 in constants. Also make a constant for everywhere you use Color::WHITE.
 - Don't use '_div' in gui_floating_panel.
 - Be consistent with `commands: Commands` vs `commands: &Commands`.
 - Be consistent on when to use the 'Tag' suffix.

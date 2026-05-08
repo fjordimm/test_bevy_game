@@ -10,7 +10,7 @@ pub const MINOR_PADDING: i32 = 5;
 pub const MAIN_FONT: FontOption = FontOption::Sans;
 pub fn main_box_shadow() -> BoxShadow {
     BoxShadow::new(
-        Color::srgba(0.0, 0.0, 0.0, 0.5),
+        Color::hsva(0.0, 0.0, 0.0, 0.5),
         Val::ZERO,
         Val::ZERO,
         Val::ZERO,
@@ -29,8 +29,9 @@ pub const BUTTON_COLOR_MAIN: Color = Color::hsv(185.0, 0.1, 0.25);
 pub const BUTTON_COLOR_HOVER: Color = Color::hsv(185.0, 0.1, 0.2);
 pub const BUTTON_COLOR_PRESSED: Color = Color::hsv(185.0, 0.1, 0.15);
 
+pub const SCROLLBAR_COLOR: Color = Color::WHITE;
 pub const SCROLLBAR_WIDTH: i32 = 10;
-pub const SCROLLBAR_THUMB_WIDTH: i32 = 5;
+pub const SCROLLBAR_THUMB_WIDTH: i32 = 2;
 pub const SCROLLBAR_THUMB_MIN_HEIGHT: f32 = 20.0;
 pub const SCROLL_INTERVAL: f32 = 10.0;
 

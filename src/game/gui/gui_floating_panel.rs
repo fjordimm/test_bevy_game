@@ -142,10 +142,8 @@ impl GuiNode for GuiFloatingPanel {
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::FlexStart,
                     align_items: AlignItems::FlexStart,
-                    padding: UiRect::all(px(MAIN_PADDING)),
                     ..default()
                 },
-                BackgroundColor(Color::hsv(90.0, 1.0, 0.8)),
             ))
             .id();
         commands.entity(entity).add_child(main_content_div);
@@ -153,7 +151,6 @@ impl GuiNode for GuiFloatingPanel {
         let main_content_div_inner = commands
             .spawn((
                 GuiFloatingPanelMainContentInnerTag,
-                Interaction::default(),
                 Node {
                     flex_grow: 1.0,
                     align_self: AlignSelf::Stretch,
@@ -162,10 +159,10 @@ impl GuiNode for GuiFloatingPanel {
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::FlexStart,
                     align_items: AlignItems::FlexStart,
+                    padding: UiRect::all(px(MAIN_PADDING)),
                     row_gap: px(MAIN_PADDING),
                     ..default()
                 },
-                BackgroundColor(Color::hsv(270.0, 1.0, 0.7)),
                 ScrollPosition::default(),
             ))
             .id();
@@ -185,8 +182,8 @@ impl GuiNode for GuiFloatingPanel {
                 GuiFloatingPanelHScrollbarTag,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: px(0),
-                    right: px(MAIN_PADDING),
+                    left: px(MAIN_PADDING),
+                    right: px(MAIN_PADDING as f32 * 1.75),
                     bottom: px(0),
                     height: px(SCROLLBAR_WIDTH),
                     display: Display::None,
@@ -197,7 +194,6 @@ impl GuiNode for GuiFloatingPanel {
                     orientation: ControlOrientation::Horizontal,
                     min_thumb_length: SCROLLBAR_THUMB_MIN_HEIGHT,
                 },
-                BackgroundColor(Color::hsv(0.0, 0.5, 0.5)),
                 Children::spawn(Spawn((
                     CoreScrollbarThumb,
                     Node {
@@ -207,12 +203,11 @@ impl GuiNode for GuiFloatingPanel {
                         flex_direction: FlexDirection::Row,
                         justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
-                        padding: UiRect::all(px(
-                            (SCROLLBAR_WIDTH - SCROLLBAR_THUMB_WIDTH) as f32 / 2.0
-                        )),
+                        padding: UiRect::vertical(px((SCROLLBAR_WIDTH - SCROLLBAR_THUMB_WIDTH)
+                            as f32
+                            / 2.0)),
                         ..default()
                     },
-                    BackgroundColor(Color::hsv(180.0, 1.0, 0.5)),
                     Children::spawn(Spawn((
                         Node {
                             flex_grow: 1.0,
@@ -220,7 +215,7 @@ impl GuiNode for GuiFloatingPanel {
                             border_radius: BorderRadius::all(px(SCROLLBAR_THUMB_WIDTH)),
                             ..default()
                         },
-                        BackgroundColor(Color::hsv(180.0, 1.0, 0.1)),
+                        BackgroundColor(SCROLLBAR_COLOR),
                     ))),
                 ))),
             ))
@@ -232,8 +227,8 @@ impl GuiNode for GuiFloatingPanel {
                 GuiFloatingPanelVScrollbarTag,
                 Node {
                     position_type: PositionType::Absolute,
-                    top: px(0),
-                    bottom: px(MAIN_PADDING),
+                    top: px(MAIN_PADDING),
+                    bottom: px(MAIN_PADDING as f32 * 1.75),
                     right: px(0),
                     width: px(SCROLLBAR_WIDTH),
                     display: Display::None,
@@ -244,7 +239,6 @@ impl GuiNode for GuiFloatingPanel {
                     orientation: ControlOrientation::Vertical,
                     min_thumb_length: SCROLLBAR_THUMB_MIN_HEIGHT,
                 },
-                BackgroundColor(Color::hsv(0.0, 0.5, 0.5)),
                 Children::spawn(Spawn((
                     CoreScrollbarThumb,
                     Node {
@@ -254,12 +248,11 @@ impl GuiNode for GuiFloatingPanel {
                         flex_direction: FlexDirection::Column,
                         justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
-                        padding: UiRect::all(px(
-                            (SCROLLBAR_WIDTH - SCROLLBAR_THUMB_WIDTH) as f32 / 2.0
-                        )),
+                        padding: UiRect::horizontal(px((SCROLLBAR_WIDTH - SCROLLBAR_THUMB_WIDTH)
+                            as f32
+                            / 2.0)),
                         ..default()
                     },
-                    BackgroundColor(Color::hsv(180.0, 1.0, 0.5)),
                     Children::spawn(Spawn((
                         Node {
                             flex_grow: 1.0,
@@ -267,7 +260,7 @@ impl GuiNode for GuiFloatingPanel {
                             border_radius: BorderRadius::all(px(SCROLLBAR_THUMB_WIDTH)),
                             ..default()
                         },
-                        BackgroundColor(Color::hsv(180.0, 1.0, 0.1)),
+                        BackgroundColor(SCROLLBAR_COLOR),
                     ))),
                 ))),
             ))
