@@ -2,8 +2,6 @@
     Note: if there are multiple floating panels, they will not order themselves
 */
 
-use std::ops::Add;
-
 use bevy::{
     prelude::*,
     ui_widgets::{ControlOrientation, CoreScrollbarThumb, Scrollbar},
@@ -122,26 +120,6 @@ impl GuiNode for GuiFloatingPanel {
             .id();
         commands.entity(entity).add_child(title_bar);
 
-        let main_content_div_inner = commands
-            .spawn((
-                GuiFloatingPanelMainContentInnerTag,
-                Interaction::default(),
-                Node {
-                    flex_grow: 1.0,
-                    align_self: AlignSelf::Stretch,
-                    overflow: Overflow::scroll(),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Column,
-                    justify_content: JustifyContent::FlexStart,
-                    align_items: AlignItems::FlexStart,
-                    column_gap: px(MAIN_PADDING),
-                    ..default()
-                },
-                BackgroundColor(Color::hsv(270.0, 1.0, 0.7)),
-                ScrollPosition::default(),
-            ))
-            .id();
-
         let main_content_div = commands
             .spawn((
                 GuiFloatingPanelMainContentTag,
@@ -157,6 +135,26 @@ impl GuiNode for GuiFloatingPanel {
             ))
             .id();
         commands.entity(entity).add_child(main_content_div);
+
+        let main_content_div_inner = commands
+            .spawn((
+                GuiFloatingPanelMainContentInnerTag,
+                Interaction::default(),
+                Node {
+                    flex_grow: 1.0,
+                    align_self: AlignSelf::Stretch,
+                    overflow: Overflow::scroll(),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::FlexStart,
+                    align_items: AlignItems::FlexStart,
+                    row_gap: px(MAIN_PADDING),
+                    ..default()
+                },
+                BackgroundColor(Color::hsv(270.0, 1.0, 0.7)),
+                ScrollPosition::default(),
+            ))
+            .id();
 
         commands
             .entity(main_content_div)
@@ -229,7 +227,7 @@ impl GuiNode for GuiFloatingPanel {
             .id();
         commands.entity(title_bar).add_child(title_bar_main_part);
 
-        GuiText::new_small(self.title).spawn(commands, Some(title_bar_main_part));
+        GuiText::new_small(self.title, false).spawn(commands, Some(title_bar_main_part));
 
         let title_bar_button_part = commands
             .spawn((Node {
@@ -465,12 +463,15 @@ pub fn update_panel_resized_enforce_min_width(
             if let Some((main_content_div_computed_node, mut main_content_div_node)) =
                 warned_ok!(main_content_div_q.get_mut(panel.main_content_div))
             {
-                if main_content_div_computed_node.size.x < title_bar_computed_node.size.x {
-                    main_content_div_node.min_width = px(title_bar_computed_node.size.x
-                        * title_bar_computed_node.inverse_scale_factor
-                        - 1.0);
-                    main_content_div_node.width = px(title_bar_computed_node.size.x
-                        * title_bar_computed_node.inverse_scale_factor);
+                // so that it doesn't do it when the panel is minimized
+                if main_content_div_computed_node.size.x > 0.0 {
+                    if main_content_div_computed_node.size.x < title_bar_computed_node.size.x {
+                        main_content_div_node.min_width = px(title_bar_computed_node.size.x
+                            * title_bar_computed_node.inverse_scale_factor
+                            - 1.0);
+                        main_content_div_node.width = px(title_bar_computed_node.size.x
+                            * title_bar_computed_node.inverse_scale_factor);
+                    }
                 }
             }
         }
@@ -538,21 +539,6 @@ pub fn update_panel_from_is_active(
         }
     });
 }
-
-// pub fn update_main_content_from_mouse_scroll(
-//     mut main_content_inner_q: Query<
-//         (&Interaction, &mut ScrollPosition),
-//         With<GuiFloatingPanelMainContentInnerTag>,
-//     >,
-// ) {
-//     main_content_inner_q
-//         .iter_mut()
-//         .for_each(|(interaction, mut scroll_position)| {
-//             if *interaction == Interaction::Hovered {
-//                 scroll_position.y += 1.0;
-//             }
-//         });
-// }
 
 pub fn update_cursor_from_resizer_interaction(
     mut commands: Commands,

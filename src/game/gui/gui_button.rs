@@ -46,7 +46,7 @@ where
         Self {
             style: GuiButtonStyle::Regular,
             event_supplier: Some(event_supplier),
-            children: vec![Box::new(GuiText::new_regular(text))],
+            children: vec![Box::new(GuiText::new_regular(text, true))],
         }
     }
 }
@@ -71,7 +71,7 @@ impl GuiButton<_GuiButtonDummyGeneric, fn() -> _GuiButtonDummyGeneric> {
         Self {
             style: GuiButtonStyle::Regular,
             event_supplier: None,
-            children: vec![Box::new(GuiText::new_regular(text))],
+            children: vec![Box::new(GuiText::new_regular(text, true))],
         }
     }
 }

@@ -53,7 +53,7 @@ fn spawn_main_menu_gui(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
             JustifyContent::Center,
             AlignItems::Stretch,
             (
-                GuiText::new_h1("Main Menu"),
+                GuiText::new_h1("Main Menu", true),
                 GuiButton::new_regular(|| interactions::PlayButtonEv, "Play"),
                 GuiButton::new_regular(|| interactions::QuitButtonEv, "Quit"),
             ),
