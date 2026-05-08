@@ -458,6 +458,8 @@ pub fn update_panel_resized_enforce_min_width(
                 warned_ok!(main_content_div_q.get_mut(panel.main_content_div))
             {
                 if main_content_div_computed_node.size.x < title_bar_computed_node.size.x {
+                    main_content_div_node.min_width = px((title_bar_computed_node.size.x - 1.0)
+                        * title_bar_computed_node.inverse_scale_factor);
                     main_content_div_node.width = px(title_bar_computed_node.size.x
                         * title_bar_computed_node.inverse_scale_factor);
                 }
