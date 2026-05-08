@@ -33,7 +33,12 @@ pub struct GuiFloatingPanelMinimizeButtonTag;
 pub struct GuiFloatingPanelXButtonTag;
 
 #[derive(Component)]
-pub struct GuiFloatingPanelMainContentTag;
+pub struct GuiFloatingPanelMainContentTag {
+    pub inner_div: Entity,
+}
+
+#[derive(Component)]
+pub struct GuiFloatingPanelMainContentInnerTag;
 
 #[derive(Component)]
 pub struct GuiFloatingPanelResizerTag;
@@ -111,20 +116,9 @@ impl GuiNode for GuiFloatingPanel {
             .id();
         commands.entity(entity).add_child(title_bar);
 
-        let main_content_div = commands
-            .spawn((
-                GuiFloatingPanelMainContentTag,
-                Node {
-                    padding: UiRect::all(px(MAIN_PADDING)),
-                    ..default()
-                },
-                BackgroundColor(Color::hsv(90.0, 1.0, 0.8)),
-            ))
-            .id();
-        commands.entity(entity).add_child(main_content_div);
-
         let main_content_div_inner = commands
             .spawn((
+                GuiFloatingPanelMainContentInnerTag,
                 Node {
                     flex_grow: 1.0,
                     overflow: Overflow::scroll(),
@@ -138,6 +132,25 @@ impl GuiNode for GuiFloatingPanel {
                 BackgroundColor(Color::hsv(270.0, 1.0, 0.7)),
             ))
             .id();
+
+        let main_content_div = commands
+            .spawn((
+                GuiFloatingPanelMainContentTag {
+                    inner_div: main_content_div_inner,
+                },
+                Node {
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::FlexStart,
+                    align_items: AlignItems::FlexStart,
+                    padding: UiRect::all(px(MAIN_PADDING)),
+                    ..default()
+                },
+                BackgroundColor(Color::hsv(90.0, 1.0, 0.8)),
+            ))
+            .id();
+        commands.entity(entity).add_child(main_content_div);
+
         commands
             .entity(main_content_div)
             .add_child(main_content_div_inner);
@@ -149,35 +162,50 @@ impl GuiNode for GuiFloatingPanel {
                 .add_child(child_entity);
         }
 
-        // let main_content_div_scrollbar = commands
-        //     .spawn((
-        //         Node {
-        //             position_type: PositionType::Absolute,
-        //             right: px(0),
-        //             width: px(10),
-        //             height: percent(100),
-        //             ..default()
-        //         },
-        //         Scrollbar {
-        //             target: main_content_div_inner,
-        //             orientation: ControlOrientation::Vertical,
-        //             min_thumb_length: 20.0,
-        //         },
-        //         BackgroundColor(Color::hsv(0.0, 0.5, 0.5)),
-        //         Children::spawn(Spawn((
-        //             CoreScrollbarThumb,
-        //             Node {
-        //                 position_type: PositionType::Absolute,
-        //                 width: percent(100),
-        //                 ..default()
-        //             },
-        //             BackgroundColor(Color::WHITE),
-        //         ))),
-        //     ))
-        //     .id();
-        // commands
-        //     .entity(main_content_div_inner)
-        //     .add_child(main_content_div_scrollbar);
+        let v_scrollbar = commands
+            .spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: px(0),
+                    bottom: px(MAIN_PADDING),
+                    right: px(0),
+                    width: px(SCROLLBAR_WIDTH),
+                    ..default()
+                },
+                Scrollbar {
+                    target: main_content_div_inner,
+                    orientation: ControlOrientation::Vertical,
+                    min_thumb_length: SCROLLBAR_THUMB_MIN_HEIGHT,
+                },
+                BackgroundColor(Color::hsv(0.0, 0.5, 0.5)),
+                Children::spawn(Spawn((
+                    CoreScrollbarThumb,
+                    Node {
+                        position_type: PositionType::Absolute,
+                        width: px(SCROLLBAR_WIDTH),
+                        display: Display::Flex,
+                        flex_direction: FlexDirection::Column,
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        padding: UiRect::all(px(
+                            (SCROLLBAR_WIDTH - SCROLLBAR_THUMB_WIDTH) as f32 / 2.0
+                        )),
+                        ..default()
+                    },
+                    BackgroundColor(Color::hsv(180.0, 1.0, 0.5)),
+                    Children::spawn(Spawn((
+                        Node {
+                            flex_grow: 1.0,
+                            width: px(SCROLLBAR_THUMB_WIDTH),
+                            border_radius: BorderRadius::all(px(SCROLLBAR_THUMB_WIDTH)),
+                            ..default()
+                        },
+                        BackgroundColor(Color::hsv(180.0, 1.0, 0.1)),
+                    ))),
+                ))),
+            ))
+            .id();
+        commands.entity(main_content_div).add_child(v_scrollbar);
 
         let title_bar_main_part = commands
             .spawn((Node {
@@ -371,7 +399,8 @@ pub fn update_panel_resized(
     >,
     mut panel_being_resized: Local<Option<Entity>>,
     panel_q: Query<&GuiFloatingPanelTag>,
-    mut main_content_div_q: Query<(&mut Node, &ComputedNode), With<GuiFloatingPanelMainContentTag>>,
+    mut main_content_div_q: Query<(&GuiFloatingPanelMainContentTag, &mut Node, &ComputedNode)>,
+    main_content_div_inner_q: Query<&ComputedNode, With<GuiFloatingPanelMainContentInnerTag>>,
     mut mouse_motion: MessageReader<CursorMoved>,
 ) {
     interaction_q
@@ -394,9 +423,17 @@ pub fn update_panel_resized(
                 delta_y += msg.delta.map(|d| d.y).unwrap_or(0.0);
             });
 
-            if let Some((mut main_content_div_node, computed_node)) =
+            if let Some((main_content_div, mut main_content_div_node, computed_node)) =
                 warned_ok!(main_content_div_q.get_mut(panel.main_content_div))
             {
+                let min_width = if let Some(inner) =
+                    warned_ok!(main_content_div_inner_q.get(main_content_div.inner_div))
+                {
+                    inner.size.x * inner.inverse_scale_factor
+                } else {
+                    0.0
+                };
+
                 if !matches!(main_content_div_node.width, Val::Px(_)) {
                     main_content_div_node.width =
                         px(computed_node.size.x * computed_node.inverse_scale_factor);
@@ -409,6 +446,10 @@ pub fn update_panel_resized(
 
                 if let Val::Px(ref mut width) = main_content_div_node.width {
                     *width += delta_x;
+
+                    if *width < min_width {
+                        *width = min_width;
+                    }
                 }
 
                 if let Val::Px(ref mut height) = main_content_div_node.height {

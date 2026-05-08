@@ -13,6 +13,7 @@
 - Make a better system for changing the cursor type (right now it's just done locally for the floating panel corner resizer).
 - Right now I'm inserting a new CursorIcon to the window entity when changing the cursor type. Should I be removing the old ones?
 - Fix the window dragging and resizing not being fully consistent with mouse movement.
+- Possible optimization: don't use commands.entity(...) but use EntityCommands directly, wherever possible.
 
 Currently on:
 - Be consistent on when to use the 'Tag' suffix.
