@@ -67,16 +67,17 @@ fn spawn_main_debug_menu(
         pos_x,
         pos_y,
         "Debug Menu",
-        (GuiDiv::new(
-            GuiDivStyle::None,
-            true,
-            UiRect::ZERO,
-            MAIN_PADDING,
-            FlexDirection::Column,
-            JustifyContent::FlexStart,
-            AlignItems::FlexStart,
-            (GuiText::new_small_mono("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n"),),
-        ),),
+        (GuiText::new_small_mono("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n"),)
+        // (GuiDiv::new(
+        //     GuiDivStyle::None,
+        //     true,
+        //     UiRect::ZERO,
+        //     MAIN_PADDING,
+        //     FlexDirection::Column,
+        //     JustifyContent::FlexStart,
+        //     AlignItems::FlexStart,
+        //     (GuiText::new_small_mono("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n"),),
+        // ),),
     )
     .spawn(&mut commands, Some(gui_root.0));
     commands.entity(main_debug_menu).insert(ZIndex(4000));

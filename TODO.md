@@ -11,9 +11,13 @@
 - Get rid of the yellow background color.
 - Make different GUI sizes.
 - Make a better system for changing the cursor type (right now it's just done locally for the floating panel corner resizer).
+- Right now I'm inserting a new CursorIcon to the window entity when changing the cursor type. Should I be removing the old ones?
+- Fix the window dragging and resizing not being fully consistent with mouse movement.
 
 Currently on:
 - Be consistent on when to use the 'Tag' suffix.
 - Figure out randomness.
-- Make a debug menu
-    - Make it resizable
+- Make a debug menu.
+    - Make it resizable.
+    - Test out when there are multiple floating panels and if you drag the window or drag the resizer over each other.
+- Add shadow under the floating panel title bar.

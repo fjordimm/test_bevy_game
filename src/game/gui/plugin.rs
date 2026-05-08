@@ -16,6 +16,7 @@ impl Plugin for GuiPlugin {
                     gui_div::update_is_active,
                     gui_screen_div::update_is_active,
                     gui_floating_panel::update_panel_dragged,
+                    gui_floating_panel::update_panel_resized,
                     gui_floating_panel::update_content_from_is_minimized,
                     gui_floating_panel::update_title_bar_from_is_minimized,
                     gui_floating_panel::update_resizer_from_is_minimized,

@@ -1,6 +1,7 @@
 use bevy::{
     diagnostic::FrameTimeDiagnosticsPlugin,
     prelude::*,
+    ui_widgets::ScrollbarPlugin,
     window::{CursorGrabMode, CursorOptions, PrimaryWindow},
 };
 use bevy_prng::WyRand;
@@ -26,6 +27,7 @@ impl Plugin for CorePlugin {
         #[rustfmt::skip]
         app
             // External Plugins
+            .add_plugins(ScrollbarPlugin)
             .add_plugins(FrameTimeDiagnosticsPlugin::new(120))
             .add_plugins(EntropyPlugin::<WyRand>::default())
             // Relevant Stuff

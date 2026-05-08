@@ -4,7 +4,7 @@ use crate::game::gui::fonts::FontOption;
 
 pub const MAIN_COLOR: Color = Color::hsv(185.0, 0.1, 0.15);
 pub const PAUSE_MENU_BG_COLOR: Color = Color::hsva(0.0, 0.0, 0.0, 0.75);
-pub const BORDER_RADIUS: i32 = 6;
+pub const BORDER_RADIUS: i32 = 5;
 pub const MAIN_PADDING: i32 = 10;
 pub const MINOR_PADDING: i32 = 5;
 pub const MAIN_FONT: FontOption = FontOption::Sans;
@@ -14,7 +14,7 @@ pub fn main_box_shadow() -> BoxShadow {
         Val::ZERO,
         Val::ZERO,
         Val::ZERO,
-        px(4),
+        px(5),
     )
 }
 
@@ -28,6 +28,10 @@ pub const TEXT_SIZE_SMALL_MONO: f32 = 14.0;
 pub const BUTTON_COLOR_MAIN: Color = Color::hsv(185.0, 0.1, 0.25);
 pub const BUTTON_COLOR_HOVER: Color = Color::hsv(185.0, 0.1, 0.2);
 pub const BUTTON_COLOR_PRESSED: Color = Color::hsv(185.0, 0.1, 0.15);
+
+pub const SCROLLBAR_WIDTH: i32 = 7;
+pub const SCROLLBAR_THUMB_WIDTH: i32 = 5;
+pub const SCROLLBAR_THUMB_HEIGHT: i32 = 15;
 
 pub const TITLE_BAR_BUTTON_COLOR_MAIN: Color = BUTTON_COLOR_PRESSED;
 pub const TITLE_BAR_BUTTON_COLOR_HOVER: Color = BUTTON_COLOR_HOVER;

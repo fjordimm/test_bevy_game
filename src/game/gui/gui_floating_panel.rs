@@ -4,13 +4,14 @@
 
 use bevy::{
     prelude::*,
+    ui_widgets::{ControlOrientation, CoreScrollbarThumb, Scrollbar},
     window::{CursorIcon, PrimaryWindow, SystemCursorIcon},
 };
 
 use crate::game::{
     gui::{
-        GuiButton, GuiDiv, GuiDivStyle, GuiIcon, GuiNode, GuiText, constants::*,
-        gui_button::GuiButtonStyle, images::UiIconOption, plugin::CollectionOfGuiItems,
+        GuiButton, GuiIcon, GuiNode, GuiText, constants::*, gui_button::GuiButtonStyle,
+        images::UiIconOption, plugin::CollectionOfGuiItems,
     },
     util::{TempOnCreation, warned_ok},
 };
@@ -19,6 +20,7 @@ use crate::game::{
 pub struct GuiFloatingPanelTag {
     pub is_active: bool,
     pub is_minimized: bool,
+    main_content_div: Entity,
 }
 
 #[derive(Component)]
@@ -35,9 +37,6 @@ pub struct GuiFloatingPanelMainContentTag;
 
 #[derive(Component)]
 pub struct GuiFloatingPanelResizerTag;
-
-#[derive(Component)]
-pub struct GuiFloatingPanelResizerDivTag;
 
 pub struct GuiFloatingPanel {
     starts_active: bool,
@@ -72,11 +71,12 @@ impl GuiNode for GuiFloatingPanel {
                 GuiFloatingPanelTag {
                     is_active: true,
                     is_minimized: false,
+                    main_content_div: Entity::PLACEHOLDER,
                 },
                 Node {
                     position_type: PositionType::Absolute,
-                    left: px(self.pos_x),
-                    top: px(self.pos_y),
+                    // left: px(self.pos_x),
+                    // top: px(self.pos_y),
                     border_radius: BorderRadius::all(px(BORDER_RADIUS)),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Column,
@@ -111,25 +111,73 @@ impl GuiNode for GuiFloatingPanel {
             .id();
         commands.entity(entity).add_child(title_bar);
 
-        let main_content_div = GuiDiv::new(
-            GuiDivStyle::None,
-            false,
-            UiRect::all(px(MAIN_PADDING)),
-            MAIN_PADDING,
-            FlexDirection::Column,
-            JustifyContent::FlexStart,
-            AlignItems::FlexStart,
-            (),
-        )
-        .spawn(commands, Some(entity));
+        let main_content_div = commands
+            .spawn((
+                GuiFloatingPanelMainContentTag,
+                Node {
+                    padding: UiRect::all(px(MAIN_PADDING)),
+                    ..default()
+                },
+                BackgroundColor(Color::hsv(90.0, 1.0, 0.8)),
+            ))
+            .id();
+        commands.entity(entity).add_child(main_content_div);
+
+        let main_content_div_inner = commands
+            .spawn((
+                Node {
+                    flex_grow: 1.0,
+                    overflow: Overflow::scroll(),
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::FlexStart,
+                    align_items: AlignItems::FlexStart,
+                    column_gap: px(MAIN_PADDING),
+                    ..default()
+                },
+                BackgroundColor(Color::hsv(270.0, 1.0, 0.7)),
+            ))
+            .id();
         commands
             .entity(main_content_div)
-            .insert(GuiFloatingPanelMainContentTag);
+            .add_child(main_content_div_inner);
 
         for child in self.children {
             let child_entity = child.spawn_dyn(commands, None);
-            commands.entity(main_content_div).add_child(child_entity);
+            commands
+                .entity(main_content_div_inner)
+                .add_child(child_entity);
         }
+
+        // let main_content_div_scrollbar = commands
+        //     .spawn((
+        //         Node {
+        //             position_type: PositionType::Absolute,
+        //             right: px(0),
+        //             width: px(10),
+        //             height: percent(100),
+        //             ..default()
+        //         },
+        //         Scrollbar {
+        //             target: main_content_div_inner,
+        //             orientation: ControlOrientation::Vertical,
+        //             min_thumb_length: 20.0,
+        //         },
+        //         BackgroundColor(Color::hsv(0.0, 0.5, 0.5)),
+        //         Children::spawn(Spawn((
+        //             CoreScrollbarThumb,
+        //             Node {
+        //                 position_type: PositionType::Absolute,
+        //                 width: percent(100),
+        //                 ..default()
+        //             },
+        //             BackgroundColor(Color::WHITE),
+        //         ))),
+        //     ))
+        //     .id();
+        // commands
+        //     .entity(main_content_div_inner)
+        //     .add_child(main_content_div_scrollbar);
 
         let title_bar_main_part = commands
             .spawn((Node {
@@ -187,9 +235,10 @@ impl GuiNode for GuiFloatingPanel {
         .spawn(commands, Some(title_bar_button_part));
         commands.entity(x_button).insert(GuiFloatingPanelXButtonTag);
 
-        let corner_resizer_div = commands
+        let corner_resizer = commands
             .spawn((
-                GuiFloatingPanelResizerDivTag,
+                GuiFloatingPanelResizerTag,
+                Button,
                 Node {
                     position_type: PositionType::Absolute,
                     right: px(CORNER_RESIZER_PADDING),
@@ -202,26 +251,20 @@ impl GuiNode for GuiFloatingPanel {
                 },
             ))
             .id();
-        commands.entity(entity).add_child(corner_resizer_div);
+        commands.entity(entity).add_child(corner_resizer);
 
-        let corner_resizer = GuiButton::new(
-            GuiButtonStyle::CornerResizer,
-            || interactions::CornerResizerEv { panel_div: entity },
-            (GuiIcon::new(
-                UiIconOption::CornerResizer,
-                CORNER_RESIZER_SIZE,
-                CORNER_RESIZER_SIZE,
-            ),),
+        GuiIcon::new(
+            UiIconOption::CornerResizer,
+            CORNER_RESIZER_SIZE,
+            CORNER_RESIZER_SIZE,
         )
-        .spawn(commands, Some(corner_resizer_div));
-        commands
-            .entity(corner_resizer)
-            .insert(GuiFloatingPanelResizerTag);
+        .spawn(commands, Some(corner_resizer));
 
         commands.add_observer(
-            move |ent: On<TempOnCreation>, mut query: Query<&mut GuiFloatingPanelTag>| {
-                if let Ok(mut screen_div) = query.get_mut(ent.0) {
-                    screen_div.is_active = self.starts_active;
+            move |me: On<TempOnCreation>, mut query: Query<&mut GuiFloatingPanelTag>| {
+                if let Ok(mut panel) = query.get_mut(me.0) {
+                    panel.is_active = self.starts_active;
+                    panel.main_content_div = main_content_div;
                 }
             },
         );
@@ -245,11 +288,6 @@ mod interactions {
 
     #[derive(Event, Clone)]
     pub struct XButtonEv {
-        pub panel_div: Entity,
-    }
-
-    #[derive(Event, Clone)]
-    pub struct CornerResizerEv {
         pub panel_div: Entity,
     }
 }
@@ -302,20 +340,80 @@ pub fn update_panel_dragged(
         let mut delta_x = 0.0;
         let mut delta_y = 0.0;
         mouse_motion.read().for_each(|msg| {
-            delta_x += msg.delta.map(|d| d.x).unwrap_or(0.0);
-            delta_y += msg.delta.map(|d| d.y).unwrap_or(0.0);
+            delta_x = msg.delta.map(|d| d.x).unwrap_or(0.0);
+            delta_y = msg.delta.map(|d| d.y).unwrap_or(0.0);
         });
 
-        if let Ok(mut panel) = panel_q.get_mut(target_panel) {
-            if let Val::Px(ref mut x) = panel.left {
-                *x += delta_x;
-            } else {
-                panel.left = px(0.0);
+        if let Ok(mut panel_node) = panel_q.get_mut(target_panel) {
+            if !matches!(panel_node.left, Val::Px(_)) {
+                panel_node.left = px(0);
             }
-            if let Val::Px(ref mut y) = panel.top {
-                *y += delta_y;
-            } else {
-                panel.top = px(0.0);
+
+            if !matches!(panel_node.top, Val::Px(_)) {
+                panel_node.top = px(0);
+            }
+
+            if let Val::Px(ref mut left) = panel_node.left {
+                *left += delta_x;
+            }
+
+            if let Val::Px(ref mut top) = panel_node.top {
+                *top += delta_y;
+            }
+        }
+    }
+}
+
+pub fn update_panel_resized(
+    interaction_q: Query<
+        (&Interaction, &ChildOf),
+        (Changed<Interaction>, With<GuiFloatingPanelResizerTag>),
+    >,
+    mut panel_being_resized: Local<Option<Entity>>,
+    panel_q: Query<&GuiFloatingPanelTag>,
+    mut main_content_div_q: Query<(&mut Node, &ComputedNode), With<GuiFloatingPanelMainContentTag>>,
+    mut mouse_motion: MessageReader<CursorMoved>,
+) {
+    interaction_q
+        .iter()
+        .for_each(|(interaction, childof)| match *interaction {
+            Interaction::Pressed => {
+                *panel_being_resized = Some(childof.0);
+            }
+            _ => {
+                *panel_being_resized = None;
+            }
+        });
+
+    if let Some(target_panel) = *panel_being_resized {
+        if let Ok(panel) = panel_q.get(target_panel) {
+            let mut delta_x = 0.0;
+            let mut delta_y = 0.0;
+            mouse_motion.read().for_each(|msg| {
+                delta_x = msg.delta.map(|d| d.x).unwrap_or(0.0);
+                delta_y = msg.delta.map(|d| d.y).unwrap_or(0.0);
+            });
+
+            if let Some((mut main_content_div_node, computed_node)) =
+                warned_ok!(main_content_div_q.get_mut(panel.main_content_div))
+            {
+                if !matches!(main_content_div_node.width, Val::Px(_)) {
+                    main_content_div_node.width =
+                        px(computed_node.size.x * computed_node.inverse_scale_factor);
+                }
+
+                if !matches!(main_content_div_node.height, Val::Px(_)) {
+                    main_content_div_node.height =
+                        px(computed_node.size.y * computed_node.inverse_scale_factor);
+                }
+
+                if let Val::Px(ref mut width) = main_content_div_node.width {
+                    *width += delta_x;
+                }
+
+                if let Val::Px(ref mut height) = main_content_div_node.height {
+                    *height += delta_y;
+                }
             }
         }
     }
@@ -354,14 +452,14 @@ pub fn update_title_bar_from_is_minimized(
 }
 
 pub fn update_resizer_from_is_minimized(
-    mut resizer_div_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelResizerDivTag>>,
+    mut resizer_q: Query<(&ChildOf, &mut Node), With<GuiFloatingPanelResizerTag>>,
     panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
 ) {
-    resizer_div_q
+    resizer_q
         .iter_mut()
-        .for_each(|(childof, mut resizer_div_node)| {
+        .for_each(|(childof, mut resizer_node)| {
             if let Ok(panel) = panel_q.get(childof.0) {
-                resizer_div_node.display = match panel.is_minimized {
+                resizer_node.display = match panel.is_minimized {
                     false => Display::Flex,
                     true => Display::None,
                 }
@@ -389,7 +487,7 @@ pub fn update_cursor_from_resizer_interaction(
     mut button_last_interacted_with: Local<Option<Entity>>,
     window_q: Query<Entity, With<PrimaryWindow>>,
 ) {
-    if let Some(mut window) = warned_ok!(window_q.single()) {
+    if let Some(window) = warned_ok!(window_q.single()) {
         interaction_q.iter().for_each(|(interaction, button_id)| {
             if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
                 commands
