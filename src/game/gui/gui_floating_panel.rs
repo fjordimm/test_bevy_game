@@ -340,8 +340,8 @@ pub fn update_panel_dragged(
         let mut delta_x = 0.0;
         let mut delta_y = 0.0;
         mouse_motion.read().for_each(|msg| {
-            delta_x = msg.delta.map(|d| d.x).unwrap_or(0.0);
-            delta_y = msg.delta.map(|d| d.y).unwrap_or(0.0);
+            delta_x += msg.delta.map(|d| d.x).unwrap_or(0.0);
+            delta_y += msg.delta.map(|d| d.y).unwrap_or(0.0);
         });
 
         if let Ok(mut panel_node) = panel_q.get_mut(target_panel) {
@@ -390,8 +390,8 @@ pub fn update_panel_resized(
             let mut delta_x = 0.0;
             let mut delta_y = 0.0;
             mouse_motion.read().for_each(|msg| {
-                delta_x = msg.delta.map(|d| d.x).unwrap_or(0.0);
-                delta_y = msg.delta.map(|d| d.y).unwrap_or(0.0);
+                delta_x += msg.delta.map(|d| d.x).unwrap_or(0.0);
+                delta_y += msg.delta.map(|d| d.y).unwrap_or(0.0);
             });
 
             if let Some((mut main_content_div_node, computed_node)) =
