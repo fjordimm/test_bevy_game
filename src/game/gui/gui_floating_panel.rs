@@ -20,9 +20,9 @@ use crate::game::{
 pub struct GuiFloatingPanelTag {
     pub is_active: bool,
     pub is_minimized: bool,
-    title_bar_div: Entity,
-    main_content_div: Entity,
-    main_content_div_inner: Entity,
+    title_bar: Entity,
+    main_content: Entity,
+    main_content_inner: Entity,
     resizer: Entity,
     h_scrollbar: Entity,
     v_scrollbar: Entity,
@@ -88,12 +88,12 @@ impl GuiNode for GuiFloatingPanel {
                 GuiFloatingPanelTag {
                     is_active: true, // Only temporary
                     is_minimized: false,
-                    title_bar_div: Entity::PLACEHOLDER, // Only temporary
-                    main_content_div: Entity::PLACEHOLDER, // Only temporary
-                    main_content_div_inner: Entity::PLACEHOLDER, // Only temporary
-                    resizer: Entity::PLACEHOLDER,       // Only temporary
-                    h_scrollbar: Entity::PLACEHOLDER,   // Only temporary
-                    v_scrollbar: Entity::PLACEHOLDER,   // Only temporary
+                    title_bar: Entity::PLACEHOLDER, // Only temporary
+                    main_content: Entity::PLACEHOLDER, // Only temporary
+                    main_content_inner: Entity::PLACEHOLDER, // Only temporary
+                    resizer: Entity::PLACEHOLDER,   // Only temporary
+                    h_scrollbar: Entity::PLACEHOLDER, // Only temporary
+                    v_scrollbar: Entity::PLACEHOLDER, // Only temporary
                 },
                 Node {
                     position_type: PositionType::Absolute,
@@ -134,7 +134,7 @@ impl GuiNode for GuiFloatingPanel {
             .id();
         commands.entity(entity).add_child(title_bar);
 
-        let main_content_div = commands
+        let main_content = commands
             .spawn((
                 GuiFloatingPanelMainContentTag,
                 Node {
@@ -146,9 +146,9 @@ impl GuiNode for GuiFloatingPanel {
                 },
             ))
             .id();
-        commands.entity(entity).add_child(main_content_div);
+        commands.entity(entity).add_child(main_content);
 
-        let main_content_div_inner = commands
+        let main_content_inner = commands
             .spawn((
                 GuiFloatingPanelMainContentInnerTag,
                 Node {
@@ -166,15 +166,11 @@ impl GuiNode for GuiFloatingPanel {
                 ScrollPosition::default(),
             ))
             .id();
-        commands
-            .entity(main_content_div)
-            .add_child(main_content_div_inner);
+        commands.entity(main_content).add_child(main_content_inner);
 
         for child in self.children {
             let child_entity = child.spawn_dyn(commands, None);
-            commands
-                .entity(main_content_div_inner)
-                .add_child(child_entity);
+            commands.entity(main_content_inner).add_child(child_entity);
         }
 
         let h_scrollbar = commands
@@ -190,7 +186,7 @@ impl GuiNode for GuiFloatingPanel {
                     ..default()
                 },
                 Scrollbar {
-                    target: main_content_div_inner,
+                    target: main_content_inner,
                     orientation: ControlOrientation::Horizontal,
                     min_thumb_length: SCROLLBAR_THUMB_MIN_HEIGHT,
                 },
@@ -220,7 +216,7 @@ impl GuiNode for GuiFloatingPanel {
                 ))),
             ))
             .id();
-        commands.entity(main_content_div).add_child(h_scrollbar);
+        commands.entity(main_content).add_child(h_scrollbar);
 
         let v_scrollbar = commands
             .spawn((
@@ -235,7 +231,7 @@ impl GuiNode for GuiFloatingPanel {
                     ..default()
                 },
                 Scrollbar {
-                    target: main_content_div_inner,
+                    target: main_content_inner,
                     orientation: ControlOrientation::Vertical,
                     min_thumb_length: SCROLLBAR_THUMB_MIN_HEIGHT,
                 },
@@ -265,7 +261,7 @@ impl GuiNode for GuiFloatingPanel {
                 ))),
             ))
             .id();
-        commands.entity(main_content_div).add_child(v_scrollbar);
+        commands.entity(main_content).add_child(v_scrollbar);
 
         let title_bar_main_part = commands
             .spawn((Node {
@@ -299,7 +295,7 @@ impl GuiNode for GuiFloatingPanel {
 
         let minimize_button = GuiButton::new(
             GuiButtonStyle::TitleBarButton,
-            || interactions::MinimizeButtonEv { panel_div: entity },
+            || interactions::MinimizeButtonEv { panel: entity },
             (GuiIcon::new(
                 UiIconOption::Minimize,
                 TITLE_BAR_BUTTON_ICON_SIZE,
@@ -313,7 +309,7 @@ impl GuiNode for GuiFloatingPanel {
 
         let x_button = GuiButton::new(
             GuiButtonStyle::TitleBarButton,
-            || interactions::XButtonEv { panel_div: entity },
+            || interactions::XButtonEv { panel: entity },
             (GuiIcon::new(
                 UiIconOption::X,
                 TITLE_BAR_BUTTON_ICON_SIZE,
@@ -352,9 +348,9 @@ impl GuiNode for GuiFloatingPanel {
             move |me: On<TempOnCreation>, mut query: Query<&mut GuiFloatingPanelTag>| {
                 if let Ok(mut panel) = query.get_mut(me.0) {
                     panel.is_active = self.starts_active;
-                    panel.title_bar_div = title_bar;
-                    panel.main_content_div = main_content_div;
-                    panel.main_content_div_inner = main_content_div_inner;
+                    panel.title_bar = title_bar;
+                    panel.main_content = main_content;
+                    panel.main_content_inner = main_content_inner;
                     panel.resizer = corner_resizer;
                     panel.h_scrollbar = h_scrollbar;
                     panel.v_scrollbar = v_scrollbar;
@@ -376,12 +372,12 @@ mod interactions {
 
     #[derive(Event, Clone)]
     pub struct MinimizeButtonEv {
-        pub panel_div: Entity,
+        pub panel: Entity,
     }
 
     #[derive(Event, Clone)]
     pub struct XButtonEv {
-        pub panel_div: Entity,
+        pub panel: Entity,
     }
 }
 
@@ -389,7 +385,7 @@ pub fn minimize_button_observer(
     ev: On<interactions::MinimizeButtonEv>,
     mut panel_q: Query<&mut GuiFloatingPanelTag>,
 ) {
-    if let Ok(mut panel) = panel_q.get_mut(ev.panel_div) {
+    if let Ok(mut panel) = panel_q.get_mut(ev.panel) {
         panel.is_minimized = match panel.is_minimized {
             true => false,
             false => true,
@@ -401,7 +397,7 @@ pub fn x_button_observer(
     ev: On<interactions::XButtonEv>,
     mut panel_q: Query<&mut GuiFloatingPanelTag>,
 ) {
-    if let Ok(mut panel) = panel_q.get_mut(ev.panel_div) {
+    if let Ok(mut panel) = panel_q.get_mut(ev.panel) {
         panel.is_active = match panel.is_active {
             true => false,
             false => true,
@@ -425,8 +421,7 @@ pub fn update_main_content_from_is_minimized(
     mut main_content_q: Query<&mut Node, With<GuiFloatingPanelMainContentTag>>,
 ) {
     panel_q.iter().for_each(|panel| {
-        if let Some(mut main_content_node) =
-            warned_ok!(main_content_q.get_mut(panel.main_content_div))
+        if let Some(mut main_content_node) = warned_ok!(main_content_q.get_mut(panel.main_content))
         {
             main_content_node.display = match panel.is_minimized {
                 false => Display::Flex,
@@ -441,7 +436,7 @@ pub fn update_title_bar_from_is_minimized(
     mut title_bar_q: Query<&mut Node, With<GuiFloatingPanelTitleBarTag>>,
 ) {
     panel_q.iter().for_each(|panel| {
-        if let Some(mut title_bar_node) = warned_ok!(title_bar_q.get_mut(panel.title_bar_div)) {
+        if let Some(mut title_bar_node) = warned_ok!(title_bar_q.get_mut(panel.title_bar)) {
             title_bar_node.border_radius = match panel.is_minimized {
                 false => BorderRadius::top(px(BORDER_RADIUS)),
                 true => BorderRadius::all(px(BORDER_RADIUS)),
@@ -565,7 +560,7 @@ pub fn update_panel_resized(
 
             // Show/hide the scrollbars
             if let Some(computed_node) =
-                warned_ok!(main_content_inner_q.get(panel.main_content_div_inner))
+                warned_ok!(main_content_inner_q.get(panel.main_content_inner))
             {
                 if let Some(mut h_scrollbar_node) =
                     warned_ok!(h_scrollbar_q.get_mut(panel.h_scrollbar))
@@ -590,7 +585,7 @@ pub fn update_panel_resized(
 
             // Resize the main content div
             if let Some((mut main_content_node, computed_node)) =
-                warned_ok!(main_content_q.get_mut(panel.main_content_div))
+                warned_ok!(main_content_q.get_mut(panel.main_content))
             {
                 if !matches!(main_content_node.width, Val::Px(_)) {
                     main_content_node.width =
@@ -617,20 +612,22 @@ pub fn update_panel_resized(
 pub fn update_panel_resized_enforce_min_width(
     panel_q: Query<&GuiFloatingPanelTag>,
     title_bar_q: Query<&ComputedNode, With<GuiFloatingPanelTitleBarTag>>,
-    mut main_content_div_q: Query<(&ComputedNode, &mut Node), With<GuiFloatingPanelMainContentTag>>,
+    mut main_content_q: Query<(&ComputedNode, &mut Node), With<GuiFloatingPanelMainContentTag>>,
 ) {
     panel_q.iter().for_each(|panel| {
-        if let Some(title_bar_computed_node) = warned_ok!(title_bar_q.get(panel.title_bar_div)) {
-            if let Some((main_content_div_computed_node, mut main_content_div_node)) =
-                warned_ok!(main_content_div_q.get_mut(panel.main_content_div))
+        if let Some(title_bar_computed_node) = warned_ok!(title_bar_q.get(panel.title_bar)) {
+            if let Some((main_content_computed_node, mut main_content_node)) =
+                warned_ok!(main_content_q.get_mut(panel.main_content))
             {
                 // so that it doesn't do it when the panel is minimized
-                if main_content_div_computed_node.size.x > 0.0 {
-                    if main_content_div_computed_node.size.x < title_bar_computed_node.size.x {
-                        // main_content_div_node.min_width = px(title_bar_computed_node.size.x
-                        //     * title_bar_computed_node.inverse_scale_factor
-                        //     - 1.0); // TODO: should I include this or not?
-                        main_content_div_node.width = px(title_bar_computed_node.size.x
+                if main_content_computed_node.size.x > 0.0 {
+                    if main_content_computed_node.size.x < title_bar_computed_node.size.x {
+                        // to minimize jittering
+                        main_content_node.min_width = px(title_bar_computed_node.size.x
+                            * title_bar_computed_node.inverse_scale_factor
+                            - 1.0);
+
+                        main_content_node.width = px(title_bar_computed_node.size.x
                             * title_bar_computed_node.inverse_scale_factor);
                     }
                 }

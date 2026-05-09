@@ -14,14 +14,10 @@
 - Right now I'm inserting a new CursorIcon to the window entity when changing the cursor type. Should I be removing the old ones?
 - Fix the window dragging and resizing not being fully consistent with mouse movement.
 - Possible optimization: don't use commands.entity(...) but use EntityCommands directly, wherever possible.
+- Test out when there are multiple floating panels and if you drag the window or drag the resizer over each other.
 
 Currently on:
-- Change all the i32 to f32 in constants. Also make a constant for everywhere you use Color::WHITE.
-- Don't use '_div' in gui_floating_panel.
 - Be consistent with `commands: Commands` vs `commands: &Commands`.
 - Be consistent on when to use the 'Tag' suffix.
 - Figure out randomness.
-- Make a debug menu.
-    - Make it resizable.
-    - Test out when there are multiple floating panels and if you drag the window or drag the resizer over each other.
 - Add shadow under the floating panel title bar.
