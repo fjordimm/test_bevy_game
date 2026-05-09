@@ -53,8 +53,6 @@ fn spawn_main_debug_menu(
     let mut pos_x = 10.0;
     let mut pos_y = 10.0;
     if let Some(_window) = warned_ok!(window_q.single()) {
-        // pos_x = window.width() / 4.0;
-        // pos_y = window.height() / 4.0;
         pos_x = 100.0;
         pos_y = 100.0;
     }
@@ -68,16 +66,6 @@ fn spawn_main_debug_menu(
             GuiText::new_small_mono("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm", false),
             GuiText::new_small_mono("I'm some more text", false),
         )
-        // (GuiDiv::new(
-        //     GuiDivStyle::None,
-        //     true,
-        //     UiRect::ZERO,
-        //     MAIN_PADDING,
-        //     FlexDirection::Column,
-        //     JustifyContent::FlexStart,
-        //     AlignItems::FlexStart,
-        //     (GuiText::new_small_mono("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\n"),),
-        // ),),
     )
     .spawn(&mut commands, Some(gui_root.0));
     commands.entity(main_debug_menu).insert(ZIndex(4000));

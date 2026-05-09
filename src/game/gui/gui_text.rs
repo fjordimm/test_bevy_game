@@ -79,7 +79,7 @@ impl GuiNode for GuiText {
         let entity = commands
             .spawn((
                 Text::new(&self.text),
-                TextColor(Color::WHITE),
+                TextColor(MAIN_CONTENT_COLOR),
                 TextFont {
                     font_size: self.size,
                     ..default()

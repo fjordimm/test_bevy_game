@@ -1,15 +1,15 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiNode, images::UiIconOption};
+use crate::game::gui::{GuiNode, constants::*, images::UiIconOption};
 
 pub struct GuiIcon {
     icon: UiIconOption,
-    width: i32,
-    height: i32,
+    width: f32,
+    height: f32,
 }
 
 impl GuiIcon {
-    pub fn new(icon: UiIconOption, width: i32, height: i32) -> Self {
+    pub fn new(icon: UiIconOption, width: f32, height: f32) -> Self {
         Self {
             icon: icon,
             width: width,
@@ -29,6 +29,7 @@ impl GuiNode for GuiIcon {
                 },
                 ImageNode {
                     image_mode: NodeImageMode::Stretch,
+                    color: MAIN_CONTENT_COLOR,
                     ..default()
                 },
                 self.icon,

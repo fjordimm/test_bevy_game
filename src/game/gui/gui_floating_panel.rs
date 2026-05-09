@@ -107,7 +107,7 @@ impl GuiNode for GuiFloatingPanel {
                     ..default()
                 },
                 main_box_shadow(),
-                BackgroundColor(MAIN_COLOR),
+                BackgroundColor(MAIN_BACKGROUND_COLOR),
             ))
             .id();
         if let Some(par) = parent {

@@ -20,7 +20,7 @@ pub struct GuiDiv {
     style: GuiDivStyle,
     expand: bool,
     padding: UiRect,
-    gap: i32,
+    gap: f32,
     flex_direction: FlexDirection,
     justify_content: JustifyContent,
     align_items: AlignItems,
@@ -32,7 +32,7 @@ impl GuiDiv {
         style: GuiDivStyle,
         expand: bool,
         padding: UiRect,
-        gap: i32,
+        gap: f32,
         flex_direction: FlexDirection,
         justify_content: JustifyContent,
         align_items: AlignItems,
@@ -84,7 +84,7 @@ impl GuiNode for GuiDiv {
                     ..default()
                 },
                 main_box_shadow(),
-                BackgroundColor(MAIN_COLOR),
+                BackgroundColor(MAIN_BACKGROUND_COLOR),
             )),
         }
         .id();

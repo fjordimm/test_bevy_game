@@ -42,7 +42,7 @@ struct MainMenuGuiTag;
 fn spawn_main_menu_gui(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
     let main_menu_gui = GuiScreenDiv::new(
         false,
-        gui::constants::MAIN_COLOR,
+        gui::constants::MAIN_BACKGROUND_COLOR,
         FlexDirection::Column,
         (GuiDiv::new(
             GuiDivStyle::Regular,
