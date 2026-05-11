@@ -1,23 +1,39 @@
-- Add TabGroups to gui stuff
-- Mark all the gui stuff with proper tags (MainMenuState or PlayingState)
+
+# Todo List
+
+## Currently Working On
+- Figure out randomness.
+    - See: https://docs.rs/bevy_rand/latest/bevy_rand/.
+    - And actually more imporantly: https://docs.rs/bevy_rand/latest/bevy_rand/tutorial/index.html
+
+## Reminders
+- Prefer using resources rather than consts for constant arbitrary values.
+- Be consistent on when to use the 'Tag' suffix.
+- Mark everything with proper tags (MainMenuState or PlayingState)
     - Make some debug tool to make warnings when there are objects without one of these tags
     - Maybe make a thing that automatically marks any newly created objects?
     - Actually nvm?
-- Add VSync as an option in user settings. Right now it is disabled (see present_mode in build_bevy_app.rs)
-- Switch to the better way of using randomization. See: https://docs.rs/bevy_rand/latest/bevy_rand/. And actually more imporantly: https://docs.rs/bevy_rand/latest/bevy_rand/tutorial/index.html
+    - Actually maybe use something like GameEntity just for PlayingState and nothing for MainMenuState.
+
+## Should Do At Some Point
+- Make a better system for changing the cursor type (right now it's just done locally for the floating panel corner resizer).
+- Test out when there are multiple floating panels and if you drag the window or drag the resizer over each other.
 - Make floating panels move correctly when the window is resized.
 - Make the camera cursor movement proportional to the window size.
 - When dragging floating panels around, they should order themselves correctly (most recently dragged goes on top).
 - Get rid of the yellow background color.
 - Make different GUI sizes.
-- Make a better system for changing the cursor type (right now it's just done locally for the floating panel corner resizer).
-- Right now I'm inserting a new CursorIcon to the window entity when changing the cursor type. Should I be removing the old ones?
-- Fix the window dragging and resizing not being fully consistent with mouse movement.
-- Possible optimization: don't use commands.entity(...) but use EntityCommands directly, wherever possible.
-- Test out when there are multiple floating panels and if you drag the window or drag the resizer over each other.
+- Make dev vs release profiles in Cargo.toml
 
-Currently on:
-- Be consistent with `commands: Commands` vs `commands: &Commands`.
-- Be consistent on when to use the 'Tag' suffix.
-- Figure out randomness.
-- Add shadow under the floating panel title bar.
+## Optimizations
+- Right now I'm inserting a new CursorIcon to the window entity when changing the cursor type. Should I be removing the old ones?
+- Don't use commands.entity(...) but use EntityCommands directly, wherever possible.
+- Maybe the warned_ok!() and warned_some!() macros can cease to do anything in the release profile.
+
+## Features
+- Add TabGroups to gui stuff
+- Add VSync as an option in user settings. Right now it is disabled (see present_mode in build_bevy_app.rs)
+
+
+
+

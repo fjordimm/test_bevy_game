@@ -27,9 +27,9 @@ impl Plugin for CorePlugin {
         #[rustfmt::skip]
         app
             // External Plugins
+            .add_plugins(EntropyPlugin::<WyRand>::default())
             .add_plugins(ScrollbarPlugin)
             .add_plugins(FrameTimeDiagnosticsPlugin::new(120))
-            .add_plugins(EntropyPlugin::<WyRand>::default())
             // Relevant Stuff
             .init_resource::<KeyBindings>()
             .init_state::<MouseMode>()
