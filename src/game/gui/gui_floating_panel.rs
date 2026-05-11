@@ -78,9 +78,6 @@ impl GuiFloatingPanel {
     }
 }
 
-#[derive(Component)]
-pub struct WaitOneFrame;
-
 impl GuiNode for GuiFloatingPanel {
     fn spawn(self, commands: &mut Commands, parent: Option<Entity>) -> Entity {
         let entity = commands
@@ -129,7 +126,6 @@ impl GuiNode for GuiFloatingPanel {
                     ..default()
                 },
                 BackgroundColor(BUTTON_COLOR_MAIN),
-                WaitOneFrame,
             ))
             .id();
         commands.entity(entity).add_child(title_bar);
@@ -138,6 +134,7 @@ impl GuiNode for GuiFloatingPanel {
             .spawn((
                 GuiFloatingPanelMainContentTag,
                 Node {
+                    border_radius: BorderRadius::bottom(px(BORDER_RADIUS)),
                     display: Display::Flex,
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::FlexStart,
