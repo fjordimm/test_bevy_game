@@ -12,12 +12,14 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
+rand = "0.10.1"
+rand_distr = "0.6.0"
+rand_core = "0.10"
 bevy = { version = "0.18.0", features = [
     "dev",
     "dynamic_linking",              # TODO: remove dynamic_linking for production
     "experimental_bevy_ui_widgets",
 ] }
 bevy_ecs = "0.18.0"
-rand_core = "0.10"
 bevy_rand = "0.14"
 bevy_prng = { version = "0.14", features = ["chacha20", "wyrand"] }

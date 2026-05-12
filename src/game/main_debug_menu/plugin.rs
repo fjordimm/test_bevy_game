@@ -1,5 +1,5 @@
 use bevy::{diagnostic::DiagnosticsStore, prelude::*, time::common_conditions::on_timer};
-use bevy_prng::WyRand;
+use rand::Rng;
 use std::time::Duration;
 
 use crate::game::{
@@ -9,7 +9,7 @@ use crate::game::{
     },
     gui::{GuiFloatingPanel, GuiFloatingPanelTag, GuiNode, GuiText},
     playing_state::sets::PlayingStateOrdering,
-    randomness::rands::GeneralRand,
+    randomness::{Prng, rands::GeneralRand},
     util::warned_ok,
 };
 
@@ -42,9 +42,9 @@ fn spawn_main_debug_menu(
     mut commands: Commands,
     gui_root: Res<GlobalGuiRoot>,
     window_q: Query<&Window>,
-    thing1: Res<GeneralRand>,
+    mut general_rand_q: Single<&mut Prng, With<GeneralRand>>,
 ) {
-    // debug!("thing1: {}", commands.entity(thing1.0).n);
+    debug!("Random Number: {}", general_rand_q.next_u32());
 
     let mut pos_x = 10.0;
     let mut pos_y = 10.0;

@@ -4,7 +4,6 @@ use bevy::{
     ui_widgets::ScrollbarPlugin,
     window::{CursorGrabMode, CursorOptions, PrimaryWindow},
 };
-use bevy_prng::WyRand;
 use bevy_rand::plugin::EntropyPlugin;
 
 use crate::game::{
@@ -17,7 +16,7 @@ use crate::game::{
     main_debug_menu::MainDebugMenuPlugin,
     main_menu_state::MainMenuStatePlugin,
     playing_state::PlayingStatePlugin,
-    randomness::RandomnessPlugin,
+    randomness::{Prng, RandomnessPlugin},
     util::warned_ok,
 };
 
@@ -28,7 +27,7 @@ impl Plugin for CorePlugin {
         #[rustfmt::skip]
         app
             // External Plugins
-            .add_plugins(EntropyPlugin::<WyRand>::default())
+            .add_plugins(EntropyPlugin::<Prng>::default())
             .add_plugins(ScrollbarPlugin)
             .add_plugins(FrameTimeDiagnosticsPlugin::new(120))
             // Relevant Stuff

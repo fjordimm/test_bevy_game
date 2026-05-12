@@ -1,17 +1,26 @@
+use crate::game::randomness::{Prng, list_of_rands::list_of_rands};
 use bevy::prelude::*;
+use bevy_rand::prelude::ForkableRng;
 
-#[derive(Resource)]
-pub struct GeneralRand(pub Entity);
+macro_rules! make_components {
+    ( $( $name:ident ),* $(,)? ) => {
+        $(
+            #[derive(Component)]
+            pub struct $name;
+        )*
+    };
+}
 
-#[derive(Component)]
-pub(super) struct GeneralRandTag;
+list_of_rands!(make_components);
 
-#[derive(Resource)]
-pub struct DumbRand(pub Entity);
+macro_rules! make_spawn_rands_fn {
+    ( $( $name:ident ),* $(,)? ) => {
+        pub(super) fn spawn_rands(commands: &mut Commands, global_rng: &mut Prng) {
+            $(
+                commands.spawn(($name, global_rng.fork_rng()));
+            )*
+        }
+    };
+}
 
-#[derive(Component)]
-pub(super) struct DumbRandTag;
-
-// pub(super) fn rands() -> Vec<&Resource> {
-//     vec![]
-// }
+list_of_rands!(make_spawn_rands_fn);

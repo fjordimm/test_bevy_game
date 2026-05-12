@@ -5,7 +5,6 @@ use crate::game::gui::{GuiNode, GuiText, constants::*, plugin::CollectionOfGuiIt
 pub enum GuiButtonStyle {
     Regular,
     TitleBarButton,
-    CornerResizer,
 }
 
 #[derive(Component)]
@@ -117,22 +116,6 @@ where
                 main_box_shadow(),
                 BackgroundColor(BUTTON_COLOR_MAIN),
             )),
-            GuiButtonStyle::CornerResizer => commands.spawn((
-                GuiButtonTag { style: self.style },
-                Button,
-                Node {
-                    min_width: px(CORNER_RESIZER_SIZE),
-                    max_width: px(CORNER_RESIZER_SIZE),
-                    min_height: px(CORNER_RESIZER_SIZE),
-                    max_height: px(CORNER_RESIZER_SIZE),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Column,
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    ..default()
-                },
-                BackgroundColor(Color::NONE),
-            )),
         }
         .id();
         if let Some(par) = parent {
@@ -181,6 +164,5 @@ fn what_style(interaction: &Interaction, tag: &GuiButtonTag) -> BackgroundColor 
             Interaction::Hovered => BackgroundColor(TITLE_BAR_BUTTON_COLOR_HOVER),
             Interaction::Pressed => BackgroundColor(TITLE_BAR_BUTTON_COLOR_PRESSED),
         },
-        GuiButtonStyle::CornerResizer => BackgroundColor(Color::NONE),
     }
 }
