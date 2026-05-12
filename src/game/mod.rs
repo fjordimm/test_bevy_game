@@ -1,9 +1,10 @@
 mod build_bevy_app;
+mod core;
+mod gui;
+mod main_debug_menu;
+mod main_menu_state;
+mod playing_state;
+mod randomness;
+mod util;
 
-pub mod core;
-pub mod gui;
-pub mod main_debug_menu;
-pub mod main_menu_state;
-pub mod playing_state;
-pub mod util;
 pub use build_bevy_app::build_bevy_app;

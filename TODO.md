@@ -2,6 +2,8 @@
 # Todo List
 
 ## Currently Working On
+- Make a plugin for quickly testing things out.
+- Maybe utilize pub(...) instead of everything in the mod.rs files.
 - Figure out randomness.
     - See: https://docs.rs/bevy_rand/latest/bevy_rand/.
     - And actually more imporantly: https://docs.rs/bevy_rand/latest/bevy_rand/tutorial/index.html
@@ -28,7 +30,7 @@
 ## Optimizations
 - Right now I'm inserting a new CursorIcon to the window entity when changing the cursor type. Should I be removing the old ones?
 - Don't use commands.entity(...) but use EntityCommands directly, wherever possible.
-- Maybe the warned_ok!() and warned_some!() macros can cease to do anything in the release profile.
+- Maybe the warned_ok!() and warned_some!() macros can cease to do anything in the release profile. Especially consider using Single<> instead of Query<>.
 
 ## Features
 - Add TabGroups to gui stuff

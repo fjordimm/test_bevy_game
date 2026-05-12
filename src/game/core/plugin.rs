@@ -17,6 +17,7 @@ use crate::game::{
     main_debug_menu::MainDebugMenuPlugin,
     main_menu_state::MainMenuStatePlugin,
     playing_state::PlayingStatePlugin,
+    randomness::RandomnessPlugin,
     util::warned_ok,
 };
 
@@ -47,6 +48,7 @@ impl Plugin for CorePlugin {
             .add_systems(Update, gui::images::apply_ui_icons)
             .add_systems(OnEnter(MouseMode::Grabbed), on_enter_mouse_grabbed)
             .add_systems(OnExit(MouseMode::Grabbed), on_exit_mouse_grabbed)
+            .add_plugins(RandomnessPlugin)
             .add_plugins(GuiPlugin)
             .add_plugins(MainDebugMenuPlugin)
             .add_plugins(MainMenuStatePlugin)
