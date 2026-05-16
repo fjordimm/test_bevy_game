@@ -4,7 +4,7 @@ use bevy_rand::global::GlobalRng;
 use crate::game::{
     core::sets::GlobalStartupOrdering,
     random::{Prng, rands},
-    util::alrmo,
+    util::alrms,
 };
 
 pub struct RandomPlugin;
@@ -19,8 +19,8 @@ impl Plugin for RandomPlugin {
     }
 }
 
-fn startup(mut commands: Commands, mut global_rng_q: Query<&mut Prng, With<GlobalRng>>) {
-    if let Some(mut global_rng) = alrmo!(global_rng_q.single_mut()) {
+fn startup(mut commands: Commands, global_rng_q: Option<Single<&mut Prng, With<GlobalRng>>>) {
+    if let Some(mut global_rng) = alrms!(global_rng_q) {
         rands::spawn_rands(&mut commands, &mut global_rng);
     }
 }

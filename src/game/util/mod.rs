@@ -2,50 +2,6 @@
 
 use bevy::prelude::*;
 
-// "Alerted Unwrap-Or-Return Ok"
-// Similar to .unwrap, but instead of panicking,
-//  it will return from the function it is in as well as reporting an error!().
-macro_rules! alrro {
-    ($input:expr) => {
-        if let Ok(input) = $input {
-            input
-        } else {
-            error!(
-                "Didn't get an Ok from something that was supposed to get one ({}:{}:{}). IMPORTANT: This has returned prematurely from whatever function it was in.",
-                file!(),
-                line!(),
-                column!(),
-            );
-
-            return;
-        }
-    };
-}
-
-pub(crate) use alrro;
-
-// "Alerted Unwrap-Or-Return Some"
-// Similar to .unwrap, but instead of panicking,
-//  it will return from the function it is in as well as reporting an error!().
-macro_rules! alrrs {
-    ($input:expr) => {
-        if let Some(input) = $input {
-            input
-        } else {
-            error!(
-                "Didn't get a Some from something that was supposed to get one ({}:{}:{}). IMPORTANT: This has returned prematurely from whatever function it was in.",
-                file!(),
-                line!(),
-                column!(),
-            );
-
-            return;
-        }
-    };
-}
-
-pub(crate) use alrrs;
-
 // "Alerted Make-Sure-It-Is Ok"
 // Takes a Result and...
 //  - If it's an Ok, then just return the inner part in a Some.
@@ -92,6 +48,50 @@ macro_rules! alrms {
 
 pub(crate) use alrms;
 
+// "Alerted Unwrap-Or-Return Ok"
+// Similar to .unwrap, but instead of panicking,
+//  it will return from the function it is in as well as reporting an error!().
+macro_rules! alrro {
+    ($input:expr) => {
+        if let Ok(input) = $input {
+            input
+        } else {
+            error!(
+                "Didn't get an Ok from something that was supposed to get one ({}:{}:{}). IMPORTANT: This has returned prematurely from whatever function it was in.",
+                file!(),
+                line!(),
+                column!(),
+            );
+
+            return;
+        }
+    };
+}
+
+pub(crate) use alrro;
+
+// "Alerted Unwrap-Or-Return Some"
+// Similar to .unwrap, but instead of panicking,
+//  it will return from the function it is in as well as reporting an error!().
+macro_rules! alrrs {
+    ($input:expr) => {
+        if let Some(input) = $input {
+            input
+        } else {
+            error!(
+                "Didn't get a Some from something that was supposed to get one ({}:{}:{}). IMPORTANT: This has returned prematurely from whatever function it was in.",
+                file!(),
+                line!(),
+                column!(),
+            );
+
+            return;
+        }
+    };
+}
+
+pub(crate) use alrrs;
+
 #[derive(EntityEvent)]
 pub struct TempOnCreation(pub Entity);
 
@@ -102,6 +102,7 @@ pub struct DummyEventToTrigger;
 
 // For when you need to use an event, but don't want it to ever activate.
 // That means you should never trigger this event.
+// TODO: add an observer for this event that reports an error!().
 #[derive(Event)]
 pub struct DummyEventToObserve;
 

@@ -13,7 +13,7 @@ use crate::game::{
         GuiButton, GuiIcon, GuiNode, GuiText, constants::*, gui_button::GuiButtonStyle,
         images::UiIconOption, plugin::CollectionOfGuiItems,
     },
-    util::{TempOnCreation, alrmo},
+    util::{TempOnCreation, alrmo, alrms},
 };
 
 #[derive(Component)]
@@ -418,8 +418,7 @@ pub fn update_main_content_from_is_minimized(
     mut main_content_q: Query<&mut Node, With<GuiFloatingPanelMainContentTag>>,
 ) {
     panel_q.iter().for_each(|panel| {
-        if let Some(mut main_content_node) = alrmo!(main_content_q.get_mut(panel.main_content))
-        {
+        if let Some(mut main_content_node) = alrmo!(main_content_q.get_mut(panel.main_content)) {
             main_content_node.display = match panel.is_minimized {
                 false => Display::Flex,
                 true => Display::None,
@@ -556,11 +555,9 @@ pub fn update_panel_resized(
             });
 
             // Show/hide the scrollbars
-            if let Some(computed_node) =
-                alrmo!(main_content_inner_q.get(panel.main_content_inner))
+            if let Some(computed_node) = alrmo!(main_content_inner_q.get(panel.main_content_inner))
             {
-                if let Some(mut h_scrollbar_node) =
-                    alrmo!(h_scrollbar_q.get_mut(panel.h_scrollbar))
+                if let Some(mut h_scrollbar_node) = alrmo!(h_scrollbar_q.get_mut(panel.h_scrollbar))
                 {
                     h_scrollbar_node.display =
                         match computed_node.content_size.x - computed_node.size.x > 0.0 {
@@ -569,8 +566,7 @@ pub fn update_panel_resized(
                         }
                 }
 
-                if let Some(mut v_scrollbar_node) =
-                    alrmo!(v_scrollbar_q.get_mut(panel.v_scrollbar))
+                if let Some(mut v_scrollbar_node) = alrmo!(v_scrollbar_q.get_mut(panel.v_scrollbar))
                 {
                     v_scrollbar_node.display =
                         match computed_node.content_size.y - computed_node.size.y > 0.0 {
@@ -640,13 +636,13 @@ pub fn update_cursor_from_resizer_interaction(
         (With<GuiFloatingPanelResizerTag>, Changed<Interaction>),
     >,
     mut button_last_interacted_with: Local<Option<Entity>>,
-    window_q: Query<Entity, With<PrimaryWindow>>,
+    window_q: Option<Single<Entity, With<PrimaryWindow>>>,
 ) {
-    if let Some(window) = alrmo!(window_q.single()) {
+    if let Some(window) = alrms!(window_q) {
         interaction_q.iter().for_each(|(interaction, button_id)| {
             if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
                 commands
-                    .entity(window)
+                    .entity(*window)
                     .insert(CursorIcon::from(SystemCursorIcon::SeResize));
 
                 *button_last_interacted_with = Some(button_id);
@@ -654,7 +650,7 @@ pub fn update_cursor_from_resizer_interaction(
                 if let Some(button_last_interacted_with) = *button_last_interacted_with {
                     if button_last_interacted_with == button_id {
                         commands
-                            .entity(window)
+                            .entity(*window)
                             .insert(CursorIcon::from(SystemCursorIcon::Default));
                     }
                 }

@@ -7,7 +7,7 @@ use crate::game::{
         sets::PlayingStateOrdering,
         states::PauseState,
     },
-    util::alrmo,
+    util::alrms,
 };
 
 pub struct PlayerPlugin;
@@ -57,15 +57,12 @@ fn on_exit_unpaused(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
 }
 
 fn cursor_controls_camera_look(
-    movement_settings: Res<PlayerMovementSettings>,
-    window_q: Query<&mut Window, With<PrimaryWindow>>,
+    window_q: Option<Single<&mut Window, With<PrimaryWindow>>>,
+    camera_trans_q: Option<Single<&mut Transform, With<CameraForPlayer>>>,
     mut mouse_motion: MessageReader<MouseMotion>,
-    mut camera_trans_q: Query<&mut Transform, With<CameraForPlayer>>,
+    movement_settings: Res<PlayerMovementSettings>,
 ) {
-    if let (Some(window), Some(mut camera_trans)) = (
-        alrmo!(window_q.single()),
-        alrmo!(camera_trans_q.single_mut()),
-    ) {
+    if let (Some(window), Some(mut camera_trans)) = (alrms!(window_q), alrms!(camera_trans_q)) {
         mouse_motion.read().for_each(|ev| {
             let (mut yaw, mut pitch, _) = camera_trans.rotation.to_euler(EulerRot::YXZ);
             let window_scale = window.height().min(window.width());

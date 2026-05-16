@@ -2,6 +2,7 @@
 # Todo List
 
 ## Currently Working On
+- Finish random/usage.md
 - Figure out randomness.
     - See: https://docs.rs/bevy_rand/latest/bevy_rand/.
     - And actually more imporantly: https://docs.rs/bevy_rand/latest/bevy_rand/tutorial/index.html

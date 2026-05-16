@@ -17,7 +17,7 @@ use crate::game::{
     main_menu_state::MainMenuStatePlugin,
     playing_state::PlayingStatePlugin,
     random::{Prng, plugin::RandomPlugin},
-    util::alrmo,
+    util::{alrmo, alrms},
 };
 
 pub struct CorePlugin;
@@ -67,15 +67,19 @@ fn start_game(mut commands: Commands) {
     commands.set_state(OverallState::MainMenu);
 }
 
-fn on_enter_mouse_grabbed(mut cursor_options_q: Query<&mut CursorOptions, With<PrimaryWindow>>) {
-    if let Some(mut cursor_options) = alrmo!(cursor_options_q.single_mut()) {
+fn on_enter_mouse_grabbed(
+    cursor_options_q: Option<Single<&mut CursorOptions, With<PrimaryWindow>>>,
+) {
+    if let Some(mut cursor_options) = alrms!(cursor_options_q) {
         cursor_options.grab_mode = CursorGrabMode::Confined;
         cursor_options.visible = false;
     }
 }
 
-fn on_exit_mouse_grabbed(mut cursor_options_q: Query<&mut CursorOptions, With<PrimaryWindow>>) {
-    if let Some(mut cursor_options) = alrmo!(cursor_options_q.single_mut()) {
+fn on_exit_mouse_grabbed(
+    cursor_options_q: Option<Single<&mut CursorOptions, With<PrimaryWindow>>>,
+) {
+    if let Some(mut cursor_options) = alrms!(cursor_options_q) {
         cursor_options.grab_mode = CursorGrabMode::None;
         cursor_options.visible = true;
     }

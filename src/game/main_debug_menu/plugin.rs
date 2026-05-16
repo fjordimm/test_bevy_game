@@ -11,7 +11,7 @@ use crate::game::{
     gui::{GuiFloatingPanel, GuiFloatingPanelTag, GuiNode, GuiText},
     playing_state::sets::PlayingStateOrdering,
     random::{Prng, rands::GeneralRand},
-    util::{alrmo, alrro},
+    util::{alrmo, alrms, alrro},
 };
 
 pub struct MainDebugMenuPlugin;
@@ -42,21 +42,19 @@ struct MainDebugMenuTag;
 fn spawn_main_debug_menu(
     mut commands: Commands,
     gui_root: Res<GlobalGuiRoot>,
-    window_q: Query<&Window>,
+    window_q: Option<Single<&Window>>,
     mut general_rand: Single<&mut Prng, With<GeneralRand>>,
 ) {
     for _ in 0..50 {
         debug!(
             "Random Number: {}",
-            general_rand.sample(alrro!(Normal::new(0.0, f64::NAN)))
+            general_rand.sample(alrro!(Normal::new(0.0, 100.0)))
         );
     }
 
-    // let nd = rand_distr::Normal::from;
-
     let mut pos_x = 10.0;
     let mut pos_y = 10.0;
-    if let Some(_window) = alrmo!(window_q.single()) {
+    if let Some(_window) = alrms!(window_q) {
         pos_x = 100.0;
         pos_y = 100.0;
     }
