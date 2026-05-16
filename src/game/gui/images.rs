@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::core::global_resources::UiIcons;
+use crate::game::core::resources::UiIcons;
 
 #[derive(Component, Debug, Clone, Copy)]
 pub enum UiIconOption {

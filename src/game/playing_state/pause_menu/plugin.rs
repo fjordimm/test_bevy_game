@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    core::{global_resources::GlobalGuiRoot, sets::GlobalStartupOrdering, states::OverallState},
+    core::{resources::GlobalGuiRoot, sets::GlobalStartupOrdering, states::OverallState},
     gui::{
         self, GuiButton, GuiDiv, GuiDivStyle, GuiNode, GuiScreenDiv, GuiScreenDivTag, GuiText,
         constants::MAIN_PADDING,
@@ -75,13 +75,13 @@ fn update_pause_menu_hiddenness(
     pause_state: Res<State<PauseState>>,
 ) {
     if let Some(mut screen_div) = alrms!(pause_menu_q) {
-        screen_div.is_active = match overall_state.get() {
+        screen_div.set_is_active(match overall_state.get() {
             OverallState::Playing => match pause_state.get() {
                 PauseState::Paused => true,
                 _ => false,
             },
             _ => false,
-        }
+        });
     }
 }
 

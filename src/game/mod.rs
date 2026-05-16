@@ -7,4 +7,4 @@ mod playing_state;
 mod random;
 mod util;
 
-pub use build_bevy_app::build_bevy_app;
+pub use build_bevy_app::*;

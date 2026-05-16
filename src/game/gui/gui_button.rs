@@ -8,8 +8,8 @@ pub enum GuiButtonStyle {
 }
 
 #[derive(Component)]
-pub struct GuiButtonTag {
-    pub style: GuiButtonStyle,
+pub(super) struct GuiButtonTag {
+    pub(super) style: GuiButtonStyle,
 }
 
 pub struct GuiButton<E, F>
@@ -144,7 +144,7 @@ where
     }
 }
 
-pub fn update(
+pub(super) fn update(
     mut query: Query<(&Interaction, &GuiButtonTag, &mut BackgroundColor), Changed<Interaction>>,
 ) {
     query.iter_mut().for_each(|(interaction, tag, mut color)| {

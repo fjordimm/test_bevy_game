@@ -18,8 +18,8 @@ use crate::game::{
 
 #[derive(Component)]
 pub struct GuiFloatingPanelTag {
-    pub is_active: bool,
-    pub is_minimized: bool,
+    pub(super) is_active: bool,
+    pub(super) is_minimized: bool,
     title_bar: Entity,
     main_content: Entity,
     main_content_inner: Entity,
@@ -28,29 +28,39 @@ pub struct GuiFloatingPanelTag {
     v_scrollbar: Entity,
 }
 
-#[derive(Component)]
-pub struct GuiFloatingPanelTitleBarTag;
+impl GuiFloatingPanelTag {
+    pub fn get_is_active(&self) -> bool {
+        self.is_active
+    }
+
+    pub fn set_is_active(&mut self, val: bool) {
+        self.is_active = val;
+    }
+}
 
 #[derive(Component)]
-pub struct GuiFloatingPanelMinimizeButtonTag;
+pub(super) struct GuiFloatingPanelTitleBarTag;
 
 #[derive(Component)]
-pub struct GuiFloatingPanelXButtonTag;
+pub(super) struct GuiFloatingPanelMinimizeButtonTag;
 
 #[derive(Component)]
-pub struct GuiFloatingPanelMainContentTag;
+pub(super) struct GuiFloatingPanelXButtonTag;
 
 #[derive(Component)]
-pub struct GuiFloatingPanelMainContentInnerTag;
+pub(super) struct GuiFloatingPanelMainContentTag;
 
 #[derive(Component)]
-pub struct GuiFloatingPanelResizerTag;
+pub(super) struct GuiFloatingPanelMainContentInnerTag;
 
 #[derive(Component)]
-pub struct GuiFloatingPanelHScrollbarTag;
+pub(super) struct GuiFloatingPanelResizerTag;
 
 #[derive(Component)]
-pub struct GuiFloatingPanelVScrollbarTag;
+pub(super) struct GuiFloatingPanelHScrollbarTag;
+
+#[derive(Component)]
+pub(super) struct GuiFloatingPanelVScrollbarTag;
 
 pub struct GuiFloatingPanel {
     starts_active: bool,
@@ -369,16 +379,16 @@ mod interactions {
 
     #[derive(Event, Clone)]
     pub struct MinimizeButtonEv {
-        pub panel: Entity,
+        pub(super) panel: Entity,
     }
 
     #[derive(Event, Clone)]
     pub struct XButtonEv {
-        pub panel: Entity,
+        pub(super) panel: Entity,
     }
 }
 
-pub fn minimize_button_observer(
+pub(super) fn minimize_button_observer(
     ev: On<interactions::MinimizeButtonEv>,
     mut panel_q: Query<&mut GuiFloatingPanelTag>,
 ) {
@@ -390,7 +400,7 @@ pub fn minimize_button_observer(
     }
 }
 
-pub fn x_button_observer(
+pub(super) fn x_button_observer(
     ev: On<interactions::XButtonEv>,
     mut panel_q: Query<&mut GuiFloatingPanelTag>,
 ) {
@@ -402,7 +412,7 @@ pub fn x_button_observer(
     }
 }
 
-pub fn update_panel_from_is_active(
+pub(super) fn update_panel_from_is_active(
     mut panel_q: Query<(&GuiFloatingPanelTag, &mut Node), Changed<GuiFloatingPanelTag>>,
 ) {
     panel_q.iter_mut().for_each(|(panel, mut panel_node)| {
@@ -413,7 +423,7 @@ pub fn update_panel_from_is_active(
     });
 }
 
-pub fn update_main_content_from_is_minimized(
+pub(super) fn update_main_content_from_is_minimized(
     panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
     mut main_content_q: Query<&mut Node, With<GuiFloatingPanelMainContentTag>>,
 ) {
@@ -427,7 +437,7 @@ pub fn update_main_content_from_is_minimized(
     });
 }
 
-pub fn update_title_bar_from_is_minimized(
+pub(super) fn update_title_bar_from_is_minimized(
     panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
     mut title_bar_q: Query<&mut Node, With<GuiFloatingPanelTitleBarTag>>,
 ) {
@@ -441,7 +451,7 @@ pub fn update_title_bar_from_is_minimized(
     });
 }
 
-pub fn update_resizer_from_is_minimized(
+pub(super) fn update_resizer_from_is_minimized(
     panel_q: Query<&GuiFloatingPanelTag, Changed<GuiFloatingPanelTag>>,
     mut resizer_q: Query<&mut Node, With<GuiFloatingPanelResizerTag>>,
 ) {
@@ -455,7 +465,7 @@ pub fn update_resizer_from_is_minimized(
     });
 }
 
-pub fn update_panel_dragged(
+pub(super) fn update_panel_dragged(
     interaction_q: Query<
         (&Interaction, &ChildOf),
         (Changed<Interaction>, With<GuiFloatingPanelTitleBarTag>),
@@ -503,7 +513,7 @@ pub fn update_panel_dragged(
     }
 }
 
-pub fn update_panel_resized(
+pub(super) fn update_panel_resized(
     interaction_q: Query<
         (&Interaction, &ChildOf),
         (Changed<Interaction>, With<GuiFloatingPanelResizerTag>),
@@ -602,7 +612,7 @@ pub fn update_panel_resized(
     }
 }
 
-pub fn update_panel_resized_enforce_min_width(
+pub(super) fn update_panel_resized_enforce_min_width(
     panel_q: Query<&GuiFloatingPanelTag>,
     title_bar_q: Query<&ComputedNode, With<GuiFloatingPanelTitleBarTag>>,
     mut main_content_q: Query<(&ComputedNode, &mut Node), With<GuiFloatingPanelMainContentTag>>,
@@ -629,7 +639,7 @@ pub fn update_panel_resized_enforce_min_width(
     });
 }
 
-pub fn update_cursor_from_resizer_interaction(
+pub(super) fn update_cursor_from_resizer_interaction(
     mut commands: Commands,
     interaction_q: Query<
         (&Interaction, Entity),

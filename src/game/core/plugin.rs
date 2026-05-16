@@ -8,16 +8,16 @@ use bevy_rand::plugin::EntropyPlugin;
 
 use crate::game::{
     core::{
-        global_resources::{GlobalGuiRoot, KeyBindings},
+        resources::{GlobalGuiRoot, KeyBindings},
         sets::{GLOBAL_STARTUP_ORDERING_ORDER, GlobalStartupOrdering},
         states::{MouseMode, OverallState},
     },
     gui::{self, gui_root_template, plugin::GuiPlugin},
-    main_debug_menu::MainDebugMenuPlugin,
-    main_menu_state::MainMenuStatePlugin,
-    playing_state::PlayingStatePlugin,
+    main_debug_menu::plugin::MainDebugMenuPlugin,
+    main_menu_state::plugin::MainMenuStatePlugin,
+    playing_state::plugin::PlayingStatePlugin,
     random::{Prng, plugin::RandomPlugin},
-    util::{alrmo, alrms},
+    util::alrms,
 };
 
 pub struct CorePlugin;

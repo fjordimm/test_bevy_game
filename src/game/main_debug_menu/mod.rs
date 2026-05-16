@@ -1,3 +1,1 @@
-mod plugin;
-
-pub use plugin::MainDebugMenuPlugin;
+pub mod plugin;

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::states::{MouseMode, OverallState},
-    main_menu_state::{main_menu_gui::MainMenuGuiPlugin, tags::MainMenuStateEntity},
+    main_menu_state::{main_menu_gui::plugin::MainMenuGuiPlugin, tags::MainMenuStateEntity},
 };
 
 pub struct MainMenuStatePlugin;

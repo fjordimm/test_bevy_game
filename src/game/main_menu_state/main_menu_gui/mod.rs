@@ -1,3 +1,1 @@
-mod plugin;
-
-pub use plugin::MainMenuGuiPlugin;
+pub mod plugin;

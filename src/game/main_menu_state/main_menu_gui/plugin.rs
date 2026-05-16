@@ -2,8 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::{
-        global_resources::GlobalGuiRoot, quit_game, sets::GlobalStartupOrdering,
-        states::OverallState,
+        quit_game, resources::GlobalGuiRoot, sets::GlobalStartupOrdering, states::OverallState,
     },
     gui::{
         self, GuiButton, GuiDiv, GuiDivStyle, GuiNode, GuiScreenDiv, GuiScreenDivTag, GuiText,
@@ -69,10 +68,10 @@ fn update_main_menu_gui_hiddenness(
     overall_state: Res<State<OverallState>>,
 ) {
     if let Some(mut screen_div) = alrms!(main_menu_gui_q) {
-        screen_div.is_active = match overall_state.get() {
+        screen_div.set_is_active(match overall_state.get() {
             OverallState::MainMenu => true,
             _ => false,
-        }
+        });
     }
 }
 

@@ -1,3 +1,1 @@
-mod plugin;
-
-pub use plugin::WorldPlugin;
+pub mod plugin;

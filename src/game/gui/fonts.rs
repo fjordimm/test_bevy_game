@@ -1,4 +1,4 @@
-use crate::game::core::global_resources::Fonts;
+use crate::game::core::resources::Fonts;
 use bevy::prelude::*;
 
 #[derive(Component, Debug, Clone, Copy)]

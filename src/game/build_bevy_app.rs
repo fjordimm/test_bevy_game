@@ -1,6 +1,6 @@
 use bevy::{log::LogPlugin, prelude::*, window::PrimaryWindow};
 
-use crate::game::core;
+use crate::game::core::plugin::CorePlugin;
 
 const DEBUG_BACKGROUND_COLOR: Color = Color::linear_rgb(1.0, 1.0, 0.0);
 
@@ -28,7 +28,7 @@ pub fn build_bevy_app() -> App {
         .add_plugins(default_plugins)
         .insert_resource(ClearColor(DEBUG_BACKGROUND_COLOR))
         .add_systems(Startup, set_window_maximized)
-        .add_plugins(core::CorePlugin);
+        .add_plugins(CorePlugin);
 
     app
 }

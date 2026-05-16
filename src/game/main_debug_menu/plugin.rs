@@ -5,10 +5,10 @@ use std::time::Duration;
 
 use crate::game::{
     core::{
-        global_resources::{GlobalGuiRoot, KeyBindings},
+        resources::{GlobalGuiRoot, KeyBindings},
         sets::GlobalStartupOrdering,
     },
-    gui::{GuiFloatingPanel, GuiFloatingPanelTag, GuiNode, GuiText},
+    gui::{GuiButton, GuiFloatingPanel, GuiFloatingPanelTag, GuiNode, GuiText},
     playing_state::sets::PlayingStateOrdering,
     random::{Prng, rands::GeneralRand},
     util::{alrmo, alrms, alrro},
@@ -67,6 +67,7 @@ fn spawn_main_debug_menu(
         (
             GuiText::new_small_mono("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm", false),
             GuiText::new_small_mono("I'm some more text", false),
+            GuiButton::new_regular_eventless("nothin"),
         )
     )
     .spawn(&mut commands, Some(gui_root.0));
@@ -87,10 +88,8 @@ fn toggle_main_debug_menu(
 ) {
     if keys.just_pressed(key_bindings.open_main_debug_menu) {
         main_debug_menu_q.iter_mut().for_each(|mut panel| {
-            panel.is_active = match panel.is_active {
-                false => true,
-                true => false,
-            }
+            let is_active = panel.get_is_active();
+            panel.set_is_active(!is_active);
         });
     }
 }

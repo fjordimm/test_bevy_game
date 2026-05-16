@@ -1,10 +1,11 @@
+use bevy::prelude::*;
+
 mod gui_button;
 mod gui_div;
 mod gui_entity;
 mod gui_floating_panel;
 mod gui_icon;
 mod gui_node;
-mod gui_root_template;
 mod gui_screen_div;
 mod gui_text;
 mod scrolling;
@@ -13,17 +14,23 @@ pub mod constants;
 pub mod fonts;
 pub mod images;
 pub mod plugin;
-pub use gui_button::GuiButton;
-pub use gui_button::GuiButtonStyle;
-pub use gui_div::GuiDiv;
-pub use gui_div::GuiDivStyle;
-pub use gui_div::GuiDivTag;
-pub use gui_entity::GuiEntity;
-pub use gui_floating_panel::GuiFloatingPanel;
-pub use gui_floating_panel::GuiFloatingPanelTag;
-pub use gui_icon::GuiIcon;
-pub use gui_node::GuiNode;
-pub use gui_root_template::gui_root_template;
-pub use gui_screen_div::GuiScreenDiv;
-pub use gui_screen_div::GuiScreenDivTag;
-pub use gui_text::GuiText;
+pub use gui_button::*;
+pub use gui_div::*;
+pub use gui_entity::*;
+pub use gui_floating_panel::*;
+pub use gui_icon::*;
+pub use gui_node::*;
+pub use gui_screen_div::*;
+pub use gui_text::*;
+
+pub fn gui_root_template() -> Node {
+    Node {
+        width: vw(100),
+        height: vh(100),
+        display: Display::Flex,
+        flex_direction: FlexDirection::Column,
+        justify_content: JustifyContent::FlexStart,
+        align_items: AlignItems::FlexStart,
+        ..default()
+    }
+}

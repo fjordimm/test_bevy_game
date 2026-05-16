@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    core::{global_resources::KeyBindings, states::OverallState},
+    core::{resources::KeyBindings, states::OverallState},
     playing_state::{
-        pause_menu::PauseMenuPlugin,
-        player::{PlayerPlugin, tags::CameraForPlayer},
+        pause_menu::plugin::PauseMenuPlugin,
+        player::{plugin::PlayerPlugin, tags::CameraForPlayer},
         sets::{PLAYING_STATE_ORDERING_ORDER, PlayingStateOrdering},
         states::PauseState,
         tags::PlayingStateEntity,
-        world::WorldPlugin,
+        world::plugin::WorldPlugin,
     },
 };
 

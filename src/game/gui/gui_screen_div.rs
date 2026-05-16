@@ -7,7 +7,17 @@ use crate::game::{
 
 #[derive(Component)]
 pub struct GuiScreenDivTag {
-    pub is_active: bool,
+    pub(super) is_active: bool,
+}
+
+impl GuiScreenDivTag {
+    pub fn get_is_active(&self) -> bool {
+        self.is_active
+    }
+
+    pub fn set_is_active(&mut self, val: bool) {
+        self.is_active = val;
+    }
 }
 
 pub struct GuiScreenDiv {
@@ -78,7 +88,7 @@ impl GuiNode for GuiScreenDiv {
     }
 }
 
-pub fn update_is_active(
+pub(super) fn update_is_active(
     mut screen_div_q: Query<(&GuiScreenDivTag, &mut Node), Changed<GuiScreenDivTag>>,
 ) {
     screen_div_q

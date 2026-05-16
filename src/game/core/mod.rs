@@ -1,8 +1,8 @@
-mod plugin;
-mod quit_game;
-
-pub mod global_resources;
+pub mod resources;
+pub mod plugin;
 pub mod sets;
 pub mod states;
-pub use plugin::CorePlugin;
-pub use quit_game::quit_game;
+
+pub fn quit_game() {
+    std::process::exit(0);
+}
