@@ -1,4 +1,4 @@
-use crate::game::randomness::{Prng, list_of_rands::list_of_rands};
+use crate::game::random::{Prng, list_of_rands::list_of_rands};
 use bevy::prelude::*;
 use bevy_rand::prelude::ForkableRng;
 

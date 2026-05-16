@@ -1,5 +1,6 @@
 use bevy::{diagnostic::DiagnosticsStore, prelude::*, time::common_conditions::on_timer};
-use rand::Rng;
+use rand::{Rng, RngExt};
+use rand_distr::{Distribution, Normal, StandardNormal};
 use std::time::Duration;
 
 use crate::game::{
@@ -9,8 +10,8 @@ use crate::game::{
     },
     gui::{GuiFloatingPanel, GuiFloatingPanelTag, GuiNode, GuiText},
     playing_state::sets::PlayingStateOrdering,
-    randomness::{Prng, rands::GeneralRand},
-    util::warned_ok,
+    random::{Prng, rands::GeneralRand},
+    util::{alrmo, alrro},
 };
 
 pub struct MainDebugMenuPlugin;
@@ -42,13 +43,20 @@ fn spawn_main_debug_menu(
     mut commands: Commands,
     gui_root: Res<GlobalGuiRoot>,
     window_q: Query<&Window>,
-    mut general_rand_q: Single<&mut Prng, With<GeneralRand>>,
+    mut general_rand: Single<&mut Prng, With<GeneralRand>>,
 ) {
-    debug!("Random Number: {}", general_rand_q.next_u32());
+    for _ in 0..50 {
+        debug!(
+            "Random Number: {}",
+            general_rand.sample(alrro!(Normal::new(0.0, f64::NAN)))
+        );
+    }
+
+    // let nd = rand_distr::Normal::from;
 
     let mut pos_x = 10.0;
     let mut pos_y = 10.0;
-    if let Some(_window) = warned_ok!(window_q.single()) {
+    if let Some(_window) = alrmo!(window_q.single()) {
         pos_x = 100.0;
         pos_y = 100.0;
     }

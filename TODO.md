@@ -2,11 +2,11 @@
 # Todo List
 
 ## Currently Working On
-- Maybe utilize pub(...) instead of everything in the mod.rs files.
-- Make a plugin for quickly testing things out.
 - Figure out randomness.
     - See: https://docs.rs/bevy_rand/latest/bevy_rand/.
     - And actually more imporantly: https://docs.rs/bevy_rand/latest/bevy_rand/tutorial/index.html
+- Maybe utilize pub(...) instead of everything in the mod.rs files.
+- Make a plugin for quickly testing things out.
 
 ## Reminders
 - Prefer using resources rather than consts for constant arbitrary values.

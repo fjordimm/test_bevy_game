@@ -4,7 +4,7 @@ mod gui;
 mod main_debug_menu;
 mod main_menu_state;
 mod playing_state;
-mod randomness;
+mod random;
 mod util;
 
 pub use build_bevy_app::build_bevy_app;

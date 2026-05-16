@@ -2,13 +2,61 @@
 
 use bevy::prelude::*;
 
-macro_rules! warned_ok {
+// "Alerted Unwrap-Or-Return Ok"
+// Similar to .unwrap, but instead of panicking,
+//  it will return from the function it is in as well as reporting an error!().
+macro_rules! alrro {
+    ($input:expr) => {
+        if let Ok(input) = $input {
+            input
+        } else {
+            error!(
+                "Didn't get an Ok from something that was supposed to get one ({}:{}:{}). IMPORTANT: This has returned prematurely from whatever function it was in.",
+                file!(),
+                line!(),
+                column!(),
+            );
+
+            return;
+        }
+    };
+}
+
+pub(crate) use alrro;
+
+// "Alerted Unwrap-Or-Return Some"
+// Similar to .unwrap, but instead of panicking,
+//  it will return from the function it is in as well as reporting an error!().
+macro_rules! alrrs {
+    ($input:expr) => {
+        if let Some(input) = $input {
+            input
+        } else {
+            error!(
+                "Didn't get a Some from something that was supposed to get one ({}:{}:{}). IMPORTANT: This has returned prematurely from whatever function it was in.",
+                file!(),
+                line!(),
+                column!(),
+            );
+
+            return;
+        }
+    };
+}
+
+pub(crate) use alrrs;
+
+// "Alerted Make-Sure-It-Is Ok"
+// Takes a Result and...
+//  - If it's an Ok, then just return the inner part in a Some.
+//  - If it's an Err, then return None but report an error!().
+macro_rules! alrmo {
     ($input:expr) => {
         if let Ok(input) = $input {
             Some(input)
         } else {
             error!(
-                "Didn't get an Ok from something supposed to get one ({}:{}:{}).",
+                "Didn't get an Ok from something that was supposed to get one ({}:{}:{}). IMPORTANT: This probably has broken the functionality of whatever function it was in.",
                 file!(),
                 line!(),
                 column!(),
@@ -19,15 +67,19 @@ macro_rules! warned_ok {
     };
 }
 
-pub(crate) use warned_ok;
+pub(crate) use alrmo;
 
-macro_rules! warned_some {
+// "Alerted Make-Sure-It-Is Some"
+// Takes an Option and...
+//  - If it's a Some, then just return the inner part in a Some.
+//  - If it's a None, then return None but report an error!().
+macro_rules! alrms {
     ($input:expr) => {
         if let Some(input) = $input {
             Some(input)
         } else {
             error!(
-                "Didn't get a Some from something supposed to get one ({}:{}:{}).",
+                "Didn't get a Some from something that was supposed to get one ({}:{}:{}). IMPORTANT: This probably has broken the functionality of whatever function it was in.",
                 file!(),
                 line!(),
                 column!(),
@@ -38,7 +90,7 @@ macro_rules! warned_some {
     };
 }
 
-pub(crate) use warned_some;
+pub(crate) use alrms;
 
 #[derive(EntityEvent)]
 pub struct TempOnCreation(pub Entity);
@@ -56,7 +108,7 @@ pub struct DummyEventToObserve;
 pub fn get_entity_components(world: &World, entity: Entity) -> String {
     let mut ret = String::from("-----Entity-----");
 
-    if let Some(components) = warned_ok!(world.inspect_entity(entity)) {
+    if let Some(components) = alrmo!(world.inspect_entity(entity)) {
         components.into_iter().for_each(|component_info| {
             ret.push_str("\n    ");
             ret.push_str(&component_info.name().as_string());

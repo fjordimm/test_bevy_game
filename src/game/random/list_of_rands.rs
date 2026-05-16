@@ -3,7 +3,6 @@ macro_rules! list_of_rands {
         $name! {
             // Add to the list here!
             GeneralRand,
-            TempRand,
         }
     };
 }

@@ -7,7 +7,7 @@ use crate::game::{
         constants::MAIN_PADDING,
     },
     playing_state::{sets::PlayingStateOrdering, states::PauseState},
-    util::warned_ok,
+    util::alrmo,
 };
 
 pub struct PauseMenuPlugin;
@@ -74,7 +74,7 @@ fn update_pause_menu_hiddenness(
     overall_state: Res<State<OverallState>>,
     pause_state: Res<State<PauseState>>,
 ) {
-    if let Some(mut screen_div) = warned_ok!(pause_menu_q.single_mut()) {
+    if let Some(mut screen_div) = alrmo!(pause_menu_q.single_mut()) {
         screen_div.is_active = match overall_state.get() {
             OverallState::Playing => match pause_state.get() {
                 PauseState::Paused => true,

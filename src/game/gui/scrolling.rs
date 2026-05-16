@@ -4,7 +4,7 @@ use bevy::{
     prelude::*,
 };
 
-use crate::game::{gui::constants::*, util::warned_ok};
+use crate::game::{gui::constants::*, util::alrmo};
 
 #[derive(EntityEvent)]
 #[entity_event(propagate, auto_propagate)]
@@ -43,7 +43,7 @@ pub fn on_scroll_handler(
     mut query: Query<(&mut ScrollPosition, &Node, &ComputedNode)>,
 ) {
     if let Some((mut scroll_position, node, computed_node)) =
-        warned_ok!(query.get_mut(scroll.entity))
+        alrmo!(query.get_mut(scroll.entity))
     {
         let max_offset = (computed_node.content_size() - computed_node.size())
             * computed_node.inverse_scale_factor();

@@ -10,7 +10,7 @@ use crate::game::{
         constants::*,
     },
     playing_state::sets::PlayingStateOrdering,
-    util::warned_ok,
+    util::alrmo,
 };
 
 pub struct MainMenuGuiPlugin;
@@ -68,7 +68,7 @@ fn update_main_menu_gui_hiddenness(
     mut main_menu_gui_q: Query<&mut GuiScreenDivTag, With<MainMenuGuiTag>>,
     overall_state: Res<State<OverallState>>,
 ) {
-    if let Some(mut screen_div) = warned_ok!(main_menu_gui_q.single_mut()) {
+    if let Some(mut screen_div) = alrmo!(main_menu_gui_q.single_mut()) {
         screen_div.is_active = match overall_state.get() {
             OverallState::MainMenu => true,
             _ => false,

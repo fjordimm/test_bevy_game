@@ -7,7 +7,7 @@ use crate::game::{
         sets::PlayingStateOrdering,
         states::PauseState,
     },
-    util::warned_ok,
+    util::alrmo,
 };
 
 pub struct PlayerPlugin;
@@ -63,8 +63,8 @@ fn cursor_controls_camera_look(
     mut camera_trans_q: Query<&mut Transform, With<CameraForPlayer>>,
 ) {
     if let (Some(window), Some(mut camera_trans)) = (
-        warned_ok!(window_q.single()),
-        warned_ok!(camera_trans_q.single_mut()),
+        alrmo!(window_q.single()),
+        alrmo!(camera_trans_q.single_mut()),
     ) {
         mouse_motion.read().for_each(|ev| {
             let (mut yaw, mut pitch, _) = camera_trans.rotation.to_euler(EulerRot::YXZ);

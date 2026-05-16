@@ -13,7 +13,7 @@ use crate::game::{
         GuiButton, GuiIcon, GuiNode, GuiText, constants::*, gui_button::GuiButtonStyle,
         images::UiIconOption, plugin::CollectionOfGuiItems,
     },
-    util::{TempOnCreation, warned_ok},
+    util::{TempOnCreation, alrmo},
 };
 
 #[derive(Component)]
@@ -418,7 +418,7 @@ pub fn update_main_content_from_is_minimized(
     mut main_content_q: Query<&mut Node, With<GuiFloatingPanelMainContentTag>>,
 ) {
     panel_q.iter().for_each(|panel| {
-        if let Some(mut main_content_node) = warned_ok!(main_content_q.get_mut(panel.main_content))
+        if let Some(mut main_content_node) = alrmo!(main_content_q.get_mut(panel.main_content))
         {
             main_content_node.display = match panel.is_minimized {
                 false => Display::Flex,
@@ -433,7 +433,7 @@ pub fn update_title_bar_from_is_minimized(
     mut title_bar_q: Query<&mut Node, With<GuiFloatingPanelTitleBarTag>>,
 ) {
     panel_q.iter().for_each(|panel| {
-        if let Some(mut title_bar_node) = warned_ok!(title_bar_q.get_mut(panel.title_bar)) {
+        if let Some(mut title_bar_node) = alrmo!(title_bar_q.get_mut(panel.title_bar)) {
             title_bar_node.border_radius = match panel.is_minimized {
                 false => BorderRadius::top(px(BORDER_RADIUS)),
                 true => BorderRadius::all(px(BORDER_RADIUS)),
@@ -447,7 +447,7 @@ pub fn update_resizer_from_is_minimized(
     mut resizer_q: Query<&mut Node, With<GuiFloatingPanelResizerTag>>,
 ) {
     panel_q.iter().for_each(|panel| {
-        if let Some(mut resizer_node) = warned_ok!(resizer_q.get_mut(panel.resizer)) {
+        if let Some(mut resizer_node) = alrmo!(resizer_q.get_mut(panel.resizer)) {
             resizer_node.display = match panel.is_minimized {
                 false => Display::Flex,
                 true => Display::None,
@@ -557,10 +557,10 @@ pub fn update_panel_resized(
 
             // Show/hide the scrollbars
             if let Some(computed_node) =
-                warned_ok!(main_content_inner_q.get(panel.main_content_inner))
+                alrmo!(main_content_inner_q.get(panel.main_content_inner))
             {
                 if let Some(mut h_scrollbar_node) =
-                    warned_ok!(h_scrollbar_q.get_mut(panel.h_scrollbar))
+                    alrmo!(h_scrollbar_q.get_mut(panel.h_scrollbar))
                 {
                     h_scrollbar_node.display =
                         match computed_node.content_size.x - computed_node.size.x > 0.0 {
@@ -570,7 +570,7 @@ pub fn update_panel_resized(
                 }
 
                 if let Some(mut v_scrollbar_node) =
-                    warned_ok!(v_scrollbar_q.get_mut(panel.v_scrollbar))
+                    alrmo!(v_scrollbar_q.get_mut(panel.v_scrollbar))
                 {
                     v_scrollbar_node.display =
                         match computed_node.content_size.y - computed_node.size.y > 0.0 {
@@ -582,7 +582,7 @@ pub fn update_panel_resized(
 
             // Resize the main content div
             if let Some((mut main_content_node, computed_node)) =
-                warned_ok!(main_content_q.get_mut(panel.main_content))
+                alrmo!(main_content_q.get_mut(panel.main_content))
             {
                 if !matches!(main_content_node.width, Val::Px(_)) {
                     main_content_node.width =
@@ -612,9 +612,9 @@ pub fn update_panel_resized_enforce_min_width(
     mut main_content_q: Query<(&ComputedNode, &mut Node), With<GuiFloatingPanelMainContentTag>>,
 ) {
     panel_q.iter().for_each(|panel| {
-        if let Some(title_bar_computed_node) = warned_ok!(title_bar_q.get(panel.title_bar)) {
+        if let Some(title_bar_computed_node) = alrmo!(title_bar_q.get(panel.title_bar)) {
             if let Some((main_content_computed_node, mut main_content_node)) =
-                warned_ok!(main_content_q.get_mut(panel.main_content))
+                alrmo!(main_content_q.get_mut(panel.main_content))
             {
                 // so that it doesn't do it when the panel is minimized
                 if main_content_computed_node.size.x > 0.0 {
@@ -642,7 +642,7 @@ pub fn update_cursor_from_resizer_interaction(
     mut button_last_interacted_with: Local<Option<Entity>>,
     window_q: Query<Entity, With<PrimaryWindow>>,
 ) {
-    if let Some(window) = warned_ok!(window_q.single()) {
+    if let Some(window) = alrmo!(window_q.single()) {
         interaction_q.iter().for_each(|(interaction, button_id)| {
             if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
                 commands

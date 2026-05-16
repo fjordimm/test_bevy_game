@@ -16,8 +16,8 @@ use crate::game::{
     main_debug_menu::MainDebugMenuPlugin,
     main_menu_state::MainMenuStatePlugin,
     playing_state::PlayingStatePlugin,
-    randomness::{Prng, RandomnessPlugin},
-    util::warned_ok,
+    random::{Prng, plugin::RandomPlugin},
+    util::alrmo,
 };
 
 pub struct CorePlugin;
@@ -47,7 +47,7 @@ impl Plugin for CorePlugin {
             .add_systems(Update, gui::images::apply_ui_icons)
             .add_systems(OnEnter(MouseMode::Grabbed), on_enter_mouse_grabbed)
             .add_systems(OnExit(MouseMode::Grabbed), on_exit_mouse_grabbed)
-            .add_plugins(RandomnessPlugin)
+            .add_plugins(RandomPlugin)
             .add_plugins(GuiPlugin)
             .add_plugins(MainDebugMenuPlugin)
             .add_plugins(MainMenuStatePlugin)
@@ -68,14 +68,14 @@ fn start_game(mut commands: Commands) {
 }
 
 fn on_enter_mouse_grabbed(mut cursor_options_q: Query<&mut CursorOptions, With<PrimaryWindow>>) {
-    if let Some(mut cursor_options) = warned_ok!(cursor_options_q.single_mut()) {
+    if let Some(mut cursor_options) = alrmo!(cursor_options_q.single_mut()) {
         cursor_options.grab_mode = CursorGrabMode::Confined;
         cursor_options.visible = false;
     }
 }
 
 fn on_exit_mouse_grabbed(mut cursor_options_q: Query<&mut CursorOptions, With<PrimaryWindow>>) {
-    if let Some(mut cursor_options) = warned_ok!(cursor_options_q.single_mut()) {
+    if let Some(mut cursor_options) = alrmo!(cursor_options_q.single_mut()) {
         cursor_options.grab_mode = CursorGrabMode::None;
         cursor_options.visible = true;
     }
