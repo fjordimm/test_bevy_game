@@ -11,15 +11,18 @@ pub struct GuiScreenDivTag {
 }
 
 impl GuiScreenDivTag {
+    #[allow(unused)]
     pub fn get_is_active(&self) -> bool {
         self.is_active
     }
 
+    #[allow(unused)]
     pub fn set_is_active(&mut self, val: bool) {
         self.is_active = val;
     }
 }
 
+#[allow(unused)]
 pub struct GuiScreenDiv {
     starts_active: bool,
     color: Color,
@@ -28,6 +31,7 @@ pub struct GuiScreenDiv {
 }
 
 impl GuiScreenDiv {
+    #[allow(unused)]
     pub fn new<C: Into<CollectionOfGuiItems>>(
         starts_active: bool,
         color: Color,

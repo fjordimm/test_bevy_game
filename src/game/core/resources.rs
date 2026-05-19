@@ -16,6 +16,7 @@ pub struct UiIcons {
     pub corner_resizer: Handle<Image>,
 }
 
+#[allow(unused)]
 #[derive(Resource, Debug)]
 pub struct KeyBindings {
     pub pause: KeyCode,

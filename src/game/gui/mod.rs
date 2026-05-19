@@ -16,7 +16,6 @@ pub mod images;
 pub mod plugin;
 pub use gui_button::*;
 pub use gui_div::*;
-pub use gui_entity::*;
 pub use gui_floating_panel::*;
 pub use gui_icon::*;
 pub use gui_node::*;

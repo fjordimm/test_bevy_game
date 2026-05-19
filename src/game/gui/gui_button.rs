@@ -12,6 +12,7 @@ pub(super) struct GuiButtonTag {
     pub(super) style: GuiButtonStyle,
 }
 
+#[allow(unused)]
 pub struct GuiButton<E, F>
 where
     E: Event + Clone,
@@ -29,6 +30,7 @@ where
     for<'a> E::Trigger<'a>: Default,
     F: Fn() -> E,
 {
+    #[allow(unused)]
     pub fn new<C: Into<CollectionOfGuiItems>>(
         style: GuiButtonStyle,
         event_supplier: F,
@@ -41,6 +43,7 @@ where
         }
     }
 
+    #[allow(unused)]
     pub fn new_regular(event_supplier: F, text: impl Into<String>) -> Self {
         Self {
             style: GuiButtonStyle::Regular,
@@ -55,6 +58,7 @@ where
 pub struct _GuiButtonDummyGeneric;
 
 impl GuiButton<_GuiButtonDummyGeneric, fn() -> _GuiButtonDummyGeneric> {
+    #[allow(unused)]
     pub fn new_eventless<C: Into<CollectionOfGuiItems>>(
         style: GuiButtonStyle,
         children: C,
@@ -66,6 +70,7 @@ impl GuiButton<_GuiButtonDummyGeneric, fn() -> _GuiButtonDummyGeneric> {
         }
     }
 
+    #[allow(unused)]
     pub fn new_regular_eventless(text: impl Into<String>) -> Self {
         Self {
             style: GuiButtonStyle::Regular,

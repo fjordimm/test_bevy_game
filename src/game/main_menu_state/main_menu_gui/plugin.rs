@@ -9,7 +9,7 @@ use crate::game::{
         constants::*,
     },
     playing_state::sets::PlayingStateOrdering,
-    util::{alrmo, alrms},
+    util::alrms,
 };
 
 pub struct MainMenuGuiPlugin;

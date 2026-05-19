@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::gui::{GuiNode, constants::*, fonts::FontOption};
 
+#[allow(unused)]
 pub struct GuiText {
     text: String,
     font: FontOption,
@@ -10,6 +11,7 @@ pub struct GuiText {
 }
 
 impl GuiText {
+    #[allow(unused)]
     pub fn new(text: impl Into<String>, font: FontOption, size: f32, wraps: bool) -> Self {
         Self {
             text: text.into(),
@@ -19,6 +21,7 @@ impl GuiText {
         }
     }
 
+    #[allow(unused)]
     pub fn new_regular(text: impl Into<String>, wraps: bool) -> Self {
         Self {
             text: text.into(),
@@ -28,6 +31,7 @@ impl GuiText {
         }
     }
 
+    #[allow(unused)]
     pub fn new_h1(text: impl Into<String>, wraps: bool) -> Self {
         Self {
             text: text.into(),
@@ -37,6 +41,7 @@ impl GuiText {
         }
     }
 
+    #[allow(unused)]
     pub fn new_h2(text: impl Into<String>, wraps: bool) -> Self {
         Self {
             text: text.into(),
@@ -46,6 +51,7 @@ impl GuiText {
         }
     }
 
+    #[allow(unused)]
     pub fn new_h3(text: impl Into<String>, wraps: bool) -> Self {
         Self {
             text: text.into(),
@@ -55,6 +61,7 @@ impl GuiText {
         }
     }
 
+    #[allow(unused)]
     pub fn new_small(text: impl Into<String>, wraps: bool) -> Self {
         Self {
             text: text.into(),
@@ -64,6 +71,7 @@ impl GuiText {
         }
     }
 
+    #[allow(unused)]
     pub fn new_small_mono(text: impl Into<String>, wraps: bool) -> Self {
         Self {
             text: text.into(),

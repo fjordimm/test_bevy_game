@@ -62,6 +62,7 @@ pub(super) struct GuiFloatingPanelHScrollbarTag;
 #[derive(Component)]
 pub(super) struct GuiFloatingPanelVScrollbarTag;
 
+#[allow(unused)]
 pub struct GuiFloatingPanel {
     starts_active: bool,
     pos_x: f32,
@@ -71,6 +72,7 @@ pub struct GuiFloatingPanel {
 }
 
 impl GuiFloatingPanel {
+    #[allow(unused)]
     pub fn new<C: Into<CollectionOfGuiItems>>(
         starts_active: bool,
         pos_x: f32,

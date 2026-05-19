@@ -1,5 +1,5 @@
-pub mod resources;
 pub mod plugin;
+pub mod resources;
 pub mod sets;
 pub mod states;
 

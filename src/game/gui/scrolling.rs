@@ -42,9 +42,7 @@ pub fn on_scroll_handler(
     mut scroll: On<GuiScroll>,
     mut query: Query<(&mut ScrollPosition, &Node, &ComputedNode)>,
 ) {
-    if let Some((mut scroll_position, node, computed_node)) =
-        alrmo!(query.get_mut(scroll.entity))
-    {
+    if let Some((mut scroll_position, node, computed_node)) = alrmo!(query.get_mut(scroll.entity)) {
         let max_offset = (computed_node.content_size() - computed_node.size())
             * computed_node.inverse_scale_factor();
 

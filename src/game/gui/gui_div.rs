@@ -10,6 +10,7 @@ pub(super) struct GuiDivTag {
     pub(super) is_active: bool,
 }
 
+#[allow(unused)]
 pub enum GuiDivStyle {
     None,
     Regular,
@@ -28,6 +29,7 @@ pub struct GuiDiv {
 }
 
 impl GuiDiv {
+    #[allow(unused)]
     pub fn new<C: Into<CollectionOfGuiItems>>(
         style: GuiDivStyle,
         expand: bool,

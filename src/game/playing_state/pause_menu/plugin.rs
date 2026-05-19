@@ -7,7 +7,7 @@ use crate::game::{
         constants::MAIN_PADDING,
     },
     playing_state::{sets::PlayingStateOrdering, states::PauseState},
-    util::{alrmo, alrms},
+    util::alrms,
 };
 
 pub struct PauseMenuPlugin;

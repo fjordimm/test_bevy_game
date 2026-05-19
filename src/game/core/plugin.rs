@@ -27,7 +27,8 @@ impl Plugin for CorePlugin {
         #[rustfmt::skip]
         app
             // External Plugins
-            .add_plugins(EntropyPlugin::<Prng>::default())
+            .add_plugins(EntropyPlugin::<Prng>::with_seed([203; 8]))
+            // .add_plugins(EntropyPlugin::<Prng>::default())
             .add_plugins(ScrollbarPlugin)
             .add_plugins(FrameTimeDiagnosticsPlugin::new(120))
             // Relevant Stuff

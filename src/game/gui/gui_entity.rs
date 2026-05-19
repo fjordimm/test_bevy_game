@@ -4,11 +4,13 @@ use bevy::prelude::*;
 
 use crate::game::gui::GuiNode;
 
+#[allow(unused)]
 pub struct GuiEntity<B: Bundle> {
     content: Box<B>,
 }
 
 impl<B: Bundle> GuiEntity<B> {
+    #[allow(unused)]
     pub fn new(content: B) -> Self {
         Self {
             content: Box::new(content),

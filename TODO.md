@@ -2,11 +2,6 @@
 # Todo List
 
 ## Currently Working On
-- Finish random/usage.md
-- Figure out randomness.
-    - See: https://docs.rs/bevy_rand/latest/bevy_rand/.
-    - And actually more imporantly: https://docs.rs/bevy_rand/latest/bevy_rand/tutorial/index.html
-- Maybe utilize pub(...) instead of everything in the mod.rs files.
 - Make a plugin for quickly testing things out.
 
 ## Reminders
@@ -17,6 +12,7 @@
     - Maybe make a thing that automatically marks any newly created objects?
     - Actually nvm?
     - Actually maybe use something like GameEntity just for PlayingState and nothing for MainMenuState.
+- Put more `#[allow(unused)]` where you need them.
 
 ## Should Do At Some Point
 - Make a better system for changing the cursor type (right now it's just done locally for the floating panel corner resizer).

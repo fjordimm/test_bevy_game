@@ -1,6 +1,7 @@
 use crate::game::core::resources::Fonts;
 use bevy::prelude::*;
 
+#[allow(unused)]
 #[derive(Component, Debug, Clone, Copy)]
 pub enum FontOption {
     Sans,

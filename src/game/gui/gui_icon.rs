@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::gui::{GuiNode, constants::*, images::UiIconOption};
 
+#[allow(unused)]
 pub struct GuiIcon {
     icon: UiIconOption,
     width: f32,
@@ -9,6 +10,7 @@ pub struct GuiIcon {
 }
 
 impl GuiIcon {
+    #[allow(unused)]
     pub fn new(icon: UiIconOption, width: f32, height: f32) -> Self {
         Self {
             icon: icon,

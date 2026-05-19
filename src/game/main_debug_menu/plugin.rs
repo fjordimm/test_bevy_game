@@ -1,6 +1,4 @@
 use bevy::{diagnostic::DiagnosticsStore, prelude::*, time::common_conditions::on_timer};
-use rand::{Rng, RngExt};
-use rand_distr::{Distribution, Normal, StandardNormal};
 use std::time::Duration;
 
 use crate::game::{
@@ -10,8 +8,6 @@ use crate::game::{
     },
     gui::{GuiButton, GuiFloatingPanel, GuiFloatingPanelTag, GuiNode, GuiText},
     playing_state::sets::PlayingStateOrdering,
-    random::{Prng, rands::GeneralRand},
-    util::{alrmo, alrms, alrro},
 };
 
 pub struct MainDebugMenuPlugin;
@@ -39,37 +35,18 @@ impl Plugin for MainDebugMenuPlugin {
 #[derive(Component)]
 struct MainDebugMenuTag;
 
-fn spawn_main_debug_menu(
-    mut commands: Commands,
-    gui_root: Res<GlobalGuiRoot>,
-    window_q: Option<Single<&Window>>,
-    mut general_rand: Single<&mut Prng, With<GeneralRand>>,
-) {
-    for _ in 0..50 {
-        debug!(
-            "Random Number: {}",
-            general_rand.sample(alrro!(Normal::new(0.0, 100.0)))
-        );
-    }
-
-    let mut pos_x = 10.0;
-    let mut pos_y = 10.0;
-    if let Some(_window) = alrms!(window_q) {
-        pos_x = 100.0;
-        pos_y = 100.0;
-    }
-
+fn spawn_main_debug_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
     let main_debug_menu = GuiFloatingPanel::new(
-        true,
-        pos_x,
-        pos_y,
-        "Debug Menu",
-        (
-            GuiText::new_small_mono("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm", false),
-            GuiText::new_small_mono("I'm some more text", false),
-            GuiButton::new_regular_eventless("nothin"),
+            true,
+            30.0,
+            30.0,
+            "Main Debug Menu",
+            (
+                GuiText::new_small_mono("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm", false),
+                GuiText::new_small_mono("I'm some more text", false),
+                GuiButton::new_regular_eventless("nothin"),
+            )
         )
-    )
     .spawn(&mut commands, Some(gui_root.0));
     commands.entity(main_debug_menu).insert(ZIndex(4000));
     commands.entity(main_debug_menu).insert(MainDebugMenuTag);
