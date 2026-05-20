@@ -2,14 +2,14 @@
 
 ## Running
 
-To run, do:
+To run in dev mode, do:
 ```
-cargo run
+.\run.bat
 ```
 
 Currently no release option.
 
-## Environment
+## Development Environment
 
 - Windows 11
 - CPU: 12th Gen Intel(R) Core(TM) i7-1260P

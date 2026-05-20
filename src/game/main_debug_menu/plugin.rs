@@ -37,7 +37,7 @@ struct MainDebugMenuTag;
 
 fn spawn_main_debug_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
     let main_debug_menu = GuiFloatingPanel::new(
-            true,
+            false,
             30.0,
             30.0,
             "Main Debug Menu",

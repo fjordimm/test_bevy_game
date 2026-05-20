@@ -3,6 +3,7 @@
 
 ## Currently Working On
 - Make a plugin for quickly testing things out.
+- Finish the debug menu.
 
 ## Reminders
 - Prefer using resources rather than consts for constant arbitrary values.
@@ -23,6 +24,7 @@
 - Get rid of the yellow background color.
 - Make different GUI sizes.
 - Make dev vs release profiles in Cargo.toml
+- Maybe instead of creating all GUI stuff during Startup, you create the elements when they appear and actually delete them when they are gone.
 
 ## Optimizations
 - Right now I'm inserting a new CursorIcon to the window entity when changing the cursor type. Should I be removing the old ones?
