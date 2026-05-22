@@ -1,8 +1,12 @@
 use bevy::prelude::*;
+use bevy_inspector_egui::egui::lerp;
 
 use crate::game::{
     core::states::OverallState,
-    playing_state::{SunPosition, sets::DuringPlayingUnpaused, tags::PlayingStateEntity},
+    playing_state::{
+        SunPosition, player::tags::CameraForPlayer, sets::DuringPlayingUnpaused,
+        tags::PlayingStateEntity,
+    },
     util::alrms,
 };
 
@@ -63,6 +67,7 @@ fn on_enter(
 fn update_sunlight(
     sun_position: Res<SunPosition>,
     sunlight_q: Option<Single<(&mut Transform, &mut DirectionalLight), With<SunlightTag>>>,
+    ambient_light_q: Option<Single<&mut AmbientLight, With<CameraForPlayer>>>,
 ) {
     if let Some(mut sunlight) = alrms!(sunlight_q) {
         sunlight.0.look_at(sun_position.0, Vec3::Y);
@@ -70,5 +75,9 @@ fn update_sunlight(
 
         sunlight.1.illuminance =
             f32::max(0.0, sun_position.0.y) * light_consts::lux::AMBIENT_DAYLIGHT;
+    }
+
+    if let Some(mut ambient_light) = alrms!(ambient_light_q) {
+        ambient_light.brightness = lerp(30.0..=80.0, f32::max(0.0, sun_position.0.y));
     }
 }

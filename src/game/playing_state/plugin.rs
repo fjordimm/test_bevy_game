@@ -72,6 +72,10 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
             ..default()
         }),
         Transform::from_xyz(0.0, 3.0, 7.0),
+        AmbientLight {
+            brightness: 80.0,
+            ..default()
+        },
     ));
 }
 

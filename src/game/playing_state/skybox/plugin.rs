@@ -29,7 +29,7 @@ impl Plugin for SkyboxPlugin {
 const DAY_ZENITH_COLOR: Color = Color::hsv(210.0, 0.8, 0.97);
 const DAY_HORIZON_COLOR: Color = Color::hsv(210.0, 0.5, 1.0);
 const NIGHT_ZENITH_COLOR: Color = Color::hsv(210.0, 0.8, 0.1);
-const NIGHT_HORIZON_COLOR: Color = Color::hsv(210.0, 0.5, 0.1);
+const NIGHT_HORIZON_COLOR: Color = Color::hsv(210.0, 0.7, 0.11);
 
 #[derive(Component)]
 pub struct SkyboxTag;
