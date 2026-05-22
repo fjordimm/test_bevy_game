@@ -2,20 +2,17 @@
 #import bevy_pbr::mesh_view_bindings
 #import bevy_pbr::mesh_functions
 
-@group(#{MATERIAL_BIND_GROUP}) @binding(0) var<uniform> sun_direction: vec3<f32>;
+@group(#{MATERIAL_BIND_GROUP}) @binding(0) var<uniform> zenith_color: vec3<f32>;
+@group(#{MATERIAL_BIND_GROUP}) @binding(1) var<uniform> horizon_color: vec3<f32>;
+@group(#{MATERIAL_BIND_GROUP}) @binding(2) var<uniform> sun_position: vec3<f32>;
 
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
-    let dir = normalize(in.world_position.xyz);
+    let sky_pos = normalize(in.world_position.xyz);
 
-    let horizon = vec3<f32>(0.8, 0.9, 1.0);
-    let zenith = vec3<f32>(0.1, 0.3, 0.8);
+    var color = mix(horizon_color, zenith_color, max(0.0, sky_pos.y));
 
-    var t = max(dir.y * 0.5 + 0.5, 0.0);
-
-    var color = mix(horizon, zenith, t);
-
-    let sun_amount = pow(max(dot(dir, normalize(sun_direction)), 0.0), 512.0);
+    let sun_amount = pow(max(dot(sky_pos, normalize(sun_position)), 0.0), 512.0);
 
     color += vec3<f32>(1.0, 0.9, 0.6) * sun_amount;
 

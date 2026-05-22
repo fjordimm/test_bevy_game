@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::game::{
     core::{resources::KeyBindings, states::OverallState},
     playing_state::{
+        SunPosition,
         pause_menu::plugin::PauseMenuPlugin,
         player::{plugin::PlayerPlugin, tags::CameraForPlayer},
         sets::{
@@ -33,6 +34,7 @@ impl Plugin for PlayingStatePlugin {
                 DURING_PLAYING_UNPAUSED_LIST.chain(),
             ))
             .init_state::<PauseState>()
+            .insert_resource(SunPosition(Vec3::new(0.0, 0.5, -1.0).normalize()))
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
                     .in_set(DuringPlayingUnpausedW)
@@ -46,6 +48,10 @@ impl Plugin for PlayingStatePlugin {
             .add_systems(Update,
                 toggle_pause
                     .in_set(DuringPlaying)
+            )
+            .add_systems(Update,
+                rotate_sun
+                    .in_set(DuringPlayingUnpaused::General)
             )
             .add_plugins(PauseMenuPlugin)
             .add_plugins(SkyboxPlugin)
@@ -61,6 +67,10 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
         PlayingStateEntity,
         CameraForPlayer,
         Camera3d::default(),
+        Projection::Perspective(PerspectiveProjection {
+            fov: 60.0f32.to_radians(),
+            ..default()
+        }),
         Transform::from_xyz(0.0, 3.0, 7.0).looking_at(-Vec3::Z, Vec3::Y),
     ));
 }
@@ -83,4 +93,8 @@ fn toggle_pause(
             PauseState::Paused => PauseState::Unpaused,
         });
     }
+}
+
+fn rotate_sun(time: Res<Time>, mut sun_position: ResMut<SunPosition>) {
+    sun_position.0 = sun_position.0.rotate_z(0.1 * time.delta_secs());
 }

@@ -3,7 +3,8 @@ use bevy::{prelude::*, render::render_resource::*, shader::ShaderRef};
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        player::tags::CameraForPlayer, sets::DuringPlayingUnpaused, tags::PlayingStateEntity,
+        SunPosition, player::tags::CameraForPlayer, sets::DuringPlayingUnpaused,
+        tags::PlayingStateEntity,
     },
     util::{alrms, alrro},
 };
@@ -14,12 +15,12 @@ impl Plugin for SkyboxPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_plugins(MaterialPlugin::<SkyMaterial>::default())
+            .add_plugins(MaterialPlugin::<SkyboxMaterial>::default())
             .add_systems(OnEnter(OverallState::Playing),
                 spawn_skybox
             )
             .add_systems(Update,
-                move_skybox_with_camera
+                update_skybox
                     .in_set(DuringPlayingUnpaused::General)
             );
     }
@@ -31,40 +32,59 @@ pub struct SkyboxTag;
 fn spawn_skybox(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    // mut materials: ResMut<Assets<StandardMaterial>>,
-    mut materials: ResMut<Assets<SkyMaterial>>,
+    mut materials: ResMut<Assets<SkyboxMaterial>>,
+    sun_position: Res<SunPosition>,
 ) {
+    let zenith_color = Color::hsv(210.0, 0.8, 0.97).to_linear();
+    let horizon_color = Color::hsv(210.0, 0.4, 0.97).to_linear();
+
     commands.spawn((
         PlayingStateEntity,
         SkyboxTag,
         Mesh3d(meshes.add(alrro!(
-            Mesh::from(Sphere::new(1000.0)).with_inverted_winding()
+            Mesh::from(Sphere::new(10_000.0)).with_inverted_winding()
         ))),
-        MeshMaterial3d(materials.add(SkyMaterial {
-            sun_direction: Vec3::new(0.4, 1.0, 0.7).normalize(),
+        MeshMaterial3d(materials.add(SkyboxMaterial {
+            zenith_color: Vec3::new(zenith_color.red, zenith_color.green, zenith_color.blue),
+            horizon_color: Vec3::new(horizon_color.red, horizon_color.green, horizon_color.blue),
+            sun_position: sun_position.0,
         })),
         Transform::default(),
     ));
 }
 
-fn move_skybox_with_camera(
+fn update_skybox(
     camera_transf_q: Option<Single<&Transform, With<CameraForPlayer>>>,
     skybox_transf_q: Option<Single<&mut Transform, (With<SkyboxTag>, Without<CameraForPlayer>)>>,
+    mut materials: ResMut<Assets<SkyboxMaterial>>,
+    sun_position: Res<SunPosition>,
 ) {
+    // Move it to be the same position as the camera.
+
     if let (Some(camera_transf), Some(mut skybox_transf)) =
         (alrms!(camera_transf_q), alrms!(skybox_transf_q))
     {
         skybox_transf.translation = camera_transf.translation;
     }
+
+    // Update the shader uniforms.
+
+    materials.iter_mut().for_each(|(_, mat)| {
+        mat.sun_position = sun_position.0;
+    });
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
-pub struct SkyMaterial {
+pub struct SkyboxMaterial {
     #[uniform(0)]
-    pub sun_direction: Vec3,
+    pub zenith_color: Vec3,
+    #[uniform(1)]
+    pub horizon_color: Vec3,
+    #[uniform(2)]
+    pub sun_position: Vec3,
 }
 
-impl Material for SkyMaterial {
+impl Material for SkyboxMaterial {
     fn fragment_shader() -> ShaderRef {
         "shaders/sky.wgsl".into()
     }
