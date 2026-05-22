@@ -9,6 +9,7 @@ use crate::game::{
             DURING_PLAYING_UNPAUSED_LIST, DuringPlaying, DuringPlayingUnpaused,
             DuringPlayingUnpausedW,
         },
+        skybox::plugin::SkyboxPlugin,
         states::PauseState,
         tags::PlayingStateEntity,
         world::plugin::WorldPlugin,
@@ -47,6 +48,7 @@ impl Plugin for PlayingStatePlugin {
                     .in_set(DuringPlaying)
             )
             .add_plugins(PauseMenuPlugin)
+            .add_plugins(SkyboxPlugin)
             .add_plugins(WorldPlugin)
             .add_plugins(PlayerPlugin);
     }

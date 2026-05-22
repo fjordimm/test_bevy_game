@@ -26,10 +26,11 @@ fn on_enter(
         Transform::from_xyz(0.0, 0.0, 0.0),
     ));
     commands.spawn((
-        PointLight {
-            shadows_enabled: true,
+        DirectionalLight {
+            color: Color::hsv(0.0, 0.0, 1.0),
+            shadows_enabled: false,
             ..default()
         },
-        Transform::from_xyz(4.0, 8.0, 4.0),
+        Transform::default().looking_at(Vec3::new(-0.1, -1.0, -0.2), Dir3::Y),
     ));
 }
