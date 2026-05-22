@@ -2,6 +2,7 @@
 # Todo List
 
 ## Currently Working On
+- Rework the whole GUI system.
 - Make a plugin for quickly testing things out.
 - Finish the debug menu.
 
@@ -13,6 +14,7 @@
     - Maybe make a thing that automatically marks any newly created objects?
     - Actually nvm?
     - Actually maybe use something like GameEntity just for PlayingState and nothing for MainMenuState.
+- Add systems using proper sets (PlayingStateSet).
 - Put more `#[allow(unused)]` where you need them.
 
 ## Should Do At Some Point

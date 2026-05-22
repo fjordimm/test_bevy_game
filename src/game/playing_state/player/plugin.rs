@@ -19,11 +19,11 @@ impl Plugin for PlayerPlugin {
             .init_resource::<PlayerMovementSettings>()
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
-                    .in_set(PlayingStateOrdering::WorldOnEnter)
+                    .in_set(PlayingStateOrdering::WorldGeneral)
             )
             .add_systems(OnExit(OverallState::Playing),
                 on_exit
-                    .in_set(PlayingStateOrdering::WorldOnExit)
+                    .in_set(PlayingStateOrdering::WorldGeneral)
             )
             .add_systems(OnEnter(PauseState::Unpaused),
                 on_enter_unpaused
@@ -38,7 +38,7 @@ impl Plugin for PlayerPlugin {
             .add_systems(Update,
                 cursor_controls_camera_look
                     .run_if(in_state(OverallState::Playing))
-                    .in_set(PlayingStateOrdering::WorldPlayer)
+                    .in_set(PlayingStateOrdering::WorldGeneral)
                     .run_if(in_state(MouseMode::Grabbed))
             );
     }

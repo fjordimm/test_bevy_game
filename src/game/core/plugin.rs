@@ -12,10 +12,11 @@ use crate::game::{
         sets::{GLOBAL_STARTUP_ORDERING_ORDER, GlobalStartupOrdering},
         states::{MouseMode, OverallState},
     },
+    debug_menu::plugin::DebugMenuPlugin,
     gui::{self, gui_root_template, plugin::GuiPlugin},
-    main_debug_menu::plugin::MainDebugMenuPlugin,
     main_menu_state::plugin::MainMenuStatePlugin,
     playing_state::plugin::PlayingStatePlugin,
+    quick_dev_test::plugin::QuickDevTestPlugin,
     random::{Prng, plugin::RandomPlugin},
     util::alrms,
 };
@@ -50,9 +51,10 @@ impl Plugin for CorePlugin {
             .add_systems(OnExit(MouseMode::Grabbed), on_exit_mouse_grabbed)
             .add_plugins(RandomPlugin)
             .add_plugins(GuiPlugin)
-            .add_plugins(MainDebugMenuPlugin)
+            .add_plugins(DebugMenuPlugin)
             .add_plugins(MainMenuStatePlugin)
-            .add_plugins(PlayingStatePlugin);
+            .add_plugins(PlayingStatePlugin)
+            .add_plugins(QuickDevTestPlugin);
     }
 }
 

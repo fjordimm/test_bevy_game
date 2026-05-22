@@ -2,11 +2,9 @@ use bevy::prelude::*;
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PlayingStateOrdering {
-    WorldOnEnter,
-    WorldPlayer,
-    World,
-    WorldOnExit,
-    Physics,
+    WorldFirst,
+    WorldGeneral,
+    WorldLast,
     Ui,
 }
 
@@ -15,13 +13,9 @@ pub const PLAYING_STATE_ORDERING_ORDER: (
     PlayingStateOrdering,
     PlayingStateOrdering,
     PlayingStateOrdering,
-    PlayingStateOrdering,
-    PlayingStateOrdering,
 ) = (
-    PlayingStateOrdering::WorldOnEnter,
-    PlayingStateOrdering::WorldPlayer,
-    PlayingStateOrdering::World,
-    PlayingStateOrdering::WorldOnExit,
-    PlayingStateOrdering::Physics,
+    PlayingStateOrdering::WorldFirst,
+    PlayingStateOrdering::WorldGeneral,
+    PlayingStateOrdering::WorldLast,
     PlayingStateOrdering::Ui,
 );

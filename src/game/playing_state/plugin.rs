@@ -22,11 +22,11 @@ impl Plugin for PlayingStatePlugin {
             .init_state::<PauseState>()
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
-                    .in_set(PlayingStateOrdering::WorldOnEnter)
+                    .in_set(PlayingStateOrdering::WorldFirst)
             )
             .add_systems(OnExit(OverallState::Playing),
                 on_exit
-                    .in_set(PlayingStateOrdering::WorldOnExit)
+                    .in_set(PlayingStateOrdering::WorldLast)
             )
             .add_systems(Update,
                 toggle_pause

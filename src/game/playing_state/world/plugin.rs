@@ -10,11 +10,11 @@ impl Plugin for WorldPlugin {
         app
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
-                    .in_set(PlayingStateOrdering::WorldOnEnter)
+                    .in_set(PlayingStateOrdering::WorldGeneral)
             )
             .add_systems(OnExit(OverallState::Playing),
                 on_exit
-                    .in_set(PlayingStateOrdering::WorldOnExit)
+                    .in_set(PlayingStateOrdering::WorldGeneral)
             );
     }
 }

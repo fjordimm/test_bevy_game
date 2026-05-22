@@ -26,7 +26,7 @@ pub struct KeyBindings {
     pub move_right: KeyCode,
     pub move_up: KeyCode,
     pub move_down: KeyCode,
-    pub open_main_debug_menu: KeyCode,
+    pub toggle_debug_menu: KeyCode,
 }
 
 impl Default for KeyBindings {
@@ -39,7 +39,7 @@ impl Default for KeyBindings {
             move_right: KeyCode::KeyD,
             move_up: KeyCode::Space,
             move_down: KeyCode::ShiftLeft,
-            open_main_debug_menu: KeyCode::KeyP,
+            toggle_debug_menu: KeyCode::KeyP,
         }
     }
 }

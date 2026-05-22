@@ -10,37 +10,37 @@ use crate::game::{
     playing_state::sets::PlayingStateOrdering,
 };
 
-pub struct MainDebugMenuPlugin;
+pub struct DebugMenuPlugin;
 
-impl Plugin for MainDebugMenuPlugin {
+impl Plugin for DebugMenuPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
             .add_systems(Startup,
-                spawn_main_debug_menu
+                spawn_debug_menu
                     .in_set(GlobalStartupOrdering::GuiSpawning)
             )
             .add_systems(Update,
-                update_main_debug_menu
+                update_debug_menu
                     .in_set(PlayingStateOrdering::Ui)
                     .run_if(on_timer(Duration::from_secs(1)))
             )
             .add_systems(Update,
-                toggle_main_debug_menu
+                toggle_debug_menu
                     .in_set(PlayingStateOrdering::Ui)
             );
     }
 }
 
 #[derive(Component)]
-struct MainDebugMenuTag;
+struct DebugMenuTag;
 
-fn spawn_main_debug_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
-    let main_debug_menu = GuiFloatingPanel::new(
+fn spawn_debug_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
+    let debug_menu = GuiFloatingPanel::new(
             false,
             30.0,
             30.0,
-            "Main Debug Menu",
+            "Debug Menu",
             (
                 GuiText::new_small_mono("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm\nmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm", false),
                 GuiText::new_small_mono("I'm some more text", false),
@@ -48,23 +48,23 @@ fn spawn_main_debug_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
             )
         )
     .spawn(&mut commands, Some(gui_root.0));
-    commands.entity(main_debug_menu).insert(ZIndex(4000));
-    commands.entity(main_debug_menu).insert(MainDebugMenuTag);
+    commands.entity(debug_menu).insert(ZIndex(4000));
+    commands.entity(debug_menu).insert(DebugMenuTag);
 }
 
-fn update_main_debug_menu(_diag: Res<DiagnosticsStore>) {
+fn update_debug_menu(_diag: Res<DiagnosticsStore>) {
     // if let Some(fps) = diag.get_measurement(&FrameTimeDiagnosticsPlugin::FPS) {
     //     debug!("{:?}", fps.value);
     // }
 }
 
-fn toggle_main_debug_menu(
+fn toggle_debug_menu(
     keys: Res<ButtonInput<KeyCode>>,
     key_bindings: Res<KeyBindings>,
-    mut main_debug_menu_q: Query<&mut GuiFloatingPanelTag, With<MainDebugMenuTag>>,
+    mut debug_menu_q: Query<&mut GuiFloatingPanelTag, With<DebugMenuTag>>,
 ) {
-    if keys.just_pressed(key_bindings.open_main_debug_menu) {
-        main_debug_menu_q.iter_mut().for_each(|mut panel| {
+    if keys.just_pressed(key_bindings.toggle_debug_menu) {
+        debug_menu_q.iter_mut().for_each(|mut panel| {
             let is_active = panel.get_is_active();
             panel.set_is_active(!is_active);
         });
