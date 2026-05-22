@@ -62,10 +62,13 @@ fn on_enter(
 
 fn update_sunlight(
     sun_position: Res<SunPosition>,
-    sunlight_transf_q: Option<Single<&mut Transform, With<SunlightTag>>>,
+    sunlight_q: Option<Single<(&mut Transform, &mut DirectionalLight), With<SunlightTag>>>,
 ) {
-    if let Some(mut sunlight_transf) = alrms!(sunlight_transf_q) {
-        sunlight_transf.look_at(sun_position.0, Vec3::Y);
-        sunlight_transf.rotate_local_y(180.0f32.to_radians());
+    if let Some(mut sunlight) = alrms!(sunlight_q) {
+        sunlight.0.look_at(sun_position.0, Vec3::Y);
+        sunlight.0.rotate_local_y(180.0f32.to_radians());
+
+        sunlight.1.illuminance =
+            f32::max(0.0, sun_position.0.y) * light_consts::lux::AMBIENT_DAYLIGHT;
     }
 }
