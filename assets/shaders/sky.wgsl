@@ -12,17 +12,28 @@
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let sun_pos = normalize(sun_position);
 
-    let sky_pos = normalize(in.world_position.xyz);
+    let pos: vec3<f32> = normalize(in.world_position.xyz);
+    let clamped_pos_y: f32 = min(1.0, max(0.0, pos.y));
 
-    let zenith_color = mix(night_zenith_color, day_zenith_color, max(0.0, sun_pos.y));
-    let horizon_color = mix(night_horizon_color, day_horizon_color, max(0.0, sun_pos.y));
-    var color = mix(horizon_color, zenith_color, max(0.0, sky_pos.y));
+    let twilight_offset = 0.05;
+    let zenith_color = mix(night_zenith_color, day_zenith_color, min(1.0, max(0.0, sun_pos.y + twilight_offset)));
+    let horizon_color = mix(night_horizon_color, day_horizon_color, min(1.0, max(0.0, sun_pos.y + twilight_offset)));
+    var color: vec3<f32> = mix(horizon_color, zenith_color, pow(smoothstep(clamped_pos_y), 0.5));
 
-    let sun_amount = pow(max(dot(sky_pos, sun_pos), 0.0), 512.0);
+    // the sun
+    let sun_color = vec3<f32>(1.0, 0.9, 0.6);
+    color += sun_color * pow(max(0.0, dot(pos, sun_pos)), 3000.0);
 
-    color += vec3<f32>(1.0, 0.9, 0.6) * sun_amount;
+    // sunset
+    let sunset_color = vec3<f32>(1.0, 0.75, 0.3);
+    color += 0.06 * sunset_color
+        * (1.0 - pow(max(0.0, -sun_pos.y), 0.1))
+        * (3.0 * pow(50.0, dot(pos, sun_pos) - 1.2) * 0.01 / (0.01 + pow(pos.y, 2.0))
+           + 0.3 * pow(max(0.0, dot(pos, sun_pos)), 25.0));
 
     return vec4<f32>(color, 1.0);
+}
 
-    // return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+fn smoothstep(x: f32) -> f32 {
+    return 6.0 * pow(x, 5.0) - 15.0 * pow(x, 4.0) + 10.0 * pow(x, 3.0);
 }
