@@ -71,7 +71,7 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
             fov: 60.0f32.to_radians(),
             ..default()
         }),
-        Transform::from_xyz(0.0, 3.0, 7.0).looking_at(-Vec3::Z, Vec3::Y),
+        Transform::from_xyz(0.0, 3.0, 7.0),
     ));
 }
 
@@ -95,6 +95,29 @@ fn toggle_pause(
     }
 }
 
-fn rotate_sun(time: Res<Time>, mut sun_position: ResMut<SunPosition>) {
-    sun_position.0 = sun_position.0.rotate_z(0.1 * time.delta_secs());
+fn rotate_sun(
+    time: Res<Time>,
+    mut sun_position: ResMut<SunPosition>,
+    keys: Res<ButtonInput<KeyCode>>,
+) {
+    if keys.just_pressed(KeyCode::Digit1) {
+        sun_position.0 = Vec3::Y.rotate_x(-0.0f32.to_radians())
+    }
+    if keys.just_pressed(KeyCode::Digit2) {
+        sun_position.0 = Vec3::Y.rotate_x(-45.0f32.to_radians())
+    }
+    if keys.just_pressed(KeyCode::Digit3) {
+        sun_position.0 = Vec3::Y.rotate_x(-60.0f32.to_radians())
+    }
+    if keys.just_pressed(KeyCode::Digit4) {
+        sun_position.0 = Vec3::Y.rotate_x(-85.0f32.to_radians())
+    }
+    if keys.just_pressed(KeyCode::Digit5) {
+        sun_position.0 = Vec3::Y.rotate_x(-90.0f32.to_radians())
+    }
+    if keys.just_pressed(KeyCode::Digit6) {
+        sun_position.0 = Vec3::Y.rotate_x(-105.0f32.to_radians())
+    }
+
+    // sun_position.0 = sun_position.0.rotate_z(0.3 * time.delta_secs());
 }
