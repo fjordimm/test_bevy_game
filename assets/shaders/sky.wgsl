@@ -31,9 +31,16 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
         * (3.0 * pow(50.0, dot(pos, sun_pos) - 1.2) * 0.01 / (0.01 + pow(pos.y, 2.0))
            + 0.3 * pow(max(0.0, dot(pos, sun_pos)), 25.0));
 
+    color += (1.0 / 255.0) * gradient_noise(in.position.xy) - (0.5 / 255.0); // Fights banding
     return vec4<f32>(color, 1.0);
 }
 
 fn smoothstep(x: f32) -> f32 {
     return 6.0 * pow(x, 5.0) - 15.0 * pow(x, 4.0) + 10.0 * pow(x, 3.0);
+}
+
+/* Gradient noise from Jorge Jimenez's presentation: */
+/* http://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare */
+fn gradient_noise(uv: vec2<f32>) -> f32 {
+    return fract(52.9829189 * fract(dot(uv, vec2(0.06711056, 0.00583715))));
 }
