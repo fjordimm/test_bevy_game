@@ -59,7 +59,7 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
         PlayingStateEntity,
         CameraForPlayer,
         Camera3d::default(),
-        Transform::from_xyz(0.0, 0.0, 7.0).looking_at(-Vec3::Z, Vec3::Y),
+        Transform::from_xyz(0.0, 3.0, 7.0).looking_at(-Vec3::Z, Vec3::Y),
     ));
 }
 

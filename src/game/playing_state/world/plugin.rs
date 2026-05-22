@@ -11,10 +11,6 @@ impl Plugin for WorldPlugin {
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
                     .in_set(DuringPlayingUnpaused::General)
-            )
-            .add_systems(OnExit(OverallState::Playing),
-                on_exit
-                    .in_set(DuringPlayingUnpaused::General)
             );
     }
 }
@@ -27,7 +23,7 @@ fn on_enter(
     commands.spawn((
         Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
         MeshMaterial3d(materials.add(Color::srgb_u8(255, 0, 0))),
-        Transform::from_xyz(0.0, 0.5, -5.0),
+        Transform::from_xyz(0.0, 0.0, 0.0),
     ));
     commands.spawn((
         PointLight {
@@ -36,8 +32,4 @@ fn on_enter(
         },
         Transform::from_xyz(4.0, 8.0, 4.0),
     ));
-}
-
-fn on_exit() {
-    debug!("on exit for world");
 }
