@@ -3,7 +3,6 @@
 
 ## Currently Working On
 - Rework the whole GUI system.
-- Make a plugin for quickly testing things out.
 - Finish the debug menu.
 
 ## Reminders
