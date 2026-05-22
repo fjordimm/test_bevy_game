@@ -4,7 +4,7 @@ use crate::game::{
     core::states::{MouseMode, OverallState},
     playing_state::{
         player::{resources::PlayerMovementSettings, tags::CameraForPlayer},
-        sets::PlayingStateOrdering,
+        sets::{DuringPlaying, DuringPlayingUnpaused},
         states::PauseState,
     },
     util::alrms,
@@ -17,42 +17,30 @@ impl Plugin for PlayerPlugin {
         #[rustfmt::skip]
         app
             .init_resource::<PlayerMovementSettings>()
-            .add_systems(OnEnter(OverallState::Playing),
-                on_enter
-                    .in_set(PlayingStateOrdering::WorldGeneral)
-            )
-            .add_systems(OnExit(OverallState::Playing),
-                on_exit
-                    .in_set(PlayingStateOrdering::WorldGeneral)
-            )
             .add_systems(OnEnter(PauseState::Unpaused),
-                on_enter_unpaused
-                    .run_if(in_state(OverallState::Playing))
-                    .in_set(PlayingStateOrdering::Ui)
+                grab_cursor
+                    .in_set(DuringPlaying)
             )
             .add_systems(OnExit(PauseState::Unpaused),
-                on_exit_unpaused
-                    .run_if(in_state(OverallState::Playing))
-                    .in_set(PlayingStateOrdering::Ui)
+                free_cursor
+                    .in_set(DuringPlaying)
+            )
+            .add_systems(OnExit(OverallState::Playing),
+                free_cursor
             )
             .add_systems(Update,
                 cursor_controls_camera_look
-                    .run_if(in_state(OverallState::Playing))
-                    .in_set(PlayingStateOrdering::WorldGeneral)
+                    .in_set(DuringPlayingUnpaused::General)
                     .run_if(in_state(MouseMode::Grabbed))
             );
     }
 }
 
-fn on_enter() {}
-
-fn on_exit() {}
-
-fn on_enter_unpaused(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
+fn grab_cursor(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
     next_mouse_mode.set(MouseMode::Grabbed);
 }
 
-fn on_exit_unpaused(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
+fn free_cursor(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
     next_mouse_mode.set(MouseMode::Free);
 }
 

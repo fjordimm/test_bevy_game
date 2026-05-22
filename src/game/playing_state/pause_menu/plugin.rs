@@ -6,7 +6,7 @@ use crate::game::{
         self, GuiButton, GuiDiv, GuiDivStyle, GuiNode, GuiScreenDiv, GuiScreenDivTag, GuiText,
         constants::MAIN_PADDING,
     },
-    playing_state::{sets::PlayingStateOrdering, states::PauseState},
+    playing_state::states::PauseState,
     util::alrms,
 };
 
@@ -22,19 +22,15 @@ impl Plugin for PauseMenuPlugin {
             )
             .add_systems(OnEnter(OverallState::Playing),
                 update_pause_menu_hiddenness
-                    .in_set(PlayingStateOrdering::Ui)
             )
             .add_systems(OnExit(OverallState::Playing),
                 update_pause_menu_hiddenness
-                    .in_set(PlayingStateOrdering::Ui)
             )
             .add_systems(OnEnter(PauseState::Paused),
                 update_pause_menu_hiddenness
-                    .in_set(PlayingStateOrdering::Ui)
             )
             .add_systems(OnExit(PauseState::Paused),
                 update_pause_menu_hiddenness
-                    .in_set(PlayingStateOrdering::Ui)
             )
             .add_observer(exit_button_observer)
             .add_observer(continue_button_observer);

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::{core::states::OverallState, playing_state::sets::PlayingStateOrdering};
+use crate::game::{core::states::OverallState, playing_state::sets::DuringPlayingUnpaused};
 
 pub struct WorldPlugin;
 
@@ -10,11 +10,11 @@ impl Plugin for WorldPlugin {
         app
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
-                    .in_set(PlayingStateOrdering::WorldGeneral)
+                    .in_set(DuringPlayingUnpaused::General)
             )
             .add_systems(OnExit(OverallState::Playing),
                 on_exit
-                    .in_set(PlayingStateOrdering::WorldGeneral)
+                    .in_set(DuringPlayingUnpaused::General)
             );
     }
 }
@@ -38,4 +38,6 @@ fn on_enter(
     ));
 }
 
-fn on_exit() {}
+fn on_exit() {
+    debug!("on exit for world");
+}

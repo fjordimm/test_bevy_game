@@ -8,7 +8,6 @@ use crate::game::{
         self, GuiButton, GuiDiv, GuiDivStyle, GuiNode, GuiScreenDiv, GuiScreenDivTag, GuiText,
         constants::*,
     },
-    playing_state::sets::PlayingStateOrdering,
     util::alrms,
 };
 
@@ -24,11 +23,9 @@ impl Plugin for MainMenuGuiPlugin {
             )
             .add_systems(OnEnter(OverallState::MainMenu),
                 update_main_menu_gui_hiddenness
-                    .in_set(PlayingStateOrdering::Ui)
             )
             .add_systems(OnExit(OverallState::MainMenu),
                 update_main_menu_gui_hiddenness
-                    .in_set(PlayingStateOrdering::Ui)
             )
             .add_observer(play_button_observer)
             .add_observer(quit_button_observer);

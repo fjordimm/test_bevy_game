@@ -7,7 +7,6 @@ use crate::game::{
         sets::GlobalStartupOrdering,
     },
     gui::{GuiButton, GuiFloatingPanel, GuiFloatingPanelTag, GuiNode, GuiText},
-    playing_state::sets::PlayingStateOrdering,
 };
 
 pub struct DebugMenuPlugin;
@@ -22,13 +21,9 @@ impl Plugin for DebugMenuPlugin {
             )
             .add_systems(Update,
                 update_debug_menu
-                    .in_set(PlayingStateOrdering::Ui)
                     .run_if(on_timer(Duration::from_secs(1)))
             )
-            .add_systems(Update,
-                toggle_debug_menu
-                    .in_set(PlayingStateOrdering::Ui)
-            );
+            .add_systems(Update, toggle_debug_menu);
     }
 }
 

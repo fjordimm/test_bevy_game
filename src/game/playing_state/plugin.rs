@@ -5,7 +5,10 @@ use crate::game::{
     playing_state::{
         pause_menu::plugin::PauseMenuPlugin,
         player::{plugin::PlayerPlugin, tags::CameraForPlayer},
-        sets::{PLAYING_STATE_ORDERING_ORDER, PlayingStateOrdering},
+        sets::{
+            DURING_PLAYING_UNPAUSED_LIST, DuringPlaying, DuringPlayingUnpaused,
+            DuringPlayingUnpausedW,
+        },
         states::PauseState,
         tags::PlayingStateEntity,
         world::plugin::WorldPlugin,
@@ -18,20 +21,30 @@ impl Plugin for PlayingStatePlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .configure_sets(Update, PLAYING_STATE_ORDERING_ORDER.chain())
+            .configure_sets(Update, (
+                DuringPlaying
+                    .run_if(in_state(OverallState::Playing)),
+                DuringPlayingUnpausedW
+                    .in_set(DuringPlaying)
+                    .run_if(in_state(PauseState::Unpaused)),
+                DURING_PLAYING_UNPAUSED_LIST
+                    .in_set(DuringPlayingUnpausedW),
+                DURING_PLAYING_UNPAUSED_LIST.chain(),
+            ))
             .init_state::<PauseState>()
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
-                    .in_set(PlayingStateOrdering::WorldFirst)
+                    .in_set(DuringPlayingUnpausedW)
+                    .before(<[DuringPlayingUnpaused; _]>::from(DURING_PLAYING_UNPAUSED_LIST).first().unwrap().clone())
             )
             .add_systems(OnExit(OverallState::Playing),
                 on_exit
-                    .in_set(PlayingStateOrdering::WorldLast)
+                    .in_set(DuringPlayingUnpausedW)
+                    .after(<[DuringPlayingUnpaused; _]>::from(DURING_PLAYING_UNPAUSED_LIST).last().unwrap().clone())
             )
             .add_systems(Update,
                 toggle_pause
-                    .run_if(in_state(OverallState::Playing))
-                    .in_set(PlayingStateOrdering::Ui)
+                    .in_set(DuringPlaying)
             )
             .add_plugins(PauseMenuPlugin)
             .add_plugins(WorldPlugin)
