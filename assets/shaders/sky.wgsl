@@ -1,6 +1,5 @@
 #import bevy_pbr::forward_io::VertexOutput
-#import bevy_pbr::mesh_view_bindings
-#import bevy_pbr::mesh_functions
+#import "shaders/util.wgsl"::reduce_banding;
 #import "shaders/util.wgsl"::smoothstep_skew_left;
 #import "shaders/util.wgsl"::smoothstep_skew_right;
 
@@ -38,22 +37,10 @@ fn fragment(vert_out: VertexOutput) -> @location(0) vec4<f32> {
 
     // Sunset
     color += SUNSET_BRIGHTNESS * SUNSET_COLOR
-        * (1.0 - pow(max(0.0, -sun_pos.y), 0.1))
+        * (1.0 - pow(max(0.0, -sun_pos.y), 0.03))
         * (3.0 * pow(50.0, dot(pos, sun_pos) - 1.2) * 0.01 / (0.01 + pow(pos.y, 2.0))
            + 0.3 * pow(max(0.0, dot(pos, sun_pos)), 25.0));
 
-    // Reduce banding
-    color += (1.0 / 255.0) * gradient_noise(vert_out.position.xy) - (0.5 / 255.0);
-    
+    color += reduce_banding(vert_out.position.xy);
     return vec4<f32>(color, 1.0);
-}
-
-// fn smoothstep(x: f32) -> f32 {
-//     return 6.0 * pow(x, 5.0) - 15.0 * pow(x, 4.0) + 10.0 * pow(x, 3.0);
-// }
-
-/* Gradient noise from Jorge Jimenez's presentation: */
-/* http://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare */
-fn gradient_noise(uv: vec2<f32>) -> f32 {
-    return fract(52.9829189 * fract(dot(uv, vec2(0.06711056, 0.00583715))));
 }
