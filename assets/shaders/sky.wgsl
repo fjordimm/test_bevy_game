@@ -1,43 +1,56 @@
 #import bevy_pbr::forward_io::VertexOutput
 #import bevy_pbr::mesh_view_bindings
 #import bevy_pbr::mesh_functions
+#import "shaders/util.wgsl"::smoothstep_skew_left;
+#import "shaders/util.wgsl"::smoothstep_skew_right;
 
-@group(#{MATERIAL_BIND_GROUP}) @binding(0) var<uniform> day_zenith_color: vec3<f32>;
-@group(#{MATERIAL_BIND_GROUP}) @binding(1) var<uniform> day_horizon_color: vec3<f32>;
-@group(#{MATERIAL_BIND_GROUP}) @binding(2) var<uniform> night_zenith_color: vec3<f32>;
-@group(#{MATERIAL_BIND_GROUP}) @binding(3) var<uniform> night_horizon_color: vec3<f32>;
-@group(#{MATERIAL_BIND_GROUP}) @binding(4) var<uniform> sun_position: vec3<f32>;
+const DAY_ZENITH_COLOR = vec3<f32>(0.19, 0.58, 0.97);
+const DAY_HORIZON_COLOR = vec3<f32>(0.28, 0.66, 1.0);
+const DAY_HORIZON_SQUISH_FACTOR = 2.5;
+const NIGHT_ZENITH_COLOR = vec3<f32>(0.0005, 0.001, 0.002);
+const NIGHT_HORIZON_COLOR = vec3<f32>(0.002, 0.004, 0.006);
+const NIGHT_HORIZON_SQUISH_FACTOR = 1.0;
+
+const TWIGHTLIGHT_OFFSET = 0.05;
+
+const SUN_COLOR = vec3<f32>(1.0, 0.8, 0.2);
+const INV_SUN_SIZE = 1500.0;
+const INV_SUN_SOFTNESS = 2.9;
+
+const SUNSET_COLOR = vec3<f32>(1.0, 0.65, 0.3);
+const SUNSET_BRIGHTNESS = 0.16;
+
+@group(#{MATERIAL_BIND_GROUP}) @binding(0) var<uniform> sun_position: vec3<f32>;
 
 @fragment
-fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
+fn fragment(vert_out: VertexOutput) -> @location(0) vec4<f32> {
+    var color = vec3<f32>(0.0, 0.0, 0.0);
+
     let sun_pos = normalize(sun_position);
+    let pos: vec3<f32> = normalize(vert_out.world_position.xyz);
 
-    let pos: vec3<f32> = normalize(in.world_position.xyz);
-    let clamped_pos_y: f32 = min(1.0, max(0.0, pos.y));
+    let day_color = mix(DAY_HORIZON_COLOR, DAY_ZENITH_COLOR, smoothstep_skew_left(0.0, 1.0, DAY_HORIZON_SQUISH_FACTOR, pos.y));
+    let night_color = mix(NIGHT_HORIZON_COLOR, NIGHT_ZENITH_COLOR, smoothstep_skew_left(0.0, 1.0, NIGHT_HORIZON_SQUISH_FACTOR, pos.y));
+    color += mix(night_color, day_color, clamp(sun_pos.y + TWIGHTLIGHT_OFFSET, 0.0, 1.0));
 
-    let twilight_offset = 0.05;
-    let zenith_color = mix(night_zenith_color, day_zenith_color, min(1.0, max(0.0, sun_pos.y + twilight_offset)));
-    let horizon_color = mix(night_horizon_color, day_horizon_color, min(1.0, max(0.0, sun_pos.y + twilight_offset)));
-    var color: vec3<f32> = mix(horizon_color, zenith_color, pow(smoothstep(clamped_pos_y), 0.5));
+    // Sun
+    color += SUN_COLOR * pow(2.0 * smoothstep_skew_right(0.0, 1.0, INV_SUN_SIZE, dot(pos, sun_pos)), INV_SUN_SOFTNESS);
 
-    // the sun
-    let sun_color = vec3<f32>(1.0, 0.9, 0.6);
-    color += sun_color * pow(max(0.0, dot(pos, sun_pos)), 3000.0);
-
-    // sunset
-    let sunset_color = vec3<f32>(1.0, 0.75, 0.3);
-    color += 0.06 * sunset_color
+    // Sunset
+    color += SUNSET_BRIGHTNESS * SUNSET_COLOR
         * (1.0 - pow(max(0.0, -sun_pos.y), 0.1))
         * (3.0 * pow(50.0, dot(pos, sun_pos) - 1.2) * 0.01 / (0.01 + pow(pos.y, 2.0))
            + 0.3 * pow(max(0.0, dot(pos, sun_pos)), 25.0));
 
-    color += (1.0 / 255.0) * gradient_noise(in.position.xy) - (0.5 / 255.0); // Fights banding
+    // Reduce banding
+    color += (1.0 / 255.0) * gradient_noise(vert_out.position.xy) - (0.5 / 255.0);
+    
     return vec4<f32>(color, 1.0);
 }
 
-fn smoothstep(x: f32) -> f32 {
-    return 6.0 * pow(x, 5.0) - 15.0 * pow(x, 4.0) + 10.0 * pow(x, 3.0);
-}
+// fn smoothstep(x: f32) -> f32 {
+//     return 6.0 * pow(x, 5.0) - 15.0 * pow(x, 4.0) + 10.0 * pow(x, 3.0);
+// }
 
 /* Gradient noise from Jorge Jimenez's presentation: */
 /* http://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare */
