@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{input::mouse::MouseWheel, prelude::*};
 
 use crate::game::playing_state::{SunPosition, sets::DuringPlayingUnpaused};
 
@@ -19,6 +19,7 @@ fn rotate_sun(
     _time: Res<Time>,
     mut sun_position: ResMut<SunPosition>,
     keys: Res<ButtonInput<KeyCode>>,
+    mut mouse_wheel_reader: MessageReader<MouseWheel>,
 ) {
     if keys.just_pressed(KeyCode::Digit1) {
         sun_position.0 = Vec3::Y.rotate_x(-0.0f32.to_radians())
@@ -48,5 +49,7 @@ fn rotate_sun(
         sun_position.0 = Vec3::Y.rotate_x(-180.0f32.to_radians())
     }
 
-    // sun_position.0 = Vec3::Y.rotate_x(1.5 + 0.001 * time.elapsed_secs());
+    for mouse_wheel in mouse_wheel_reader.read() {
+        sun_position.0 = sun_position.0.rotate_x(-0.01 * mouse_wheel.y);
+    }
 }

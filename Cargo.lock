@@ -4933,6 +4933,7 @@ dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "bevy_ecs",
+ "bevy_mesh",
  "bevy_prng",
  "bevy_rand",
  "rand 0.10.1",
