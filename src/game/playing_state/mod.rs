@@ -1,5 +1,3 @@
-use bevy::prelude::*;
-
 pub mod pause_menu;
 pub mod player;
 pub mod plugin;
@@ -8,6 +6,3 @@ pub mod skybox;
 pub mod states;
 pub mod tags;
 pub mod world;
-
-#[derive(Resource)]
-pub struct SunPosition(pub Vec3);

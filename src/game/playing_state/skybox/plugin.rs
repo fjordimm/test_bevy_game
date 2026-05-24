@@ -3,7 +3,9 @@ use bevy::{prelude::*, render::render_resource::*, shader::ShaderRef};
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        SunPosition, player::tags::CameraForPlayer, sets::DuringPlayingUnpaused,
+        player::tags::CameraForPlayer,
+        sets::DuringPlayingUnpaused,
+        skybox::{SkyRotationInv, SunPosition},
         tags::PlayingStateEntity,
     },
     util::{alrms, alrro},
@@ -16,6 +18,8 @@ impl Plugin for SkyboxPlugin {
         #[rustfmt::skip]
         app
             .add_plugins(MaterialPlugin::<SkyboxMaterial>::default())
+            .insert_resource(SunPosition(Vec3::Y))
+            .insert_resource(SkyRotationInv(Mat3::IDENTITY))
             .add_systems(OnEnter(OverallState::Playing),
                 spawn_skybox
             )
@@ -34,6 +38,7 @@ fn spawn_skybox(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<SkyboxMaterial>>,
     sun_position: Res<SunPosition>,
+    sky_rotation_matrix: Res<SkyRotationInv>,
 ) {
     commands.spawn((
         PlayingStateEntity,
@@ -43,6 +48,7 @@ fn spawn_skybox(
         ))),
         MeshMaterial3d(materials.add(SkyboxMaterial {
             sun_position: sun_position.0,
+            sky_rotation_inv: sky_rotation_matrix.0,
         })),
         Transform::default(),
     ));
@@ -53,6 +59,7 @@ fn update_skybox(
     skybox_transf_q: Option<Single<&mut Transform, (With<SkyboxTag>, Without<CameraForPlayer>)>>,
     mut materials: ResMut<Assets<SkyboxMaterial>>,
     sun_position: Res<SunPosition>,
+    sky_rotation_matrix: Res<SkyRotationInv>,
 ) {
     // Move it to be the same position as the camera.
 
@@ -66,6 +73,7 @@ fn update_skybox(
 
     materials.iter_mut().for_each(|(_, mat)| {
         mat.sun_position = sun_position.0;
+        mat.sky_rotation_inv = sky_rotation_matrix.0;
     });
 }
 
@@ -73,6 +81,8 @@ fn update_skybox(
 pub struct SkyboxMaterial {
     #[uniform(0)]
     pub sun_position: Vec3,
+    #[uniform(1)]
+    pub sky_rotation_inv: Mat3, // Used by the stars
 }
 
 impl Material for SkyboxMaterial {

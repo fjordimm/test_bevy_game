@@ -17,7 +17,7 @@ const NIGHT_HORIZON_SQUISH_FACTOR: f32 = 1.7;
 const TWILIGHT_OFFSET: f32 = 0.25;
 
 const SUN_COLOR = vec3<f32>(1.0, 0.8, 0.2);
-const SUN_SIZE_INV: f32 = 1500.0;
+const SUN_SIZE_INV: f32 = 5000.0;
 const SUN_SOFTNESS_INV: f32 = 2.9;
 
 const SUNSET_COLOR = vec3<f32>(1.0, 0.65, 0.3);
@@ -29,10 +29,11 @@ const SUNSET_TIME_RANGE_OFFSET: f32 = 0.17;
 
 const STARS_COLOR = vec3<f32>(1.0, 1.0, 1.0);
 const STARS_SCALE: f32 = 130.0;
-const STARS_DENSITY: f32 = 0.93;
+const STARS_DENSITY_INV: f32 = 0.975;
 const STARS_TIME_RANGE_FACTOR: f32 = 17.0;
 
 @group(#{MATERIAL_BIND_GROUP}) @binding(0) var<uniform> sun_position: vec3<f32>;
+@group(#{MATERIAL_BIND_GROUP}) @binding(1) var<uniform> sky_rotation_matrix: mat3x3<f32>;
 
 @fragment
 fn fragment(vertout: VertexOutput) -> @location(0) vec4<f32> {
@@ -57,7 +58,7 @@ fn fragment(vertout: VertexOutput) -> @location(0) vec4<f32> {
     color += SUNSET_BRIGHTNESS * SUNSET_COLOR * (sunset_horizon_glow * sunset_side * sunset_time_multiplier);
 
     // Stars
-    color += STARS_COLOR * local_star_value(dir) * clamp(pow(1.0 - day_amount, STARS_TIME_RANGE_FACTOR), 0.0, 1.0);
+    color += STARS_COLOR * local_star_value(sky_rotation_matrix * dir) * clamp(pow(1.0 - day_amount, STARS_TIME_RANGE_FACTOR), 0.0, 1.0);
 
     color += reduce_banding(vertout.position.xy);
     return vec4<f32>(color, 1.0);
@@ -67,7 +68,7 @@ fn local_star_value(dir: vec3<f32>) -> f32 {
     let grid = dir * STARS_SCALE;
 
     let h = hash3(floor(grid));
-    if h > STARS_DENSITY {
+    if h > STARS_DENSITY_INV {
         let sdist = length(fract(grid) - 0.5); // Distance from the center of the star.
         return clamp(-pow(abs(sdist * 1.5) - 1.0, 5.0), 0.0, 1.0);
     } else {

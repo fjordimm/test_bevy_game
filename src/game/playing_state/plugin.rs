@@ -3,7 +3,6 @@ use bevy::prelude::*;
 use crate::game::{
     core::{resources::KeyBindings, states::OverallState},
     playing_state::{
-        SunPosition,
         pause_menu::plugin::PauseMenuPlugin,
         player::{plugin::PlayerPlugin, tags::CameraForPlayer},
         sets::{
@@ -34,7 +33,6 @@ impl Plugin for PlayingStatePlugin {
                 DURING_PLAYING_UNPAUSED_LIST.chain(),
             ))
             .init_state::<PauseState>()
-            .insert_resource(SunPosition(Vec3::new(0.0, 0.5, -1.0).normalize()))
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
                     .in_set(DuringPlayingUnpausedW)

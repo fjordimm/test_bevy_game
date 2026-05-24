@@ -4,7 +4,7 @@ use bevy_inspector_egui::egui::lerp;
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        SunPosition, player::tags::CameraForPlayer, sets::DuringPlayingUnpaused,
+        player::tags::CameraForPlayer, sets::DuringPlayingUnpaused, skybox::SunPosition,
         tags::PlayingStateEntity,
     },
     util::alrms,
