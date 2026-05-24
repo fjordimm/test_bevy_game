@@ -11,10 +11,17 @@ fn reduce_banding(pixel_pos: vec2<f32>) -> f32 {
     return (1.0 / 255.0) * gradient_noise(pixel_pos) - (0.5 / 255.0);
 }
 
+// Warning: only works for 0 <= x <= 1
+fn inv_smoothstep(x: f32) -> f32 {
+    return 0.5 - sin(asin(1.0 - 2.0 * x) / 3.0);
+}
+
+// Skew should be >= 1. 1 is no skew.
 fn smoothstep_skew_left(edge0: f32, edge1: f32, skew: f32, x: f32) -> f32 {
     return smoothstep(edge0, edge1, skew * x);
 }
 
+// Skew should be >= 1. 1 is no skew.
 fn smoothstep_skew_right(edge0: f32, edge1: f32, skew: f32, x: f32) -> f32 {
     return smoothstep(edge0, edge1, skew * (x - 1.0) + 1.0);
 }
@@ -30,4 +37,8 @@ fn hash3(p: vec3<f32>) -> f32 {
         sin(dot(p, vec3<f32>(12.9898, 78.233, 37.719)))
         * 43758.5453
     );
+}
+
+fn bell(x: f32) -> f32 {
+    return 1.0 / (1.0 + x * x);
 }
