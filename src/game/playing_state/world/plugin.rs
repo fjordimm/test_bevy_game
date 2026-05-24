@@ -5,7 +5,7 @@ use crate::game::{
     core::states::OverallState,
     playing_state::{
         SunPosition, player::tags::CameraForPlayer, sets::DuringPlayingUnpaused,
-        skybox::plugin::Icosahedron, tags::PlayingStateEntity,
+        tags::PlayingStateEntity,
     },
     util::alrms,
 };
@@ -56,18 +56,9 @@ fn on_enter(
         })),
         Transform::from_xyz(0.0, -1.0, 0.0),
     ));
-    // commands.spawn((
-    //     PlayingStateEntity,
-    //     Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
-    //     MeshMaterial3d(materials.add(Color::hsv(0.0, 1.0, 1.0))),
-    //     Transform::default(),
-    // ));
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(meshes.add(Mesh::from(Icosahedron::new(1.0)))),
-        // Mesh3d(meshes.add(alrro!(
-        //     Mesh::from(Icosahedron::new(1.0)).with_inverted_winding()
-        // ))),
+        Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
         MeshMaterial3d(materials.add(Color::hsv(0.0, 1.0, 1.0))),
         Transform::default(),
     ));
