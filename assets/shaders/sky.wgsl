@@ -21,11 +21,11 @@ const SUN_SIZE_INV: f32 = 1500.0;
 const SUN_SOFTNESS_INV: f32 = 2.9;
 
 const SUNSET_COLOR = vec3<f32>(1.0, 0.65, 0.3);
-const SUNSET_BRIGHTNESS: f32 = 0.09;
-const SUNSET_HORIZON_CURVE_INV: f32 = 23.0;
-const SUNSET_CURVE_INV: f32 = 0.04;
-const SUNSET_RANGE_INV: f32 = 2.1;
-const SUNSET_RANGE_OFFSET: f32 = 0.15;
+const SUNSET_BRIGHTNESS: f32 = 0.13;
+const SUNSET_HORIZON_CURVE_INV: f32 = 15.0;
+const SUNSET_CURVE_INV: f32 = 0.11;
+const SUNSET_RANGE_INV: f32 = 2.9;
+const SUNSET_RANGE_OFFSET: f32 = 0.17;
 
 const STARS_COLOR = vec3<f32>(1.0, 1.0, 1.0);
 const STARS_SCALE: f32 = 130.0;
@@ -50,10 +50,10 @@ fn fragment(vertout: VertexOutput) -> @location(0) vec4<f32> {
     color += SUN_COLOR * pow(2.0 * smoothstep_skew_right(0.0, 1.0, SUN_SIZE_INV, dot(dir, sun_pos)), SUN_SOFTNESS_INV);
 
     // Sunset
-    color += SUNSET_BRIGHTNESS * SUNSET_COLOR
-        * bell(SUNSET_HORIZON_CURVE_INV * dir.y) // Glow around the horizon.
-        * -1.0 / ((dot(dir, sun_pos) * 0.5 + 0.5) - 1.0 - SUNSET_CURVE_INV) // Glow around the sun.
-        * (1.0 - smoothstep_skew_left(0.0, 1.0, SUNSET_RANGE_INV, abs(sun_pos.y - SUNSET_RANGE_OFFSET))); // Multiplier based sun's distance to horizon.
+    let sunset_horizon_glow = bell(SUNSET_HORIZON_CURVE_INV * dir.y);
+    let sunset_side = -1.0 / ((dot(dir, sun_pos) * 0.5 + 0.5) - 1.0 - SUNSET_CURVE_INV);
+    let sunset_time_multiplier = (1.0 - smoothstep_skew_left(0.0, 1.0, SUNSET_RANGE_INV, abs(sun_pos.y - SUNSET_RANGE_OFFSET)));
+    color += SUNSET_BRIGHTNESS * SUNSET_COLOR * (sunset_horizon_glow * sunset_side * sunset_time_multiplier);
 
     // Stars
     // color += STARS_COLOR * local_star_value(dir) * clamp(pow(1.0 - day_amount, 30.0), 0.0, 1.0);
