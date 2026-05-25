@@ -4,8 +4,8 @@ use bevy_inspector_egui::egui::lerp;
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        player::tags::CameraForPlayer, sets::DuringPlayingUnpaused, skybox::SunPosition,
-        tags::PlayingStateEntity,
+        player::tags::CameraForPlayer, sets::DuringPlayingUnpaused, skybox::ComputedSkyboxValues,
+        tags::PlayingStateEntity, world::TimeOfDay,
     },
     util::alrms,
 };
@@ -16,6 +16,7 @@ impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
+            .insert_resource(TimeOfDay(0.0))
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
                     .in_set(DuringPlayingUnpaused::General)
@@ -34,6 +35,7 @@ fn on_enter(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut time_of_day: ResMut<TimeOfDay>,
 ) {
     commands.spawn((
         PlayingStateEntity,
@@ -62,22 +64,29 @@ fn on_enter(
         MeshMaterial3d(materials.add(Color::hsv(0.0, 1.0, 1.0))),
         Transform::default(),
     ));
+
+    time_of_day.0 = 0.5;
 }
 
 fn update_sunlight(
-    sun_position: Res<SunPosition>,
     sunlight_q: Option<Single<(&mut Transform, &mut DirectionalLight), With<SunlightTag>>>,
     ambient_light_q: Option<Single<&mut AmbientLight, With<CameraForPlayer>>>,
+    computed_skybox_values: Res<ComputedSkyboxValues>,
 ) {
     if let Some(mut sunlight) = alrms!(sunlight_q) {
-        sunlight.0.look_at(sun_position.0, Vec3::Y);
+        sunlight
+            .0
+            .look_at(computed_skybox_values.sun_position, Vec3::Y);
         sunlight.0.rotate_local_y(180.0f32.to_radians());
 
-        sunlight.1.illuminance =
-            f32::max(0.0, sun_position.0.y) * light_consts::lux::AMBIENT_DAYLIGHT;
+        sunlight.1.illuminance = f32::max(0.0, computed_skybox_values.sun_position.y)
+            * light_consts::lux::AMBIENT_DAYLIGHT;
     }
 
     if let Some(mut ambient_light) = alrms!(ambient_light_q) {
-        ambient_light.brightness = lerp(30.0..=80.0, f32::max(0.0, sun_position.0.y));
+        ambient_light.brightness = lerp(
+            30.0..=80.0,
+            f32::max(0.0, computed_skybox_values.sun_position.y),
+        );
     }
 }

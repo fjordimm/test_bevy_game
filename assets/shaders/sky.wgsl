@@ -8,8 +8,8 @@
 #import "shaders/util.wgsl"::bell;
 
 const DAY_ZENITH_COLOR = vec3<f32>(0.19, 0.58, 0.97);
-const DAY_HORIZON_COLOR = vec3<f32>(0.28, 0.66, 1.0);
-const DAY_HORIZON_SQUISH_FACTOR: f32 = 2.5;
+const DAY_HORIZON_COLOR = vec3<f32>(0.32, 0.69, 1.0);
+const DAY_HORIZON_SQUISH_FACTOR: f32 = 2.9;
 const NIGHT_ZENITH_COLOR = vec3<f32>(0.0005, 0.001, 0.002);
 const NIGHT_HORIZON_COLOR = vec3<f32>(0.0024, 0.0048, 0.0068);
 const NIGHT_HORIZON_SQUISH_FACTOR: f32 = 1.7;
@@ -28,9 +28,9 @@ const SUNSET_TIME_RANGE_INV: f32 = 2.9;
 const SUNSET_TIME_RANGE_OFFSET: f32 = 0.17;
 
 const STARS_COLOR = vec3<f32>(1.0, 1.0, 1.0);
-const STARS_SCALE: f32 = 130.0;
-const STARS_DENSITY_INV: f32 = 0.975;
-const STARS_TIME_RANGE_FACTOR: f32 = 17.0;
+const STARS_SCALE: f32 = 230.0;
+const STARS_DENSITY_INV: f32 = 0.995;
+const STARS_TIME_RANGE_FACTOR: f32 = 80.0;
 
 @group(#{MATERIAL_BIND_GROUP}) @binding(0) var<uniform> sun_position: vec3<f32>;
 @group(#{MATERIAL_BIND_GROUP}) @binding(1) var<uniform> sky_rotation_matrix: mat3x3<f32>;

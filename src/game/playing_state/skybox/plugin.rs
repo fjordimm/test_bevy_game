@@ -1,12 +1,12 @@
+use std::f32::consts::PI;
+
 use bevy::{prelude::*, render::render_resource::*, shader::ShaderRef};
 
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        player::tags::CameraForPlayer,
-        sets::DuringPlayingUnpaused,
-        skybox::{SkyRotationInv, SunPosition},
-        tags::PlayingStateEntity,
+        player::tags::CameraForPlayer, sets::DuringPlayingUnpaused, skybox::ComputedSkyboxValues,
+        tags::PlayingStateEntity, world::TimeOfDay,
     },
     util::{alrms, alrro},
 };
@@ -18,8 +18,7 @@ impl Plugin for SkyboxPlugin {
         #[rustfmt::skip]
         app
             .add_plugins(MaterialPlugin::<SkyboxMaterial>::default())
-            .insert_resource(SunPosition(Vec3::Y))
-            .insert_resource(SkyRotationInv(Mat3::IDENTITY))
+            .insert_resource(ComputedSkyboxValues { sun_position: Vec3::NEG_Z, sky_rotation_inv: Mat3::IDENTITY })
             .add_systems(OnEnter(OverallState::Playing),
                 spawn_skybox
             )
@@ -37,9 +36,11 @@ fn spawn_skybox(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<SkyboxMaterial>>,
-    sun_position: Res<SunPosition>,
-    sky_rotation_matrix: Res<SkyRotationInv>,
+    time_of_day: Res<TimeOfDay>,
+    mut computed_skybox_values: ResMut<ComputedSkyboxValues>,
 ) {
+    compute_skybox_values(time_of_day.0, &mut computed_skybox_values);
+
     commands.spawn((
         PlayingStateEntity,
         SkyboxTag,
@@ -47,8 +48,8 @@ fn spawn_skybox(
             Mesh::from(Sphere::new(10_000.0)).with_inverted_winding()
         ))),
         MeshMaterial3d(materials.add(SkyboxMaterial {
-            sun_position: sun_position.0,
-            sky_rotation_inv: sky_rotation_matrix.0,
+            sun_position: computed_skybox_values.sun_position,
+            sky_rotation_inv: computed_skybox_values.sky_rotation_inv,
         })),
         Transform::default(),
     ));
@@ -58,8 +59,8 @@ fn update_skybox(
     camera_transf_q: Option<Single<&Transform, With<CameraForPlayer>>>,
     skybox_transf_q: Option<Single<&mut Transform, (With<SkyboxTag>, Without<CameraForPlayer>)>>,
     mut materials: ResMut<Assets<SkyboxMaterial>>,
-    sun_position: Res<SunPosition>,
-    sky_rotation_matrix: Res<SkyRotationInv>,
+    time_of_day: Res<TimeOfDay>,
+    mut computed_skybox_values: ResMut<ComputedSkyboxValues>,
 ) {
     // Move it to be the same position as the camera.
 
@@ -71,9 +72,11 @@ fn update_skybox(
 
     // Update the shader uniforms.
 
+    compute_skybox_values(time_of_day.0, &mut computed_skybox_values);
+
     materials.iter_mut().for_each(|(_, mat)| {
-        mat.sun_position = sun_position.0;
-        mat.sky_rotation_inv = sky_rotation_matrix.0;
+        mat.sun_position = computed_skybox_values.sun_position;
+        mat.sky_rotation_inv = computed_skybox_values.sky_rotation_inv;
     });
 }
 
@@ -82,7 +85,7 @@ pub struct SkyboxMaterial {
     #[uniform(0)]
     pub sun_position: Vec3,
     #[uniform(1)]
-    pub sky_rotation_inv: Mat3, // Used by the stars
+    pub sky_rotation_inv: Mat3,
 }
 
 impl Material for SkyboxMaterial {
@@ -93,4 +96,9 @@ impl Material for SkyboxMaterial {
     fn alpha_mode(&self) -> AlphaMode {
         AlphaMode::Opaque
     }
+}
+
+fn compute_skybox_values(time_of_day: f32, computed_skybox_values: &mut ComputedSkyboxValues) {
+    computed_skybox_values.sun_position = Vec3::NEG_Z.rotate_x(time_of_day * PI);
+    computed_skybox_values.sky_rotation_inv = Mat3::from_rotation_x(-time_of_day * PI);
 }
