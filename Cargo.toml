@@ -20,6 +20,7 @@ rand_core = "0.10.1"
 bevy = { version = "0.18.0", features = [
     "dev",
     "experimental_bevy_ui_widgets",
+    "experimental_bevy_feathers",
 ] }
 bevy_ecs = "0.18.0"
 bevy_rand = "0.14.2"

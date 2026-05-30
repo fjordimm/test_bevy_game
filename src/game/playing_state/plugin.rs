@@ -3,7 +3,6 @@ use bevy::prelude::*;
 use crate::game::{
     core::{resources::KeyBindings, states::OverallState},
     playing_state::{
-        pause_menu::plugin::PauseMenuPlugin,
         player::{plugin::PlayerPlugin, tags::CameraForPlayer},
         sets::{
             DURING_PLAYING_UNPAUSED_LIST, DuringPlaying, DuringPlayingUnpaused,
@@ -14,6 +13,7 @@ use crate::game::{
         tags::PlayingStateEntity,
         world::plugin::WorldPlugin,
     },
+    util::get_entity_components,
 };
 
 pub struct PlayingStatePlugin;
@@ -39,7 +39,7 @@ impl Plugin for PlayingStatePlugin {
                     .before(<[DuringPlayingUnpaused; _]>::from(DURING_PLAYING_UNPAUSED_LIST).first().unwrap().clone())
             )
             .add_systems(OnExit(OverallState::Playing),
-                on_exit
+                remove_all_relevant_entities
                     .in_set(DuringPlayingUnpausedW)
                     .after(<[DuringPlayingUnpaused; _]>::from(DURING_PLAYING_UNPAUSED_LIST).last().unwrap().clone())
             )
@@ -47,7 +47,10 @@ impl Plugin for PlayingStatePlugin {
                 toggle_pause
                     .in_set(DuringPlaying)
             )
-            .add_plugins(PauseMenuPlugin)
+            .add_systems(Update,
+                playing_state_entity_check
+                    .in_set(DuringPlaying)
+            ) // TODO: only do this in debug mode
             .add_plugins(SkyboxPlugin)
             .add_plugins(WorldPlugin)
             .add_plugins(PlayerPlugin);
@@ -73,7 +76,10 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
     ));
 }
 
-fn on_exit(mut commands: Commands, all_entities_q: Query<Entity, With<PlayingStateEntity>>) {
+fn remove_all_relevant_entities(
+    mut commands: Commands,
+    all_entities_q: Query<Entity, With<PlayingStateEntity>>,
+) {
     all_entities_q.iter().for_each(|entity| {
         commands.entity(entity).despawn();
     });
@@ -91,4 +97,13 @@ fn toggle_pause(
             PauseState::Paused => PauseState::Unpaused,
         });
     }
+}
+
+fn playing_state_entity_check(
+    world: &World,
+    entity_q: Query<Entity, (Added<Transform>, Without<PlayingStateEntity>)>,
+) {
+    entity_q.iter().for_each(|entity| {
+        warn!("The following entity with a Transform was spawned without the PlayingStateEntity tag, meaning it won't get despawned when OverallState::Playing is exited: \n{}", get_entity_components(world, entity));
+    });
 }

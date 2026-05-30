@@ -17,6 +17,7 @@
 - Put more `#[allow(unused)]` where you need them.
 
 ## Should Do At Some Point
+- Search project for 'TODO'.
 - Make a better system for changing the cursor type (right now it's just done locally for the floating panel corner resizer).
 - Test out when there are multiple floating panels and if you drag the window or drag the resizer over each other.
 - Make floating panels move correctly when the window is resized.
@@ -24,8 +25,9 @@
 - When dragging floating panels around, they should order themselves correctly (most recently dragged goes on top).
 - Get rid of the yellow background color.
 - Make different GUI sizes.
-- Make dev vs release profiles in Cargo.toml
+- Make dev vs release profiles in Cargo.toml.
 - Maybe instead of creating all GUI stuff during Startup, you create the elements when they appear and actually delete them when they are gone.
+- Check whether everything is despawned when you exit OverallState::Playing.
 
 ## Optimizations
 - Right now I'm inserting a new CursorIcon to the window entity when changing the cursor type. Should I be removing the old ones?

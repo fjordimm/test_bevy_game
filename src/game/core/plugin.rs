@@ -1,19 +1,16 @@
 use bevy::{
     diagnostic::FrameTimeDiagnosticsPlugin,
     prelude::*,
-    ui_widgets::ScrollbarPlugin,
     window::{CursorGrabMode, CursorOptions, PrimaryWindow},
 };
 use bevy_rand::plugin::EntropyPlugin;
 
 use crate::game::{
     core::{
-        resources::{GlobalGuiRoot, KeyBindings},
+        resources::KeyBindings,
         sets::{GLOBAL_STARTUP_ORDERING_ORDER, GlobalStartupOrdering},
         states::{MouseMode, OverallState},
     },
-    debug_menu::plugin::DebugMenuPlugin,
-    gui::{self, gui_root_template, plugin::GuiPlugin},
     main_menu_state::plugin::MainMenuStatePlugin,
     playing_state::plugin::PlayingStatePlugin,
     quick_dev_test::plugin::QuickDevTestPlugin,
@@ -28,9 +25,7 @@ impl Plugin for CorePlugin {
         #[rustfmt::skip]
         app
             // External Plugins
-            .add_plugins(EntropyPlugin::<Prng>::with_seed([203; 8]))
-            // .add_plugins(EntropyPlugin::<Prng>::default())
-            .add_plugins(ScrollbarPlugin)
+            .add_plugins(EntropyPlugin::<Prng>::default())
             .add_plugins(FrameTimeDiagnosticsPlugin::new(120))
             // Relevant Stuff
             .init_resource::<KeyBindings>()
@@ -45,26 +40,16 @@ impl Plugin for CorePlugin {
                 start_game
                     .run_if(run_once)
             )
-            .add_systems(Update, gui::fonts::apply_fonts)
-            .add_systems(Update, gui::images::apply_ui_icons)
             .add_systems(OnEnter(MouseMode::Grabbed), on_enter_mouse_grabbed)
             .add_systems(OnExit(MouseMode::Grabbed), on_exit_mouse_grabbed)
             .add_plugins(RandomPlugin)
-            .add_plugins(GuiPlugin)
-            .add_plugins(DebugMenuPlugin)
             .add_plugins(MainMenuStatePlugin)
             .add_plugins(PlayingStatePlugin)
             .add_plugins(QuickDevTestPlugin);
     }
 }
 
-fn startup_stuff(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.insert_resource(gui::fonts::make_fonts_resource(&asset_server));
-    commands.insert_resource(gui::images::make_ui_icons_resource(&asset_server));
-
-    let gui_root = commands.spawn(gui_root_template()).id();
-    commands.insert_resource(GlobalGuiRoot(gui_root));
-}
+fn startup_stuff(mut _commands: Commands, _asset_server: Res<AssetServer>) {}
 
 fn start_game(mut commands: Commands) {
     commands.set_state(OverallState::MainMenu);
