@@ -1,6 +1,9 @@
 use bevy::{prelude::*, ui::widget::Text};
 
-use crate::game::gui::resources::GuiTheme;
+use crate::game::gui::{
+    resources::GuiTheme,
+    sets::{GuiWidgetDuringAddFunctionalComponents, GuiWidgetDuringUpdateFunctionalComponents},
+};
 
 pub enum GuiTextSize {
     Regular,
@@ -22,16 +25,16 @@ impl Default for GuiTextProps {
 }
 
 #[derive(Component)]
-struct GuiTextTempAttribs {
+struct GuiTextAttribs {
     content: String,
-    props: GuiTextProps,
+    size: GuiTextSize,
 }
 
 pub fn gui_text(content: impl Into<String>, props: GuiTextProps) -> impl Bundle {
-    GuiTextTempAttribs {
+    (GuiTextAttribs {
         content: content.into(),
-        props: props,
-    }
+        size: props.size,
+    },)
 }
 
 pub struct GuiTextPlugin;
@@ -40,30 +43,52 @@ impl Plugin for GuiTextPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(Update, on_creation)
+            .add_systems(Update,
+                add_functional_components
+                    .in_set(GuiWidgetDuringAddFunctionalComponents)
+            )
+            .add_systems(Update,
+                update_functional_components
+                    .in_set(GuiWidgetDuringUpdateFunctionalComponents)
+            )
         ;
     }
 }
 
-fn on_creation(
+fn add_functional_components(
     mut commands: Commands,
-    theme: Res<GuiTheme>,
-    temp_attribs_q: Query<(Entity, &GuiTextTempAttribs), Added<GuiTextTempAttribs>>,
+    entity_q: Query<Entity, Added<GuiTextAttribs>>,
 ) {
-    temp_attribs_q.iter().for_each(|(entity, temp_attribs)| {
-        commands.entity(entity).insert((
-            Text::new(temp_attribs.content.clone()), // TODO: could be more efficient
-            TextFont {
-                font_size: match temp_attribs.props.size {
-                    GuiTextSize::Regular => theme.font_size_regular,
-                    GuiTextSize::Medium => theme.font_size_medium,
-                    GuiTextSize::Title => theme.font_size_title,
-                    GuiTextSize::Custom(val) => val,
-                },
-                ..default()
-            },
-        ));
-
-        commands.entity(entity).remove::<GuiTextTempAttribs>();
+    entity_q.iter().for_each(|entity| {
+        commands
+            .entity(entity)
+            .insert((Text::default(), TextFont::default()));
     });
+}
+
+fn update_functional_components(
+    theme: Res<GuiTheme>,
+    mut entity_q: Query<
+        (Entity, &GuiTextAttribs, &mut Text, &mut TextFont),
+        Or<(Added<GuiTextAttribs>, Changed<GuiTextAttribs>)>,
+    >,
+) {
+    entity_q
+        .iter_mut()
+        .for_each(|(_entity, attribs, mut text, mut textfont)| {
+            *text = Text::new(attribs.content.clone()); // TODO: could be more efficient
+            *textfont = TextFont {
+                font_size: what_font_size(&theme, &attribs),
+                ..default()
+            };
+        });
+}
+
+fn what_font_size(theme: &GuiTheme, attribs: &GuiTextAttribs) -> f32 {
+    match attribs.size {
+        GuiTextSize::Regular => theme.font_size_regular,
+        GuiTextSize::Medium => theme.font_size_medium,
+        GuiTextSize::Title => theme.font_size_title,
+        GuiTextSize::Custom(val) => val,
+    }
 }

@@ -34,7 +34,7 @@ fn todor1(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
             parent.spawn(gui_text(
                 "yay",
                 GuiTextProps {
-                    size: GuiTextSize::Custom(5.),
+                    size: GuiTextSize::Custom(15.0),
                 },
             ));
         })
