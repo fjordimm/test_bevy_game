@@ -113,6 +113,8 @@ pub fn get_entity_components(world: &World, entity: Entity) -> String {
         components.into_iter().for_each(|component_info| {
             ret.push_str("\n    ");
             ret.push_str(&component_info.name().as_string());
+
+            let a = 'e';
         });
     }
 
