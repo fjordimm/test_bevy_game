@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::{resources::GlobalGuiRoot, states::OverallState},
-    gui::widgets::text::gui_text,
+    gui::widgets::text::{GuiTextProps, GuiTextSize, gui_text},
 };
 
 pub struct MainMenuGuiPlugin;
@@ -31,7 +31,12 @@ fn todor1(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
             BackgroundColor(Color::linear_rgb(0.0, 0.0, 1.0)),
         ))
         .with_children(|parent| {
-            parent.spawn(gui_text("yay", default()));
+            parent.spawn(gui_text(
+                "yay",
+                GuiTextProps {
+                    size: GuiTextSize::Custom(5.),
+                },
+            ));
         })
         .id();
     commands.entity(gui_root.0).add_child(thing);

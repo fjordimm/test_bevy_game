@@ -10,7 +10,7 @@ pub enum GuiTextSize {
 }
 
 pub struct GuiTextProps {
-    size: GuiTextSize,
+    pub size: GuiTextSize,
 }
 
 impl Default for GuiTextProps {
