@@ -39,7 +39,7 @@ impl Plugin for PlayingStatePlugin {
                     .before(<[DuringPlayingUnpaused; _]>::from(DURING_PLAYING_UNPAUSED_LIST).first().unwrap().clone())
             )
             .add_systems(OnExit(OverallState::Playing),
-                remove_all_relevant_entities
+                despawn_all_relevant_entities
                     .in_set(DuringPlayingUnpausedW)
                     .after(<[DuringPlayingUnpaused; _]>::from(DURING_PLAYING_UNPAUSED_LIST).last().unwrap().clone())
             )
@@ -77,7 +77,7 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
     ));
 }
 
-fn remove_all_relevant_entities(
+fn despawn_all_relevant_entities(
     mut commands: Commands,
     all_entities_q: Query<Entity, With<PlayingStateEntity>>,
 ) {

@@ -12,7 +12,7 @@ impl Plugin for MainMenuStatePlugin {
         #[rustfmt::skip]
         app
             .add_systems(OnEnter(OverallState::MainMenu), on_enter)
-            .add_systems(OnExit(OverallState::MainMenu), remove_all_relevant_entities)
+            .add_systems(OnExit(OverallState::MainMenu), despawn_all_relevant_entities)
             .add_plugins(MainMenuGuiPlugin)
         ;
     }
@@ -24,7 +24,7 @@ fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseM
     commands.spawn((MainMenuStateEntity, Camera2d::default()));
 }
 
-fn remove_all_relevant_entities(
+fn despawn_all_relevant_entities(
     mut commands: Commands,
     all_entities_q: Query<Entity, With<MainMenuStateEntity>>,
 ) {
