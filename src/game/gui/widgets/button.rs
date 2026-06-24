@@ -14,9 +14,27 @@ impl Default for GuiButtonProps {
 #[derive(Component)]
 struct GuiButtonAttribs {}
 
+enum GuiButtonPressedState {
+    None,
+    Hovered,
+    Pressed,
+}
+
+#[derive(Component)]
+struct GuiButtonState {
+    pressed_state: GuiButtonPressedState,
+}
+
 #[allow(unused)]
 pub fn gui_button(props: GuiButtonProps) -> impl Bundle {
-    (GuiButtonAttribs {}, Node::default(), Button)
+    (
+        GuiButtonAttribs {},
+        GuiButtonState {
+            pressed_state: GuiButtonPressedState::None,
+        },
+        Node::default(),
+        Button,
+    )
 }
 
 pub struct GuiButtonPlugin;
@@ -25,44 +43,69 @@ impl Plugin for GuiButtonPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
+            .add_systems(Update, update_style_on_attrib_change)
             .add_systems(Update,
-                update_functional_components_on_attrib_change
-            )
-            .add_systems(Update,
-                update_functional_components_on_theme_change
+                update_style_on_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)
             )
+            .add_systems(Update, update_state)
+            .add_systems(Update, update_style_from_state_change)
         ;
     }
 }
 
-fn update_functional_components_on_attrib_change(
+fn update_style_on_attrib_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
     mut entity_q: Query<
-        (&GuiButtonAttribs, Entity, &mut Node),
+        (&GuiButtonAttribs, &GuiButtonState, Entity, &mut Node),
         Or<(Added<GuiButtonAttribs>, Changed<GuiButtonAttribs>)>,
     >,
 ) {
-    entity_q.iter_mut().for_each(|(attribs, entity, mut node)| {
-        update_functional_components(&mut commands, &theme, &attribs, &entity, &mut node);
-    });
+    entity_q
+        .iter_mut()
+        .for_each(|(attribs, state, entity, mut node)| {
+            set_style(&mut commands, &theme, &attribs, &state, &entity, &mut node);
+        });
 }
 
-fn update_functional_components_on_theme_change(
+fn update_style_on_theme_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
-    mut entity_q: Query<(&GuiButtonAttribs, Entity, &mut Node)>,
+    mut entity_q: Query<(&GuiButtonAttribs, &GuiButtonState, Entity, &mut Node)>,
 ) {
-    entity_q.iter_mut().for_each(|(attribs, entity, mut node)| {
-        update_functional_components(&mut commands, &theme, &attribs, &entity, &mut node);
+    entity_q
+        .iter_mut()
+        .for_each(|(attribs, state, entity, mut node)| {
+            set_style(&mut commands, &theme, &attribs, &state, &entity, &mut node);
+        });
+}
+
+fn update_state(mut entity_q: Query<(&mut GuiButtonState, &Interaction), Changed<Interaction>>) {
+    entity_q.iter_mut().for_each(|(mut state, interaction)| {
+        state.pressed_state = match interaction {
+            Interaction::None => GuiButtonPressedState::None,
+            Interaction::Hovered => GuiButtonPressedState::Hovered,
+            Interaction::Pressed => GuiButtonPressedState::Pressed,
+        }
     });
 }
 
-fn update_functional_components(
+fn update_style_from_state_change(
+    mut commands: Commands,
+    theme: Res<GuiThemeComputed>,
+    entity_q: Query<(&GuiButtonState, Entity), Changed<GuiButtonState>>,
+) {
+    entity_q.iter().for_each(|(state, entity)| {
+        set_style_from_state(&mut commands, &theme, &state, &entity);
+    });
+}
+
+fn set_style(
     commands: &mut Commands,
     theme: &GuiThemeComputed,
-    attribs: &GuiButtonAttribs,
+    _attribs: &GuiButtonAttribs,
+    state: &GuiButtonState,
     entity: &Entity,
     node: &mut Node,
 ) {
@@ -77,6 +120,25 @@ fn update_functional_components(
     node.row_gap = px(theme.0.padding_main);
     commands
         .entity(*entity)
-        .insert(BackgroundColor(theme.0.bg_color_main))
+        .insert(BackgroundColor(what_bg_color(&theme, &state)))
         .insert(theme.0.box_shadow.clone());
+}
+
+fn set_style_from_state(
+    commands: &mut Commands,
+    theme: &GuiThemeComputed,
+    state: &GuiButtonState,
+    entity: &Entity,
+) {
+    commands
+        .entity(*entity)
+        .insert(BackgroundColor(what_bg_color(&theme, &state)));
+}
+
+fn what_bg_color(theme: &GuiThemeComputed, state: &GuiButtonState) -> Color {
+    match state.pressed_state {
+        GuiButtonPressedState::None => theme.0.button_color_normal,
+        GuiButtonPressedState::Hovered => theme.0.button_color_hovered,
+        GuiButtonPressedState::Pressed => theme.0.button_color_pressed,
+    }
 }

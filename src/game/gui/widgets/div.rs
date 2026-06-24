@@ -41,13 +41,13 @@ impl Default for GuiDivProps {
 
 #[derive(Component)]
 struct GuiDivAttribs {
-    pub is_active: bool,
-    pub expand: bool,
-    pub size: Option<(f32, f32)>,
-    pub flex_direction: FlexDirection,
-    pub justify_content: JustifyContent,
-    pub align_items: AlignItems,
-    pub div_style: GuiDivStyle,
+    is_active: bool,
+    expand: bool,
+    size: Option<(f32, f32)>,
+    flex_direction: FlexDirection,
+    justify_content: JustifyContent,
+    align_items: AlignItems,
+    div_style: GuiDivStyle,
 }
 
 #[allow(unused)]
@@ -73,17 +73,17 @@ impl Plugin for GuiDivPlugin {
         #[rustfmt::skip]
         app
             .add_systems(Update,
-                update_functional_components_on_attrib_change
+                update_style_on_attrib_change
             )
             .add_systems(Update,
-                update_functional_components_on_theme_change
+                update_style_on_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)
             )
         ;
     }
 }
 
-fn update_functional_components_on_attrib_change(
+fn update_style_on_attrib_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
     mut entity_q: Query<
@@ -92,21 +92,21 @@ fn update_functional_components_on_attrib_change(
     >,
 ) {
     entity_q.iter_mut().for_each(|(attribs, entity, mut node)| {
-        update_functional_components(&mut commands, &theme, &attribs, &entity, &mut node);
+        set_style(&mut commands, &theme, &attribs, &entity, &mut node);
     });
 }
 
-fn update_functional_components_on_theme_change(
+fn update_style_on_theme_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
     mut entity_q: Query<(&GuiDivAttribs, Entity, &mut Node)>,
 ) {
     entity_q.iter_mut().for_each(|(attribs, entity, mut node)| {
-        update_functional_components(&mut commands, &theme, &attribs, &entity, &mut node);
+        set_style(&mut commands, &theme, &attribs, &entity, &mut node);
     });
 }
 
-fn update_functional_components(
+fn set_style(
     commands: &mut Commands,
     theme: &GuiThemeComputed,
     attribs: &GuiDivAttribs,

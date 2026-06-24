@@ -49,17 +49,17 @@ impl Plugin for GuiTextPlugin {
         #[rustfmt::skip]
         app
             .add_systems(Update,
-                update_functional_components_on_attrib_change
+                update_style_on_attrib_change
             )
             .add_systems(Update,
-                update_functional_components_on_theme_change
+                update_style_on_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)
             )
         ;
     }
 }
 
-fn update_functional_components_on_attrib_change(
+fn update_style_on_attrib_change(
     theme: Res<GuiThemeComputed>,
     mut entity_q: Query<
         (&GuiTextAttribs, &mut Text, &mut TextFont, &mut TextColor),
@@ -69,7 +69,7 @@ fn update_functional_components_on_attrib_change(
     entity_q
         .iter_mut()
         .for_each(|(attribs, mut text, mut textfont, mut textcolor)| {
-            update_functional_components(
+            set_style(
                 &theme,
                 &attribs,
                 &mut text,
@@ -79,14 +79,14 @@ fn update_functional_components_on_attrib_change(
         });
 }
 
-fn update_functional_components_on_theme_change(
+fn update_style_on_theme_change(
     theme: Res<GuiThemeComputed>,
     mut entity_q: Query<(&GuiTextAttribs, &mut Text, &mut TextFont, &mut TextColor)>,
 ) {
     entity_q
         .iter_mut()
         .for_each(|(attribs, mut text, mut textfont, mut textcolor)| {
-            update_functional_components(
+            set_style(
                 &theme,
                 &attribs,
                 &mut text,
@@ -96,7 +96,7 @@ fn update_functional_components_on_theme_change(
         });
 }
 
-fn update_functional_components(
+fn set_style(
     theme: &GuiThemeComputed,
     attribs: &GuiTextAttribs,
     text: &mut Text,
