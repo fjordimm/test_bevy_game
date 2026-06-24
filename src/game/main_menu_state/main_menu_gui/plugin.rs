@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::game::{
     core::{resources::GlobalGuiRoot, states::OverallState},
     gui::widgets::{
+        button::gui_button,
         div::{GuiDivProps, GuiDivStyle, gui_div},
         text::gui_text,
     },
@@ -39,6 +40,9 @@ fn todor1(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
                 }))
                 .with_children(|parent| {
                     parent.spawn(gui_text("Howdy", default()));
+                    parent.spawn(gui_button(default())).with_children(|parent| {
+                        parent.spawn(gui_text("pressme", default()));
+                    });
                 });
         })
         .id();

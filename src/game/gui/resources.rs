@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::core::resources::FontHandles;
 
+#[allow(unused)]
 #[derive(Clone)]
 pub struct GuiTheme {
     pub font_main: Handle<Font>,

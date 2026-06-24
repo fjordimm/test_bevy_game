@@ -4,7 +4,7 @@ use crate::game::{
     core::{resources::FontHandles, sets::GlobalStartupOrdering},
     gui::{
         resources::{GuiScale, GuiTheme, GuiThemeComputed, GuiThemeUncomputed},
-        widgets::{div::GuiDivPlugin, text::GuiTextPlugin},
+        widgets::{button::GuiButtonPlugin, div::GuiDivPlugin, text::GuiTextPlugin},
     },
 };
 
@@ -24,6 +24,7 @@ impl Plugin for GuiPlugin {
             )
             .add_plugins(GuiTextPlugin)
             .add_plugins(GuiDivPlugin)
+            .add_plugins(GuiButtonPlugin)
         ;
     }
 }
