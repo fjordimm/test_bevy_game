@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::gui::resources::GuiThemeComputed;
 
+#[allow(unused)]
 pub enum GuiDivStyle {
     None,
     Regular,
@@ -13,6 +14,7 @@ pub enum GuiDivStyle {
     },
 }
 
+#[allow(unused)]
 pub struct GuiDivProps {
     pub starts_active: bool,
     pub expand: bool,
@@ -48,6 +50,7 @@ struct GuiDivAttribs {
     pub div_style: GuiDivStyle,
 }
 
+#[allow(unused)]
 pub fn gui_div(props: GuiDivProps) -> impl Bundle {
     (
         GuiDivAttribs {

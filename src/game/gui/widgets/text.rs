@@ -2,17 +2,15 @@ use bevy::{prelude::*, ui::widget::Text};
 
 use crate::game::gui::resources::GuiThemeComputed;
 
+#[allow(unused)]
 pub enum GuiTextSize {
-    #[allow(unused)]
     Regular,
-    #[allow(unused)]
     Medium,
-    #[allow(unused)]
     Title,
-    #[allow(unused)]
     Custom(f32),
 }
 
+#[allow(unused)]
 pub struct GuiTextProps {
     pub size: GuiTextSize,
 }
@@ -31,6 +29,7 @@ struct GuiTextAttribs {
     size: GuiTextSize,
 }
 
+#[allow(unused)]
 pub fn gui_text(content: impl Into<String>, props: GuiTextProps) -> impl Bundle {
     (
         GuiTextAttribs {
