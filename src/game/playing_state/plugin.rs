@@ -69,9 +69,9 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
             fov: 60.0f32.to_radians(),
             ..default()
         }),
-        Transform::from_xyz(0.0, 3.0, 7.0),
+        Transform::from_xyz(0., 3., 7.),
         AmbientLight {
-            brightness: 80.0,
+            brightness: 80.,
             ..default()
         },
     ));

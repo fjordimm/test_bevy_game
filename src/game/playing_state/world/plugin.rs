@@ -16,7 +16,7 @@ impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .insert_resource(TimeOfDay(0.0))
+            .insert_resource(TimeOfDay(0.))
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
                     .in_set(DuringPlayingUnpaused::General)
@@ -42,27 +42,27 @@ fn on_enter(
         PlayingStateEntity,
         SunlightTag,
         DirectionalLight {
-            color: Color::hsv(0.0, 0.0, 1.0),
+            color: Color::hsv(0., 0., 1.),
             shadows_enabled: false,
             ..default()
         },
-        Transform::default().looking_at(Vec3::new(-0.1, -1.0, -0.2), Dir3::Y),
+        Transform::default().looking_at(Vec3::new(-0.1, -1., -0.2), Dir3::Y),
     ));
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(meshes.add(Cuboid::new(10_000.0, 1.0, 10_000.0))),
+        Mesh3d(meshes.add(Cuboid::new(10_000., 1., 10_000.))),
         MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: Color::hsv(113.0, 0.57, 0.55),
-            perceptual_roughness: 0.0,
-            reflectance: 0.0,
+            base_color: Color::hsv(113., 0.57, 0.55),
+            perceptual_roughness: 0.,
+            reflectance: 0.,
             ..default()
         })),
-        Transform::from_xyz(0.0, -1.0, 0.0),
+        Transform::from_xyz(0., -1., 0.),
     ));
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
-        MeshMaterial3d(materials.add(Color::hsv(0.0, 1.0, 1.0))),
+        Mesh3d(meshes.add(Cuboid::new(1., 1., 1.))),
+        MeshMaterial3d(materials.add(Color::hsv(0., 1., 1.))),
         Transform::default(),
     ));
 
@@ -80,14 +80,14 @@ fn update_sunlight(
             .look_at(computed_skybox_values.sun_position, Vec3::Y);
         sunlight.0.rotate_local_y(180.0f32.to_radians());
 
-        sunlight.1.illuminance = f32::max(0.0, computed_skybox_values.sun_position.y)
+        sunlight.1.illuminance = f32::max(0., computed_skybox_values.sun_position.y)
             * light_consts::lux::AMBIENT_DAYLIGHT;
     }
 
     if let Some(mut ambient_light) = alrms!(ambient_light_q) {
         ambient_light.brightness = lerp(
-            30.0..=80.0,
-            f32::max(0.0, computed_skybox_values.sun_position.y),
+            30.0..=80.,
+            f32::max(0., computed_skybox_values.sun_position.y),
         );
     }
 }

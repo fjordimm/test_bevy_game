@@ -28,13 +28,13 @@ fn todor1(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
                 column_gap: px(10),
                 ..default()
             },
-            BackgroundColor(Color::linear_rgb(0.0, 0.0, 1.0)),
+            BackgroundColor(Color::linear_rgb(0., 0., 1.)),
         ))
         .with_children(|parent| {
             parent.spawn(gui_text(
                 "yay",
                 GuiTextProps {
-                    size: GuiTextSize::Custom(15.0),
+                    size: GuiTextSize::Custom(15.),
                 },
             ));
         })

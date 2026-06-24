@@ -79,7 +79,7 @@ fn rotate_and_move(
 
             // Movement
 
-            let forward = -Quat::from_euler(EulerRot::YXZ, rot.0, 0.0, 0.0).mul_vec3(Vec3::Z);
+            let forward = -Quat::from_euler(EulerRot::YXZ, rot.0, 0., 0.).mul_vec3(Vec3::Z);
             let right = forward.rotate_y(-0.5 * PI);
 
             let mut velocity = Vec3::ZERO;

@@ -4,8 +4,6 @@
 ## Currently Working On
 - Rework the whole GUI system.
 - Finish the debug menu.
-- For plugins, make the final semicolon in the build method on a new line.
-- Use `_.` instead of `_.0`.
 
 ## Reminders
 - Prefer using resources rather than consts for constant arbitrary values.
