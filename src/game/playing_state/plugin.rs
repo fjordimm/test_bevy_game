@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::game::{
     core::{resources::KeyBindings, states::OverallState},
     playing_state::{
+        pause_menu::plugin::PauseMenuPlugin,
         player::{plugin::PlayerPlugin, tags::CameraForPlayer},
         sets::{
             DURING_PLAYING_UNPAUSED_LIST, DuringPlaying, DuringPlayingUnpaused,
@@ -39,7 +40,7 @@ impl Plugin for PlayingStatePlugin {
                     .before(<[DuringPlayingUnpaused; _]>::from(DURING_PLAYING_UNPAUSED_LIST).first().unwrap().clone())
             )
             .add_systems(OnExit(OverallState::Playing),
-                despawn_all_relevant_entities
+                on_exit
                     .in_set(DuringPlayingUnpausedW)
                     .after(<[DuringPlayingUnpaused; _]>::from(DURING_PLAYING_UNPAUSED_LIST).last().unwrap().clone())
             )
@@ -51,6 +52,7 @@ impl Plugin for PlayingStatePlugin {
                 playing_state_entity_check
                     .in_set(DuringPlaying)
             ) // TODO: only do this in debug mode
+            .add_plugins(PauseMenuPlugin)
             .add_plugins(SkyboxPlugin)
             .add_plugins(WorldPlugin)
             .add_plugins(PlayerPlugin)
@@ -77,13 +79,16 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
     ));
 }
 
-fn despawn_all_relevant_entities(
+fn on_exit(
     mut commands: Commands,
     all_entities_q: Query<Entity, With<PlayingStateEntity>>,
+    mut next_pause_state: ResMut<NextState<PauseState>>,
 ) {
     all_entities_q.iter().for_each(|entity| {
         commands.entity(entity).despawn();
     });
+
+    next_pause_state.set(PauseState::Limbo);
 }
 
 fn toggle_pause(
@@ -94,6 +99,10 @@ fn toggle_pause(
 ) {
     if keys.just_pressed(key_bindings.pause) {
         next_pause_state.set(match pause_state.get() {
+            PauseState::Limbo => {
+                error!("PauseState was in Limbo. Setting it to Unpaused.");
+                PauseState::Unpaused
+            }
             PauseState::Unpaused => PauseState::Paused,
             PauseState::Paused => PauseState::Unpaused,
         });
