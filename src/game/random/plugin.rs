@@ -12,10 +12,12 @@ pub struct RandomPlugin;
 impl Plugin for RandomPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
-        app.add_systems(
-            Startup,
-            startup.in_set(GlobalStartupOrdering::RandomUseOnly),
-        );
+        app
+            .add_systems(Startup,
+                startup
+                    .in_set(GlobalStartupOrdering::RandomUseOnly)
+            )
+        ;
     }
 }
 

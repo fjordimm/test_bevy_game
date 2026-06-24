@@ -53,7 +53,8 @@ impl Plugin for PlayingStatePlugin {
             ) // TODO: only do this in debug mode
             .add_plugins(SkyboxPlugin)
             .add_plugins(WorldPlugin)
-            .add_plugins(PlayerPlugin);
+            .add_plugins(PlayerPlugin)
+        ;
     }
 }
 

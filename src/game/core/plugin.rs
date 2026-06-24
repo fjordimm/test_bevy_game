@@ -47,7 +47,8 @@ impl Plugin for CorePlugin {
             .add_plugins(GuiPlugin)
             .add_plugins(MainMenuStatePlugin)
             .add_plugins(PlayingStatePlugin)
-            .add_plugins(QuickDevTestPlugin);
+            .add_plugins(QuickDevTestPlugin)
+        ;
     }
 }
 

@@ -24,7 +24,8 @@ impl Plugin for WorldPlugin {
             .add_systems(Update,
                 update_sunlight
                     .in_set(DuringPlayingUnpaused::General)
-            );
+            )
+        ;
     }
 }
 

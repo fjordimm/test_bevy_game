@@ -31,7 +31,8 @@ pub fn build_bevy_app() -> App {
             set_window_maximized
                 .in_set(GlobalStartupOrdering::BuildBevyAppUseOnly)
         )
-        .add_plugins(CorePlugin);
+        .add_plugins(CorePlugin)
+    ;
 
     app
 }

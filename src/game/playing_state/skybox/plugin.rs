@@ -25,7 +25,8 @@ impl Plugin for SkyboxPlugin {
             .add_systems(Update,
                 update_skybox
                     .in_set(DuringPlayingUnpaused::General)
-            );
+            )
+        ;
     }
 }
 

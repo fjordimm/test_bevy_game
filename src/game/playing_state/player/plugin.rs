@@ -36,7 +36,8 @@ impl Plugin for PlayerPlugin {
             .add_systems(Update,
                 rotate_and_move
                     .in_set(DuringPlayingUnpaused::General)
-            );
+            )
+        ;
     }
 }
 

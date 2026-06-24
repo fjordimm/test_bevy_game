@@ -11,7 +11,8 @@ impl Plugin for QuickDevTestPlugin {
             .add_systems(Update,
                 rotate_sun
                     .in_set(DuringPlayingUnpaused::General)
-            );
+            )
+        ;
     }
 }
 
