@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::game::{
     core::{resources::FontHandles, sets::GlobalStartupOrdering},
     gui::{
-        resources::{GuiScale, GuiTheme, GuiThemeUncomputed, compute_gui_theme},
+        resources::{GuiScale, GuiTheme, GuiThemeComputed, GuiThemeUncomputed},
         widgets::{div::GuiDivPlugin, text::GuiTextPlugin},
     },
 };
@@ -19,8 +19,8 @@ impl Plugin for GuiPlugin {
                     .in_set(GlobalStartupOrdering::Regular)
             )
             .add_systems(Update,
-                update_gui_globals
-                    .run_if(resource_changed::<GuiScale>)
+                update_gui_theme_computed
+                    .run_if(resource_changed::<GuiScale>.or(resource_changed::<GuiThemeUncomputed>))
             )
             .add_plugins(GuiTextPlugin)
             .add_plugins(GuiDivPlugin)
@@ -29,15 +29,21 @@ impl Plugin for GuiPlugin {
 }
 
 fn startup(mut commands: Commands, font_handles: Res<FontHandles>) {
-    commands.insert_resource(GuiThemeUncomputed::make(&font_handles));
-    commands.insert_resource(GuiScale::default());
-    commands.insert_resource(GuiTheme::default());
+    let gui_theme_uncomputed = GuiThemeUncomputed(GuiTheme::make(&font_handles));
+    let gui_scale = GuiScale::default();
+
+    commands.insert_resource(GuiThemeComputed::compute_from(
+        &gui_theme_uncomputed.0,
+        &gui_scale,
+    ));
+    commands.insert_resource(gui_theme_uncomputed);
+    commands.insert_resource(gui_scale);
 }
 
-fn update_gui_globals(
+fn update_gui_theme_computed(
     theme_uncomputed: Res<GuiThemeUncomputed>,
     scale: Res<GuiScale>,
-    mut theme: ResMut<GuiTheme>,
+    mut theme: ResMut<GuiThemeComputed>,
 ) {
-    *theme = compute_gui_theme(&theme_uncomputed, &scale);
+    *theme = GuiThemeComputed::compute_from(&theme_uncomputed.0, &scale);
 }

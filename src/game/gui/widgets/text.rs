@@ -1,6 +1,6 @@
 use bevy::{prelude::*, ui::widget::Text};
 
-use crate::game::gui::resources::GuiTheme;
+use crate::game::gui::resources::GuiThemeComputed;
 
 pub enum GuiTextSize {
     #[allow(unused)]
@@ -54,14 +54,14 @@ impl Plugin for GuiTextPlugin {
             )
             .add_systems(Update,
                 update_functional_components_on_theme_change
-                    .run_if(resource_changed::<GuiTheme>)
+                    .run_if(resource_changed::<GuiThemeComputed>)
             )
         ;
     }
 }
 
 fn update_functional_components_on_attrib_change(
-    theme: Res<GuiTheme>,
+    theme: Res<GuiThemeComputed>,
     mut entity_q: Query<
         (&GuiTextAttribs, &mut Text, &mut TextFont, &mut TextColor),
         Or<(Added<GuiTextAttribs>, Changed<GuiTextAttribs>)>,
@@ -81,7 +81,7 @@ fn update_functional_components_on_attrib_change(
 }
 
 fn update_functional_components_on_theme_change(
-    theme: Res<GuiTheme>,
+    theme: Res<GuiThemeComputed>,
     mut entity_q: Query<(&GuiTextAttribs, &mut Text, &mut TextFont, &mut TextColor)>,
 ) {
     entity_q
@@ -98,7 +98,7 @@ fn update_functional_components_on_theme_change(
 }
 
 fn update_functional_components(
-    theme: &GuiTheme,
+    theme: &GuiThemeComputed,
     attribs: &GuiTextAttribs,
     text: &mut Text,
     textfont: &mut TextFont,
@@ -107,15 +107,15 @@ fn update_functional_components(
     text.0 = attribs.content.clone(); // TODO: could be more efficient
 
     *textfont = TextFont {
-        font: theme.font_main.clone(),
+        font: theme.0.font_main.clone(),
         font_size: match attribs.size {
-            GuiTextSize::Regular => theme.font_size_regular,
-            GuiTextSize::Medium => theme.font_size_medium,
-            GuiTextSize::Title => theme.font_size_title,
+            GuiTextSize::Regular => theme.0.font_size_regular,
+            GuiTextSize::Medium => theme.0.font_size_medium,
+            GuiTextSize::Title => theme.0.font_size_title,
             GuiTextSize::Custom(val) => val,
         },
         ..default()
     };
 
-    textcolor.0 = theme.main_content_color;
+    textcolor.0 = theme.0.main_content_color;
 }

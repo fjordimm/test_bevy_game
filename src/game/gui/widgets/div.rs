@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::gui::resources::GuiTheme;
+use crate::game::gui::resources::GuiThemeComputed;
 
 pub enum GuiDivStyle {
     None,
@@ -74,7 +74,7 @@ impl Plugin for GuiDivPlugin {
             )
             .add_systems(Update,
                 update_functional_components_on_theme_change
-                    .run_if(resource_changed::<GuiTheme>)
+                    .run_if(resource_changed::<GuiThemeComputed>)
             )
         ;
     }
@@ -82,7 +82,7 @@ impl Plugin for GuiDivPlugin {
 
 fn update_functional_components_on_attrib_change(
     mut commands: Commands,
-    theme: Res<GuiTheme>,
+    theme: Res<GuiThemeComputed>,
     mut entity_q: Query<
         (&GuiDivAttribs, Entity, &mut Node),
         Or<(Added<GuiDivAttribs>, Changed<GuiDivAttribs>)>,
@@ -95,7 +95,7 @@ fn update_functional_components_on_attrib_change(
 
 fn update_functional_components_on_theme_change(
     mut commands: Commands,
-    theme: Res<GuiTheme>,
+    theme: Res<GuiThemeComputed>,
     mut entity_q: Query<(&GuiDivAttribs, Entity, &mut Node)>,
 ) {
     entity_q.iter_mut().for_each(|(attribs, entity, mut node)| {
@@ -105,7 +105,7 @@ fn update_functional_components_on_theme_change(
 
 fn update_functional_components(
     commands: &mut Commands,
-    theme: &GuiTheme,
+    theme: &GuiThemeComputed,
     attribs: &GuiDivAttribs,
     entity: &Entity,
     node: &mut Node,
@@ -144,12 +144,12 @@ fn update_functional_components(
                 .remove::<BoxShadow>();
         }
         GuiDivStyle::Regular => {
-            node.padding = UiRect::all(px(theme.main_padding));
-            node.row_gap = px(theme.main_padding);
+            node.padding = UiRect::all(px(theme.0.main_padding));
+            node.row_gap = px(theme.0.main_padding);
             commands
                 .entity(*entity)
-                .insert(BackgroundColor(theme.main_bg_color))
-                .insert(theme.main_box_shadow.clone());
+                .insert(BackgroundColor(theme.0.main_bg_color))
+                .insert(theme.0.main_box_shadow.clone());
         }
         GuiDivStyle::Custom {
             padding,
@@ -164,7 +164,7 @@ fn update_functional_components(
             if box_shadow {
                 commands
                     .entity(*entity)
-                    .insert(theme.main_box_shadow.clone());
+                    .insert(theme.0.main_box_shadow.clone());
             }
         }
     }

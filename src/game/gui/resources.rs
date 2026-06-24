@@ -2,8 +2,8 @@ use bevy::prelude::*;
 
 use crate::game::core::resources::FontHandles;
 
-#[derive(Resource)]
-pub struct GuiThemeUncomputed {
+#[derive(Clone)]
+pub struct GuiTheme {
     pub font_main: Handle<Font>,
     pub font_mono: Handle<Font>,
     pub main_padding: f32,
@@ -15,7 +15,7 @@ pub struct GuiThemeUncomputed {
     pub main_box_shadow: BoxShadow,
 }
 
-impl GuiThemeUncomputed {
+impl GuiTheme {
     pub fn make(font_handles: &FontHandles) -> Self {
         Self {
             font_main: font_handles.cabin.clone(),
@@ -38,6 +38,9 @@ impl GuiThemeUncomputed {
 }
 
 #[derive(Resource)]
+pub struct GuiThemeUncomputed(pub GuiTheme);
+
+#[derive(Resource)]
 pub struct GuiScale(pub f32);
 
 impl Default for GuiScale {
@@ -46,29 +49,18 @@ impl Default for GuiScale {
     }
 }
 
-#[derive(Resource, Default)]
-pub struct GuiTheme {
-    pub font_main: Handle<Font>,
-    pub font_mono: Handle<Font>,
-    pub main_padding: f32,
-    pub font_size_regular: f32,
-    pub font_size_medium: f32,
-    pub font_size_title: f32,
-    pub main_bg_color: Color,
-    pub main_content_color: Color,
-    pub main_box_shadow: BoxShadow,
-}
+#[derive(Resource)]
+pub struct GuiThemeComputed(pub GuiTheme);
 
-pub fn compute_gui_theme(t: &GuiThemeUncomputed, scale: &GuiScale) -> GuiTheme {
-    GuiTheme {
-        font_main: t.font_main.clone(),
-        font_mono: t.font_mono.clone(),
-        main_padding: scale.0 * t.main_padding,
-        font_size_regular: scale.0 * t.font_size_regular,
-        font_size_medium: scale.0 * t.font_size_medium,
-        font_size_title: scale.0 * t.font_size_title,
-        main_bg_color: t.main_bg_color,
-        main_content_color: t.main_content_color,
-        main_box_shadow: t.main_box_shadow.clone(),
+impl GuiThemeComputed {
+    pub fn compute_from(theme_uncomputed: &GuiTheme, scale: &GuiScale) -> Self {
+        let mut ret = theme_uncomputed.clone();
+
+        ret.main_padding *= scale.0;
+        ret.font_size_regular *= scale.0;
+        ret.font_size_medium *= scale.0;
+        ret.font_size_title *= scale.0;
+
+        Self(ret)
     }
 }
