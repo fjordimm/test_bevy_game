@@ -1,9 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{
-    resources::GuiTheme,
-    sets::{GuiWidgetDuringAddFunctionalComponents, GuiWidgetDuringUpdateFunctionalComponents},
-};
+use crate::game::gui::resources::GuiTheme;
 
 pub enum GuiDivStyle {
     None,
@@ -44,6 +41,7 @@ impl Default for GuiDivProps {
 struct GuiDivAttribs {
     pub is_active: bool,
     pub expand: bool,
+    pub size: Option<(f32, f32)>,
     pub flex_direction: FlexDirection,
     pub justify_content: JustifyContent,
     pub align_items: AlignItems,
@@ -55,6 +53,7 @@ pub fn gui_div(props: GuiDivProps) -> impl Bundle {
         GuiDivAttribs {
             is_active: props.starts_active,
             expand: props.expand,
+            size: props.size,
             flex_direction: props.flex_direction,
             justify_content: props.justify_content,
             align_items: props.align_items,
@@ -71,29 +70,14 @@ impl Plugin for GuiDivPlugin {
         #[rustfmt::skip]
         app
             .add_systems(Update,
-                add_functional_components
-                    .in_set(GuiWidgetDuringAddFunctionalComponents)
-            )
-            .add_systems(Update,
                 update_functional_components_on_attrib_change
-                    .in_set(GuiWidgetDuringUpdateFunctionalComponents)
             )
             .add_systems(Update,
                 update_functional_components_on_theme_change
-                    .in_set(GuiWidgetDuringUpdateFunctionalComponents)
                     .run_if(resource_changed::<GuiTheme>)
             )
         ;
     }
-}
-
-fn add_functional_components(
-    mut commands: Commands,
-    entity_q: Query<Entity, Added<GuiDivAttribs>>,
-) {
-    entity_q.iter().for_each(|entity| {
-        commands.entity(entity).insert((Node::default(),));
-    });
 }
 
 fn update_functional_components_on_attrib_change(
@@ -127,17 +111,25 @@ fn update_functional_components(
     node: &mut Node,
 ) {
     node.display = match attribs.is_active {
-        false => Display::None,
         true => Display::Flex,
+        false => Display::None,
     };
-    node.width = match attribs.expand {
-        true => percent(100),
-        false => Val::Auto,
-    };
-    node.height = match attribs.expand {
-        true => percent(100),
-        false => Val::Auto,
-    };
+    match attribs.size {
+        Some((w, h)) => {
+            node.width = px(w);
+            node.height = px(h);
+        }
+        None => match attribs.expand {
+            true => {
+                node.width = percent(100);
+                node.height = percent(100);
+            }
+            false => {
+                node.width = Val::Auto;
+                node.height = Val::Auto;
+            }
+        },
+    }
     node.flex_direction = attribs.flex_direction;
     node.justify_content = attribs.justify_content;
     node.align_items = attribs.align_items;

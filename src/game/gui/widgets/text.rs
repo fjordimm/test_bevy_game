@@ -1,9 +1,6 @@
 use bevy::{prelude::*, ui::widget::Text};
 
-use crate::game::gui::{
-    resources::GuiTheme,
-    sets::{GuiWidgetDuringAddFunctionalComponents, GuiWidgetDuringUpdateFunctionalComponents},
-};
+use crate::game::gui::resources::GuiTheme;
 
 pub enum GuiTextSize {
     #[allow(unused)]
@@ -53,33 +50,14 @@ impl Plugin for GuiTextPlugin {
         #[rustfmt::skip]
         app
             .add_systems(Update,
-                add_functional_components
-                    .in_set(GuiWidgetDuringAddFunctionalComponents)
-            )
-            .add_systems(Update,
                 update_functional_components_on_attrib_change
-                    .in_set(GuiWidgetDuringUpdateFunctionalComponents)
             )
             .add_systems(Update,
                 update_functional_components_on_theme_change
-                    .in_set(GuiWidgetDuringUpdateFunctionalComponents)
                     .run_if(resource_changed::<GuiTheme>)
             )
         ;
     }
-}
-
-fn add_functional_components(
-    mut commands: Commands,
-    entity_q: Query<Entity, Added<GuiTextAttribs>>,
-) {
-    entity_q.iter().for_each(|entity| {
-        commands.entity(entity).insert((
-            Text::default(),
-            TextFont::default(),
-            TextColor::default(),
-        ));
-    });
 }
 
 fn update_functional_components_on_attrib_change(
