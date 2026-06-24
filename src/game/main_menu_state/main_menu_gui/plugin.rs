@@ -5,6 +5,7 @@ use crate::game::{
     gui::widgets::{
         button::gui_button,
         div::{GuiDivProps, GuiDivStyle, gui_div},
+        screen_div::{GuiScreenDivProps, gui_screen_div},
         text::gui_text,
     },
 };
@@ -31,22 +32,32 @@ fn todor1(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
         }))
         .with_children(|parent| {
             parent
-                .spawn(gui_div(GuiDivProps {
+                .spawn(gui_screen_div(GuiScreenDivProps {
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
-                    div_style: GuiDivStyle::Regular,
+                    bg_color: Color::BLACK,
                     ..default()
                 }))
                 .with_children(|parent| {
-                    parent.spawn(gui_text("Howdy", default()));
                     parent
-                        .spawn(gui_button(default()))
+                        .spawn(gui_div(GuiDivProps {
+                            flex_direction: FlexDirection::Column,
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+                            div_style: GuiDivStyle::Regular,
+                            ..default()
+                        }))
                         .with_children(|parent| {
-                            parent.spawn(gui_text("pressme", default()));
-                        })
-                        .observe(|_: On<Pointer<Click>>| {
-                            debug!("oh no i've been clicked!!!!");
+                            parent.spawn(gui_text("Howdy", default()));
+                            parent
+                                .spawn(gui_button(default()))
+                                .with_children(|parent| {
+                                    parent.spawn(gui_text("pressme", default()));
+                                })
+                                .observe(|_: On<Pointer<Click>>| {
+                                    debug!("oh no i've been clicked!!!!");
+                                });
                         });
                 });
         })
