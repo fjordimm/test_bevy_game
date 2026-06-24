@@ -1,17 +1,18 @@
 use bevy::{prelude::*, ui::widget::Text};
 
-use crate::game::{
-    core::resources::FontHandles,
-    gui::{
-        resources::GuiTheme,
-        sets::{GuiWidgetDuringAddFunctionalComponents, GuiWidgetDuringUpdateFunctionalComponents},
-    },
+use crate::game::gui::{
+    resources::GuiTheme,
+    sets::{GuiWidgetDuringAddFunctionalComponents, GuiWidgetDuringUpdateFunctionalComponents},
 };
 
 pub enum GuiTextSize {
+    #[allow(unused)]
     Regular,
+    #[allow(unused)]
     Medium,
+    #[allow(unused)]
     Title,
+    #[allow(unused)]
     Custom(f32),
 }
 

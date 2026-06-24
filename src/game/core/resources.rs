@@ -2,11 +2,13 @@ use bevy::input::keyboard::KeyCode;
 use bevy::prelude::*;
 use bevy_ecs::resource::Resource;
 
-#[allow(unused)]
 #[derive(Resource)]
 pub struct FontHandles {
+    #[allow(unused)]
     pub cabin: Handle<Font>,
+    #[allow(unused)]
     pub sorts_mill_goudy: Handle<Font>,
+    #[allow(unused)]
     pub ibm_plex_mono: Handle<Font>,
 }
 
@@ -20,11 +22,13 @@ impl FontHandles {
     }
 }
 
-#[allow(unused)]
 #[derive(Resource, Debug)]
 pub struct UiIconHandles {
+    #[allow(unused)]
     pub x: Handle<Image>,
+    #[allow(unused)]
     pub minimize: Handle<Image>,
+    #[allow(unused)]
     pub corner_resizer: Handle<Image>,
 }
 
