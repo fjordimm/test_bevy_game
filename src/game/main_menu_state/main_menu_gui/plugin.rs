@@ -42,11 +42,11 @@ fn todor1(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
                     parent.spawn(gui_text("Howdy", default()));
                     parent
                         .spawn(gui_button(default()))
-                        .observe(|_: On<Pointer<Click>>| {
-                            debug!("oh no i've been clicked!!!!");
-                        })
                         .with_children(|parent| {
                             parent.spawn(gui_text("pressme", default()));
+                        })
+                        .observe(|_: On<Pointer<Click>>| {
+                            debug!("oh no i've been clicked!!!!");
                         });
                 });
         })
