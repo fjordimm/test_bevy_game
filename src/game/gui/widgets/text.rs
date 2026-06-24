@@ -4,10 +4,10 @@ use crate::game::gui::resources::GuiThemeComputed;
 
 #[allow(unused)]
 pub enum GuiTextSize {
-    Regular,
-    Medium,
-    Title,
     Custom(f32),
+    P,
+    H1,
+    H2,
 }
 
 #[allow(unused)]
@@ -18,7 +18,7 @@ pub struct GuiTextProps {
 impl Default for GuiTextProps {
     fn default() -> Self {
         Self {
-            size: GuiTextSize::Regular,
+            size: GuiTextSize::P,
         }
     }
 }
@@ -39,6 +39,36 @@ pub fn gui_text(content: impl Into<String>, props: GuiTextProps) -> impl Bundle 
         Text::default(),
         TextFont::default(),
         TextColor::default(),
+    )
+}
+
+#[allow(unused)]
+pub fn gui_text_p(content: impl Into<String>) -> impl Bundle {
+    gui_text(
+        content,
+        GuiTextProps {
+            size: GuiTextSize::P,
+        },
+    )
+}
+
+#[allow(unused)]
+pub fn gui_text_h1(content: impl Into<String>) -> impl Bundle {
+    gui_text(
+        content,
+        GuiTextProps {
+            size: GuiTextSize::H1,
+        },
+    )
+}
+
+#[allow(unused)]
+pub fn gui_text_h2(content: impl Into<String>) -> impl Bundle {
+    gui_text(
+        content,
+        GuiTextProps {
+            size: GuiTextSize::H2,
+        },
     )
 }
 
@@ -69,13 +99,7 @@ fn update_style_on_attrib_change(
     entity_q
         .iter_mut()
         .for_each(|(attribs, mut text, mut textfont, mut textcolor)| {
-            set_style(
-                &theme,
-                &attribs,
-                &mut text,
-                &mut textfont,
-                &mut textcolor,
-            );
+            set_style(&theme, &attribs, &mut text, &mut textfont, &mut textcolor);
         });
 }
 
@@ -86,13 +110,7 @@ fn update_style_on_theme_change(
     entity_q
         .iter_mut()
         .for_each(|(attribs, mut text, mut textfont, mut textcolor)| {
-            set_style(
-                &theme,
-                &attribs,
-                &mut text,
-                &mut textfont,
-                &mut textcolor,
-            );
+            set_style(&theme, &attribs, &mut text, &mut textfont, &mut textcolor);
         });
 }
 
@@ -108,10 +126,10 @@ fn set_style(
     *textfont = TextFont {
         font: theme.0.font_main.clone(),
         font_size: match attribs.size {
-            GuiTextSize::Regular => theme.0.font_size_regular,
-            GuiTextSize::Medium => theme.0.font_size_medium,
-            GuiTextSize::Title => theme.0.font_size_title,
             GuiTextSize::Custom(val) => val,
+            GuiTextSize::P => theme.0.font_size_p,
+            GuiTextSize::H1 => theme.0.font_size_h1,
+            GuiTextSize::H2 => theme.0.font_size_h2,
         },
         ..default()
     };

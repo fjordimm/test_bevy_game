@@ -2,6 +2,10 @@ use bevy::prelude::*;
 
 use crate::game::core::resources::FontHandles;
 
+// IMPORTANT: If you add a new field to GuiTheme,
+//   remember to rescale it in `GuiThemeComputed::compute_from`
+//   (if it's numeric and should change based on the gui scale).
+
 #[allow(unused)]
 #[derive(Clone)]
 pub struct GuiTheme {
@@ -15,9 +19,9 @@ pub struct GuiTheme {
     pub button_color_pressed: Color,
     pub padding_main: f32,
     pub border_radius: f32,
-    pub font_size_regular: f32,
-    pub font_size_medium: f32,
-    pub font_size_title: f32,
+    pub font_size_p: f32,
+    pub font_size_h1: f32,
+    pub font_size_h2: f32,
 }
 
 impl GuiTheme {
@@ -39,9 +43,9 @@ impl GuiTheme {
             button_color_pressed: Color::hsv(185.0, 0.3, 0.15),
             padding_main: 10.,
             border_radius: 5.,
-            font_size_regular: 10.,
-            font_size_medium: 14.,
-            font_size_title: 20.,
+            font_size_p: 12.,
+            font_size_h1: 20.,
+            font_size_h2: 16.,
         }
     }
 }
@@ -67,9 +71,9 @@ impl GuiThemeComputed {
 
         ret.padding_main *= scale.0;
         ret.border_radius *= scale.0;
-        ret.font_size_regular *= scale.0;
-        ret.font_size_medium *= scale.0;
-        ret.font_size_title *= scale.0;
+        ret.font_size_p *= scale.0;
+        ret.font_size_h1 *= scale.0;
+        ret.font_size_h2 *= scale.0;
 
         Self(ret)
     }

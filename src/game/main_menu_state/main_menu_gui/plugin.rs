@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    core::{resources::GlobalGuiRoot, states::OverallState},
+    core::{quit_game, resources::GlobalGuiRoot, states::OverallState},
     gui::{
         resources::GuiThemeComputed,
         widgets::{
             button::gui_button,
             div::{GuiDivProps, GuiDivStyle, gui_div},
             screen_div::{GuiScreenDivProps, gui_screen_div},
-            text::gui_text,
+            text::{gui_text_h1, gui_text_h2},
         },
     },
 };
@@ -33,41 +33,50 @@ fn spawn_main_menu_gui(
     gui_root: Res<GlobalGuiRoot>,
     theme: Res<GuiThemeComputed>,
 ) {
-    let thing = commands
-        .spawn((
-            MainMenuGuiTag,
-            gui_screen_div(GuiScreenDivProps {
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                bg_color: theme.0.bg_color_main,
-                ..default()
-            }),
-        ))
+    let main_menu_gui = commands
+        .spawn((gui_screen_div(GuiScreenDivProps {
+            flex_direction: FlexDirection::Column,
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            bg_color: theme.0.bg_color_main,
+            ..default()
+        }),))
         .with_children(|parent| {
             parent
                 .spawn(gui_div(GuiDivProps {
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
+                    align_items: AlignItems::Stretch,
                     div_style: GuiDivStyle::Regular,
                     ..default()
                 }))
                 .with_children(|parent| {
-                    parent.spawn(gui_text("Howdy", default()));
+                    parent.spawn(gui_text_h1("Main Menu"));
+
                     parent
                         .spawn(gui_button(default()))
                         .with_children(|parent| {
-                            parent.spawn(gui_text("pressme", default()));
+                            parent.spawn(gui_text_h2("Play"));
+                        })
+                        .observe(|_: On<Pointer<Click>>, mut commands: Commands| {
+                            commands.set_state(OverallState::Playing);
+                        });
+
+                    parent
+                        .spawn(gui_button(default()))
+                        .with_children(|parent| {
+                            parent.spawn(gui_text_h2("Quit"));
                         })
                         .observe(|_: On<Pointer<Click>>| {
-                            debug!("oh no i've been clicked!!!!");
+                            quit_game();
                         });
                 });
         })
+        .insert(MainMenuGuiTag)
+        .insert(ZIndex(3001))
         .id();
 
-    commands.entity(gui_root.0).add_child(thing);
+    commands.entity(gui_root.0).add_child(main_menu_gui);
 }
 
 fn despawn_main_menu_gui(
