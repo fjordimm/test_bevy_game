@@ -35,10 +35,15 @@ struct GuiTextAttribs {
 }
 
 pub fn gui_text(content: impl Into<String>, props: GuiTextProps) -> impl Bundle {
-    (GuiTextAttribs {
-        content: content.into(),
-        size: props.size,
-    },)
+    (
+        GuiTextAttribs {
+            content: content.into(),
+            size: props.size,
+        },
+        Text::default(),
+        TextFont::default(),
+        TextColor::default(),
+    )
 }
 
 pub struct GuiTextPlugin;
@@ -69,34 +74,48 @@ fn add_functional_components(
     entity_q: Query<Entity, Added<GuiTextAttribs>>,
 ) {
     entity_q.iter().for_each(|entity| {
-        commands
-            .entity(entity)
-            .insert((Text::default(), TextFont::default()));
+        commands.entity(entity).insert((
+            Text::default(),
+            TextFont::default(),
+            TextColor::default(),
+        ));
     });
 }
 
 fn update_functional_components_on_attrib_change(
     theme: Res<GuiTheme>,
     mut entity_q: Query<
-        (&GuiTextAttribs, &mut Text, &mut TextFont),
+        (&GuiTextAttribs, &mut Text, &mut TextFont, &mut TextColor),
         Or<(Added<GuiTextAttribs>, Changed<GuiTextAttribs>)>,
     >,
 ) {
     entity_q
         .iter_mut()
-        .for_each(|(attribs, mut text, mut textfont)| {
-            update_functional_components(&theme, &attribs, &mut text, &mut textfont);
+        .for_each(|(attribs, mut text, mut textfont, mut textcolor)| {
+            update_functional_components(
+                &theme,
+                &attribs,
+                &mut text,
+                &mut textfont,
+                &mut textcolor,
+            );
         });
 }
 
 fn update_functional_components_on_theme_change(
     theme: Res<GuiTheme>,
-    mut entity_q: Query<(&GuiTextAttribs, &mut Text, &mut TextFont)>,
+    mut entity_q: Query<(&GuiTextAttribs, &mut Text, &mut TextFont, &mut TextColor)>,
 ) {
     entity_q
         .iter_mut()
-        .for_each(|(attribs, mut text, mut textfont)| {
-            update_functional_components(&theme, &attribs, &mut text, &mut textfont);
+        .for_each(|(attribs, mut text, mut textfont, mut textcolor)| {
+            update_functional_components(
+                &theme,
+                &attribs,
+                &mut text,
+                &mut textfont,
+                &mut textcolor,
+            );
         });
 }
 
@@ -105,20 +124,20 @@ fn update_functional_components(
     attribs: &GuiTextAttribs,
     text: &mut Text,
     textfont: &mut TextFont,
+    textcolor: &mut TextColor,
 ) {
     text.0 = attribs.content.clone(); // TODO: could be more efficient
+
     *textfont = TextFont {
-        font_size: what_font_size(&theme, &attribs),
         font: theme.font_main.clone(),
+        font_size: match attribs.size {
+            GuiTextSize::Regular => theme.font_size_regular,
+            GuiTextSize::Medium => theme.font_size_medium,
+            GuiTextSize::Title => theme.font_size_title,
+            GuiTextSize::Custom(val) => val,
+        },
         ..default()
     };
-}
 
-fn what_font_size(theme: &GuiTheme, attribs: &GuiTextAttribs) -> f32 {
-    match attribs.size {
-        GuiTextSize::Regular => theme.font_size_regular,
-        GuiTextSize::Medium => theme.font_size_medium,
-        GuiTextSize::Title => theme.font_size_title,
-        GuiTextSize::Custom(val) => val,
-    }
+    textcolor.0 = theme.main_content_color;
 }

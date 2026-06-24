@@ -1,11 +1,8 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    core::{resources::FontHandles, sets::GlobalStartupOrdering},
-    gui::{
-        resources::{GuiScale, GuiTheme, GuiThemeUncomputed, compute_gui_theme},
-        sets::{GuiWidgetDuringAddFunctionalComponents, GuiWidgetDuringUpdateFunctionalComponents},
-        widgets::text::GuiTextPlugin,
+    core::{resources::FontHandles, sets::GlobalStartupOrdering}, gui::{
+        resources::{GuiScale, GuiTheme, GuiThemeUncomputed, compute_gui_theme}, sets::{GuiWidgetDuringAddFunctionalComponents, GuiWidgetDuringUpdateFunctionalComponents}, widgets::{div::GuiDivPlugin, text::GuiTextPlugin},
     },
 };
 
@@ -30,6 +27,7 @@ impl Plugin for GuiPlugin {
                     .run_if(resource_changed::<GuiScale>)
             )
             .add_plugins(GuiTextPlugin)
+            .add_plugins(GuiDivPlugin)
         ;
     }
 }

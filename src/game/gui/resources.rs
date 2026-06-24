@@ -10,6 +10,9 @@ pub struct GuiThemeUncomputed {
     pub font_size_regular: f32,
     pub font_size_medium: f32,
     pub font_size_title: f32,
+    pub main_bg_color: Color,
+    pub main_content_color: Color,
+    pub main_box_shadow: BoxShadow,
 }
 
 impl GuiThemeUncomputed {
@@ -21,6 +24,15 @@ impl GuiThemeUncomputed {
             font_size_regular: 10.,
             font_size_medium: 14.,
             font_size_title: 20.,
+            main_bg_color: Color::hsv(185.0, 0.3, 0.15),
+            main_content_color: Color::hsv(185.0, 0.075, 0.9),
+            main_box_shadow: BoxShadow::new(
+                Color::hsva(0.0, 0.0, 0.0, 0.5),
+                Val::ZERO,
+                Val::ZERO,
+                Val::ZERO,
+                px(5),
+            ),
         }
     }
 }
@@ -42,15 +54,21 @@ pub struct GuiTheme {
     pub font_size_regular: f32,
     pub font_size_medium: f32,
     pub font_size_title: f32,
+    pub main_bg_color: Color,
+    pub main_content_color: Color,
+    pub main_box_shadow: BoxShadow,
 }
 
-pub fn compute_gui_theme(theme_uncomputed: &GuiThemeUncomputed, scale: &GuiScale) -> GuiTheme {
+pub fn compute_gui_theme(t: &GuiThemeUncomputed, scale: &GuiScale) -> GuiTheme {
     GuiTheme {
-        font_main: theme_uncomputed.font_main.clone(),
-        font_mono: theme_uncomputed.font_mono.clone(),
-        main_padding: scale.0 * theme_uncomputed.main_padding,
-        font_size_regular: scale.0 * theme_uncomputed.font_size_regular,
-        font_size_medium: scale.0 * theme_uncomputed.font_size_medium,
-        font_size_title: scale.0 * theme_uncomputed.font_size_title,
+        font_main: t.font_main.clone(),
+        font_mono: t.font_mono.clone(),
+        main_padding: scale.0 * t.main_padding,
+        font_size_regular: scale.0 * t.font_size_regular,
+        font_size_medium: scale.0 * t.font_size_medium,
+        font_size_title: scale.0 * t.font_size_title,
+        main_bg_color: t.main_bg_color,
+        main_content_color: t.main_content_color,
+        main_box_shadow: t.main_box_shadow.clone(),
     }
 }

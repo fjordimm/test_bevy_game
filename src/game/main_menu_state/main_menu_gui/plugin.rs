@@ -2,7 +2,10 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::{resources::GlobalGuiRoot, states::OverallState},
-    gui::widgets::text::{GuiTextProps, GuiTextSize, gui_text},
+    gui::widgets::{
+        div::{GuiDivProps, GuiDivStyle, gui_div},
+        text::gui_text,
+    },
 };
 
 pub struct MainMenuGuiPlugin;
@@ -18,26 +21,27 @@ impl Plugin for MainMenuGuiPlugin {
 
 fn todor1(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
     let thing = commands
-        .spawn((
-            Node {
-                display: Display::Flex,
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::FlexStart,
-                align_items: AlignItems::FlexStart,
-                padding: UiRect::all(px(10)),
-                column_gap: px(10),
-                ..default()
-            },
-            BackgroundColor(Color::linear_rgb(0., 0., 1.)),
-        ))
+        .spawn(gui_div(GuiDivProps {
+            flex_direction: FlexDirection::Column,
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            div_style: GuiDivStyle::Regular,
+            ..default()
+        }))
         .with_children(|parent| {
-            parent.spawn(gui_text(
-                "yay",
-                GuiTextProps {
-                    size: GuiTextSize::Regular,
-                },
-            ));
+            parent
+                .spawn(gui_div(GuiDivProps {
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    div_style: GuiDivStyle::Regular,
+                    ..default()
+                }))
+                .with_children(|parent| {
+                    parent.spawn(gui_text("Howdy", default()));
+                });
         })
         .id();
+
     commands.entity(gui_root.0).add_child(thing);
 }
