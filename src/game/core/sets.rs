@@ -5,7 +5,7 @@ pub enum GlobalStartupOrdering {
     BuildBevyAppUseOnly,
     RandomUseOnly,
     CoreUseOnly,
-    GuiSpawning,
+    Regular,
 }
 
 pub const GLOBAL_STARTUP_ORDERING_ORDER: (
@@ -17,5 +17,5 @@ pub const GLOBAL_STARTUP_ORDERING_ORDER: (
     GlobalStartupOrdering::BuildBevyAppUseOnly,
     GlobalStartupOrdering::RandomUseOnly,
     GlobalStartupOrdering::CoreUseOnly,
-    GlobalStartupOrdering::GuiSpawning,
+    GlobalStartupOrdering::Regular,
 );

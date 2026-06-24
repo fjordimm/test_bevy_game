@@ -1,8 +1,11 @@
 use bevy::{prelude::*, ui::widget::Text};
 
-use crate::game::gui::{
-    resources::GuiTheme,
-    sets::{GuiWidgetDuringAddFunctionalComponents, GuiWidgetDuringUpdateFunctionalComponents},
+use crate::game::{
+    core::resources::FontHandles,
+    gui::{
+        resources::GuiTheme,
+        sets::{GuiWidgetDuringAddFunctionalComponents, GuiWidgetDuringUpdateFunctionalComponents},
+    },
 };
 
 pub enum GuiTextSize {
@@ -79,6 +82,7 @@ fn update_functional_components(
             *text = Text::new(attribs.content.clone()); // TODO: could be more efficient
             *textfont = TextFont {
                 font_size: what_font_size(&theme, &attribs),
+                font: theme.font_main.clone(),
                 ..default()
             };
         });

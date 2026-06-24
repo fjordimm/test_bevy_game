@@ -7,7 +7,7 @@ use bevy_rand::plugin::EntropyPlugin;
 
 use crate::game::{
     core::{
-        resources::{GlobalGuiRoot, KeyBindings},
+        resources::{FontHandles, GlobalGuiRoot, KeyBindings, UiIconHandles},
         sets::{GLOBAL_STARTUP_ORDERING_ORDER, GlobalStartupOrdering},
         states::{MouseMode, OverallState},
     },
@@ -34,7 +34,7 @@ impl Plugin for CorePlugin {
             .init_state::<OverallState>()
             .configure_sets(Startup, GLOBAL_STARTUP_ORDERING_ORDER.chain())
             .add_systems(Startup,
-                startup_stuff
+                startup
                     .in_set(GlobalStartupOrdering::CoreUseOnly)
             )
             .add_systems(Update,
@@ -51,7 +51,10 @@ impl Plugin for CorePlugin {
     }
 }
 
-fn startup_stuff(mut commands: Commands, _asset_server: Res<AssetServer>) {
+fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(FontHandles::make(&asset_server));
+    commands.insert_resource(UiIconHandles::make(&asset_server));
+
     let gui_root = commands.spawn(make_global_gui_root()).id();
     commands.insert_resource(GlobalGuiRoot(gui_root));
 }

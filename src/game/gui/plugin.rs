@@ -1,9 +1,12 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{
-    resources::GuiTheme,
-    sets::{GuiWidgetDuringAddFunctionalComponents, GuiWidgetDuringUpdateFunctionalComponents},
-    widgets::text::GuiTextPlugin,
+use crate::game::{
+    core::{resources::FontHandles, sets::GlobalStartupOrdering},
+    gui::{
+        resources::GuiTheme,
+        sets::{GuiWidgetDuringAddFunctionalComponents, GuiWidgetDuringUpdateFunctionalComponents},
+        widgets::text::GuiTextPlugin,
+    },
 };
 
 pub struct GuiPlugin;
@@ -13,10 +16,20 @@ impl Plugin for GuiPlugin {
         #[rustfmt::skip]
         app
             .configure_sets(Update,
-                (GuiWidgetDuringAddFunctionalComponents, GuiWidgetDuringUpdateFunctionalComponents).chain()
+                (
+                    GuiWidgetDuringAddFunctionalComponents,
+                    GuiWidgetDuringUpdateFunctionalComponents
+                ).chain()
             )
-            .insert_resource(GuiTheme::default())
+            .add_systems(Startup,
+                startup
+                    .in_set(GlobalStartupOrdering::Regular)
+            )
             .add_plugins(GuiTextPlugin)
         ;
     }
+}
+
+fn startup(mut commands: Commands, font_handles: Res<FontHandles>) {
+    commands.insert_resource(GuiTheme::make(&font_handles));
 }
