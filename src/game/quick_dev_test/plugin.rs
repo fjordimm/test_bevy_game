@@ -1,4 +1,6 @@
-use bevy::{input::mouse::MouseWheel, prelude::*};
+use std::time::Duration;
+
+use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_timer};
 
 use crate::game::playing_state::{sets::DuringPlayingUnpaused, world::TimeOfDay};
 
@@ -12,8 +14,16 @@ impl Plugin for QuickDevTestPlugin {
                 rotate_sun
                     .in_set(DuringPlayingUnpaused::General)
             )
+            .add_systems(Update,
+                after_a_sec
+                    .run_if(on_timer(Duration::from_secs(1)))
+            )
         ;
     }
+}
+
+fn after_a_sec(/* mut gui_scale: ResMut<GuiScale> */) {
+    // gui_scale.0 = 5.;
 }
 
 fn rotate_sun(

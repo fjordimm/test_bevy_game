@@ -52,8 +52,13 @@ impl Plugin for GuiTextPlugin {
                     .in_set(GuiWidgetDuringAddFunctionalComponents)
             )
             .add_systems(Update,
-                update_functional_components
+                update_functional_components_on_attrib_change
                     .in_set(GuiWidgetDuringUpdateFunctionalComponents)
+            )
+            .add_systems(Update,
+                update_functional_components_on_theme_change
+                    .in_set(GuiWidgetDuringUpdateFunctionalComponents)
+                    .run_if(resource_changed::<GuiTheme>)
             )
         ;
     }
@@ -70,23 +75,43 @@ fn add_functional_components(
     });
 }
 
-fn update_functional_components(
+fn update_functional_components_on_attrib_change(
     theme: Res<GuiTheme>,
     mut entity_q: Query<
-        (Entity, &GuiTextAttribs, &mut Text, &mut TextFont),
+        (&GuiTextAttribs, &mut Text, &mut TextFont),
         Or<(Added<GuiTextAttribs>, Changed<GuiTextAttribs>)>,
     >,
 ) {
     entity_q
         .iter_mut()
-        .for_each(|(_entity, attribs, mut text, mut textfont)| {
-            *text = Text::new(attribs.content.clone()); // TODO: could be more efficient
-            *textfont = TextFont {
-                font_size: what_font_size(&theme, &attribs),
-                font: theme.font_main.clone(),
-                ..default()
-            };
+        .for_each(|(attribs, mut text, mut textfont)| {
+            update_functional_components(&theme, &attribs, &mut text, &mut textfont);
         });
+}
+
+fn update_functional_components_on_theme_change(
+    theme: Res<GuiTheme>,
+    mut entity_q: Query<(&GuiTextAttribs, &mut Text, &mut TextFont)>,
+) {
+    entity_q
+        .iter_mut()
+        .for_each(|(attribs, mut text, mut textfont)| {
+            update_functional_components(&theme, &attribs, &mut text, &mut textfont);
+        });
+}
+
+fn update_functional_components(
+    theme: &GuiTheme,
+    attribs: &GuiTextAttribs,
+    text: &mut Text,
+    textfont: &mut TextFont,
+) {
+    text.0 = attribs.content.clone(); // TODO: could be more efficient
+    *textfont = TextFont {
+        font_size: what_font_size(&theme, &attribs),
+        font: theme.font_main.clone(),
+        ..default()
+    };
 }
 
 fn what_font_size(theme: &GuiTheme, attribs: &GuiTextAttribs) -> f32 {
