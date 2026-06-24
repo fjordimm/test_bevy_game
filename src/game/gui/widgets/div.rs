@@ -133,6 +133,7 @@ fn update_functional_components(
             }
         },
     }
+    node.border_radius = BorderRadius::all(px(theme.0.border_radius));
     node.flex_direction = attribs.flex_direction;
     node.justify_content = attribs.justify_content;
     node.align_items = attribs.align_items;
@@ -147,12 +148,12 @@ fn update_functional_components(
                 .remove::<BoxShadow>();
         }
         GuiDivStyle::Regular => {
-            node.padding = UiRect::all(px(theme.0.main_padding));
-            node.row_gap = px(theme.0.main_padding);
+            node.padding = UiRect::all(px(theme.0.padding_main));
+            node.row_gap = px(theme.0.padding_main);
             commands
                 .entity(*entity)
-                .insert(BackgroundColor(theme.0.main_bg_color))
-                .insert(theme.0.main_box_shadow.clone());
+                .insert(BackgroundColor(theme.0.bg_color_main))
+                .insert(theme.0.box_shadow.clone());
         }
         GuiDivStyle::Custom {
             padding,
@@ -165,9 +166,7 @@ fn update_functional_components(
             commands.entity(*entity).insert(BackgroundColor(bg_color));
 
             if box_shadow {
-                commands
-                    .entity(*entity)
-                    .insert(theme.0.main_box_shadow.clone());
+                commands.entity(*entity).insert(theme.0.box_shadow.clone());
             }
         }
     }

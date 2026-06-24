@@ -69,13 +69,14 @@ fn update_functional_components(
     node.display = Display::Flex;
     node.width = Val::Auto;
     node.height = Val::Auto;
+    node.border_radius = BorderRadius::all(px(theme.0.border_radius));
     node.flex_direction = FlexDirection::Column;
     node.justify_content = JustifyContent::Center;
     node.align_items = AlignItems::Center;
-    node.padding = UiRect::all(px(theme.0.main_padding));
-    node.row_gap = px(theme.0.main_padding);
+    node.padding = UiRect::all(px(theme.0.padding_main));
+    node.row_gap = px(theme.0.padding_main);
     commands
         .entity(*entity)
-        .insert(BackgroundColor(theme.0.main_bg_color))
-        .insert(theme.0.main_box_shadow.clone());
+        .insert(BackgroundColor(theme.0.bg_color_main))
+        .insert(theme.0.box_shadow.clone());
 }

@@ -116,5 +116,5 @@ fn update_functional_components(
         ..default()
     };
 
-    textcolor.0 = theme.0.main_content_color;
+    textcolor.0 = theme.0.content_color_main;
 }
