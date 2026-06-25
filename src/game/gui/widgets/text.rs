@@ -78,9 +78,7 @@ impl Plugin for GuiTextPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(Update,
-                update_style_on_attrib_change
-            )
+            .add_systems(Update, update_style_on_attrib_change)
             .add_systems(Update,
                 update_style_on_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)

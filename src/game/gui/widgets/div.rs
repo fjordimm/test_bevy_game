@@ -16,51 +16,57 @@ pub enum GuiDivStyle {
 
 #[allow(unused)]
 pub struct GuiDivProps {
-    pub starts_active: bool,
-    pub expand: bool,
-    pub size: Option<(f32, f32)>,
     pub flex_direction: FlexDirection,
     pub justify_content: JustifyContent,
     pub align_items: AlignItems,
     pub div_style: GuiDivStyle,
+    pub size: Option<(f32, f32)>,
+    pub expand: bool,
+    pub starts_active: bool,
 }
 
 impl Default for GuiDivProps {
     fn default() -> Self {
         Self {
-            starts_active: true,
-            expand: false,
-            size: None,
             flex_direction: FlexDirection::Column,
             justify_content: JustifyContent::FlexStart,
             align_items: AlignItems::FlexStart,
             div_style: GuiDivStyle::Regular,
+            size: None,
+            expand: false,
+            starts_active: true,
         }
     }
 }
 
 #[derive(Component)]
 struct GuiDivAttribs {
-    is_active: bool,
-    expand: bool,
-    size: Option<(f32, f32)>,
     flex_direction: FlexDirection,
     justify_content: JustifyContent,
     align_items: AlignItems,
     div_style: GuiDivStyle,
+    size: Option<(f32, f32)>,
+    expand: bool,
+}
+
+#[derive(Component)]
+struct GuiDivState {
+    is_active: bool,
 }
 
 #[allow(unused)]
 pub fn gui_div(props: GuiDivProps) -> impl Bundle {
     (
         GuiDivAttribs {
-            is_active: props.starts_active,
-            expand: props.expand,
-            size: props.size,
             flex_direction: props.flex_direction,
             justify_content: props.justify_content,
             align_items: props.align_items,
             div_style: props.div_style,
+            size: props.size,
+            expand: props.expand,
+        },
+        GuiDivState {
+            is_active: props.starts_active,
         },
         Node::default(),
     )
@@ -72,13 +78,12 @@ impl Plugin for GuiDivPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(Update,
-                update_style_on_attrib_change
-            )
+            .add_systems(Update, update_style_on_attrib_change)
             .add_systems(Update,
                 update_style_on_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)
             )
+            .add_systems(Update, update_style_from_state_change)
         ;
     }
 }
@@ -87,22 +92,36 @@ fn update_style_on_attrib_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
     mut entity_q: Query<
-        (&GuiDivAttribs, Entity, &mut Node),
+        (&GuiDivAttribs, &GuiDivState, Entity, &mut Node),
         Or<(Added<GuiDivAttribs>, Changed<GuiDivAttribs>)>,
     >,
 ) {
-    entity_q.iter_mut().for_each(|(attribs, entity, mut node)| {
-        set_style(&mut commands, &theme, &attribs, &entity, &mut node);
-    });
+    entity_q
+        .iter_mut()
+        .for_each(|(attribs, state, entity, mut node)| {
+            set_style(&mut commands, &theme, &attribs, &state, &entity, &mut node);
+        });
 }
 
 fn update_style_on_theme_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
-    mut entity_q: Query<(&GuiDivAttribs, Entity, &mut Node)>,
+    mut entity_q: Query<(&GuiDivAttribs, &GuiDivState, Entity, &mut Node)>,
 ) {
-    entity_q.iter_mut().for_each(|(attribs, entity, mut node)| {
-        set_style(&mut commands, &theme, &attribs, &entity, &mut node);
+    entity_q
+        .iter_mut()
+        .for_each(|(attribs, state, entity, mut node)| {
+            set_style(&mut commands, &theme, &attribs, &state, &entity, &mut node);
+        });
+}
+
+fn update_style_from_state_change(
+    mut commands: Commands,
+    theme: Res<GuiThemeComputed>,
+    mut entity_q: Query<(&GuiDivState, Entity, &mut Node), Changed<GuiDivState>>,
+) {
+    entity_q.iter_mut().for_each(|(state, entity, mut node)| {
+        modify_style_from_state(&mut commands, &theme, &state, &entity, &mut node);
     });
 }
 
@@ -110,10 +129,11 @@ fn set_style(
     commands: &mut Commands,
     theme: &GuiThemeComputed,
     attribs: &GuiDivAttribs,
+    state: &GuiDivState,
     entity: &Entity,
     node: &mut Node,
 ) {
-    node.display = match attribs.is_active {
+    node.display = match state.is_active {
         true => Display::Flex,
         false => Display::None,
     };
@@ -170,4 +190,17 @@ fn set_style(
             }
         }
     }
+}
+
+fn modify_style_from_state(
+    _commands: &mut Commands,
+    _theme: &GuiThemeComputed,
+    state: &GuiDivState,
+    _entity: &Entity,
+    node: &mut Node,
+) {
+    node.display = match state.is_active {
+        true => Display::Flex,
+        false => Display::None,
+    };
 }

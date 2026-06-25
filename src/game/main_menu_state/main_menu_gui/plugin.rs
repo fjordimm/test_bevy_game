@@ -7,7 +7,6 @@ use crate::game::{
         widgets::{
             button::gui_button,
             div::{GuiDivProps, GuiDivStyle, gui_div},
-            icon::{GuiIconIcon, gui_icon},
             screen_div::{GuiScreenDivProps, gui_screen_div},
             text::{gui_text_h1, gui_text_h2},
         },
@@ -71,8 +70,6 @@ fn spawn_main_menu_gui(
                     .observe(|_: On<Pointer<Click>>| {
                         quit_game();
                     });
-
-                p.spawn(gui_icon(GuiIconIcon::X, 16., 16., default()));
             });
         })
         .insert(MainMenuGuiTag)
