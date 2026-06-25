@@ -22,7 +22,7 @@ impl FontHandles {
     }
 }
 
-#[derive(Resource, Debug)]
+#[derive(Resource)]
 pub struct UiIconHandles {
     #[allow(unused)]
     pub x: Handle<Image>,
