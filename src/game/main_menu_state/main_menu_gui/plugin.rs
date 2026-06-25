@@ -41,36 +41,36 @@ fn spawn_main_menu_gui(
             bg_color: theme.0.bg_color_main,
             ..default()
         }),))
-        .with_children(|parent| {
-            parent
-                .spawn(gui_div(GuiDivProps {
+        .with_children(|p| {
+            p.spawn(gui_div(GuiDivProps {
+                flex_direction: FlexDirection::Column,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Stretch,
+                div_style: GuiDivStyle::Regular,
+                ..default()
+            }))
+            .with_children(|p| {
+                p.spawn(gui_div(GuiDivProps {
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Stretch,
-                    div_style: GuiDivStyle::Regular,
+                    align_items: AlignItems::Center,
+                    div_style: GuiDivStyle::None,
                     ..default()
                 }))
-                .with_children(|parent| {
-                    parent.spawn(gui_text_h1("Main Menu"));
+                .with_child(gui_text_h1("Main Menu"));
 
-                    parent
-                        .spawn(gui_button(default()))
-                        .with_children(|parent| {
-                            parent.spawn(gui_text_h2("Play"));
-                        })
-                        .observe(|_: On<Pointer<Click>>, mut commands: Commands| {
-                            commands.set_state(OverallState::Playing);
-                        });
+                p.spawn(gui_button(default()))
+                    .with_child(gui_text_h2("Play"))
+                    .observe(|_: On<Pointer<Click>>, mut commands: Commands| {
+                        commands.set_state(OverallState::Playing);
+                    });
 
-                    parent
-                        .spawn(gui_button(default()))
-                        .with_children(|parent| {
-                            parent.spawn(gui_text_h2("Quit"));
-                        })
-                        .observe(|_: On<Pointer<Click>>| {
-                            quit_game();
-                        });
-                });
+                p.spawn(gui_button(default()))
+                    .with_child(gui_text_h2("Quit"))
+                    .observe(|_: On<Pointer<Click>>| {
+                        quit_game();
+                    });
+            });
         })
         .insert(MainMenuGuiTag)
         .insert(ZIndex(3001))

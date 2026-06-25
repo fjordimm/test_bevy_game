@@ -4,6 +4,7 @@
 #import "shaders/util.wgsl"::reduce_banding;
 #import "shaders/util.wgsl"::smoothstep_skew_left;
 #import "shaders/util.wgsl"::smoothstep_skew_right;
+#import "shaders/util.wgsl"::arc_step_up;
 #import "shaders/util.wgsl"::hash3;
 #import "shaders/util.wgsl"::bell;
 
@@ -19,6 +20,10 @@ const TWILIGHT_OFFSET: f32 = 0.25;
 const SUN_COLOR = vec3<f32>(1.0, 0.8, 0.2);
 const SUN_SIZE_INV: f32 = 5000.0;
 const SUN_SOFTNESS_INV: f32 = 2.9;
+
+const SUN_GLARE_SIZE_INV: f32 = 80.0;
+const SUN_GLARE_DECAY_INV: f32 = 1.15; // must be >= 1
+const SUN_GLARE_MULTIPLIER: f32 = 0.7;
 
 const SUNSET_COLOR = vec3<f32>(1.0, 0.65, 0.3);
 const SUNSET_BRIGHTNESS: f32 = 0.13;
@@ -50,6 +55,10 @@ fn fragment(vertout: VertexOutput) -> @location(0) vec4<f32> {
 
     // Sun
     color += SUN_COLOR * pow(2.0 * smoothstep_skew_right(0.0, 1.0, SUN_SIZE_INV, dot(dir, sun_pos)), SUN_SOFTNESS_INV);
+    let sun_glare_color_lerp = clamp(sun_pos.y, 0.0, 1.0);
+    let sun_glare_color = SUN_COLOR * sun_glare_color_lerp + SUNSET_COLOR * (1.0 - sun_glare_color_lerp);
+    let sun_glare_amount = SUN_GLARE_MULTIPLIER * arc_step_up(SUN_GLARE_DECAY_INV, clamp(sun_pos.y, 0.0, 1.0));
+    color += sun_glare_color * sun_glare_amount * pow(clamp(dot(dir, sun_pos), 0.0, 1.0), SUN_GLARE_SIZE_INV);
 
     // Sunset
     let sunset_horizon_glow = bell(SUNSET_HORIZON_CURVE_INV * dir.y);

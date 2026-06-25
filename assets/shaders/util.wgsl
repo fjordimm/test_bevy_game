@@ -16,14 +16,28 @@ fn inv_smoothstep(x: f32) -> f32 {
     return 0.5 - sin(asin(1.0 - 2.0 * x) / 3.0);
 }
 
-// Skew should be >= 1. 1 is no skew.
+// Warning: only works for skew >= 1
+// 1 is no skew
 fn smoothstep_skew_left(edge0: f32, edge1: f32, skew: f32, x: f32) -> f32 {
     return smoothstep(edge0, edge1, skew * x);
 }
 
-// Skew should be >= 1. 1 is no skew.
+// Warning: only works for skew >= 1
+// 1 is no skew
 fn smoothstep_skew_right(edge0: f32, edge1: f32, skew: f32, x: f32) -> f32 {
     return smoothstep(edge0, edge1, skew * (x - 1.0) + 1.0);
+}
+
+// Warning: only works for r >= 1
+// Larger r is closer to linear
+fn arc_step_up(r: f32, x: f32) -> f32 {
+    return (1.0 - r) + sqrt(r * r + (1.0 - r) * (1.0 - r) - (x - r) * (x - r));
+}
+
+// Warning: only works for r >= 1
+// Larger r is closer to linear
+fn arc_step_down(r: f32, x: f32) -> f32 {
+    return (1.0 + r) - sqrt(2.0 * r * r + 2.0 * r + 1.0 - (x + r) * (x + r));
 }
 
 fn hash2(p: vec2<f32>) -> f32 {

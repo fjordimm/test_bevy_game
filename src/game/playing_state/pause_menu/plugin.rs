@@ -42,36 +42,36 @@ fn spawn_pause_menu(
             bg_color: theme.0.pause_menu_bg_color,
             ..default()
         }),))
-        .with_children(|parent| {
-            parent
-                .spawn(gui_div(GuiDivProps {
+        .with_children(|p| {
+            p.spawn(gui_div(GuiDivProps {
+                flex_direction: FlexDirection::Column,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Stretch,
+                div_style: GuiDivStyle::Regular,
+                ..default()
+            }))
+            .with_children(|p| {
+                p.spawn(gui_div(GuiDivProps {
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Stretch,
-                    div_style: GuiDivStyle::Regular,
+                    align_items: AlignItems::Center,
+                    div_style: GuiDivStyle::None,
                     ..default()
                 }))
-                .with_children(|parent| {
-                    parent.spawn(gui_text_h1("Pause Menu"));
+                .with_child(gui_text_h1("Pause Menu"));
 
-                    parent
-                        .spawn(gui_button(default()))
-                        .with_children(|parent| {
-                            parent.spawn(gui_text_h2("Continue"));
-                        })
-                        .observe(|_: On<Pointer<Click>>, mut commands: Commands| {
-                            commands.set_state(PauseState::Unpaused);
-                        });
+                p.spawn(gui_button(default()))
+                    .with_child(gui_text_h2("Continue"))
+                    .observe(|_: On<Pointer<Click>>, mut commands: Commands| {
+                        commands.set_state(PauseState::Unpaused);
+                    });
 
-                    parent
-                        .spawn(gui_button(default()))
-                        .with_children(|parent| {
-                            parent.spawn(gui_text_h2("Exit"));
-                        })
-                        .observe(|_: On<Pointer<Click>>, mut commands: Commands| {
-                            commands.set_state(OverallState::MainMenu);
-                        });
-                });
+                p.spawn(gui_button(default()))
+                    .with_child(gui_text_h2("Exit"))
+                    .observe(|_: On<Pointer<Click>>, mut commands: Commands| {
+                        commands.set_state(OverallState::MainMenu);
+                    });
+            });
         })
         .insert(PauseMenuTag)
         .insert(ZIndex(3000))
