@@ -23,6 +23,7 @@ pub struct GuiDivProps {
     pub size: Option<(f32, f32)>,
     pub expand: bool,
     pub starts_active: bool,
+    pub children: Vec<Entity>,
 }
 
 impl Default for GuiDivProps {
@@ -35,6 +36,7 @@ impl Default for GuiDivProps {
             size: None,
             expand: false,
             starts_active: true,
+            children: Vec::new(),
         }
     }
 }
@@ -54,6 +56,9 @@ struct GuiDivState {
     is_active: bool,
 }
 
+#[derive(Component)]
+struct ListOfChildren(Vec<Entity>);
+
 #[allow(unused)]
 pub fn gui_div(props: GuiDivProps) -> impl Bundle {
     (
@@ -69,6 +74,7 @@ pub fn gui_div(props: GuiDivProps) -> impl Bundle {
             is_active: props.starts_active,
         },
         Node::default(),
+        ListOfChildren(props.children),
     )
 }
 
@@ -78,6 +84,7 @@ impl Plugin for GuiDivPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
+            .add_systems(Update, apply_list_of_children)
             .add_systems(Update, update_style_on_attrib_change)
             .add_systems(Update,
                 update_style_on_theme_change
@@ -86,6 +93,16 @@ impl Plugin for GuiDivPlugin {
             .add_systems(Update, update_style_from_state_change)
         ;
     }
+}
+
+fn apply_list_of_children(mut commands: Commands, entity_q: Query<(Entity, &ListOfChildren)>) {
+    entity_q.iter().for_each(|(entity, children)| {
+        children.0.iter().for_each(|child| {
+            commands.entity(entity).add_child(*child);
+        });
+
+        commands.entity(entity).remove::<ListOfChildren>();
+    });
 }
 
 fn update_style_on_attrib_change(

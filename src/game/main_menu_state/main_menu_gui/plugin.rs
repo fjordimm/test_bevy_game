@@ -58,13 +58,11 @@ fn spawn_main_menu_gui(
                     ..default()
                 }))
                 .with_child(gui_text_h1("Main Menu"));
-
                 p.spawn(gui_button(default()))
                     .with_child(gui_text_h2("Play"))
                     .observe(|_: On<Pointer<Click>>, mut commands: Commands| {
                         commands.set_state(OverallState::Playing);
                     });
-
                 p.spawn(gui_button(default()))
                     .with_child(gui_text_h2("Quit"))
                     .observe(|_: On<Pointer<Click>>| {
