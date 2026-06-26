@@ -37,6 +37,48 @@ pub fn gui_button(props: GuiButtonProps) -> impl Bundle {
     )
 }
 
+fn set_style(
+    commands: &mut Commands,
+    theme: &GuiThemeComputed,
+    _attribs: &GuiButtonAttribs,
+    state: &GuiButtonState,
+    entity: &Entity,
+    node: &mut Node,
+) {
+    node.display = Display::Flex;
+    node.width = Val::Auto;
+    node.height = Val::Auto;
+    node.border_radius = BorderRadius::all(px(theme.0.border_radius));
+    node.flex_direction = FlexDirection::Column;
+    node.justify_content = JustifyContent::Center;
+    node.align_items = AlignItems::Center;
+    node.padding = UiRect::all(px(theme.0.padding_main));
+    node.row_gap = px(theme.0.padding_main);
+    commands
+        .entity(*entity)
+        .insert(BackgroundColor(what_bg_color(&theme, &state)))
+        .insert(theme.0.box_shadow.clone());
+}
+
+fn modify_style_from_state(
+    commands: &mut Commands,
+    theme: &GuiThemeComputed,
+    state: &GuiButtonState,
+    entity: &Entity,
+) {
+    commands
+        .entity(*entity)
+        .insert(BackgroundColor(what_bg_color(&theme, &state)));
+}
+
+fn what_bg_color(theme: &GuiThemeComputed, state: &GuiButtonState) -> Color {
+    match state.pressed_state {
+        GuiButtonPressedState::None => theme.0.button_color_normal,
+        GuiButtonPressedState::Hovered => theme.0.button_color_hovered,
+        GuiButtonPressedState::Pressed => theme.0.button_color_pressed,
+    }
+}
+
 pub struct GuiButtonPlugin;
 
 impl Plugin for GuiButtonPlugin {
@@ -114,46 +156,4 @@ fn update_style_from_state_change(
     entity_q.iter().for_each(|(state, entity)| {
         modify_style_from_state(&mut commands, &theme, &state, &entity);
     });
-}
-
-fn set_style(
-    commands: &mut Commands,
-    theme: &GuiThemeComputed,
-    _attribs: &GuiButtonAttribs,
-    state: &GuiButtonState,
-    entity: &Entity,
-    node: &mut Node,
-) {
-    node.display = Display::Flex;
-    node.width = Val::Auto;
-    node.height = Val::Auto;
-    node.border_radius = BorderRadius::all(px(theme.0.border_radius));
-    node.flex_direction = FlexDirection::Column;
-    node.justify_content = JustifyContent::Center;
-    node.align_items = AlignItems::Center;
-    node.padding = UiRect::all(px(theme.0.padding_main));
-    node.row_gap = px(theme.0.padding_main);
-    commands
-        .entity(*entity)
-        .insert(BackgroundColor(what_bg_color(&theme, &state)))
-        .insert(theme.0.box_shadow.clone());
-}
-
-fn modify_style_from_state(
-    commands: &mut Commands,
-    theme: &GuiThemeComputed,
-    state: &GuiButtonState,
-    entity: &Entity,
-) {
-    commands
-        .entity(*entity)
-        .insert(BackgroundColor(what_bg_color(&theme, &state)));
-}
-
-fn what_bg_color(theme: &GuiThemeComputed, state: &GuiButtonState) -> Color {
-    match state.pressed_state {
-        GuiButtonPressedState::None => theme.0.button_color_normal,
-        GuiButtonPressedState::Hovered => theme.0.button_color_hovered,
-        GuiButtonPressedState::Pressed => theme.0.button_color_pressed,
-    }
 }

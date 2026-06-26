@@ -72,6 +72,87 @@ pub fn gui_div(props: GuiDivProps) -> impl Bundle {
     )
 }
 
+fn set_style(
+    commands: &mut Commands,
+    theme: &GuiThemeComputed,
+    attribs: &GuiDivAttribs,
+    state: &GuiDivState,
+    entity: &Entity,
+    node: &mut Node,
+) {
+    node.display = what_display(&state);
+    match attribs.size {
+        Some((w, h)) => {
+            node.width = px(w);
+            node.height = px(h);
+        }
+        None => match attribs.expand {
+            true => {
+                node.width = percent(100);
+                node.height = percent(100);
+            }
+            false => {
+                node.width = Val::Auto;
+                node.height = Val::Auto;
+            }
+        },
+    }
+    node.border_radius = BorderRadius::all(px(theme.0.border_radius));
+    node.flex_direction = attribs.flex_direction;
+    node.justify_content = attribs.justify_content;
+    node.align_items = attribs.align_items;
+
+    match attribs.div_style {
+        GuiDivStyle::None => {
+            node.padding = UiRect::default();
+            node.row_gap = Val::ZERO;
+            commands
+                .entity(*entity)
+                .remove::<BackgroundColor>()
+                .remove::<BoxShadow>();
+        }
+        GuiDivStyle::Regular => {
+            node.padding = UiRect::all(px(theme.0.padding_main));
+            node.row_gap = px(theme.0.padding_main);
+            commands
+                .entity(*entity)
+                .insert(BackgroundColor(theme.0.bg_color_main))
+                .insert(theme.0.box_shadow.clone());
+        }
+        GuiDivStyle::Custom {
+            padding,
+            gap,
+            bg_color,
+            box_shadow,
+        } => {
+            node.padding = padding;
+            node.row_gap = px(gap);
+            commands.entity(*entity).insert(BackgroundColor(bg_color));
+
+            if box_shadow {
+                commands.entity(*entity).insert(theme.0.box_shadow.clone());
+            }
+        }
+    }
+}
+
+fn modify_style_from_state(
+    _commands: &mut Commands,
+    _theme: &GuiThemeComputed,
+    state: &GuiDivState,
+    _entity: &Entity,
+    node: &mut Node,
+) {
+    node.display = what_display(&state);
+}
+
+fn what_display(state: &GuiDivState) -> Display {
+    match state.is_active {
+        true => Display::Flex,
+        false => Display::None,
+    }
+}
+
 pub struct GuiDivPlugin;
 
 impl Plugin for GuiDivPlugin {
@@ -138,84 +219,4 @@ fn update_style_from_state_change(
     entity_q.iter_mut().for_each(|(state, entity, mut node)| {
         modify_style_from_state(&mut commands, &theme, &state, &entity, &mut node);
     });
-}
-
-fn set_style(
-    commands: &mut Commands,
-    theme: &GuiThemeComputed,
-    attribs: &GuiDivAttribs,
-    state: &GuiDivState,
-    entity: &Entity,
-    node: &mut Node,
-) {
-    node.display = match state.is_active {
-        true => Display::Flex,
-        false => Display::None,
-    };
-    match attribs.size {
-        Some((w, h)) => {
-            node.width = px(w);
-            node.height = px(h);
-        }
-        None => match attribs.expand {
-            true => {
-                node.width = percent(100);
-                node.height = percent(100);
-            }
-            false => {
-                node.width = Val::Auto;
-                node.height = Val::Auto;
-            }
-        },
-    }
-    node.border_radius = BorderRadius::all(px(theme.0.border_radius));
-    node.flex_direction = attribs.flex_direction;
-    node.justify_content = attribs.justify_content;
-    node.align_items = attribs.align_items;
-
-    match attribs.div_style {
-        GuiDivStyle::None => {
-            node.padding = UiRect::default();
-            node.row_gap = Val::ZERO;
-            commands
-                .entity(*entity)
-                .remove::<BackgroundColor>()
-                .remove::<BoxShadow>();
-        }
-        GuiDivStyle::Regular => {
-            node.padding = UiRect::all(px(theme.0.padding_main));
-            node.row_gap = px(theme.0.padding_main);
-            commands
-                .entity(*entity)
-                .insert(BackgroundColor(theme.0.bg_color_main))
-                .insert(theme.0.box_shadow.clone());
-        }
-        GuiDivStyle::Custom {
-            padding,
-            gap,
-            bg_color,
-            box_shadow,
-        } => {
-            node.padding = padding;
-            node.row_gap = px(gap);
-            commands.entity(*entity).insert(BackgroundColor(bg_color));
-
-            if box_shadow {
-                commands.entity(*entity).insert(theme.0.box_shadow.clone());
-            }
-        }
-    }
-}
-
-fn modify_style_from_state(
-    _commands: &mut Commands,
-    _theme: &GuiThemeComputed,
-    state: &GuiDivState,
-    _entity: &Entity,
-    node: &mut Node,
-) {
-    node.display = match state.is_active {
-        true => Display::Flex,
-        false => Display::None,
-    };
 }

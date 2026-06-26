@@ -72,6 +72,29 @@ pub fn gui_text_h2(content: impl Into<String>) -> impl Bundle {
     )
 }
 
+fn set_style(
+    theme: &GuiThemeComputed,
+    attribs: &GuiTextAttribs,
+    text: &mut Text,
+    textfont: &mut TextFont,
+    textcolor: &mut TextColor,
+) {
+    text.0 = attribs.content.clone(); // TODO: could be more efficient
+
+    *textfont = TextFont {
+        font: theme.0.font_main.clone(),
+        font_size: match attribs.size {
+            GuiTextSize::Custom(val) => val,
+            GuiTextSize::P => theme.0.font_size_p,
+            GuiTextSize::H1 => theme.0.font_size_h1,
+            GuiTextSize::H2 => theme.0.font_size_h2,
+        },
+        ..default()
+    };
+
+    textcolor.0 = theme.0.content_color_main;
+}
+
 pub struct GuiTextPlugin;
 
 impl Plugin for GuiTextPlugin {
@@ -110,27 +133,4 @@ fn update_style_on_theme_change(
         .for_each(|(attribs, mut text, mut textfont, mut textcolor)| {
             set_style(&theme, &attribs, &mut text, &mut textfont, &mut textcolor);
         });
-}
-
-fn set_style(
-    theme: &GuiThemeComputed,
-    attribs: &GuiTextAttribs,
-    text: &mut Text,
-    textfont: &mut TextFont,
-    textcolor: &mut TextColor,
-) {
-    text.0 = attribs.content.clone(); // TODO: could be more efficient
-
-    *textfont = TextFont {
-        font: theme.0.font_main.clone(),
-        font_size: match attribs.size {
-            GuiTextSize::Custom(val) => val,
-            GuiTextSize::P => theme.0.font_size_p,
-            GuiTextSize::H1 => theme.0.font_size_h1,
-            GuiTextSize::H2 => theme.0.font_size_h2,
-        },
-        ..default()
-    };
-
-    textcolor.0 = theme.0.content_color_main;
 }

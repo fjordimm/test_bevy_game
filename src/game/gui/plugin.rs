@@ -5,8 +5,8 @@ use crate::game::{
     gui::{
         resources::{GuiScale, GuiTheme, GuiThemeComputed, GuiThemeUncomputed},
         widgets::{
-            button::GuiButtonPlugin, div::GuiDivPlugin, icon::GuiIconPlugin,
-            screen_div::GuiScreenDivPlugin, text::GuiTextPlugin,
+            button::GuiButtonPlugin, div::GuiDivPlugin, floating_panel::GuiFloatingPanelPlugin,
+            icon::GuiIconPlugin, screen_div::GuiScreenDivPlugin, text::GuiTextPlugin,
         },
     },
 };
@@ -30,6 +30,7 @@ impl Plugin for GuiPlugin {
             .add_plugins(GuiTextPlugin)
             .add_plugins(GuiIconPlugin)
             .add_plugins(GuiButtonPlugin)
+            .add_plugins(GuiFloatingPanelPlugin)
         ;
     }
 }
