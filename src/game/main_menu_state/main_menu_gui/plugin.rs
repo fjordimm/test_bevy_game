@@ -9,7 +9,7 @@ use crate::game::{
             button::gui_button,
             div::{GuiDivProps, GuiDivStyle, gui_div},
             screen_div::{GuiScreenDivProps, gui_screen_div},
-            text::{gui_text_h1, gui_text_h2, gui_text_p},
+            text::{gui_text_h1, gui_text_h2},
         },
     },
 };
