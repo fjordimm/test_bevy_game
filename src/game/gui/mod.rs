@@ -15,3 +15,18 @@ pub fn make_global_gui_root() -> Node {
         ..default()
     }
 }
+
+#[derive(Component)]
+struct GuiChildren(Box<dyn FnOnce(&mut ChildSpawner) + Sync + Send>);
+
+#[allow(unused)]
+pub fn gui_children<F: 'static + FnOnce(&mut ChildSpawner) + Sync + Send>(func: F) -> impl Bundle {
+    GuiChildren(Box::new(func))
+}
+
+#[allow(unused)]
+pub fn gui_child(bundle: impl Bundle) -> impl Bundle {
+    GuiChildren(Box::new(|p| {
+        p.spawn(bundle);
+    }))
+}

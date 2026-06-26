@@ -1,17 +1,13 @@
 use bevy::prelude::*;
 
-use crate::game::gui::resources::GuiThemeComputed;
+use crate::game::gui::{GuiChildren, resources::GuiThemeComputed};
 
 #[allow(unused)]
-pub struct GuiButtonProps {
-    pub with_children: Option<Box<dyn FnOnce(&mut ChildSpawner) + Sync + Send>>,
-}
+pub struct GuiButtonProps {}
 
 impl Default for GuiButtonProps {
     fn default() -> Self {
-        Self {
-            with_children: None,
-        }
+        Self {}
     }
 }
 
@@ -29,9 +25,6 @@ struct GuiButtonState {
     pressed_state: GuiButtonPressedState,
 }
 
-#[derive(Component)]
-struct ChildrenAdder(Option<Box<dyn FnOnce(&mut ChildSpawner) + Sync + Send>>);
-
 #[allow(unused)]
 pub fn gui_button(props: GuiButtonProps) -> impl Bundle {
     (
@@ -41,7 +34,6 @@ pub fn gui_button(props: GuiButtonProps) -> impl Bundle {
         },
         Button,
         Node::default(),
-        ChildrenAdder(props.with_children),
     )
 }
 
@@ -51,7 +43,7 @@ impl Plugin for GuiButtonPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(Update, apply_children_adder)
+            .add_systems(Update, handle_gui_children)
             .add_systems(Update, update_style_on_attrib_change)
             .add_systems(Update,
                 update_style_on_theme_change
@@ -63,18 +55,16 @@ impl Plugin for GuiButtonPlugin {
     }
 }
 
-fn apply_children_adder(
+fn handle_gui_children(
     world: &mut World,
-    mut entity_q: Local<QueryState<Entity, With<ChildrenAdder>>>,
+    mut entity_q: Local<QueryState<Entity, With<GuiChildren>>>,
 ) {
     let entities: Vec<_> = entity_q.iter(world).map(|e| e).collect();
 
     entities.iter().for_each(|entity| {
         let mut entity_mut = world.entity_mut(*entity);
-        if let Some(children_adder) = entity_mut.take::<ChildrenAdder>() {
-            if let Some(f) = children_adder.0 {
-                entity_mut.with_children(f);
-            }
+        if let Some(gui_children) = entity_mut.take::<GuiChildren>() {
+            entity_mut.with_children(gui_children.0);
         }
     });
 }

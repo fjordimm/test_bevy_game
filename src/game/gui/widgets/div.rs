@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::gui::resources::GuiThemeComputed;
+use crate::game::gui::{GuiChildren, resources::GuiThemeComputed};
 
 #[allow(unused)]
 pub enum GuiDivStyle {
@@ -23,7 +23,6 @@ pub struct GuiDivProps {
     pub size: Option<(f32, f32)>,
     pub expand: bool,
     pub starts_active: bool,
-    pub with_children: Option<Box<dyn FnOnce(&mut ChildSpawner) + Sync + Send>>,
 }
 
 impl Default for GuiDivProps {
@@ -36,7 +35,6 @@ impl Default for GuiDivProps {
             size: None,
             expand: false,
             starts_active: true,
-            with_children: None,
         }
     }
 }
@@ -56,9 +54,6 @@ struct GuiDivState {
     is_active: bool,
 }
 
-#[derive(Component)]
-struct ChildrenAdder(Option<Box<dyn FnOnce(&mut ChildSpawner) + Sync + Send>>);
-
 #[allow(unused)]
 pub fn gui_div(props: GuiDivProps) -> impl Bundle {
     (
@@ -74,7 +69,6 @@ pub fn gui_div(props: GuiDivProps) -> impl Bundle {
             is_active: props.starts_active,
         },
         Node::default(),
-        ChildrenAdder(props.with_children),
     )
 }
 
@@ -84,7 +78,7 @@ impl Plugin for GuiDivPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(Update, apply_children_adder)
+            .add_systems(Update, handle_gui_children)
             .add_systems(Update, update_style_on_attrib_change)
             .add_systems(Update,
                 update_style_on_theme_change
@@ -95,18 +89,16 @@ impl Plugin for GuiDivPlugin {
     }
 }
 
-fn apply_children_adder(
+fn handle_gui_children(
     world: &mut World,
-    mut entity_q: Local<QueryState<Entity, With<ChildrenAdder>>>,
+    mut entity_q: Local<QueryState<Entity, With<GuiChildren>>>,
 ) {
     let entities: Vec<_> = entity_q.iter(world).map(|e| e).collect();
 
     entities.iter().for_each(|entity| {
         let mut entity_mut = world.entity_mut(*entity);
-        if let Some(children_adder) = entity_mut.take::<ChildrenAdder>() {
-            if let Some(f) = children_adder.0 {
-                entity_mut.with_children(f);
-            }
+        if let Some(gui_children) = entity_mut.take::<GuiChildren>() {
+            entity_mut.with_children(gui_children.0);
         }
     });
 }
