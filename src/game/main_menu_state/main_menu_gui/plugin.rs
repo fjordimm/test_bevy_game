@@ -8,7 +8,7 @@ use crate::game::{
             button::gui_button,
             div::{GuiDivProps, GuiDivStyle, gui_div},
             screen_div::{GuiScreenDivProps, gui_screen_div},
-            text::{gui_text_h1, gui_text_h2},
+            text::{gui_text_h1, gui_text_h2, gui_text_p},
         },
     },
 };
@@ -47,28 +47,29 @@ fn spawn_main_menu_gui(
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Stretch,
                 div_style: GuiDivStyle::Regular,
+                with_children: Some(Box::new(|p: &mut ChildSpawner| {
+                    p.spawn(gui_text_p("title or something"));
+                    // p.spawn(gui_div(GuiDivProps {
+                    //     flex_direction: FlexDirection::Column,
+                    //     justify_content: JustifyContent::Center,
+                    //     align_items: AlignItems::Center,
+                    //     div_style: GuiDivStyle::None,
+                    //     ..default()
+                    // }))
+                    // .with_child(gui_text_h1("Main Menu"));
+                    // p.spawn(gui_button(default()))
+                    //     .with_child(gui_text_h2("Play"))
+                    //     .observe(|_: On<Pointer<Click>>, mut commands: Commands| {
+                    //         commands.set_state(OverallState::Playing);
+                    //     });
+                    // p.spawn(gui_button(default()))
+                    //     .with_child(gui_text_h2("Quit"))
+                    //     .observe(|_: On<Pointer<Click>>| {
+                    //         quit_game();
+                    //     });
+                })),
                 ..default()
-            }))
-            .with_children(|p| {
-                p.spawn(gui_div(GuiDivProps {
-                    flex_direction: FlexDirection::Column,
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    div_style: GuiDivStyle::None,
-                    ..default()
-                }))
-                .with_child(gui_text_h1("Main Menu"));
-                p.spawn(gui_button(default()))
-                    .with_child(gui_text_h2("Play"))
-                    .observe(|_: On<Pointer<Click>>, mut commands: Commands| {
-                        commands.set_state(OverallState::Playing);
-                    });
-                p.spawn(gui_button(default()))
-                    .with_child(gui_text_h2("Quit"))
-                    .observe(|_: On<Pointer<Click>>| {
-                        quit_game();
-                    });
-            });
+            }));
         })
         .insert(MainMenuGuiTag)
         .insert(ZIndex(3001))
