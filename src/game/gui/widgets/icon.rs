@@ -37,7 +37,7 @@ pub fn gui_icon(icon: GuiIconIcon, width: f32, height: f32, props: GuiIconProps)
     )
 }
 
-fn set_style(
+fn apply_style(
     commands: &mut Commands,
     theme: &GuiThemeComputed,
     icon_handles: &UiIconHandles,
@@ -88,7 +88,7 @@ fn update_style_on_attrib_change(
     >,
 ) {
     entity_q.iter_mut().for_each(|(attribs, entity, mut node)| {
-        set_style(
+        apply_style(
             &mut commands,
             &theme,
             &icon_handles,
@@ -106,7 +106,7 @@ fn update_style_on_theme_change(
     mut entity_q: Query<(&GuiIconAttribs, Entity, &mut Node)>,
 ) {
     entity_q.iter_mut().for_each(|(attribs, entity, mut node)| {
-        set_style(
+        apply_style(
             &mut commands,
             &theme,
             &icon_handles,

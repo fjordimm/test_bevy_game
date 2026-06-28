@@ -35,14 +35,14 @@ fn spawn_pause_menu(
     gui_root: Res<GlobalGuiRoot>,
     theme: Res<GuiThemeComputed>,
 ) {
-    let main_menu_gui = commands
-        .spawn((gui_screen_div(GuiScreenDivProps {
+    let pause_menu = commands
+        .spawn(gui_screen_div(GuiScreenDivProps {
             flex_direction: FlexDirection::Column,
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             bg_color: theme.0.pause_menu_bg_color,
             ..default()
-        }),))
+        }))
         .insert(gui_children(|p| {
             p.spawn(gui_div(GuiDivProps {
                 flex_direction: FlexDirection::Column,
@@ -78,7 +78,7 @@ fn spawn_pause_menu(
         .insert(ZIndex(3000))
         .id();
 
-    commands.entity(gui_root.0).add_child(main_menu_gui);
+    commands.entity(gui_root.0).add_child(pause_menu);
 }
 
 fn despawn_pause_menu(mut commands: Commands, pause_menu_q: Query<Entity, With<PauseMenuTag>>) {

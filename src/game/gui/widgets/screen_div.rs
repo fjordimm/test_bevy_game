@@ -60,7 +60,7 @@ pub fn gui_screen_div(props: GuiScreenDivProps) -> impl Bundle {
     )
 }
 
-fn set_style(
+fn apply_style(
     commands: &mut Commands,
     _theme: &GuiThemeComputed,
     attribs: &GuiScreenDivAttribs,
@@ -84,7 +84,7 @@ fn set_style(
         .insert(BackgroundColor(attribs.bg_color));
 }
 
-fn modify_style_from_state(
+fn apply_state_changes(
     _commands: &mut Commands,
     _theme: &GuiThemeComputed,
     state: &GuiScreenDivState,
@@ -107,29 +107,15 @@ impl Plugin for GuiScreenDivPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(Update, handle_gui_children)
             .add_systems(Update, update_style_on_attrib_change)
             .add_systems(Update,
                 update_style_on_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)
             )
             .add_systems(Update, update_style_from_state_change)
+            .add_systems(Update, handle_gui_children)
         ;
     }
-}
-
-fn handle_gui_children(
-    world: &mut World,
-    mut entity_q: Local<QueryState<Entity, With<GuiChildren>>>,
-) {
-    let entities: Vec<_> = entity_q.iter(world).map(|e| e).collect();
-
-    entities.iter().for_each(|entity| {
-        let mut entity_mut = world.entity_mut(*entity);
-        if let Some(gui_children) = entity_mut.take::<GuiChildren>() {
-            entity_mut.with_children(gui_children.0);
-        }
-    });
 }
 
 fn update_style_on_attrib_change(
@@ -143,7 +129,7 @@ fn update_style_on_attrib_change(
     entity_q
         .iter_mut()
         .for_each(|(attribs, state, entity, mut node)| {
-            set_style(&mut commands, &theme, &attribs, &state, &entity, &mut node);
+            apply_style(&mut commands, &theme, &attribs, &state, &entity, &mut node);
         });
 }
 
@@ -155,7 +141,7 @@ fn update_style_on_theme_change(
     entity_q
         .iter_mut()
         .for_each(|(attribs, state, entity, mut node)| {
-            set_style(&mut commands, &theme, &attribs, &state, &entity, &mut node);
+            apply_style(&mut commands, &theme, &attribs, &state, &entity, &mut node);
         });
 }
 
@@ -165,6 +151,20 @@ fn update_style_from_state_change(
     mut entity_q: Query<(&GuiScreenDivState, Entity, &mut Node), Changed<GuiScreenDivState>>,
 ) {
     entity_q.iter_mut().for_each(|(state, entity, mut node)| {
-        modify_style_from_state(&mut commands, &theme, &state, &entity, &mut node);
+        apply_state_changes(&mut commands, &theme, &state, &entity, &mut node);
+    });
+}
+
+fn handle_gui_children(
+    world: &mut World,
+    mut entity_q: Local<QueryState<Entity, With<GuiChildren>>>,
+) {
+    let entities: Vec<_> = entity_q.iter(world).map(|e| e).collect();
+
+    entities.iter().for_each(|entity| {
+        let mut entity_mut = world.entity_mut(*entity);
+        if let Some(gui_children) = entity_mut.take::<GuiChildren>() {
+            entity_mut.with_children(gui_children.0);
+        }
     });
 }

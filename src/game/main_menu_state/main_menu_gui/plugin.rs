@@ -35,13 +35,13 @@ fn spawn_main_menu_gui(
     theme: Res<GuiThemeComputed>,
 ) {
     let main_menu_gui = commands
-        .spawn((gui_screen_div(GuiScreenDivProps {
+        .spawn(gui_screen_div(GuiScreenDivProps {
             flex_direction: FlexDirection::Column,
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             bg_color: theme.0.bg_color_main,
             ..default()
-        }),))
+        }))
         .insert(gui_children(|p| {
             p.spawn(gui_div(GuiDivProps {
                 flex_direction: FlexDirection::Column,

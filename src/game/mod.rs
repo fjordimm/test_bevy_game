@@ -3,6 +3,7 @@ mod core;
 mod gui;
 mod main_menu_state;
 mod playing_state;
+mod primary_debug_menu;
 mod quick_dev_test;
 mod random;
 mod util;

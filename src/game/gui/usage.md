@@ -11,5 +11,5 @@
     - 3001: Main menu
     - The rest is reserved (for now)
 - 4000-4999: Debug menus
-    - 4000: Main debug menu
+    - 4000: Primary debug menu
     - The rest is reserved (for now)

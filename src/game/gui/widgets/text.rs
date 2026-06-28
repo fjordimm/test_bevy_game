@@ -25,16 +25,20 @@ impl Default for GuiTextProps {
 
 #[derive(Component)]
 struct GuiTextAttribs {
-    content: String,
     size: GuiTextSize,
+}
+
+#[derive(Component)]
+struct GuiTextState {
+    content: String,
 }
 
 #[allow(unused)]
 pub fn gui_text(content: impl Into<String>, props: GuiTextProps) -> impl Bundle {
     (
-        GuiTextAttribs {
+        GuiTextAttribs { size: props.size },
+        GuiTextState {
             content: content.into(),
-            size: props.size,
         },
         Text::default(),
         TextFont::default(),
@@ -72,14 +76,15 @@ pub fn gui_text_h2(content: impl Into<String>) -> impl Bundle {
     )
 }
 
-fn set_style(
+fn apply_style(
     theme: &GuiThemeComputed,
     attribs: &GuiTextAttribs,
+    state: &GuiTextState,
     text: &mut Text,
     textfont: &mut TextFont,
     textcolor: &mut TextColor,
 ) {
-    text.0 = attribs.content.clone(); // TODO: could be more efficient
+    text.0 = state.content.clone(); // TODO: could be more efficient
 
     *textfont = TextFont {
         font: theme.0.font_main.clone(),
@@ -106,31 +111,66 @@ impl Plugin for GuiTextPlugin {
                 update_style_on_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)
             )
+            .add_observer(set_text_observer)
         ;
     }
 }
 
+#[derive(EntityEvent)]
+pub struct SetText {
+    entity: Entity,
+    text: String,
+}
+
+fn set_text_observer(event: On<SetText>) {}
+
 fn update_style_on_attrib_change(
     theme: Res<GuiThemeComputed>,
     mut entity_q: Query<
-        (&GuiTextAttribs, &mut Text, &mut TextFont, &mut TextColor),
+        (
+            &GuiTextAttribs,
+            &GuiTextState,
+            &mut Text,
+            &mut TextFont,
+            &mut TextColor,
+        ),
         Or<(Added<GuiTextAttribs>, Changed<GuiTextAttribs>)>,
     >,
 ) {
     entity_q
         .iter_mut()
-        .for_each(|(attribs, mut text, mut textfont, mut textcolor)| {
-            set_style(&theme, &attribs, &mut text, &mut textfont, &mut textcolor);
+        .for_each(|(attribs, state, mut text, mut textfont, mut textcolor)| {
+            apply_style(
+                &theme,
+                &attribs,
+                &state,
+                &mut text,
+                &mut textfont,
+                &mut textcolor,
+            );
         });
 }
 
 fn update_style_on_theme_change(
     theme: Res<GuiThemeComputed>,
-    mut entity_q: Query<(&GuiTextAttribs, &mut Text, &mut TextFont, &mut TextColor)>,
+    mut entity_q: Query<(
+        &GuiTextAttribs,
+        &GuiTextState,
+        &mut Text,
+        &mut TextFont,
+        &mut TextColor,
+    )>,
 ) {
     entity_q
         .iter_mut()
-        .for_each(|(attribs, mut text, mut textfont, mut textcolor)| {
-            set_style(&theme, &attribs, &mut text, &mut textfont, &mut textcolor);
+        .for_each(|(attribs, state, mut text, mut textfont, mut textcolor)| {
+            apply_style(
+                &theme,
+                &attribs,
+                &state,
+                &mut text,
+                &mut textfont,
+                &mut textcolor,
+            );
         });
 }

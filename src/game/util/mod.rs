@@ -92,9 +92,6 @@ macro_rules! alrrs {
 
 pub(crate) use alrrs;
 
-#[derive(EntityEvent)]
-pub struct TempOnCreation(pub Entity);
-
 // For when you need to use an event, but don't want it to do anything.
 // That means you should never observe this event, as it may be unpredictable.
 #[derive(Event)]
