@@ -3,6 +3,7 @@ use bevy::prelude::*;
 pub mod plugin;
 pub mod resources;
 pub mod widgets;
+pub mod sets;
 
 pub fn make_global_gui_root() -> Node {
     Node {

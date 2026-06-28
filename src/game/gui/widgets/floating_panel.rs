@@ -4,7 +4,9 @@
 
 use bevy::prelude::*;
 
-use crate::game::gui::{resources::GuiThemeComputed, widgets::text::gui_text_h2};
+use crate::game::gui::{
+    resources::GuiThemeComputed, sets::GuiSystemsOrdering, widgets::text::gui_text_h2,
+};
 
 #[allow(unused)]
 pub struct GuiFloatingPanelProps {
@@ -41,6 +43,9 @@ struct GuiFloatingPanelState {
 #[derive(Component)]
 struct GuiFloatingPanelTitleBarTag;
 
+#[derive(Component)]
+struct GuiFloatingPanelTitleTextTag;
+
 #[allow(unused)]
 pub fn gui_floating_panel(title: impl Into<String>, props: GuiFloatingPanelProps) -> impl Bundle {
     let title = title.into();
@@ -59,7 +64,7 @@ pub fn gui_floating_panel(title: impl Into<String>, props: GuiFloatingPanelProps
         children![(
             GuiFloatingPanelTitleBarTag,
             Node::default(),
-            children![(gui_text_h2(title))] // TODO: change
+            children![(GuiFloatingPanelTitleTextTag, gui_text_h2(title))] // TODO: change
         )],
     )
 }
@@ -75,13 +80,13 @@ pub fn gui_floating_panel(title: impl Into<String>, props: GuiFloatingPanelProps
 // corner_resizer
 
 fn apply_style(
-    _commands: &mut Commands,
+    commands: &mut Commands,
     theme: &GuiThemeComputed,
     attribs: &GuiFloatingPanelAttribs,
     state: &GuiFloatingPanelState,
     root_node: &mut Node,
     title_bar_node: &mut Node,
-    title_node: &mut Node,
+    title_text_ent: Entity,
 ) {
     root_node.position_type = PositionType::Absolute;
     root_node.left = px(state.pos_x);
@@ -114,38 +119,131 @@ impl Plugin for GuiFloatingPanelPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(Update, handle_gui_children)
-            .add_systems(Update, update_style_on_attrib_change)
+            .add_systems(Update,
+                setup_relations
+                    .in_set(GuiSystemsOrdering::SetupRelations)
+            )
+            .add_systems(Update,
+                update_style_on_attrib_change
+                    .in_set(GuiSystemsOrdering::UpdateStyle)
+            )
             .add_systems(Update,
                 update_style_on_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)
+                    .in_set(GuiSystemsOrdering::UpdateStyle)
             )
-            .add_systems(Update, update_style_from_state_change)
+            .add_systems(Update,
+                update_style_from_state_change
+                    .in_set(GuiSystemsOrdering::UpdateStyle)
+            )
+            .add_systems(Update,
+                handle_gui_children
+                    .in_set(GuiSystemsOrdering::HandleGuiChildren)
+            )
         ;
     }
 }
 
-fn handle_gui_children() {}
+#[derive(Component)]
+struct GuiFloatingPanelRelations {
+    title_bar: Entity,
+    title_text: Entity,
+}
+
+// TODO: use sets to make this run first
+
+fn setup_relations(
+    mut commands: Commands,
+    root_q: Query<
+        (Entity, &Children),
+        (
+            With<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelRelations>,
+        ),
+    >,
+    title_bar_q: Query<
+        (Entity, &Children),
+        (
+            With<GuiFloatingPanelTitleBarTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleTextTag>,
+        ),
+    >,
+    title_text_q: Query<
+        Entity,
+        (
+            With<GuiFloatingPanelTitleTextTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleBarTag>,
+        ),
+    >,
+) {
+    root_q.iter().for_each(|(root, root_children)| {
+        let mut relations = GuiFloatingPanelRelations {
+            title_bar: Entity::PLACEHOLDER,
+            title_text: Entity::PLACEHOLDER,
+        };
+
+        root_children.iter().for_each(|child| {
+            if let Ok((title_bar, title_bar_children)) = title_bar_q.get(child) {
+                relations.title_bar = title_bar;
+
+                title_bar_children.iter().for_each(|child| {
+                    if let Ok(title_text) = title_text_q.get(child) {
+                        relations.title_text = title_text;
+                    }
+                });
+            }
+        });
+
+        commands.entity(root).insert(relations);
+    });
+}
 
 fn update_style_on_attrib_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
-    mut root_q: Query<(
-        &GuiFloatingPanelAttribs,
-        &GuiFloatingPanelState,
-        Entity,
-        &mut Node,
-    )>,
+    mut root_q: Query<
+        (
+            &GuiFloatingPanelAttribs,
+            &GuiFloatingPanelState,
+            Entity,
+            &mut Node,
+            &Children,
+        ),
+        Or<(
+            Added<GuiFloatingPanelAttribs>,
+            Changed<GuiFloatingPanelAttribs>,
+        )>,
+    >,
     mut title_bar_q: Query<
-        (&ChildOf, Entity, &mut Node),
+        (Entity, &mut Node, &Children),
         (
             With<GuiFloatingPanelTitleBarTag>,
             Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleTextTag>,
+        ),
+    >,
+    title_text_q: Query<
+        (Entity),
+        (
+            With<GuiFloatingPanelTitleTextTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleBarTag>,
         ),
     >,
 ) {
+    root_q.iter_mut().for_each(
+        |(attribs, state, root_entity, mut root_node, root_children)| {
+            root_children.iter().for_each(|root_child| {
+                if let Ok(title_bar) = title_bar_q.get_mut(root_child) {}
+            });
+        },
+    );
 }
 
 fn update_style_on_theme_change() {}
 
 fn update_style_from_state_change() {}
+
+fn handle_gui_children() {}

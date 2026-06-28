@@ -4,6 +4,7 @@ use crate::game::{
     core::{resources::FontHandles, sets::GlobalStartupOrdering},
     gui::{
         resources::{GuiScale, GuiTheme, GuiThemeComputed, GuiThemeUncomputed},
+        sets::GUI_SYSTEMS_ORDERING_ORDER,
         widgets::{
             button::GuiButtonPlugin, div::GuiDivPlugin, floating_panel::GuiFloatingPanelPlugin,
             icon::GuiIconPlugin, screen_div::GuiScreenDivPlugin, text::GuiTextPlugin,
@@ -17,6 +18,7 @@ impl Plugin for GuiPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
+            .configure_sets(Update, GUI_SYSTEMS_ORDERING_ORDER.chain())
             .add_systems(Startup,
                 startup
                     .in_set(GlobalStartupOrdering::Regular)

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::gui::{GuiChildren, resources::GuiThemeComputed};
+use crate::game::gui::{GuiChildren, resources::GuiThemeComputed, sets::GuiSystemsOrdering};
 
 #[allow(unused)]
 pub struct GuiScreenDivProps {
@@ -107,13 +107,23 @@ impl Plugin for GuiScreenDivPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(Update, update_style_on_attrib_change)
+            .add_systems(Update,
+                update_style_on_attrib_change
+                    .in_set(GuiSystemsOrdering::UpdateStyle)
+            )
             .add_systems(Update,
                 update_style_on_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)
+                    .in_set(GuiSystemsOrdering::UpdateStyle)
             )
-            .add_systems(Update, update_style_from_state_change)
-            .add_systems(Update, handle_gui_children)
+            .add_systems(Update,
+                update_style_from_state_change
+                    .in_set(GuiSystemsOrdering::UpdateStyle)
+            )
+            .add_systems(Update,
+                handle_gui_children
+                    .in_set(GuiSystemsOrdering::HandleGuiChildren)
+            )
         ;
     }
 }

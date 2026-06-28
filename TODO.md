@@ -3,6 +3,7 @@
 
 ## Currently Working On
 - Rework the whole GUI system.
+    - Use sets to force the order of observers and setup_relations.
 - Finish the debug menu.
 
 ## Reminders

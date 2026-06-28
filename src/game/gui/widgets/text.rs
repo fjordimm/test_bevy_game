@@ -1,6 +1,9 @@
 use bevy::{prelude::*, ui::widget::Text};
 
-use crate::game::gui::resources::GuiThemeComputed;
+use crate::game::{
+    gui::{resources::GuiThemeComputed, sets::GuiSystemsOrdering},
+    util::alrmo,
+};
 
 #[allow(unused)]
 pub enum GuiTextSize {
@@ -106,23 +109,19 @@ impl Plugin for GuiTextPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(Update, update_style_on_attrib_change)
+            .add_systems(Update,
+                update_style_on_attrib_change
+                    .in_set(GuiSystemsOrdering::UpdateStyle)
+            )
             .add_systems(Update,
                 update_style_on_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)
+                    .in_set(GuiSystemsOrdering::UpdateStyle)
             )
-            .add_observer(set_text_observer)
+            .add_observer(observe_set_content)
         ;
     }
 }
-
-#[derive(EntityEvent)]
-pub struct SetText {
-    entity: Entity,
-    text: String,
-}
-
-fn set_text_observer(event: On<SetText>) {}
 
 fn update_style_on_attrib_change(
     theme: Res<GuiThemeComputed>,
@@ -173,4 +172,16 @@ fn update_style_on_theme_change(
                 &mut textcolor,
             );
         });
+}
+
+#[derive(EntityEvent)]
+pub struct GuiTextSetContent {
+    entity: Entity,
+    content: String,
+}
+
+fn observe_set_content(event: On<GuiTextSetContent>, mut entity_q: Query<&mut GuiTextState>) {
+    if let Some(mut state) = alrmo!(entity_q.get_mut(event.entity)) {
+        state.content = event.content.clone();
+    }
 }
