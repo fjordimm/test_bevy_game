@@ -4,8 +4,9 @@
 
 use bevy::prelude::*;
 
-use crate::game::gui::{
-    resources::GuiThemeComputed, sets::GuiSystemsOrdering, widgets::text::gui_text_h2,
+use crate::game::{
+    gui::{resources::GuiThemeComputed, sets::GuiSystemsOrdering, widgets::text::gui_text_h2},
+    util::alrro,
 };
 
 #[allow(unused)]
@@ -86,7 +87,7 @@ fn apply_style(
     state: &GuiFloatingPanelState,
     root_node: &mut Node,
     title_bar_node: &mut Node,
-    title_text_ent: Entity,
+    title_text_ent: &Entity,
 ) {
     root_node.position_type = PositionType::Absolute;
     root_node.left = px(state.pos_x);
@@ -150,8 +151,6 @@ struct GuiFloatingPanelRelations {
     title_text: Entity,
 }
 
-// TODO: use sets to make this run first
-
 fn setup_relations(
     mut commands: Commands,
     root_q: Query<
@@ -205,11 +204,10 @@ fn update_style_on_attrib_change(
     theme: Res<GuiThemeComputed>,
     mut root_q: Query<
         (
+            &GuiFloatingPanelRelations,
             &GuiFloatingPanelAttribs,
             &GuiFloatingPanelState,
-            Entity,
             &mut Node,
-            &Children,
         ),
         Or<(
             Added<GuiFloatingPanelAttribs>,
@@ -217,7 +215,7 @@ fn update_style_on_attrib_change(
         )>,
     >,
     mut title_bar_q: Query<
-        (Entity, &mut Node, &Children),
+        &mut Node,
         (
             With<GuiFloatingPanelTitleBarTag>,
             Without<GuiFloatingPanelAttribs>,
@@ -225,7 +223,7 @@ fn update_style_on_attrib_change(
         ),
     >,
     title_text_q: Query<
-        (Entity),
+        Entity,
         (
             With<GuiFloatingPanelTitleTextTag>,
             Without<GuiFloatingPanelAttribs>,
@@ -233,13 +231,22 @@ fn update_style_on_attrib_change(
         ),
     >,
 ) {
-    root_q.iter_mut().for_each(
-        |(attribs, state, root_entity, mut root_node, root_children)| {
-            root_children.iter().for_each(|root_child| {
-                if let Ok(title_bar) = title_bar_q.get_mut(root_child) {}
-            });
-        },
-    );
+    root_q
+        .iter_mut()
+        .for_each(|(relations, attribs, state, mut root_node)| {
+            let mut title_bar_node = alrro!(title_bar_q.get_mut(relations.title_bar));
+            let title_text = alrro!(title_text_q.get(relations.title_text));
+
+            apply_style(
+                &mut commands,
+                &theme,
+                &attribs,
+                &state,
+                &mut root_node,
+                &mut title_bar_node,
+                &title_text,
+            );
+        });
 }
 
 fn update_style_on_theme_change() {}

@@ -29,6 +29,7 @@
 - Make dev vs release profiles in Cargo.toml.
 - Maybe instead of creating all GUI stuff during Startup, you create the elements when they appear and actually delete them when they are gone.
 - Check whether everything is despawned when you exit OverallState::Playing.
+- When in release profile, the functions in util like `alrms`, `alrmo`, `alrrs`, and `alrro` should all just pass the input through without executing code.
 
 ## Optimizations
 - Right now I'm inserting a new CursorIcon to the window entity when changing the cursor type. Should I be removing the old ones?
