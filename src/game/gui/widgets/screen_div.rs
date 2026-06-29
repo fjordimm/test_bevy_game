@@ -121,7 +121,7 @@ impl Plugin for GuiScreenDivPlugin {
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
             .add_systems(Update,
-                update_style_from_state_change
+                update_style_on_state_change
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
         ;
@@ -169,7 +169,7 @@ fn update_style_on_theme_change(
         });
 }
 
-fn update_style_from_state_change(
+fn update_style_on_state_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
     mut entity_q: Query<(&GuiScreenDivState, Entity, &mut Node), Changed<GuiScreenDivState>>,

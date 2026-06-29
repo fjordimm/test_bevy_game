@@ -103,7 +103,7 @@ impl Plugin for GuiButtonPlugin {
                     .in_set(GuiSystemsOrdering::UpdateState)
             )
             .add_systems(Update,
-                update_style_from_state_change
+                update_style_on_state_change
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
         ;
@@ -161,7 +161,7 @@ fn update_state(mut entity_q: Query<(&mut GuiButtonState, &Interaction), Changed
     });
 }
 
-fn update_style_from_state_change(
+fn update_style_on_state_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
     entity_q: Query<(&GuiButtonState, Entity), Changed<GuiButtonState>>,

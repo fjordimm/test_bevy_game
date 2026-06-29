@@ -103,6 +103,15 @@ fn apply_style(
     textcolor.0 = theme.0.content_color_main;
 }
 
+fn apply_state_changes(
+    _theme: &GuiThemeComputed,
+    _attribs: &GuiTextAttribs,
+    state: &GuiTextState,
+    text: &mut Text,
+) {
+    text.0 = state.content.clone(); // TODO: could be more efficient
+}
+
 pub struct GuiTextPlugin;
 
 impl Plugin for GuiTextPlugin {
@@ -116,6 +125,10 @@ impl Plugin for GuiTextPlugin {
             .add_systems(Update,
                 update_style_on_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)
+                    .in_set(GuiSystemsOrdering::UpdateStyle)
+            )
+            .add_systems(Update,
+                update_style_on_state_change
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
             .add_observer(observe_set_content)
@@ -174,10 +187,19 @@ fn update_style_on_theme_change(
         });
 }
 
+fn update_style_on_state_change(
+    theme: Res<GuiThemeComputed>,
+    mut entity_q: Query<(&GuiTextAttribs, &GuiTextState, &mut Text), Changed<GuiTextState>>,
+) {
+    entity_q.iter_mut().for_each(|(attribs, state, mut text)| {
+        apply_state_changes(&theme, &attribs, &state, &mut text);
+    });
+}
+
 #[derive(EntityEvent)]
 pub struct GuiTextSetContent {
-    entity: Entity,
-    content: String,
+    pub entity: Entity,
+    pub content: String,
 }
 
 fn observe_set_content(event: On<GuiTextSetContent>, mut entity_q: Query<&mut GuiTextState>) {

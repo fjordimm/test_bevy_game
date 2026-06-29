@@ -5,7 +5,11 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    gui::{resources::GuiThemeComputed, sets::GuiSystemsOrdering, widgets::text::gui_text_h2},
+    gui::{
+        resources::GuiThemeComputed,
+        sets::GuiSystemsOrdering,
+        widgets::text::{GuiTextSetContent, gui_text_h2},
+    },
     util::alrro,
 };
 
@@ -65,7 +69,7 @@ pub fn gui_floating_panel(title: impl Into<String>, props: GuiFloatingPanelProps
         children![(
             GuiFloatingPanelTitleBarTag,
             Node::default(),
-            children![(GuiFloatingPanelTitleTextTag, gui_text_h2(title))] // TODO: change
+            children![(GuiFloatingPanelTitleTextTag, gui_text_h2(String::new()))]
         )],
     )
 }
@@ -109,6 +113,11 @@ fn apply_style(
     commands
         .entity(*title_bar)
         .insert(BackgroundColor(theme.0.floating_panel_title_bar_color));
+
+    commands.entity(*title_text).trigger(|e| GuiTextSetContent {
+        entity: e,
+        content: attribs.title.clone(),
+    });
 }
 
 fn what_display(state: &GuiFloatingPanelState) -> Display {
@@ -142,7 +151,7 @@ impl Plugin for GuiFloatingPanelPlugin {
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
             .add_systems(Update,
-                update_style_from_state_change
+                update_style_on_state_change
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
         ;
@@ -258,4 +267,4 @@ fn update_style_on_init_or_attrib_change(
 
 fn update_style_on_theme_change() {}
 
-fn update_style_from_state_change() {}
+fn update_style_on_state_change() {}
