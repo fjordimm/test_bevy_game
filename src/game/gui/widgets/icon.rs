@@ -73,7 +73,7 @@ impl Plugin for GuiIconPlugin {
         #[rustfmt::skip]
         app
             .add_systems(Update,
-                update_style_on_attrib_change
+                update_style_on_init_or_attrib_change
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
             .add_systems(Update,
@@ -85,7 +85,7 @@ impl Plugin for GuiIconPlugin {
     }
 }
 
-fn update_style_on_attrib_change(
+fn update_style_on_init_or_attrib_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
     icon_handles: Res<UiIconHandles>,

@@ -86,11 +86,15 @@ impl Plugin for GuiButtonPlugin {
         #[rustfmt::skip]
         app
             .add_systems(Update,
-                update_style_on_attrib_change
+                handle_gui_children
+                    .in_set(GuiSystemsOrdering::HandleGuiChildren)
+            )
+            .add_systems(Update,
+                update_style_from_init_or_attrib_change
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
             .add_systems(Update,
-                update_style_on_theme_change
+                update_style_from_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
@@ -102,15 +106,25 @@ impl Plugin for GuiButtonPlugin {
                 update_style_from_state_change
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
-            .add_systems(Update,
-                handle_gui_children
-                    .in_set(GuiSystemsOrdering::HandleGuiChildren)
-            )
         ;
     }
 }
 
-fn update_style_on_attrib_change(
+fn handle_gui_children(
+    world: &mut World,
+    mut entity_q: Local<QueryState<Entity, With<GuiChildren>>>,
+) {
+    let entities: Vec<_> = entity_q.iter(world).map(|e| e).collect();
+
+    entities.iter().for_each(|entity| {
+        let mut entity_mut = world.entity_mut(*entity);
+        if let Some(gui_children) = entity_mut.take::<GuiChildren>() {
+            entity_mut.with_children(gui_children.0);
+        }
+    });
+}
+
+fn update_style_from_init_or_attrib_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
     mut entity_q: Query<
@@ -125,7 +139,7 @@ fn update_style_on_attrib_change(
         });
 }
 
-fn update_style_on_theme_change(
+fn update_style_from_theme_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
     mut entity_q: Query<(&GuiButtonAttribs, &GuiButtonState, Entity, &mut Node)>,
@@ -154,19 +168,5 @@ fn update_style_from_state_change(
 ) {
     entity_q.iter().for_each(|(state, entity)| {
         apply_state_changes(&mut commands, &theme, &state, &entity);
-    });
-}
-
-fn handle_gui_children(
-    world: &mut World,
-    mut entity_q: Local<QueryState<Entity, With<GuiChildren>>>,
-) {
-    let entities: Vec<_> = entity_q.iter(world).map(|e| e).collect();
-
-    entities.iter().for_each(|entity| {
-        let mut entity_mut = world.entity_mut(*entity);
-        if let Some(gui_children) = entity_mut.take::<GuiChildren>() {
-            entity_mut.with_children(gui_children.0);
-        }
     });
 }

@@ -86,8 +86,9 @@ fn apply_style(
     attribs: &GuiFloatingPanelAttribs,
     state: &GuiFloatingPanelState,
     root_node: &mut Node,
+    title_bar: &Entity,
     title_bar_node: &mut Node,
-    title_text_ent: &Entity,
+    title_text: &Entity,
 ) {
     root_node.position_type = PositionType::Absolute;
     root_node.left = px(state.pos_x);
@@ -105,6 +106,9 @@ fn apply_style(
     title_bar_node.align_items = AlignItems::Stretch;
     title_bar_node.padding = UiRect::all(px(theme.0.padding_minor));
     title_bar_node.column_gap = px(theme.0.padding_main);
+    commands
+        .entity(*title_bar)
+        .insert(BackgroundColor(theme.0.floating_panel_title_bar_color));
 }
 
 fn what_display(state: &GuiFloatingPanelState) -> Display {
@@ -125,7 +129,11 @@ impl Plugin for GuiFloatingPanelPlugin {
                     .in_set(GuiSystemsOrdering::SetupRelations)
             )
             .add_systems(Update,
-                update_style_on_attrib_change
+                handle_gui_children
+                    .in_set(GuiSystemsOrdering::HandleGuiChildren)
+            )
+            .add_systems(Update,
+                update_style_on_init_or_attrib_change
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
             .add_systems(Update,
@@ -136,10 +144,6 @@ impl Plugin for GuiFloatingPanelPlugin {
             .add_systems(Update,
                 update_style_from_state_change
                     .in_set(GuiSystemsOrdering::UpdateStyle)
-            )
-            .add_systems(Update,
-                handle_gui_children
-                    .in_set(GuiSystemsOrdering::HandleGuiChildren)
             )
         ;
     }
@@ -199,7 +203,9 @@ fn setup_relations(
     });
 }
 
-fn update_style_on_attrib_change(
+fn handle_gui_children() {}
+
+fn update_style_on_init_or_attrib_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
     mut root_q: Query<
@@ -210,12 +216,12 @@ fn update_style_on_attrib_change(
             &mut Node,
         ),
         Or<(
-            Added<GuiFloatingPanelAttribs>,
+            Added<GuiFloatingPanelRelations>,
             Changed<GuiFloatingPanelAttribs>,
         )>,
     >,
     mut title_bar_q: Query<
-        &mut Node,
+        (Entity, &mut Node),
         (
             With<GuiFloatingPanelTitleBarTag>,
             Without<GuiFloatingPanelAttribs>,
@@ -234,7 +240,7 @@ fn update_style_on_attrib_change(
     root_q
         .iter_mut()
         .for_each(|(relations, attribs, state, mut root_node)| {
-            let mut title_bar_node = alrro!(title_bar_q.get_mut(relations.title_bar));
+            let (title_bar, mut title_bar_node) = alrro!(title_bar_q.get_mut(relations.title_bar));
             let title_text = alrro!(title_text_q.get(relations.title_text));
 
             apply_style(
@@ -243,6 +249,7 @@ fn update_style_on_attrib_change(
                 &attribs,
                 &state,
                 &mut root_node,
+                &title_bar,
                 &mut title_bar_node,
                 &title_text,
             );
@@ -252,5 +259,3 @@ fn update_style_on_attrib_change(
 fn update_style_on_theme_change() {}
 
 fn update_style_from_state_change() {}
-
-fn handle_gui_children() {}

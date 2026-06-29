@@ -4,3 +4,4 @@
     - Fields of `_Attribs` should be things that are only set at creation, or are updated rarely.
     - Fields of `_State` can be things that are updated more commonly.
 - An exception to this is that the entity hierarchy should be preserved (so basically no adding/deleting entities), so that after the client adds sub-widgets (using `gui::gui_children` or `gui::gui_child`), those sub-widgets will stay children to the same entity.
+- If using a `setup_relations` function, then make sure to change the `Added<_Attribs>` to `Added<_Relations>` in your `update_style_on_init_or_attrib_change` function.
