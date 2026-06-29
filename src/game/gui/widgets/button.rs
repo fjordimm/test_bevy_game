@@ -60,7 +60,7 @@ fn apply_style(
         .insert(theme.0.box_shadow.clone());
 }
 
-fn apply_state_changes(
+fn modify_style_from_state(
     commands: &mut Commands,
     theme: &GuiThemeComputed,
     state: &GuiButtonState,
@@ -167,6 +167,6 @@ fn update_style_on_state_change(
     entity_q: Query<(&GuiButtonState, Entity), Changed<GuiButtonState>>,
 ) {
     entity_q.iter().for_each(|(state, entity)| {
-        apply_state_changes(&mut commands, &theme, &state, &entity);
+        modify_style_from_state(&mut commands, &theme, &state, &entity);
     });
 }

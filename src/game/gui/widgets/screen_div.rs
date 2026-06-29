@@ -84,7 +84,7 @@ fn apply_style(
         .insert(BackgroundColor(attribs.bg_color));
 }
 
-fn apply_state_changes(
+fn modify_style_from_state(
     _commands: &mut Commands,
     _theme: &GuiThemeComputed,
     state: &GuiScreenDivState,
@@ -175,6 +175,6 @@ fn update_style_on_state_change(
     mut entity_q: Query<(&GuiScreenDivState, Entity, &mut Node), Changed<GuiScreenDivState>>,
 ) {
     entity_q.iter_mut().for_each(|(state, entity, mut node)| {
-        apply_state_changes(&mut commands, &theme, &state, &entity, &mut node);
+        modify_style_from_state(&mut commands, &theme, &state, &entity, &mut node);
     });
 }

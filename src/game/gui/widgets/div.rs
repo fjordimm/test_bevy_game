@@ -136,7 +136,7 @@ fn apply_style(
     }
 }
 
-fn apply_state_changes(
+fn modify_style_from_state(
     _commands: &mut Commands,
     _theme: &GuiThemeComputed,
     state: &GuiDivState,
@@ -227,6 +227,6 @@ fn update_style_on_state_change(
     mut entity_q: Query<(&GuiDivState, Entity, &mut Node), Changed<GuiDivState>>,
 ) {
     entity_q.iter_mut().for_each(|(state, entity, mut node)| {
-        apply_state_changes(&mut commands, &theme, &state, &entity, &mut node);
+        modify_style_from_state(&mut commands, &theme, &state, &entity, &mut node);
     });
 }

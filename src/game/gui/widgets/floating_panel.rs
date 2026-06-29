@@ -49,7 +49,28 @@ struct GuiFloatingPanelState {
 struct GuiFloatingPanelTitleBarTag;
 
 #[derive(Component)]
+struct GuiFloatingPanelTitleBarMainPartTag;
+
+#[derive(Component)]
 struct GuiFloatingPanelTitleTextTag;
+
+#[derive(Component)]
+struct GuiFloatingPanelTitleBarButtonPartTag;
+
+#[derive(Component)]
+struct GuiFloatingPanelMinimizeButton;
+
+#[derive(Component)]
+struct GuiFloatingPanelXButton;
+
+#[derive(Component)]
+struct GuiFloatingPanelMainContent;
+
+#[derive(Component)]
+struct GuiFloatingPanelMainContentInner;
+
+#[derive(Component)]
+struct GuiFloatingPanelCornerResizer;
 
 #[allow(unused)]
 pub fn gui_floating_panel(title: impl Into<String>, props: GuiFloatingPanelProps) -> impl Bundle {

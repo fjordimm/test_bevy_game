@@ -103,7 +103,7 @@ fn apply_style(
     textcolor.0 = theme.0.content_color_main;
 }
 
-fn apply_state_changes(
+fn modify_style_from_state(
     _theme: &GuiThemeComputed,
     _attribs: &GuiTextAttribs,
     state: &GuiTextState,
@@ -192,7 +192,7 @@ fn update_style_on_state_change(
     mut entity_q: Query<(&GuiTextAttribs, &GuiTextState, &mut Text), Changed<GuiTextState>>,
 ) {
     entity_q.iter_mut().for_each(|(attribs, state, mut text)| {
-        apply_state_changes(&theme, &attribs, &state, &mut text);
+        modify_style_from_state(&theme, &attribs, &state, &mut text);
     });
 }
 
