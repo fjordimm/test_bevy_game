@@ -8,7 +8,11 @@ use crate::game::{
     gui::{
         resources::GuiThemeComputed,
         sets::GuiSystemsOrdering,
-        widgets::{button::gui_button, text::gui_text_h2},
+        widgets::{
+            button::{GuiButtonProps, GuiButtonStyle, gui_button},
+            icon::{GuiIconIcon, GuiIconProps, gui_icon},
+            text::gui_text_h2,
+        },
     },
     util::alrro,
 };
@@ -94,8 +98,18 @@ pub fn gui_floating_panel(title: impl Into<String>, props: GuiFloatingPanelProps
                         GuiFloatingPanelTitleBarButtonPartTag,
                         Node::default(),
                         children![
-                            (GuiFloatingPanelMinimizeButtonTag, gui_button(default())),
-                            (GuiFloatingPanelXButtonTag, gui_button(default()))
+                            (
+                                GuiFloatingPanelMinimizeButtonTag,
+                                gui_button(GuiButtonProps {
+                                    button_style: GuiButtonStyle::TitleBarButton
+                                })
+                            ),
+                            (
+                                GuiFloatingPanelXButtonTag,
+                                gui_button(GuiButtonProps {
+                                    button_style: GuiButtonStyle::TitleBarButton
+                                })
+                            )
                         ]
                     )
                 ]
@@ -131,11 +145,11 @@ fn apply_style(
     title_bar_node: &mut Node,
     title_bar_main_part_entity: &Entity,
     title_bar_main_part_node: &mut Node,
-    _title_bar_button_part_node: &mut Node,
-    _minimize_button_entity: &Entity,
-    _minimize_button_node: &mut Node,
-    _x_button_entity: &Entity,
-    _x_button_node: &mut Node,
+    title_bar_button_part_node: &mut Node,
+    minimize_button_entity: &Entity,
+    minimize_button_node: &mut Node,
+    x_button_entity: &Entity,
+    x_button_node: &mut Node,
     _main_content_entity: &Entity,
     _main_content_node: &mut Node,
     _main_content_inner_node: &mut Node,
@@ -160,7 +174,7 @@ fn apply_style(
     title_bar_node.column_gap = px(theme.0.padding_main);
     commands
         .entity(*title_bar_entity)
-        .insert(BackgroundColor(theme.0.floating_panel_title_bar_color));
+        .insert(BackgroundColor(theme.0.title_bar_color));
 
     title_bar_main_part_node.flex_grow = 1.;
     title_bar_main_part_node.display = Display::Flex;
@@ -175,6 +189,39 @@ fn apply_style(
     commands
         .entity(*title_bar_main_part_entity)
         .add_child(title_text);
+
+    title_bar_button_part_node.display = Display::Flex;
+    title_bar_button_part_node.border_radius = BorderRadius::top_right(px(theme.0.border_radius));
+    title_bar_button_part_node.flex_direction = FlexDirection::Row;
+    title_bar_button_part_node.justify_content = JustifyContent::FlexStart;
+    title_bar_button_part_node.align_items = AlignItems::Center;
+    title_bar_button_part_node.column_gap = px(theme.0.padding_minor);
+
+    let minimize_button_icon = commands
+        .spawn(gui_icon(
+            GuiIconIcon::Minimize,
+            theme.0.title_bar_button_icon_size,
+            theme.0.title_bar_button_icon_size,
+            GuiIconProps::default(),
+        ))
+        .id();
+    commands
+        .entity(*minimize_button_entity)
+        .despawn_children()
+        .add_child(minimize_button_icon);
+
+    let x_button_icon = commands
+        .spawn(gui_icon(
+            GuiIconIcon::X,
+            theme.0.title_bar_button_icon_size,
+            theme.0.title_bar_button_icon_size,
+            GuiIconProps::default(),
+        ))
+        .id();
+    commands
+        .entity(*x_button_entity)
+        .despawn_children()
+        .add_child(x_button_icon);
 }
 
 fn what_display(state: &GuiFloatingPanelState) -> Display {

@@ -14,17 +14,19 @@ pub struct GuiTheme {
     pub bg_color_main: Color,
     pub content_color_main: Color,
     pub box_shadow: BoxShadow,
-    pub button_color_normal: Color,
-    pub button_color_hovered: Color,
-    pub button_color_pressed: Color,
-    pub floating_panel_title_bar_color: Color,
-    pub pause_menu_bg_color: Color,
     pub padding_main: f32,
     pub padding_minor: f32,
     pub border_radius: f32,
     pub font_size_p: f32,
     pub font_size_h1: f32,
     pub font_size_h2: f32,
+    pub button_color_normal: Color,
+    pub button_color_hovered: Color,
+    pub button_color_pressed: Color,
+    pub title_bar_color: Color,
+    pub title_bar_button_padding: f32,
+    pub title_bar_button_icon_size: f32,
+    pub pause_menu_bg_color: Color,
 }
 
 impl GuiTheme {
@@ -41,17 +43,19 @@ impl GuiTheme {
                 Val::ZERO,
                 px(5),
             ),
-            button_color_normal: Color::hsv(185.0, 0.3, 0.25),
-            button_color_hovered: Color::hsv(185.0, 0.3, 0.2),
-            button_color_pressed: Color::hsv(185.0, 0.3, 0.15),
-            floating_panel_title_bar_color: Color::hsv(185.0, 0.3, 0.25),
-            pause_menu_bg_color: Color::hsva(0.0, 0.0, 0.0, 0.75),
             padding_main: 10.,
             padding_minor: 5.,
             border_radius: 5.,
             font_size_p: 12.,
             font_size_h1: 20.,
             font_size_h2: 16.,
+            button_color_normal: Color::hsv(185.0, 0.3, 0.25),
+            button_color_hovered: Color::hsv(185.0, 0.3, 0.2),
+            button_color_pressed: Color::hsv(185.0, 0.3, 0.15),
+            title_bar_color: Color::hsv(185.0, 0.3, 0.25),
+            title_bar_button_padding: 2.,
+            title_bar_button_icon_size: 16.,
+            pause_menu_bg_color: Color::hsva(0.0, 0.0, 0.0, 0.75),
         }
     }
 }
@@ -80,6 +84,8 @@ impl GuiThemeComputed {
         ret.font_size_p *= scale.0;
         ret.font_size_h1 *= scale.0;
         ret.font_size_h2 *= scale.0;
+        ret.title_bar_button_padding *= scale.0;
+        ret.title_bar_button_icon_size *= scale.0;
 
         Self(ret)
     }

@@ -3,16 +3,29 @@ use bevy::prelude::*;
 use crate::game::gui::{GuiChildren, resources::GuiThemeComputed, sets::GuiSystemsOrdering};
 
 #[allow(unused)]
-pub struct GuiButtonProps {}
+pub enum GuiButtonStyle {
+    None,
+    Regular,
+    TitleBarButton,
+}
+
+#[allow(unused)]
+pub struct GuiButtonProps {
+    pub button_style: GuiButtonStyle,
+}
 
 impl Default for GuiButtonProps {
     fn default() -> Self {
-        Self {}
+        Self {
+            button_style: GuiButtonStyle::Regular,
+        }
     }
 }
 
 #[derive(Component)]
-struct GuiButtonAttribs {}
+struct GuiButtonAttribs {
+    button_style: GuiButtonStyle,
+}
 
 enum GuiButtonPressedState {
     None,
@@ -28,7 +41,9 @@ struct GuiButtonState {
 #[allow(unused)]
 pub fn gui_button(props: GuiButtonProps) -> impl Bundle {
     (
-        GuiButtonAttribs {},
+        GuiButtonAttribs {
+            button_style: props.button_style,
+        },
         GuiButtonState {
             pressed_state: GuiButtonPressedState::None,
         },
@@ -40,7 +55,7 @@ pub fn gui_button(props: GuiButtonProps) -> impl Bundle {
 fn apply_style(
     commands: &mut Commands,
     theme: &GuiThemeComputed,
-    _attribs: &GuiButtonAttribs,
+    attribs: &GuiButtonAttribs,
     state: &GuiButtonState,
     entity: &Entity,
     node: &mut Node,
@@ -48,16 +63,39 @@ fn apply_style(
     node.display = Display::Flex;
     node.width = Val::Auto;
     node.height = Val::Auto;
-    node.border_radius = BorderRadius::all(px(theme.0.border_radius));
     node.flex_direction = FlexDirection::Column;
     node.justify_content = JustifyContent::Center;
     node.align_items = AlignItems::Center;
-    node.padding = UiRect::all(px(theme.0.padding_main));
-    node.row_gap = px(theme.0.padding_main);
-    commands
-        .entity(*entity)
-        .insert(BackgroundColor(what_bg_color(&theme, &state)))
-        .insert(theme.0.box_shadow.clone());
+
+    match attribs.button_style {
+        GuiButtonStyle::None => {
+            node.border_radius = BorderRadius::ZERO;
+            node.padding = UiRect::ZERO;
+            node.row_gap = Val::ZERO;
+            commands
+                .entity(*entity)
+                .remove::<BackgroundColor>()
+                .remove::<BoxShadow>();
+        }
+        GuiButtonStyle::Regular => {
+            node.border_radius = BorderRadius::all(px(theme.0.border_radius));
+            node.padding = UiRect::all(px(theme.0.padding_main));
+            node.row_gap = px(theme.0.padding_main);
+            commands
+                .entity(*entity)
+                .insert(BackgroundColor(what_bg_color(&theme, &state)))
+                .insert(theme.0.box_shadow.clone());
+        }
+        GuiButtonStyle::TitleBarButton => {
+            node.border_radius = BorderRadius::all(px(theme.0.border_radius));
+            node.padding = UiRect::all(px(theme.0.title_bar_button_padding));
+            node.row_gap = px(theme.0.padding_main);
+            commands
+                .entity(*entity)
+                .insert(BackgroundColor(what_bg_color(&theme, &state)))
+                .insert(theme.0.box_shadow.clone());
+        }
+    }
 }
 
 fn modify_style_from_state(

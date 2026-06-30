@@ -7,6 +7,7 @@ pub enum GuiDivStyle {
     None,
     Regular,
     Custom {
+        border_radius: BorderRadius,
         padding: UiRect,
         gap: f32,
         bg_color: Color,
@@ -97,14 +98,14 @@ fn apply_style(
             }
         },
     }
-    node.border_radius = BorderRadius::all(px(theme.0.border_radius));
     node.flex_direction = attribs.flex_direction;
     node.justify_content = attribs.justify_content;
     node.align_items = attribs.align_items;
 
     match attribs.div_style {
         GuiDivStyle::None => {
-            node.padding = UiRect::default();
+            node.border_radius = BorderRadius::ZERO;
+            node.padding = UiRect::ZERO;
             node.row_gap = Val::ZERO;
             commands
                 .entity(*entity)
@@ -112,6 +113,7 @@ fn apply_style(
                 .remove::<BoxShadow>();
         }
         GuiDivStyle::Regular => {
+            node.border_radius = BorderRadius::all(px(theme.0.border_radius));
             node.padding = UiRect::all(px(theme.0.padding_main));
             node.row_gap = px(theme.0.padding_main);
             commands
@@ -120,11 +122,13 @@ fn apply_style(
                 .insert(theme.0.box_shadow.clone());
         }
         GuiDivStyle::Custom {
+            border_radius,
             padding,
             gap,
             bg_color,
             box_shadow,
         } => {
+            node.border_radius = border_radius;
             node.padding = padding;
             node.row_gap = px(gap);
             commands.entity(*entity).insert(BackgroundColor(bg_color));
