@@ -18,7 +18,7 @@
 - Put more `#[allow(unused)]` where you need them.
 
 ## Should Do At Some Point
-- Search project for 'TODO'.
+- Search project for 'todo'. And search project for 'debug!'.
 - Make a better system for changing the cursor type (right now it's just done locally for the floating panel corner resizer).
 - Test out when there are multiple floating panels and if you drag the window or drag the resizer over each other.
 - Make floating panels move correctly when the window is resized.

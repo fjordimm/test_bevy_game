@@ -130,7 +130,7 @@ impl Plugin for GuiScreenDivPlugin {
 
 fn handle_gui_children(
     world: &mut World,
-    mut entity_q: Local<QueryState<Entity, With<GuiChildren>>>,
+    mut entity_q: Local<QueryState<Entity, (With<GuiScreenDivAttribs>, With<GuiChildren>)>>,
 ) {
     let entities: Vec<_> = entity_q.iter(world).map(|e| e).collect();
 

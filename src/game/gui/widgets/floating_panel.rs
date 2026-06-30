@@ -155,7 +155,8 @@ fn apply_style(
     root_node.align_items = AlignItems::Stretch;
     commands
         .entity(*root_entity)
-        .insert(BackgroundColor(theme.0.bg_color_main));
+        .insert(BackgroundColor(theme.0.bg_color_main))
+        .insert(theme.0.box_shadow.clone());
 
     title_bar_node.display = Display::Flex;
     title_bar_node.border_radius = BorderRadius::top(px(theme.0.border_radius));
@@ -308,7 +309,13 @@ struct GuiFloatingPanelRelations {
 
 fn setup_relations(
     mut commands: Commands,
-    root_q: Query<(Entity, &Children), With<GuiFloatingPanelAttribs>>,
+    root_q: Query<
+        (Entity, &Children),
+        (
+            With<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelRelations>,
+        ),
+    >,
     title_bar_q: Query<(Entity, &Children), With<GuiFloatingPanelTitleBarTag>>,
     title_bar_main_part_q: Query<Entity, With<GuiFloatingPanelTitleBarMainPartTag>>,
     title_bar_button_part_q: Query<
@@ -381,7 +388,7 @@ fn setup_relations(
 
 fn handle_gui_children(
     world: &mut World,
-    mut root_q: Local<QueryState<Entity, (With<GuiChildren>, With<GuiFloatingPanelRelations>)>>,
+    mut root_q: Local<QueryState<Entity, (With<GuiFloatingPanelRelations>, With<GuiChildren>)>>,
     mut relations_q: Local<QueryState<&GuiFloatingPanelRelations>>,
     mut main_content_inner_q: Local<QueryState<Entity, With<GuiFloatingPanelMainContentInnerTag>>>,
 ) {
