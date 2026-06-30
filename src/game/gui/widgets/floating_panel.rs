@@ -15,7 +15,7 @@ use crate::game::{
             text::gui_text_h2,
         },
     },
-    util::alrro,
+    util::{alrmo, alrro},
 };
 
 #[allow(unused)]
@@ -92,6 +92,7 @@ pub fn gui_floating_panel(title: impl Into<String>, props: GuiFloatingPanelProps
         children![
             (
                 GuiFloatingPanelTitleBarTag,
+                Button,
                 Node::default(),
                 children![
                     (GuiFloatingPanelTitleBarMainPartTag, Node::default()),
@@ -171,7 +172,7 @@ fn apply_style(
 
     title_bar_main_part_node.flex_grow = 1.;
     title_bar_main_part_node.display = Display::Flex;
-    title_bar_main_part_node.border_radius = BorderRadius::top_left(px(theme.0.border_radius));
+    title_bar_node.border_radius = what_border_radius_for_title_bar(&theme, &state);
     title_bar_main_part_node.flex_direction = FlexDirection::Row;
     title_bar_main_part_node.justify_content = JustifyContent::FlexStart;
     title_bar_main_part_node.align_items = AlignItems::Center;
@@ -181,6 +182,7 @@ fn apply_style(
     let title_text = commands.spawn(gui_text_h2(attribs.title.clone())).id();
     commands
         .entity(*title_bar_main_part_entity)
+        .despawn_children()
         .add_child(title_text);
 
     title_bar_button_part_node.display = Display::Flex;
@@ -216,7 +218,7 @@ fn apply_style(
         .despawn_children()
         .add_child(x_button_icon);
 
-    main_content_node.display = Display::Flex;
+    main_content_node.display = what_display_for_main_content(&state);
     main_content_node.border_radius = BorderRadius::bottom(px(theme.0.border_radius));
     main_content_node.flex_direction = FlexDirection::Column;
     main_content_node.justify_content = JustifyContent::FlexStart;
@@ -238,7 +240,7 @@ fn apply_style(
     corner_resizer_node.position_type = PositionType::Absolute;
     corner_resizer_node.right = px(theme.0.corner_resizer_padding);
     corner_resizer_node.bottom = px(theme.0.corner_resizer_padding);
-    corner_resizer_node.display = Display::Flex;
+    corner_resizer_node.display = what_display_for_corner_resizer(&state);
     corner_resizer_node.flex_direction = FlexDirection::Column;
     corner_resizer_node.justify_content = JustifyContent::Center;
     corner_resizer_node.align_items = AlignItems::Center;
@@ -257,10 +259,55 @@ fn apply_style(
         .add_child(corner_resizer_icon);
 }
 
+fn modify_style_from_state(
+    _commands: &mut Commands,
+    theme: &GuiThemeComputed,
+    _attribs: &GuiFloatingPanelAttribs,
+    state: &GuiFloatingPanelState,
+    root_node: &mut Node,
+    title_bar_node: &mut Node,
+    main_content_node: &mut Node,
+    corner_resizer_node: &mut Node,
+) {
+    root_node.left = px(state.pos_x);
+    root_node.top = px(state.pos_y);
+    root_node.display = what_display(&state);
+
+    title_bar_node.border_radius = what_border_radius_for_title_bar(&theme, &state);
+
+    main_content_node.display = what_display_for_main_content(&state);
+
+    corner_resizer_node.display = what_display_for_corner_resizer(&state);
+}
+
 fn what_display(state: &GuiFloatingPanelState) -> Display {
     match state.is_active {
         true => Display::Flex,
         false => Display::None,
+    }
+}
+
+fn what_border_radius_for_title_bar(
+    theme: &GuiThemeComputed,
+    state: &GuiFloatingPanelState,
+) -> BorderRadius {
+    match state.is_minimized {
+        true => BorderRadius::all(px(theme.0.border_radius)),
+        false => BorderRadius::top(px(theme.0.border_radius)),
+    }
+}
+
+fn what_display_for_main_content(state: &GuiFloatingPanelState) -> Display {
+    match state.is_minimized {
+        true => Display::None,
+        false => Display::Flex,
+    }
+}
+
+fn what_display_for_corner_resizer(state: &GuiFloatingPanelState) -> Display {
+    match state.is_minimized {
+        true => Display::None,
+        false => Display::Flex,
     }
 }
 
@@ -290,6 +337,10 @@ impl Plugin for GuiFloatingPanelPlugin {
             .add_systems(Update,
                 update_style_on_state_change
                     .in_set(GuiSystemsOrdering::UpdateStyle)
+            )
+            .add_systems(Update,
+                update_panel_dragged
+                    .in_set(GuiSystemsOrdering::UpdateState)
             )
         ;
     }
@@ -357,10 +408,26 @@ fn setup_relations(
                         title_bar_button_part_children.iter().for_each(|child| {
                             if let Ok(minimize_button) = minimize_button_q.get(child) {
                                 relations.minimize_button = minimize_button;
+
+                                commands.entity(minimize_button).observe(
+                                    move |_: On<Pointer<Click>>, mut root_state_q: Query<&mut GuiFloatingPanelState>| {
+                                        if let Some(mut root_state) = alrmo!(root_state_q.get_mut(root)) {
+                                            root_state.is_minimized = !root_state.is_minimized;
+                                        }
+                                    },
+                                );
                             }
 
                             if let Ok(x_button) = x_button_q.get(child) {
                                 relations.x_button = x_button;
+
+                                commands.entity(x_button).observe(
+                                    move |_: On<Pointer<Click>>, mut root_state_q: Query<&mut GuiFloatingPanelState>| {
+                                        if let Some(mut root_state) = alrmo!(root_state_q.get_mut(root)) {
+                                            root_state.is_active = false;
+                                        }
+                                    },
+                                );
                             }
                         });
                     }
@@ -578,6 +645,262 @@ fn update_style_on_init_or_attrib_change(
         });
 }
 
-fn update_style_on_theme_change() {}
+fn update_style_on_theme_change(
+    mut commands: Commands,
+    theme: Res<GuiThemeComputed>,
+    mut root_q: Query<(
+        &GuiFloatingPanelRelations,
+        &GuiFloatingPanelAttribs,
+        &GuiFloatingPanelState,
+        Entity,
+        &mut Node,
+    )>,
+    mut title_bar_q: Query<
+        (Entity, &mut Node),
+        (
+            With<GuiFloatingPanelTitleBarTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleBarMainPartTag>,
+            Without<GuiFloatingPanelTitleBarButtonPartTag>,
+            Without<GuiFloatingPanelMinimizeButtonTag>,
+            Without<GuiFloatingPanelXButtonTag>,
+            Without<GuiFloatingPanelMainContentTag>,
+            Without<GuiFloatingPanelMainContentInnerTag>,
+            Without<GuiFloatingPanelCornerResizerTag>,
+        ),
+    >,
+    mut title_bar_main_part_q: Query<
+        (Entity, &mut Node),
+        (
+            With<GuiFloatingPanelTitleBarMainPartTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleBarTag>,
+            Without<GuiFloatingPanelTitleBarButtonPartTag>,
+            Without<GuiFloatingPanelMinimizeButtonTag>,
+            Without<GuiFloatingPanelXButtonTag>,
+            Without<GuiFloatingPanelMainContentTag>,
+            Without<GuiFloatingPanelMainContentInnerTag>,
+            Without<GuiFloatingPanelCornerResizerTag>,
+        ),
+    >,
+    mut title_bar_button_part_q: Query<
+        &mut Node,
+        (
+            With<GuiFloatingPanelTitleBarButtonPartTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleBarTag>,
+            Without<GuiFloatingPanelTitleBarMainPartTag>,
+            Without<GuiFloatingPanelMinimizeButtonTag>,
+            Without<GuiFloatingPanelXButtonTag>,
+            Without<GuiFloatingPanelMainContentTag>,
+            Without<GuiFloatingPanelMainContentInnerTag>,
+            Without<GuiFloatingPanelCornerResizerTag>,
+        ),
+    >,
+    mut minimize_button_q: Query<
+        Entity,
+        (
+            With<GuiFloatingPanelMinimizeButtonTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleBarTag>,
+            Without<GuiFloatingPanelTitleBarMainPartTag>,
+            Without<GuiFloatingPanelTitleBarButtonPartTag>,
+            Without<GuiFloatingPanelXButtonTag>,
+            Without<GuiFloatingPanelMainContentTag>,
+            Without<GuiFloatingPanelMainContentInnerTag>,
+            Without<GuiFloatingPanelCornerResizerTag>,
+        ),
+    >,
+    mut x_button_q: Query<
+        Entity,
+        (
+            With<GuiFloatingPanelXButtonTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleBarTag>,
+            Without<GuiFloatingPanelTitleBarMainPartTag>,
+            Without<GuiFloatingPanelTitleBarButtonPartTag>,
+            Without<GuiFloatingPanelMinimizeButtonTag>,
+            Without<GuiFloatingPanelMainContentTag>,
+            Without<GuiFloatingPanelMainContentInnerTag>,
+            Without<GuiFloatingPanelCornerResizerTag>,
+        ),
+    >,
+    mut main_content_q: Query<
+        &mut Node,
+        (
+            With<GuiFloatingPanelMainContentTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleBarTag>,
+            Without<GuiFloatingPanelTitleBarMainPartTag>,
+            Without<GuiFloatingPanelTitleBarButtonPartTag>,
+            Without<GuiFloatingPanelMinimizeButtonTag>,
+            Without<GuiFloatingPanelXButtonTag>,
+            Without<GuiFloatingPanelMainContentInnerTag>,
+            Without<GuiFloatingPanelCornerResizerTag>,
+        ),
+    >,
+    mut main_content_inner_q: Query<
+        (Entity, &mut Node),
+        (
+            With<GuiFloatingPanelMainContentInnerTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleBarTag>,
+            Without<GuiFloatingPanelTitleBarMainPartTag>,
+            Without<GuiFloatingPanelTitleBarButtonPartTag>,
+            Without<GuiFloatingPanelMinimizeButtonTag>,
+            Without<GuiFloatingPanelXButtonTag>,
+            Without<GuiFloatingPanelMainContentTag>,
+            Without<GuiFloatingPanelCornerResizerTag>,
+        ),
+    >,
+    mut corner_resizer_q: Query<
+        (Entity, &mut Node),
+        (
+            With<GuiFloatingPanelCornerResizerTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleBarTag>,
+            Without<GuiFloatingPanelTitleBarMainPartTag>,
+            Without<GuiFloatingPanelTitleBarButtonPartTag>,
+            Without<GuiFloatingPanelMinimizeButtonTag>,
+            Without<GuiFloatingPanelXButtonTag>,
+            Without<GuiFloatingPanelMainContentTag>,
+            Without<GuiFloatingPanelMainContentInnerTag>,
+        ),
+    >,
+) {
+    root_q
+        .iter_mut()
+        .for_each(|(relations, attribs, state, root_entity, mut root_node)| {
+            let (title_bar_entity, mut title_bar_node) =
+                alrro!(title_bar_q.get_mut(relations.title_bar));
+            let (title_bar_main_part_entity, mut title_bar_main_part_node) =
+                alrro!(title_bar_main_part_q.get_mut(relations.title_bar_main_part));
+            let mut title_bar_button_part_node =
+                alrro!(title_bar_button_part_q.get_mut(relations.title_bar_button_part));
+            let minimize_button_entity =
+                alrro!(minimize_button_q.get_mut(relations.minimize_button));
+            let x_button_entity = alrro!(x_button_q.get_mut(relations.x_button));
+            let mut main_content_node = alrro!(main_content_q.get_mut(relations.main_content));
+            let (main_content_inner_entity, mut main_content_inner_node) =
+                alrro!(main_content_inner_q.get_mut(relations.main_content_inner));
+            let (corner_resizer_entity, mut corner_resizer_node) =
+                alrro!(corner_resizer_q.get_mut(relations.corner_resizer));
 
-fn update_style_on_state_change() {}
+            apply_style(
+                &mut commands,
+                &theme,
+                &attribs,
+                &state,
+                &root_entity,
+                &mut root_node,
+                &title_bar_entity,
+                &mut title_bar_node,
+                &title_bar_main_part_entity,
+                &mut title_bar_main_part_node,
+                &mut title_bar_button_part_node,
+                &minimize_button_entity,
+                &x_button_entity,
+                &mut main_content_node,
+                &main_content_inner_entity,
+                &mut main_content_inner_node,
+                &corner_resizer_entity,
+                &mut corner_resizer_node,
+            );
+        });
+}
+
+fn update_style_on_state_change(
+    mut commands: Commands,
+    theme: Res<GuiThemeComputed>,
+    mut root_q: Query<
+        (
+            &GuiFloatingPanelRelations,
+            &GuiFloatingPanelAttribs,
+            &GuiFloatingPanelState,
+            &mut Node,
+        ),
+        Changed<GuiFloatingPanelState>,
+    >,
+    mut title_bar_q: Query<
+        &mut Node,
+        (
+            With<GuiFloatingPanelTitleBarTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelMainContentTag>,
+            Without<GuiFloatingPanelCornerResizerTag>,
+        ),
+    >,
+    mut main_content_q: Query<
+        &mut Node,
+        (
+            With<GuiFloatingPanelMainContentTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleBarTag>,
+            Without<GuiFloatingPanelCornerResizerTag>,
+        ),
+    >,
+    mut corner_resizer_q: Query<
+        &mut Node,
+        (
+            With<GuiFloatingPanelCornerResizerTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleBarTag>,
+            Without<GuiFloatingPanelMainContentTag>,
+        ),
+    >,
+) {
+    root_q
+        .iter_mut()
+        .for_each(|(relations, attribs, state, mut root_node)| {
+            let mut title_bar_node = alrro!(title_bar_q.get_mut(relations.title_bar));
+            let mut main_content_node = alrro!(main_content_q.get_mut(relations.main_content));
+            let mut corner_resizer_node =
+                alrro!(corner_resizer_q.get_mut(relations.corner_resizer));
+
+            modify_style_from_state(
+                &mut commands,
+                &theme,
+                &attribs,
+                &state,
+                &mut root_node,
+                &mut title_bar_node,
+                &mut main_content_node,
+                &mut corner_resizer_node,
+            );
+        });
+}
+
+fn update_panel_dragged(
+    interaction_q: Query<
+        (&Interaction, &ChildOf),
+        (Changed<Interaction>, With<GuiFloatingPanelTitleBarTag>),
+    >,
+    mut panel_being_dragged: Local<Option<Entity>>,
+    mut panel_q: Query<&mut GuiFloatingPanelState, With<GuiFloatingPanelAttribs>>,
+    mut mouse_motion: MessageReader<CursorMoved>,
+) {
+    interaction_q
+        .iter()
+        .for_each(|(interaction, childof)| match *interaction {
+            Interaction::Pressed => {
+                *panel_being_dragged = Some(childof.0);
+            }
+            _ => {
+                *panel_being_dragged = None;
+            }
+        });
+
+    if let Some(target_panel) = *panel_being_dragged {
+        let mut delta_x = 0.;
+        let mut delta_y = 0.;
+        mouse_motion.read().for_each(|msg| {
+            delta_x += msg.delta.map(|d| d.x).unwrap_or(0.);
+            delta_y += msg.delta.map(|d| d.y).unwrap_or(0.);
+        });
+
+        if let Ok(mut panel_state) = panel_q.get_mut(target_panel) {
+            panel_state.pos_x += delta_x;
+            panel_state.pos_y += delta_y;
+        }
+    }
+}

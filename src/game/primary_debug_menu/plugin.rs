@@ -30,6 +30,7 @@ fn spawn_debug_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
         .spawn(gui_floating_panel("Primary Debug Menu", default()))
         .insert(gui_children(|p| {
             p.spawn(gui_text_p("what's up buddy"));
+            p.spawn(gui_text_p("kowabunga yayyyy"));
         }))
         .insert(PrimaryDebugMenuTag)
         .insert(ZIndex(4000))
