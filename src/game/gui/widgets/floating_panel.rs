@@ -342,6 +342,10 @@ impl Plugin for GuiFloatingPanelPlugin {
                 update_panel_dragged
                     .in_set(GuiSystemsOrdering::UpdateState)
             )
+            .add_systems(Update,
+                update_panel_resized
+                    .in_set(GuiSystemsOrdering::UpdateState)
+            )
         ;
     }
 }
@@ -876,7 +880,7 @@ fn update_panel_dragged(
         (Changed<Interaction>, With<GuiFloatingPanelTitleBarTag>),
     >,
     mut panel_being_dragged: Local<Option<Entity>>,
-    mut panel_q: Query<&mut GuiFloatingPanelState, With<GuiFloatingPanelAttribs>>,
+    mut panel_q: Query<&mut GuiFloatingPanelState>,
     mut mouse_motion: MessageReader<CursorMoved>,
 ) {
     interaction_q
@@ -901,6 +905,38 @@ fn update_panel_dragged(
         if let Ok(mut panel_state) = panel_q.get_mut(target_panel) {
             panel_state.pos_x += delta_x;
             panel_state.pos_y += delta_y;
+        }
+    }
+}
+
+fn update_panel_resized(
+    interaction_q: Query<
+        (&Interaction, &ChildOf),
+        (Changed<Interaction>, With<GuiFloatingPanelCornerResizerTag>),
+    >,
+    mut panel_being_resized: Local<Option<Entity>>,
+    mut panel_q: Query<&mut GuiFloatingPanelState>,
+    mut mouse_motion: MessageReader<CursorMoved>,
+) {
+    interaction_q
+        .iter()
+        .for_each(|(interaction, childof)| match *interaction {
+            Interaction::Pressed => {
+                *panel_being_resized = Some(childof.0);
+            }
+            _ => {
+                *panel_being_resized = None;
+            }
+        });
+
+    if let Some(target_panel) = *panel_being_resized {
+        if let Ok(mut panel_state) = panel_q.get(target_panel) {
+            let mut delta_x = 0.0;
+            let mut delta_y = 0.0;
+            mouse_motion.read().for_each(|msg| {
+                delta_x += msg.delta.map(|d| d.x).unwrap_or(0.0);
+                delta_y += msg.delta.map(|d| d.y).unwrap_or(0.0);
+            });
         }
     }
 }
