@@ -6,6 +6,7 @@ use bevy::prelude::*;
 
 use crate::game::{
     gui::{
+        GuiChildren,
         resources::GuiThemeComputed,
         sets::GuiSystemsOrdering,
         widgets::{
@@ -124,22 +125,12 @@ pub fn gui_floating_panel(title: impl Into<String>, props: GuiFloatingPanelProps
     )
 }
 
-// TODOr
-// title_bar
-//   title_bar_main_part
-//     title_text
-//   title_bar_button_part
-//     minimize_button
-//     x_button
-// main_content
-//   main_content_inner
-// corner_resizer
-
 fn apply_style(
     commands: &mut Commands,
     theme: &GuiThemeComputed,
     attribs: &GuiFloatingPanelAttribs,
     state: &GuiFloatingPanelState,
+    root_entity: &Entity,
     root_node: &mut Node,
     title_bar_entity: &Entity,
     title_bar_node: &mut Node,
@@ -147,14 +138,12 @@ fn apply_style(
     title_bar_main_part_node: &mut Node,
     title_bar_button_part_node: &mut Node,
     minimize_button_entity: &Entity,
-    minimize_button_node: &mut Node,
     x_button_entity: &Entity,
-    x_button_node: &mut Node,
-    _main_content_entity: &Entity,
-    _main_content_node: &mut Node,
-    _main_content_inner_node: &mut Node,
-    _corner_resizer_entity: &Entity,
-    _corner_resizer_node: &mut Node,
+    main_content_node: &mut Node,
+    main_content_inner_entity: &Entity,
+    main_content_inner_node: &mut Node,
+    corner_resizer_entity: &Entity,
+    corner_resizer_node: &mut Node,
 ) {
     root_node.position_type = PositionType::Absolute;
     root_node.left = px(state.pos_x);
@@ -164,6 +153,9 @@ fn apply_style(
     root_node.flex_direction = FlexDirection::Column;
     root_node.justify_content = JustifyContent::FlexStart;
     root_node.align_items = AlignItems::Stretch;
+    commands
+        .entity(*root_entity)
+        .insert(BackgroundColor(theme.0.bg_color_main));
 
     title_bar_node.display = Display::Flex;
     title_bar_node.border_radius = BorderRadius::top(px(theme.0.border_radius));
@@ -222,6 +214,46 @@ fn apply_style(
         .entity(*x_button_entity)
         .despawn_children()
         .add_child(x_button_icon);
+
+    main_content_node.display = Display::Flex;
+    main_content_node.border_radius = BorderRadius::bottom(px(theme.0.border_radius));
+    main_content_node.flex_direction = FlexDirection::Column;
+    main_content_node.justify_content = JustifyContent::FlexStart;
+    main_content_node.align_items = AlignItems::FlexStart;
+
+    main_content_inner_node.flex_grow = 1.;
+    main_content_inner_node.align_self = AlignSelf::Stretch;
+    main_content_inner_node.overflow = Overflow::scroll();
+    main_content_inner_node.display = Display::Flex;
+    main_content_inner_node.flex_direction = FlexDirection::Column;
+    main_content_inner_node.justify_content = JustifyContent::FlexStart;
+    main_content_inner_node.align_items = AlignItems::FlexStart;
+    main_content_inner_node.padding = UiRect::all(px(theme.0.padding_main));
+    main_content_inner_node.row_gap = px(theme.0.padding_main);
+    commands
+        .entity(*main_content_inner_entity)
+        .insert(ScrollPosition::default());
+
+    corner_resizer_node.position_type = PositionType::Absolute;
+    corner_resizer_node.right = px(theme.0.corner_resizer_padding);
+    corner_resizer_node.bottom = px(theme.0.corner_resizer_padding);
+    corner_resizer_node.display = Display::Flex;
+    corner_resizer_node.flex_direction = FlexDirection::Column;
+    corner_resizer_node.justify_content = JustifyContent::Center;
+    corner_resizer_node.align_items = AlignItems::Center;
+
+    let corner_resizer_icon = commands
+        .spawn(gui_icon(
+            GuiIconIcon::CornerResizer,
+            theme.0.corner_resizer_size,
+            theme.0.corner_resizer_size,
+            GuiIconProps::default(),
+        ))
+        .id();
+    commands
+        .entity(*corner_resizer_entity)
+        .despawn_children()
+        .add_child(corner_resizer_icon);
 }
 
 fn what_display(state: &GuiFloatingPanelState) -> Display {
@@ -347,7 +379,27 @@ fn setup_relations(
     });
 }
 
-fn handle_gui_children() {}
+fn handle_gui_children(
+    world: &mut World,
+    mut root_q: Local<QueryState<Entity, (With<GuiChildren>, With<GuiFloatingPanelRelations>)>>,
+    mut relations_q: Local<QueryState<&GuiFloatingPanelRelations>>,
+    mut main_content_inner_q: Local<QueryState<Entity, With<GuiFloatingPanelMainContentInnerTag>>>,
+) {
+    let entities: Vec<_> = root_q.iter(world).map(|e| e).collect();
+
+    entities.iter().for_each(|entity| {
+        let mut entity_mut = world.entity_mut(*entity);
+        if let Some(gui_children) = entity_mut.take::<GuiChildren>() {
+            let relations = alrro!(relations_q.get(&world, *entity));
+            let main_content_inner =
+                alrro!(main_content_inner_q.get(&world, relations.main_content_inner));
+
+            world
+                .entity_mut(main_content_inner)
+                .with_children(gui_children.0);
+        }
+    });
+}
 
 fn update_style_on_init_or_attrib_change(
     mut commands: Commands,
@@ -357,6 +409,7 @@ fn update_style_on_init_or_attrib_change(
             &GuiFloatingPanelRelations,
             &GuiFloatingPanelAttribs,
             &GuiFloatingPanelState,
+            Entity,
             &mut Node,
         ),
         Or<(
@@ -407,7 +460,7 @@ fn update_style_on_init_or_attrib_change(
         ),
     >,
     mut minimize_button_q: Query<
-        (Entity, &mut Node),
+        Entity,
         (
             With<GuiFloatingPanelMinimizeButtonTag>,
             Without<GuiFloatingPanelAttribs>,
@@ -421,7 +474,7 @@ fn update_style_on_init_or_attrib_change(
         ),
     >,
     mut x_button_q: Query<
-        (Entity, &mut Node),
+        Entity,
         (
             With<GuiFloatingPanelXButtonTag>,
             Without<GuiFloatingPanelAttribs>,
@@ -435,7 +488,7 @@ fn update_style_on_init_or_attrib_change(
         ),
     >,
     mut main_content_q: Query<
-        (Entity, &mut Node),
+        &mut Node,
         (
             With<GuiFloatingPanelMainContentTag>,
             Without<GuiFloatingPanelAttribs>,
@@ -449,7 +502,7 @@ fn update_style_on_init_or_attrib_change(
         ),
     >,
     mut main_content_inner_q: Query<
-        &mut Node,
+        (Entity, &mut Node),
         (
             With<GuiFloatingPanelMainContentInnerTag>,
             Without<GuiFloatingPanelAttribs>,
@@ -479,20 +532,18 @@ fn update_style_on_init_or_attrib_change(
 ) {
     root_q
         .iter_mut()
-        .for_each(|(relations, attribs, state, mut root_node)| {
+        .for_each(|(relations, attribs, state, root_entity, mut root_node)| {
             let (title_bar_entity, mut title_bar_node) =
                 alrro!(title_bar_q.get_mut(relations.title_bar));
             let (title_bar_main_part_entity, mut title_bar_main_part_node) =
                 alrro!(title_bar_main_part_q.get_mut(relations.title_bar_main_part));
             let mut title_bar_button_part_node =
                 alrro!(title_bar_button_part_q.get_mut(relations.title_bar_button_part));
-            let (minimize_button_entity, mut minimize_button_node) =
+            let minimize_button_entity =
                 alrro!(minimize_button_q.get_mut(relations.minimize_button));
-            let (x_button_entity, mut x_button_node) =
-                alrro!(x_button_q.get_mut(relations.x_button));
-            let (main_content_entity, mut main_content_node) =
-                alrro!(main_content_q.get_mut(relations.main_content));
-            let mut main_content_inner_node =
+            let x_button_entity = alrro!(x_button_q.get_mut(relations.x_button));
+            let mut main_content_node = alrro!(main_content_q.get_mut(relations.main_content));
+            let (main_content_inner_entity, mut main_content_inner_node) =
                 alrro!(main_content_inner_q.get_mut(relations.main_content_inner));
             let (corner_resizer_entity, mut corner_resizer_node) =
                 alrro!(corner_resizer_q.get_mut(relations.corner_resizer));
@@ -502,6 +553,7 @@ fn update_style_on_init_or_attrib_change(
                 &theme,
                 &attribs,
                 &state,
+                &root_entity,
                 &mut root_node,
                 &title_bar_entity,
                 &mut title_bar_node,
@@ -509,11 +561,9 @@ fn update_style_on_init_or_attrib_change(
                 &mut title_bar_main_part_node,
                 &mut title_bar_button_part_node,
                 &minimize_button_entity,
-                &mut minimize_button_node,
                 &x_button_entity,
-                &mut x_button_node,
-                &main_content_entity,
                 &mut main_content_node,
+                &main_content_inner_entity,
                 &mut main_content_inner_node,
                 &corner_resizer_entity,
                 &mut corner_resizer_node,

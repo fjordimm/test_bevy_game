@@ -1,7 +1,11 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    core::resources::GlobalGuiRoot, gui::widgets::floating_panel::gui_floating_panel,
+    core::resources::GlobalGuiRoot,
+    gui::{
+        gui_children,
+        widgets::{floating_panel::gui_floating_panel, text::gui_text_p},
+    },
 };
 
 pub struct PrimaryDebugMenuPlugin;
@@ -24,6 +28,9 @@ struct PrimaryDebugMenuTag;
 fn spawn_debug_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
     let debug_menu = commands
         .spawn(gui_floating_panel("Primary Debug Menu", default()))
+        .insert(gui_children(|p| {
+            p.spawn(gui_text_p("what's up buddy"));
+        }))
         .insert(PrimaryDebugMenuTag)
         .insert(ZIndex(4000))
         .id();
