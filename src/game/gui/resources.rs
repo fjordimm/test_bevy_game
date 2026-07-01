@@ -1,6 +1,31 @@
-use bevy::prelude::*;
+use bevy::{platform::collections::HashMap, prelude::*, window::SystemCursorIcon};
 
 use crate::game::core::resources::FontHandles;
+
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+pub enum CursorIconPriority {
+    Regular,
+}
+
+#[derive(Resource)]
+pub struct CursorIconHandler {
+    pub(super) candidates: HashMap<(Entity, SystemCursorIcon), CursorIconPriority>,
+}
+
+impl CursorIconHandler {
+    pub fn add_candidate(
+        &mut self,
+        entity: Entity,
+        icon: SystemCursorIcon,
+        priority: CursorIconPriority,
+    ) {
+        self.candidates.insert((entity, icon), priority);
+    }
+
+    pub fn remove_candidate(&mut self, entity: Entity, icon: SystemCursorIcon) {
+        self.candidates.remove(&(entity, icon));
+    }
+}
 
 // IMPORTANT: If you add a new field to GuiTheme,
 //   remember to rescale it in `GuiThemeComputed::compute_from`

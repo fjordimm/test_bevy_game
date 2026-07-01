@@ -2,9 +2,8 @@
 # Todo List
 
 ## Currently Working On
-- Rework the whole GUI system.
-    - Use sets to force the order of observers and setup_relations.
 - Finish the debug menu.
+- Make a better system for changing the cursor type (right now it's just done locally for the floating panel corner resizer).
 
 ## Reminders
 - Prefer using resources rather than consts for constant arbitrary values.
@@ -19,7 +18,6 @@
 
 ## Should Do At Some Point
 - Search project for 'todo'. And search project for 'debug!'.
-- Make a better system for changing the cursor type (right now it's just done locally for the floating panel corner resizer).
 - Test out when there are multiple floating panels and if you drag the window or drag the resizer over each other.
 - Make floating panels move correctly when the window is resized.
 - Make the camera cursor movement proportional to the window size.

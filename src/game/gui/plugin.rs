@@ -1,15 +1,20 @@
-use bevy::prelude::*;
+use bevy::{
+    platform::collections::HashMap,
+    prelude::*,
+    window::{CursorIcon, PrimaryWindow, SystemCursorIcon},
+};
 
 use crate::game::{
     core::{resources::FontHandles, sets::GlobalStartupOrdering},
     gui::{
-        resources::{GuiScale, GuiTheme, GuiThemeComputed, GuiThemeUncomputed},
+        resources::{CursorIconHandler, GuiScale, GuiTheme, GuiThemeComputed, GuiThemeUncomputed},
         sets::GUI_SYSTEMS_ORDERING_ORDER,
         widgets::{
             button::GuiButtonPlugin, div::GuiDivPlugin, floating_panel::GuiFloatingPanelPlugin,
             icon::GuiIconPlugin, screen_div::GuiScreenDivPlugin, text::GuiTextPlugin,
         },
     },
+    util::alrms,
 };
 
 pub struct GuiPlugin;
@@ -27,6 +32,7 @@ impl Plugin for GuiPlugin {
                 update_gui_theme_computed
                     .run_if(resource_changed::<GuiScale>.or(resource_changed::<GuiThemeUncomputed>))
             )
+            .add_systems(Update, update_cursor_icon)
             .add_plugins(GuiDivPlugin)
             .add_plugins(GuiScreenDivPlugin)
             .add_plugins(GuiTextPlugin)
@@ -47,6 +53,10 @@ fn startup(mut commands: Commands, font_handles: Res<FontHandles>) {
     ));
     commands.insert_resource(gui_theme_uncomputed);
     commands.insert_resource(gui_scale);
+
+    commands.insert_resource(CursorIconHandler {
+        candidates: HashMap::new(),
+    });
 }
 
 fn update_gui_theme_computed(
@@ -55,4 +65,26 @@ fn update_gui_theme_computed(
     mut theme: ResMut<GuiThemeComputed>,
 ) {
     *theme = GuiThemeComputed::compute_from(&theme_uncomputed.0, &scale);
+}
+
+fn update_cursor_icon(
+    mut commands: Commands,
+    cursor_icon_handler: Res<CursorIconHandler>,
+    window_q: Option<Single<Entity, With<PrimaryWindow>>>,
+) {
+    if let Some(window) = alrms!(window_q) {
+        if cursor_icon_handler.candidates.is_empty() {
+            commands
+                .entity(*window)
+                .insert(CursorIcon::from(SystemCursorIcon::Default));
+        } else {
+            if let Some(((_, icon), _)) = cursor_icon_handler
+                .candidates
+                .iter()
+                .max_by(|(_, x), (_, y)| x.cmp(y))
+            {
+                commands.entity(*window).insert(CursorIcon::from(*icon));
+            }
+        }
+    }
 }

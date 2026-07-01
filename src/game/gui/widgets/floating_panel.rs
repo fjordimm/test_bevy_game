@@ -2,12 +2,12 @@
     Note: if there are multiple floating panels, they will not order themselves
 */
 
-use bevy::prelude::*;
+use bevy::{prelude::*, window::SystemCursorIcon};
 
 use crate::game::{
     gui::{
         GuiChildren,
-        resources::GuiThemeComputed,
+        resources::{CursorIconHandler, CursorIconPriority, GuiThemeComputed},
         sets::GuiSystemsOrdering,
         widgets::{
             button::{GuiButtonProps, GuiButtonStyle, gui_button},
@@ -346,6 +346,7 @@ impl Plugin for GuiFloatingPanelPlugin {
                 update_panel_resized
                     .in_set(GuiSystemsOrdering::UpdateState)
             )
+            .add_systems(Update, update_cursor_icon)
         ;
     }
 }
@@ -939,4 +940,24 @@ fn update_panel_resized(
             });
         }
     }
+}
+
+fn update_cursor_icon(
+    mut cursor_icon_handler: ResMut<CursorIconHandler>,
+    interaction_q: Query<
+        (&Interaction, Entity),
+        (With<GuiFloatingPanelCornerResizerTag>, Changed<Interaction>),
+    >,
+) {
+    interaction_q.iter().for_each(|(interaction, entity)| {
+        if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
+            cursor_icon_handler.add_candidate(
+                entity,
+                SystemCursorIcon::SeResize,
+                CursorIconPriority::Regular,
+            );
+        } else {
+            cursor_icon_handler.remove_candidate(entity, SystemCursorIcon::SeResize);
+        }
+    });
 }
