@@ -1,5 +1,5 @@
 use bevy::{
-    diagnostic::FrameTimeDiagnosticsPlugin,
+    diagnostic::{EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
     prelude::*,
     window::{CursorGrabMode, CursorOptions, PrimaryWindow},
 };
@@ -29,6 +29,7 @@ impl Plugin for CorePlugin {
             // External Plugins
             .add_plugins(EntropyPlugin::<Prng>::default())
             .add_plugins(FrameTimeDiagnosticsPlugin::new(120))
+            .add_plugins(EntityCountDiagnosticsPlugin::default())
             // Relevant Stuff
             .init_resource::<KeyBindings>()
             .init_state::<MouseMode>()

@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use bevy::{
-    diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
+    diagnostic::{DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
     prelude::*,
     time::common_conditions::on_timer,
 };
@@ -16,7 +16,7 @@ use crate::game::{
             floating_panel::{
                 GuiFloatingPanelInterface, GuiFloatingPanelProps, gui_floating_panel,
             },
-            text::{GuiTextInterface, gui_text_m},
+            text::{GuiTextInterface, gui_text_h2, gui_text_m},
         },
     },
 };
@@ -33,7 +33,7 @@ impl Plugin for PrimaryDebugMenuPlugin {
             )
             .add_systems(Update, toggle_debug_menu)
             .add_systems(Update,
-                update_fps_indicator
+                update
                     .run_if(on_timer(Duration::from_millis(250)))
             )
         ;
@@ -47,7 +47,16 @@ struct PrimaryDebugMenuTag;
 struct CoreSection;
 
 #[derive(Component)]
-struct FpsIndicator;
+struct FpsText;
+
+#[derive(Component)]
+struct EntityCountText;
+
+#[derive(Component)]
+struct OverallStatePlayingSection;
+
+#[derive(Component)]
+struct TransformEntityCountText;
 
 fn spawn_primary_debug_menu(
     mut commands: Commands,
@@ -92,8 +101,33 @@ fn spawn_primary_debug_menu(
                 ))
                 .insert(gui_children(|p| {
                     p.spawn(gui_div_p()).insert(gui_children(|p| {
-                        p.spawn(gui_text_m("fps: "));
-                        p.spawn((FpsIndicator, gui_text_m("-")));
+                        p.spawn(gui_text_m("FPS: "));
+                        p.spawn((FpsText, gui_text_m("-")));
+                    }));
+
+                    p.spawn(gui_div_p()).insert(gui_children(|p| {
+                        p.spawn(gui_text_m("Entity Count: "));
+                        p.spawn((EntityCountText, gui_text_m("-")));
+                    }));
+                }));
+
+                p.spawn((
+                    OverallStatePlayingSection,
+                    gui_div(GuiDivProps {
+                        flex_direction: FlexDirection::Column,
+                        justify_content: JustifyContent::FlexStart,
+                        align_items: AlignItems::FlexStart,
+                        div_style: GuiDivStyle::RegularStyled,
+                        expands_along_cross_axis: true,
+                        ..default()
+                    }),
+                ))
+                .insert(gui_children(|p| {
+                    p.spawn(gui_text_h2("OverallState::Playing"));
+
+                    p.spawn(gui_div_p()).insert(gui_children(|p| {
+                        p.spawn(gui_text_m("Transform Entity Count: "));
+                        p.spawn((TransformEntityCountText, gui_text_m("-")));
                     }));
                 }));
             }));
@@ -117,16 +151,53 @@ fn toggle_debug_menu(
     }
 }
 
-fn update_fps_indicator(
+fn update(
     diagnostics: Res<DiagnosticsStore>,
-    mut fps_indicator: Query<GuiTextInterface, With<FpsIndicator>>,
+    mut fps_text: Query<
+        GuiTextInterface,
+        (
+            With<FpsText>,
+            Without<EntityCountText>,
+            Without<TransformEntityCountText>,
+        ),
+    >,
+    mut entity_count_text: Query<
+        GuiTextInterface,
+        (
+            With<EntityCountText>,
+            Without<FpsText>,
+            Without<TransformEntityCountText>,
+        ),
+    >,
+    transform_q: Query<(), With<Transform>>,
+    mut transform_entity_count_text: Query<
+        GuiTextInterface,
+        (
+            With<TransformEntityCountText>,
+            Without<FpsText>,
+            Without<EntityCountText>,
+        ),
+    >,
 ) {
-    fps_indicator.iter_mut().for_each(|mut text| {
+    fps_text.iter_mut().for_each(|mut text| {
         text.set_content(
             match diagnostics.get_measurement(&FrameTimeDiagnosticsPlugin::FPS) {
                 None => String::from("-"),
                 Some(measurement) => (measurement.value as i32).to_string(),
             },
         );
+    });
+
+    entity_count_text.iter_mut().for_each(|mut text| {
+        text.set_content(
+            match diagnostics.get_measurement(&EntityCountDiagnosticsPlugin::ENTITY_COUNT) {
+                None => String::from("-"),
+                Some(measurement) => (measurement.value as i32).to_string(),
+            },
+        );
+    });
+
+    transform_entity_count_text.iter_mut().for_each(|mut text| {
+        text.set_content(transform_q.iter().count().to_string());
     });
 }
