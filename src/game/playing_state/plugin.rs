@@ -4,6 +4,7 @@ use crate::game::{
     core::{resources::KeyBindings, states::OverallState},
     playing_state::{
         pause_menu::plugin::PauseMenuPlugin,
+        phong::plugin::PhongPlugin,
         player::{plugin::PlayerPlugin, tags::CameraForPlayer},
         sets::{
             DURING_PLAYING_UNPAUSED_LIST, DuringPlaying, DuringPlayingUnpaused,
@@ -52,9 +53,10 @@ impl Plugin for PlayingStatePlugin {
                 playing_state_entity_check
                     .in_set(DuringPlaying)
             ) // TODO: only do this in debug mode
-            .add_plugins(PauseMenuPlugin)
+            .add_plugins(PhongPlugin)
             .add_plugins(SkyboxPlugin)
             .add_plugins(WorldPlugin)
+            .add_plugins(PauseMenuPlugin)
             .add_plugins(PlayerPlugin)
         ;
     }
