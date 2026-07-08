@@ -12,8 +12,16 @@ pub enum GuiTextSize {
 }
 
 #[allow(unused)]
+pub enum GuiTextFont {
+    Primary,
+    Mono,
+    Custom(Handle<Font>),
+}
+
+#[allow(unused)]
 pub struct GuiTextProps {
     pub size: GuiTextSize,
+    pub font: GuiTextFont,
     pub wraps: bool,
 }
 
@@ -21,6 +29,7 @@ impl Default for GuiTextProps {
     fn default() -> Self {
         Self {
             size: GuiTextSize::P,
+            font: GuiTextFont::Primary,
             wraps: true,
         }
     }
@@ -29,6 +38,7 @@ impl Default for GuiTextProps {
 #[derive(Component)]
 struct GuiTextAttribs {
     size: GuiTextSize,
+    font: GuiTextFont,
     wraps: bool,
 }
 
@@ -42,6 +52,7 @@ pub fn gui_text(content: impl Into<String>, props: GuiTextProps) -> impl Bundle 
     (
         GuiTextAttribs {
             size: props.size,
+            font: props.font,
             wraps: props.wraps,
         },
         GuiTextState {
@@ -87,6 +98,18 @@ pub fn gui_text_h2(content: impl Into<String>) -> impl Bundle {
     )
 }
 
+#[allow(unused)]
+pub fn gui_text_m(content: impl Into<String>) -> impl Bundle {
+    gui_text(
+        content,
+        GuiTextProps {
+            size: GuiTextSize::P,
+            font: GuiTextFont::Mono,
+            ..default()
+        },
+    )
+}
+
 fn apply_style(
     theme: &GuiThemeComputed,
     attribs: &GuiTextAttribs,
@@ -99,7 +122,11 @@ fn apply_style(
     text.0 = state.content.clone(); // TODO: could be more efficient
 
     *textfont = TextFont {
-        font: theme.0.font_main.clone(),
+        font: match &attribs.font {
+            GuiTextFont::Primary => theme.0.font_primary.clone(),
+            GuiTextFont::Mono => theme.0.font_mono.clone(),
+            GuiTextFont::Custom(font_handle) => font_handle.clone(),
+        },
         font_size: match attribs.size {
             GuiTextSize::Custom(val) => val,
             GuiTextSize::P => theme.0.font_size_p,

@@ -3,16 +3,31 @@ use bevy::prelude::*;
 use crate::game::gui::{GuiChildren, resources::GuiThemeComputed, sets::GuiSystemsOrdering};
 
 #[allow(unused)]
+pub struct GuiDivCustomStyle {
+    pub border_radius: BorderRadius,
+    pub padding: UiRect,
+    pub gap: f32,
+    pub bg_color: Color,
+    pub box_shadow: bool,
+}
+
+impl Default for GuiDivCustomStyle {
+    fn default() -> Self {
+        Self {
+            border_radius: BorderRadius::ZERO,
+            padding: UiRect::ZERO,
+            gap: 0.,
+            bg_color: Color::NONE,
+            box_shadow: false,
+        }
+    }
+}
+
+#[allow(unused)]
 pub enum GuiDivStyle {
     None,
-    Regular,
-    Custom {
-        border_radius: BorderRadius,
-        padding: UiRect,
-        gap: f32,
-        bg_color: Color,
-        box_shadow: bool,
-    },
+    RegularStyled,
+    Custom(GuiDivCustomStyle),
 }
 
 #[allow(unused)]
@@ -22,7 +37,8 @@ pub struct GuiDivProps {
     pub align_items: AlignItems,
     pub div_style: GuiDivStyle,
     pub size: Option<(f32, f32)>,
-    pub expand: bool,
+    pub expands_along_main_axis: bool,
+    pub expands_along_cross_axis: bool,
     pub starts_active: bool,
 }
 
@@ -32,9 +48,10 @@ impl Default for GuiDivProps {
             flex_direction: FlexDirection::Column,
             justify_content: JustifyContent::FlexStart,
             align_items: AlignItems::FlexStart,
-            div_style: GuiDivStyle::Regular,
+            div_style: GuiDivStyle::None,
             size: None,
-            expand: false,
+            expands_along_main_axis: false,
+            expands_along_cross_axis: false,
             starts_active: true,
         }
     }
@@ -47,7 +64,8 @@ struct GuiDivAttribs {
     align_items: AlignItems,
     div_style: GuiDivStyle,
     size: Option<(f32, f32)>,
-    expand: bool,
+    expands_along_main_axis: bool,
+    expands_along_cross_axis: bool,
 }
 
 #[derive(Component)]
@@ -64,13 +82,24 @@ pub fn gui_div(props: GuiDivProps) -> impl Bundle {
             align_items: props.align_items,
             div_style: props.div_style,
             size: props.size,
-            expand: props.expand,
+            expands_along_main_axis: props.expands_along_main_axis,
+            expands_along_cross_axis: props.expands_along_cross_axis,
         },
         GuiDivState {
             is_active: props.starts_active,
         },
         Node::default(),
     )
+}
+
+#[allow(unused)]
+pub fn gui_div_p() -> impl Bundle {
+    gui_div(GuiDivProps {
+        flex_direction: FlexDirection::Row,
+        justify_content: JustifyContent::FlexStart,
+        align_items: AlignItems::FlexStart,
+        ..default()
+    })
 }
 
 fn apply_style(
@@ -87,22 +116,32 @@ fn apply_style(
             node.width = px(w);
             node.height = px(h);
         }
-        None => match attribs.expand {
-            true => {
-                node.width = percent(100);
-                node.height = percent(100);
-            }
-            false => {
-                node.width = Val::Auto;
-                node.height = Val::Auto;
-            }
-        },
+        None => {
+            node.width = Val::Auto;
+            node.height = Val::Auto;
+        }
+    }
+    match attribs.expands_along_main_axis {
+        true => {
+            node.flex_grow = 1.;
+        }
+        false => {
+            node.flex_grow = 0.;
+        }
+    }
+    match attribs.expands_along_cross_axis {
+        true => {
+            node.align_self = AlignSelf::Stretch;
+        }
+        false => {
+            node.align_self = AlignSelf::Auto;
+        }
     }
     node.flex_direction = attribs.flex_direction;
     node.justify_content = attribs.justify_content;
     node.align_items = attribs.align_items;
 
-    match attribs.div_style {
+    match &attribs.div_style {
         GuiDivStyle::None => {
             node.border_radius = BorderRadius::ZERO;
             node.padding = UiRect::ZERO;
@@ -112,7 +151,7 @@ fn apply_style(
                 .remove::<BackgroundColor>()
                 .remove::<BoxShadow>();
         }
-        GuiDivStyle::Regular => {
+        GuiDivStyle::RegularStyled => {
             node.border_radius = BorderRadius::all(px(theme.0.border_radius));
             node.padding = UiRect::all(px(theme.0.padding_main));
             node.row_gap = px(theme.0.padding_main);
@@ -121,19 +160,15 @@ fn apply_style(
                 .insert(BackgroundColor(theme.0.bg_color_main))
                 .insert(theme.0.box_shadow.clone());
         }
-        GuiDivStyle::Custom {
-            border_radius,
-            padding,
-            gap,
-            bg_color,
-            box_shadow,
-        } => {
-            node.border_radius = border_radius;
-            node.padding = padding;
-            node.row_gap = px(gap);
-            commands.entity(*entity).insert(BackgroundColor(bg_color));
+        GuiDivStyle::Custom(custom_style) => {
+            node.border_radius = custom_style.border_radius;
+            node.padding = custom_style.padding;
+            node.row_gap = px(custom_style.gap);
+            commands
+                .entity(*entity)
+                .insert(BackgroundColor(custom_style.bg_color));
 
-            if box_shadow {
+            if custom_style.box_shadow {
                 commands.entity(*entity).insert(theme.0.box_shadow.clone());
             }
         }

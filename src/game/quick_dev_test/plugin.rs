@@ -16,7 +16,7 @@ impl Plugin for QuickDevTestPlugin {
             )
             .add_systems(Update,
                 after_a_sec
-                    .run_if(on_timer(Duration::from_secs(1)))
+                    .run_if(on_timer(Duration::from_secs(1)).and(run_once))
             )
         ;
     }

@@ -47,7 +47,7 @@ fn spawn_main_menu_gui(
                 flex_direction: FlexDirection::Column,
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Stretch,
-                div_style: GuiDivStyle::Regular,
+                div_style: GuiDivStyle::RegularStyled,
                 ..default()
             }))
             .insert(gui_children(|p: &mut ChildSpawner| {
@@ -55,7 +55,6 @@ fn spawn_main_menu_gui(
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
-                    div_style: GuiDivStyle::None,
                     ..default()
                 }))
                 .insert(gui_child(gui_text_h1("Main Menu")));

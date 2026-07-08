@@ -34,7 +34,7 @@ impl CursorIconHandler {
 #[allow(unused)]
 #[derive(Clone)]
 pub struct GuiTheme {
-    pub font_main: Handle<Font>,
+    pub font_primary: Handle<Font>,
     pub font_mono: Handle<Font>,
     pub bg_color_main: Color,
     pub content_color_main: Color,
@@ -61,7 +61,7 @@ pub struct GuiTheme {
 impl GuiTheme {
     pub fn make(font_handles: &FontHandles) -> Self {
         Self {
-            font_main: font_handles.cabin.clone(),
+            font_primary: font_handles.cabin.clone(),
             font_mono: font_handles.ibm_plex_mono.clone(),
             bg_color_main: Color::hsv(185.0, 0.3, 0.15),
             content_color_main: Color::hsv(185.0, 0.075, 0.9),
