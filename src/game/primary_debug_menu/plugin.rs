@@ -4,8 +4,11 @@ use crate::game::{
     core::resources::{GlobalGuiRoot, KeyBindings},
     gui::{
         gui_children,
+        resources::GuiThemeComputed,
         widgets::{
-            floating_panel::{GuiFloatingPanelInterface, gui_floating_panel},
+            floating_panel::{
+                GuiFloatingPanelInterface, GuiFloatingPanelProps, gui_floating_panel,
+            },
             text::gui_text_p,
         },
     },
@@ -29,9 +32,17 @@ impl Plugin for PrimaryDebugMenuPlugin {
 #[derive(Component)]
 struct PrimaryDebugMenuTag;
 
-fn spawn_primary_debug_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>) {
+fn spawn_primary_debug_menu(
+    mut commands: Commands,
+    gui_root: Res<GlobalGuiRoot>,
+    theme: Res<GuiThemeComputed>,
+) {
     let debug_menu = commands
-        .spawn(gui_floating_panel("Primary Debug Menu", default()))
+        .spawn(gui_floating_panel("Primary Debug Menu", GuiFloatingPanelProps {
+            starts_active: true,
+            starting_content_height: theme.0.primary_debug_menu_starting_height,
+            ..default()
+        }))
         .insert(gui_children(|p| {
             p.spawn(gui_text_p("what's up buddyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"));
             p.spawn(gui_text_p("kowabunga yayyyy"));

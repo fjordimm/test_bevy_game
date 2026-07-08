@@ -25,6 +25,8 @@ pub struct GuiFloatingPanelProps {
     pub starts_minimized: bool,
     pub starting_pos_x: f32,
     pub starting_pos_y: f32,
+    pub starting_content_width: f32,
+    pub starting_content_height: f32,
 }
 
 impl Default for GuiFloatingPanelProps {
@@ -34,6 +36,8 @@ impl Default for GuiFloatingPanelProps {
             starts_minimized: false,
             starting_pos_x: 10.0,
             starting_pos_y: 10.0,
+            starting_content_width: 0.,
+            starting_content_height: 0.,
         }
     }
 }
@@ -90,8 +94,8 @@ pub fn gui_floating_panel(title: impl Into<String>, props: GuiFloatingPanelProps
             is_minimized: props.starts_minimized,
             pos_x: props.starting_pos_x,
             pos_y: props.starting_pos_y,
-            size_x: 0.,
-            size_y: 0.,
+            size_x: props.starting_content_width,
+            size_y: props.starting_content_height,
         },
         Node::default(),
         children![
@@ -1018,10 +1022,7 @@ fn enforce_min_size(
                     state.size_x = title_bar_computed_node.size.x
                         * title_bar_computed_node.inverse_scale_factor;
                 }
-                if main_content_computed_node.size.y
-                    * main_content_computed_node.inverse_scale_factor
-                    < theme.0.floating_panel_content_min_height
-                {
+                if state.size_y < theme.0.floating_panel_content_min_height {
                     state.size_y = theme.0.floating_panel_content_min_height;
                 }
             }
