@@ -2,7 +2,8 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::states::{MouseMode, OverallState},
-    main_menu_state::{main_menu_gui::plugin::MainMenuGuiPlugin, tags::MainMenuStateEntity},
+    main_menu_state::main_menu_gui::plugin::MainMenuGuiPlugin,
+    util::alrms,
 };
 
 pub struct MainMenuStatePlugin;
@@ -12,23 +13,28 @@ impl Plugin for MainMenuStatePlugin {
         #[rustfmt::skip]
         app
             .add_systems(OnEnter(OverallState::MainMenu), on_enter)
-            .add_systems(OnExit(OverallState::MainMenu), despawn_all_relevant_entities)
+            .add_systems(OnExit(OverallState::MainMenu), despawn_camera)
             .add_plugins(MainMenuGuiPlugin)
         ;
     }
 }
 
+#[derive(Component)]
+struct MainMenuStateCamera;
+
 fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
     next_mouse_mode.set(MouseMode::Free);
 
-    commands.spawn((MainMenuStateEntity, Camera2d::default()));
+    commands.spawn((MainMenuStateCamera, Camera2d::default()));
 }
 
-fn despawn_all_relevant_entities(
+fn despawn_camera(
     mut commands: Commands,
-    all_entities_q: Query<Entity, With<MainMenuStateEntity>>,
+    camera_q: Option<Single<Entity, With<MainMenuStateCamera>>>,
 ) {
-    all_entities_q.iter().for_each(|entity| {
-        commands.entity(entity).despawn();
-    });
+    if let Some(camera) = alrms!(camera_q) {
+        let camera = *camera;
+
+        commands.entity(camera).despawn();
+    }
 }
