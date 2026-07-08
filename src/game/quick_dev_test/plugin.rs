@@ -2,7 +2,13 @@ use std::time::Duration;
 
 use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_timer};
 
-use crate::game::playing_state::{sets::DuringPlayingUnpaused, world::TimeOfDay};
+use crate::game::{
+    core::states::OverallState,
+    playing_state::{
+        phong::plugin::PhongMaterial, sets::DuringPlayingUnpaused, tags::PlayingStateEntity,
+        world::TimeOfDay,
+    },
+};
 
 pub struct QuickDevTestPlugin;
 
@@ -11,12 +17,16 @@ impl Plugin for QuickDevTestPlugin {
         #[rustfmt::skip]
         app
             .add_systems(Update,
+                after_a_sec
+                    .run_if(on_timer(Duration::from_secs(1)).and(run_once))
+            )
+            .add_systems(Update,
                 rotate_sun
                     .in_set(DuringPlayingUnpaused::General)
             )
-            .add_systems(Update,
-                after_a_sec
-                    .run_if(on_timer(Duration::from_secs(1)).and(run_once))
+            .add_systems(OnEnter(OverallState::Playing),
+                spawn_some_stuff
+                    .in_set(DuringPlayingUnpaused::General)
             )
         ;
     }
@@ -33,4 +43,24 @@ fn rotate_sun(
     for mouse_wheel_msg in mouse_wheel_reader.read() {
         time_of_day.0 += -0.03 * mouse_wheel_msg.y;
     }
+}
+
+fn spawn_some_stuff(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<PhongMaterial>>,
+) {
+    commands.spawn((
+        PlayingStateEntity,
+        Mesh3d(meshes.add(Cuboid::new(1., 1., 1.))),
+        MeshMaterial3d(materials.add(PhongMaterial::new(Color::hsv(0., 1., 1.)))),
+        Transform::default(),
+    ));
+
+    // commands.spawn((
+    //     PlayingStateEntity,
+    //     Mesh3d(meshes.add(Tetrahedron::default())),
+    //     MeshMaterial3d(materials.add(Color::hsv(270., 1., 1.))),
+    //     Transform::from_xyz(0., 2., 0.),
+    // ));
 }

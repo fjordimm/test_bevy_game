@@ -33,8 +33,6 @@ fn despawn_camera(
     camera_q: Option<Single<Entity, With<MainMenuStateCamera>>>,
 ) {
     if let Some(camera) = alrms!(camera_q) {
-        let camera = *camera;
-
-        commands.entity(camera).despawn();
+        commands.entity(*camera).despawn();
     }
 }

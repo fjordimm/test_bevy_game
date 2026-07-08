@@ -1,4 +1,5 @@
 pub mod pause_menu;
+pub mod phong;
 pub mod player;
 pub mod plugin;
 pub mod sets;

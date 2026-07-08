@@ -32,12 +32,7 @@ impl Plugin for WorldPlugin {
 #[derive(Component)]
 pub struct SunlightTag;
 
-fn on_enter(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut time_of_day: ResMut<TimeOfDay>,
-) {
+fn on_enter(mut commands: Commands, mut time_of_day: ResMut<TimeOfDay>) {
     commands.spawn((
         PlayingStateEntity,
         SunlightTag,
@@ -47,23 +42,6 @@ fn on_enter(
             ..default()
         },
         Transform::default().looking_at(Vec3::new(-0.1, -1., -0.2), Dir3::Y),
-    ));
-    commands.spawn((
-        PlayingStateEntity,
-        Mesh3d(meshes.add(Cuboid::new(10_000., 1., 10_000.))),
-        MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: Color::hsv(113., 0.57, 0.55),
-            perceptual_roughness: 0.,
-            reflectance: 0.,
-            ..default()
-        })),
-        Transform::from_xyz(0., -1., 0.),
-    ));
-    commands.spawn((
-        PlayingStateEntity,
-        Mesh3d(meshes.add(Cuboid::new(1., 1., 1.))),
-        MeshMaterial3d(materials.add(Color::hsv(0., 1., 1.))),
-        Transform::default(),
     ));
 
     time_of_day.0 = 0.5;
