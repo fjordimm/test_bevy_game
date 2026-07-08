@@ -3,6 +3,7 @@
 */
 
 use bevy::{prelude::*, window::SystemCursorIcon};
+use bevy_ecs::query::QueryData;
 
 use crate::game::{
     gui::{
@@ -12,7 +13,7 @@ use crate::game::{
         widgets::{
             button::{GuiButtonProps, GuiButtonStyle, gui_button},
             icon::{GuiIconIcon, GuiIconProps, gui_icon},
-            text::gui_text_h2,
+            text::{GuiTextProps, GuiTextSize, gui_text},
         },
     },
     util::{alrmo, alrro},
@@ -48,6 +49,9 @@ struct GuiFloatingPanelState {
     is_minimized: bool,
     pos_x: f32,
     pos_y: f32,
+    size_x: f32,
+    size_y: f32,
+    fit_content_size_calculated: bool,
 }
 
 #[derive(Component)]
@@ -87,6 +91,9 @@ pub fn gui_floating_panel(title: impl Into<String>, props: GuiFloatingPanelProps
             is_minimized: props.starts_minimized,
             pos_x: props.starting_pos_x,
             pos_y: props.starting_pos_y,
+            size_x: 0.,
+            size_y: 0.,
+            fit_content_size_calculated: false,
         },
         Node::default(),
         children![
@@ -149,7 +156,7 @@ fn apply_style(
     root_node.position_type = PositionType::Absolute;
     root_node.left = px(state.pos_x);
     root_node.top = px(state.pos_y);
-    root_node.display = what_display(&state);
+    root_node.display = what_display_for_root(&state);
     root_node.border_radius = BorderRadius::all(px(theme.0.border_radius));
     root_node.flex_direction = FlexDirection::Column;
     root_node.justify_content = JustifyContent::FlexStart;
@@ -173,13 +180,23 @@ fn apply_style(
     title_bar_main_part_node.flex_grow = 1.;
     title_bar_main_part_node.display = Display::Flex;
     title_bar_node.border_radius = what_border_radius_for_title_bar(&theme, &state);
+    title_bar_main_part_node.overflow = Overflow::hidden();
     title_bar_main_part_node.flex_direction = FlexDirection::Row;
     title_bar_main_part_node.justify_content = JustifyContent::FlexStart;
     title_bar_main_part_node.align_items = AlignItems::Center;
     title_bar_main_part_node.padding = UiRect::left(px(theme.0.padding_minor));
     title_bar_main_part_node.column_gap = px(theme.0.padding_minor);
 
-    let title_text = commands.spawn(gui_text_h2(attribs.title.clone())).id();
+    let title_text = commands
+        .spawn(gui_text(
+            attribs.title.clone(),
+            GuiTextProps {
+                size: GuiTextSize::H2,
+                wraps: false,
+                ..default()
+            },
+        ))
+        .id();
     commands
         .entity(*title_bar_main_part_entity)
         .despawn_children()
@@ -219,6 +236,8 @@ fn apply_style(
         .add_child(x_button_icon);
 
     main_content_node.display = what_display_for_main_content(&state);
+    main_content_node.width = what_width_for_main_content(&state);
+    main_content_node.height = what_height_for_main_content(&state);
     main_content_node.border_radius = BorderRadius::bottom(px(theme.0.border_radius));
     main_content_node.flex_direction = FlexDirection::Column;
     main_content_node.justify_content = JustifyContent::FlexStart;
@@ -271,16 +290,38 @@ fn modify_style_from_state(
 ) {
     root_node.left = px(state.pos_x);
     root_node.top = px(state.pos_y);
-    root_node.display = what_display(&state);
+    root_node.display = what_display_for_root(&state);
 
     title_bar_node.border_radius = what_border_radius_for_title_bar(&theme, &state);
 
     main_content_node.display = what_display_for_main_content(&state);
+    main_content_node.width = what_width_for_main_content(&state);
+    main_content_node.height = what_height_for_main_content(&state);
 
     corner_resizer_node.display = what_display_for_corner_resizer(&state);
 }
 
-fn what_display(state: &GuiFloatingPanelState) -> Display {
+fn what_width_for_main_content(state: &GuiFloatingPanelState) -> Val {
+    match state.fit_content_size_calculated {
+        true => match state.is_minimized {
+            true => Val::Auto,
+            false => px(state.size_x),
+        },
+        false => Val::Auto,
+    }
+}
+
+fn what_height_for_main_content(state: &GuiFloatingPanelState) -> Val {
+    match state.fit_content_size_calculated {
+        true => match state.is_minimized {
+            true => Val::Auto,
+            false => px(state.size_y),
+        },
+        false => Val::Auto,
+    }
+}
+
+fn what_display_for_root(state: &GuiFloatingPanelState) -> Display {
     match state.is_active {
         true => Display::Flex,
         false => Display::None,
@@ -931,13 +972,16 @@ fn update_panel_resized(
         });
 
     if let Some(target_panel) = *panel_being_resized {
-        if let Ok(mut panel_state) = panel_q.get(target_panel) {
+        if let Ok(mut panel_state) = panel_q.get_mut(target_panel) {
             let mut delta_x = 0.0;
             let mut delta_y = 0.0;
             mouse_motion.read().for_each(|msg| {
                 delta_x += msg.delta.map(|d| d.x).unwrap_or(0.0);
                 delta_y += msg.delta.map(|d| d.y).unwrap_or(0.0);
             });
+
+            panel_state.size_x += delta_x;
+            panel_state.size_y += delta_y;
         }
     }
 }
@@ -960,4 +1004,20 @@ fn update_cursor_icon(
             cursor_icon_handler.remove_candidate(entity, SystemCursorIcon::SeResize);
         }
     });
+}
+
+#[derive(QueryData)]
+#[query_data(mutable)]
+pub struct GuiFloatingPanelInterface {
+    state: &'static mut GuiFloatingPanelState,
+}
+
+impl<'w, 's> GuiFloatingPanelInterfaceItem<'w, 's> {
+    pub fn is_active(&self) -> bool {
+        self.state.is_active
+    }
+
+    pub fn set_is_active(&mut self, val: bool) {
+        self.state.is_active = val;
+    }
 }

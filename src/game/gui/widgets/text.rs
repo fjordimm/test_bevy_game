@@ -1,4 +1,5 @@
 use bevy::{prelude::*, ui::widget::Text};
+use bevy_ecs::query::QueryData;
 
 use crate::game::{
     gui::{resources::GuiThemeComputed, sets::GuiSystemsOrdering},
@@ -16,12 +17,14 @@ pub enum GuiTextSize {
 #[allow(unused)]
 pub struct GuiTextProps {
     pub size: GuiTextSize,
+    pub wraps: bool,
 }
 
 impl Default for GuiTextProps {
     fn default() -> Self {
         Self {
             size: GuiTextSize::P,
+            wraps: true,
         }
     }
 }
@@ -29,6 +32,7 @@ impl Default for GuiTextProps {
 #[derive(Component)]
 struct GuiTextAttribs {
     size: GuiTextSize,
+    wraps: bool,
 }
 
 #[derive(Component)]
@@ -39,13 +43,17 @@ struct GuiTextState {
 #[allow(unused)]
 pub fn gui_text(content: impl Into<String>, props: GuiTextProps) -> impl Bundle {
     (
-        GuiTextAttribs { size: props.size },
+        GuiTextAttribs {
+            size: props.size,
+            wraps: props.wraps,
+        },
         GuiTextState {
             content: content.into(),
         },
         Text::default(),
         TextFont::default(),
         TextColor::default(),
+        TextLayout::default(),
     )
 }
 
@@ -55,6 +63,7 @@ pub fn gui_text_p(content: impl Into<String>) -> impl Bundle {
         content,
         GuiTextProps {
             size: GuiTextSize::P,
+            ..default()
         },
     )
 }
@@ -65,6 +74,7 @@ pub fn gui_text_h1(content: impl Into<String>) -> impl Bundle {
         content,
         GuiTextProps {
             size: GuiTextSize::H1,
+            ..default()
         },
     )
 }
@@ -75,6 +85,7 @@ pub fn gui_text_h2(content: impl Into<String>) -> impl Bundle {
         content,
         GuiTextProps {
             size: GuiTextSize::H2,
+            ..default()
         },
     )
 }
@@ -86,6 +97,7 @@ fn apply_style(
     text: &mut Text,
     textfont: &mut TextFont,
     textcolor: &mut TextColor,
+    textlayout: &mut TextLayout,
 ) {
     text.0 = state.content.clone(); // TODO: could be more efficient
 
@@ -101,6 +113,11 @@ fn apply_style(
     };
 
     textcolor.0 = theme.0.content_color_main;
+
+    *textlayout = match attribs.wraps {
+        true => TextLayout::new(Justify::default(), LineBreak::WordBoundary),
+        false => TextLayout::new(Justify::default(), LineBreak::NoWrap),
+    };
 }
 
 fn modify_style_from_state(
@@ -131,7 +148,6 @@ impl Plugin for GuiTextPlugin {
                 update_style_on_state_change
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
-            .add_observer(observe_set_content)
         ;
     }
 }
@@ -145,13 +161,13 @@ fn update_style_on_init_or_attrib_change(
             &mut Text,
             &mut TextFont,
             &mut TextColor,
+            &mut TextLayout,
         ),
         Or<(Added<GuiTextAttribs>, Changed<GuiTextAttribs>)>,
     >,
 ) {
-    entity_q
-        .iter_mut()
-        .for_each(|(attribs, state, mut text, mut textfont, mut textcolor)| {
+    entity_q.iter_mut().for_each(
+        |(attribs, state, mut text, mut textfont, mut textcolor, mut textlayout)| {
             apply_style(
                 &theme,
                 &attribs,
@@ -159,8 +175,10 @@ fn update_style_on_init_or_attrib_change(
                 &mut text,
                 &mut textfont,
                 &mut textcolor,
+                &mut textlayout,
             );
-        });
+        },
+    );
 }
 
 fn update_style_on_theme_change(
@@ -171,11 +189,11 @@ fn update_style_on_theme_change(
         &mut Text,
         &mut TextFont,
         &mut TextColor,
+        &mut TextLayout,
     )>,
 ) {
-    entity_q
-        .iter_mut()
-        .for_each(|(attribs, state, mut text, mut textfont, mut textcolor)| {
+    entity_q.iter_mut().for_each(
+        |(attribs, state, mut text, mut textfont, mut textcolor, mut textlayout)| {
             apply_style(
                 &theme,
                 &attribs,
@@ -183,8 +201,10 @@ fn update_style_on_theme_change(
                 &mut text,
                 &mut textfont,
                 &mut textcolor,
+                &mut textlayout,
             );
-        });
+        },
+    );
 }
 
 fn update_style_on_state_change(
@@ -196,14 +216,19 @@ fn update_style_on_state_change(
     });
 }
 
-#[derive(EntityEvent)]
-pub struct GuiTextSetContent {
-    pub entity: Entity,
-    pub content: String,
+#[derive(QueryData)]
+#[query_data(mutable)]
+pub struct GuiTextInterface {
+    state: &'static mut GuiTextState,
 }
 
-fn observe_set_content(event: On<GuiTextSetContent>, mut entity_q: Query<&mut GuiTextState>) {
-    if let Some(mut state) = alrmo!(entity_q.get_mut(event.entity)) {
-        state.content = event.content.clone();
+#[allow(unused)]
+impl<'w, 's> GuiTextInterfaceItem<'w, 's> {
+    pub fn content(&self) -> &String {
+        &self.state.content
+    }
+
+    pub fn set_content(&mut self, val: String) {
+        self.state.content = val;
     }
 }

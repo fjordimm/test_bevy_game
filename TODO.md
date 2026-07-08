@@ -4,6 +4,7 @@
 ## Currently Working On
 - Finish the debug menu.
 - Make a better system for changing the cursor type (right now it's just done locally for the floating panel corner resizer).
+- Use `Res<NextState<>>` instead of `ResMut<>`.
 
 ## Reminders
 - Prefer using resources rather than consts for constant arbitrary values.
