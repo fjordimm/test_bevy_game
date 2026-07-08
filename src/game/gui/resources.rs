@@ -53,6 +53,7 @@ pub struct GuiTheme {
     pub title_bar_button_icon_size: f32,
     pub corner_resizer_padding: f32,
     pub corner_resizer_size: f32,
+    pub floating_panel_content_min_height: f32,
     pub pause_menu_bg_color: Color,
 }
 
@@ -84,6 +85,7 @@ impl GuiTheme {
             title_bar_button_icon_size: 16.,
             corner_resizer_padding: 3.,
             corner_resizer_size: 10.,
+            floating_panel_content_min_height: 30.,
             pause_menu_bg_color: Color::hsva(0.0, 0.0, 0.0, 0.75),
         }
     }
@@ -117,6 +119,7 @@ impl GuiThemeComputed {
         ret.title_bar_button_icon_size *= scale.0;
         ret.corner_resizer_padding *= scale.0;
         ret.corner_resizer_size *= scale.0;
+        ret.floating_panel_content_min_height *= scale.0;
 
         Self(ret)
     }

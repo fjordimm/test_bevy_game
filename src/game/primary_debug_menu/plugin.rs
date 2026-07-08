@@ -33,7 +33,7 @@ fn spawn_primary_debug_menu(mut commands: Commands, gui_root: Res<GlobalGuiRoot>
     let debug_menu = commands
         .spawn(gui_floating_panel("Primary Debug Menu", default()))
         .insert(gui_children(|p| {
-            p.spawn(gui_text_p("what's up buddy"));
+            p.spawn(gui_text_p("what's up buddyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"));
             p.spawn(gui_text_p("kowabunga yayyyy"));
         }))
         .insert(PrimaryDebugMenuTag)

@@ -1,10 +1,7 @@
 use bevy::{prelude::*, ui::widget::Text};
 use bevy_ecs::query::QueryData;
 
-use crate::game::{
-    gui::{resources::GuiThemeComputed, sets::GuiSystemsOrdering},
-    util::alrmo,
-};
+use crate::game::gui::{resources::GuiThemeComputed, sets::GuiSystemsOrdering};
 
 #[allow(unused)]
 pub enum GuiTextSize {

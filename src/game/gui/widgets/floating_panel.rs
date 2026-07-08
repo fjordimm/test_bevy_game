@@ -51,7 +51,6 @@ struct GuiFloatingPanelState {
     pos_y: f32,
     size_x: f32,
     size_y: f32,
-    fit_content_size_calculated: bool,
 }
 
 #[derive(Component)]
@@ -93,7 +92,6 @@ pub fn gui_floating_panel(title: impl Into<String>, props: GuiFloatingPanelProps
             pos_y: props.starting_pos_y,
             size_x: 0.,
             size_y: 0.,
-            fit_content_size_calculated: false,
         },
         Node::default(),
         children![
@@ -245,7 +243,7 @@ fn apply_style(
 
     main_content_inner_node.flex_grow = 1.;
     main_content_inner_node.align_self = AlignSelf::Stretch;
-    main_content_inner_node.overflow = Overflow::scroll();
+    main_content_inner_node.overflow = Overflow::hidden();
     main_content_inner_node.display = Display::Flex;
     main_content_inner_node.flex_direction = FlexDirection::Column;
     main_content_inner_node.justify_content = JustifyContent::FlexStart;
@@ -302,22 +300,16 @@ fn modify_style_from_state(
 }
 
 fn what_width_for_main_content(state: &GuiFloatingPanelState) -> Val {
-    match state.fit_content_size_calculated {
-        true => match state.is_minimized {
-            true => Val::Auto,
-            false => px(state.size_x),
-        },
-        false => Val::Auto,
+    match state.is_minimized {
+        true => Val::Auto,
+        false => px(state.size_x),
     }
 }
 
 fn what_height_for_main_content(state: &GuiFloatingPanelState) -> Val {
-    match state.fit_content_size_calculated {
-        true => match state.is_minimized {
-            true => Val::Auto,
-            false => px(state.size_y),
-        },
-        false => Val::Auto,
+    match state.is_minimized {
+        true => Val::Auto,
+        false => px(state.size_y),
     }
 }
 
@@ -386,6 +378,10 @@ impl Plugin for GuiFloatingPanelPlugin {
             .add_systems(Update,
                 update_panel_resized
                     .in_set(GuiSystemsOrdering::UpdateState)
+            )
+            .add_systems(Update,
+                enforce_min_size
+                    .in_set(GuiSystemsOrdering::PreUpdateState)
             )
             .add_systems(Update, update_cursor_icon)
         ;
@@ -984,6 +980,52 @@ fn update_panel_resized(
             panel_state.size_y += delta_y;
         }
     }
+}
+
+fn enforce_min_size(
+    theme: Res<GuiThemeComputed>,
+    mut root_q: Query<(
+        &GuiFloatingPanelRelations,
+        &mut GuiFloatingPanelState,
+        &Node,
+    ) /* TODO Changed<GuiFloatingPanelState>*/>,
+    title_bar_q: Query<
+        &ComputedNode,
+        (
+            With<GuiFloatingPanelTitleBarTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelMainContentTag>,
+        ),
+    >,
+    main_content_q: Query<
+        (&ComputedNode, &Node),
+        (
+            With<GuiFloatingPanelMainContentTag>,
+            Without<GuiFloatingPanelAttribs>,
+            Without<GuiFloatingPanelTitleBarTag>,
+        ),
+    >,
+) {
+    root_q
+        .iter_mut()
+        .for_each(|(relations, mut state, root_node)| {
+            let title_bar_computed_node = alrro!(title_bar_q.get(relations.title_bar));
+            let (main_content_computed_node, main_content_node) =
+                alrro!(main_content_q.get(relations.main_content));
+
+            if root_node.display != Display::None && main_content_node.display != Display::None {
+                if main_content_computed_node.size.x < title_bar_computed_node.size.x {
+                    state.size_x = title_bar_computed_node.size.x
+                        * title_bar_computed_node.inverse_scale_factor;
+                }
+                if main_content_computed_node.size.y
+                    * main_content_computed_node.inverse_scale_factor
+                    < theme.0.floating_panel_content_min_height
+                {
+                    state.size_y = theme.0.floating_panel_content_min_height;
+                }
+            }
+        });
 }
 
 fn update_cursor_icon(
