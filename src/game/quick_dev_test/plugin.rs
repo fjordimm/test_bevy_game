@@ -5,7 +5,9 @@ use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_tim
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        phong::plugin::PhongMaterial, sets::DuringPlayingUnpaused, tags::PlayingStateEntity,
+        primary_shader::plugin::{ATTRIBUTE_TEST1, PrimaryShaderMaterial, primary_shader_material},
+        sets::DuringPlayingUnpaused,
+        tags::PlayingStateEntity,
         world::TimeOfDay,
     },
 };
@@ -48,12 +50,20 @@ fn rotate_sun(
 fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<PhongMaterial>>,
+    mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
 ) {
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(meshes.add(Cuboid::new(1., 1., 1.))),
-        MeshMaterial3d(materials.add(PhongMaterial::new(Color::hsv(0., 1., 1.)))),
+        Mesh3d(
+            meshes.add(
+                Mesh::from(Cuboid::new(1., 1., 1.))
+                    .with_inserted_attribute(ATTRIBUTE_TEST1, vec![[0.1, 0.2, 0.3]; 24]),
+            ),
+        ),
+        MeshMaterial3d(materials.add(primary_shader_material(
+            Color::hsv(0., 1., 1.),
+            Color::hsv(0., 0., 1.),
+        ))),
         Transform::default(),
     ));
 

@@ -91,7 +91,7 @@ pub struct SkyboxMaterial {
 
 impl Material for SkyboxMaterial {
     fn fragment_shader() -> ShaderRef {
-        "shaders/sky.frag.wgsl".into()
+        "shaders/sky.wgsl".into()
     }
 
     fn alpha_mode(&self) -> AlphaMode {
