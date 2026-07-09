@@ -54,18 +54,15 @@ fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
-    asset_server: Res<AssetServer>,
 ) {
-    let test_texture: Handle<Image> = asset_server.load("misc/thing.png");
-
     commands.spawn((
         PlayingStateEntity,
         Mesh3d(meshes.add(create_cuboid_mesh())),
         MeshMaterial3d(
             materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-                base_color: Color::hsv(0., 0., 1.),
-                edge_color: Color::hsv(0., 0., 1.),
-                texture: Some(test_texture),
+                base_color: Color::hsv(0., 1., 1.),
+                edge_color: Color::hsv(240., 1., 1.),
+                ..default()
             })),
         ),
         Transform::default(),

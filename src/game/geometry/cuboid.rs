@@ -1,7 +1,7 @@
 use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology};
 
-use crate::game::playing_state::primary_shader::plugin::ATTRIBUTE_TEST1;
+use crate::game::playing_state::primary_shader::plugin::ATTRIBUTE_EDGE_NEARNESS_UV;
 
 #[allow(unused)]
 pub fn create_cuboid_mesh() -> Mesh {
@@ -114,7 +114,41 @@ pub fn create_cuboid_mesh() -> Mesh {
             [0.0, 1.0],
         ],
     )
-    .with_inserted_attribute(ATTRIBUTE_TEST1, vec![[0.1, 0.2, 0.3]; 24])
+    .with_inserted_attribute(
+        ATTRIBUTE_EDGE_NEARNESS_UV,
+        vec![
+            // Assigning the UV coords for the top side.
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [0.0, 1.0],
+            // Assigning the UV coords for the bottom side.
+            [0.0, 1.0],
+            [1.0, 1.0],
+            [1.0, 0.0],
+            [0.0, 0.0],
+            // Assigning the UV coords for the right side.
+            [1.0, 1.0],
+            [0.0, 1.0],
+            [0.0, 0.0],
+            [1.0, 0.0],
+            // Assigning the UV coords for the left side.
+            [0.0, 1.0],
+            [1.0, 1.0],
+            [1.0, 0.0],
+            [0.0, 0.0],
+            // Assigning the UV coords for the back side.
+            [0.0, 1.0],
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
+            // Assigning the UV coords for the forward side.
+            [1.0, 1.0],
+            [1.0, 0.0],
+            [0.0, 0.0],
+            [0.0, 1.0],
+        ],
+    )
     .with_inserted_indices(Indices::U32(vec![
         0, 3, 1, 1, 3, 2, // triangles making up the top (+y) facing side.
         4, 5, 7, 5, 6, 7, // bottom (-y)

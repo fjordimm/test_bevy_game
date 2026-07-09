@@ -58,7 +58,7 @@ pub fn primary_shader_material(props: PrimaryShaderMaterialProps) -> PrimaryShad
             ..default()
         },
         extension: __PrimaryShaderExtension {
-            edge_color: vec3(edge_color.red, edge_color.green, edge_color.blue),
+            edge_color: vec4(edge_color.red, edge_color.green, edge_color.blue, 1.),
         },
     }
 }
@@ -66,21 +66,19 @@ pub fn primary_shader_material(props: PrimaryShaderMaterialProps) -> PrimaryShad
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct __PrimaryShaderExtension {
     #[uniform(100)]
-    edge_color: Vec3,
+    edge_color: Vec4,
 }
 
-pub const ATTRIBUTE_TEST1: MeshVertexAttribute =
-    MeshVertexAttribute::new("Test1", 54784352, VertexFormat::Float32x3);
-
-const SHADER_ASSET_PATH: &str = "shaders/primary.wgsl";
+pub const ATTRIBUTE_EDGE_NEARNESS_UV: MeshVertexAttribute =
+    MeshVertexAttribute::new("EdgeNearnessUV", 54784352, VertexFormat::Float32x2);
 
 impl MaterialExtension for __PrimaryShaderExtension {
     fn vertex_shader() -> ShaderRef {
-        SHADER_ASSET_PATH.into()
+        "shaders/primary.wgsl".into()
     }
 
     fn fragment_shader() -> ShaderRef {
-        SHADER_ASSET_PATH.into()
+        "shaders/primary.wgsl".into()
     }
 
     fn specialize(
@@ -93,7 +91,7 @@ impl MaterialExtension for __PrimaryShaderExtension {
             Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
             Mesh::ATTRIBUTE_NORMAL.at_shader_location(1),
             Mesh::ATTRIBUTE_UV_0.at_shader_location(2),
-            ATTRIBUTE_TEST1.at_shader_location(3),
+            ATTRIBUTE_EDGE_NEARNESS_UV.at_shader_location(3),
         ])?;
 
         descriptor.vertex.buffers = vec![vertex_layout];
