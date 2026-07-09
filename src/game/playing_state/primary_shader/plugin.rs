@@ -69,8 +69,8 @@ pub struct __PrimaryShaderExtension {
     edge_color: Vec4,
 }
 
-pub const ATTRIBUTE_EDGE_NEARNESS_UV: MeshVertexAttribute =
-    MeshVertexAttribute::new("EdgeNearnessUV", 54784352, VertexFormat::Float32x2);
+pub const ATTRIBUTE_POLYGON_UV: MeshVertexAttribute =
+    MeshVertexAttribute::new("PolygonUV", 54784352, VertexFormat::Float32x2);
 
 impl MaterialExtension for __PrimaryShaderExtension {
     fn vertex_shader() -> ShaderRef {
@@ -91,7 +91,7 @@ impl MaterialExtension for __PrimaryShaderExtension {
             Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
             Mesh::ATTRIBUTE_NORMAL.at_shader_location(1),
             Mesh::ATTRIBUTE_UV_0.at_shader_location(2),
-            ATTRIBUTE_EDGE_NEARNESS_UV.at_shader_location(3),
+            ATTRIBUTE_POLYGON_UV.at_shader_location(3),
         ])?;
 
         descriptor.vertex.buffers = vec![vertex_layout];

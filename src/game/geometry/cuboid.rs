@@ -1,7 +1,7 @@
 use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology};
 
-use crate::game::playing_state::primary_shader::plugin::ATTRIBUTE_EDGE_NEARNESS_UV;
+use crate::game::playing_state::primary_shader::plugin::ATTRIBUTE_POLYGON_UV;
 
 #[allow(unused)]
 pub fn create_cuboid_mesh() -> Mesh {
@@ -115,13 +115,13 @@ pub fn create_cuboid_mesh() -> Mesh {
         ],
     )
     .with_inserted_attribute(
-        ATTRIBUTE_EDGE_NEARNESS_UV,
+        ATTRIBUTE_POLYGON_UV,
         vec![
             // Assigning the UV coords for the top side.
             [0.0, 0.0],
             [1.0, 0.0],
-            [0.5, 1.0],
-            [0.5, 1.0],
+            [1.0, 1.0],
+            [0.0, 1.0],
             // Assigning the UV coords for the bottom side.
             [0.0, 1.0],
             [1.0, 1.0],

@@ -17,7 +17,7 @@ struct Vertex {
     @location(0) position: vec3<f32>,
     @location(1) normal: vec3<f32>,
     @location(2) uv: vec2<f32>,
-    @location(3) edge_nearness_uv: vec2<f32>,
+    @location(3) polygon_uv: vec2<f32>,
 }
 
 struct CustomVertexOutput {
@@ -26,7 +26,7 @@ struct CustomVertexOutput {
     @location(1) world_normal: vec3<f32>,
     @location(2) uv: vec2<f32>,
     @location(3) @interpolate(flat) instance_index: u32,
-    @location(4) edge_nearness_uv: vec2<f32>,
+    @location(4) polygon_uv: vec2<f32>,
 }
 
 fn to_pbr_vertex_output(og: CustomVertexOutput) -> VertexOutput {
@@ -61,7 +61,7 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
 
     // Edge highlighting.
 
-    out.edge_nearness_uv = in.edge_nearness_uv;
+    out.polygon_uv = in.polygon_uv;
 
     // Return value.
 
@@ -79,19 +79,10 @@ fn fragment(
 
     // Edge highlighting.
 
-    var dist_to_edge: f32;
-    {
-        let distA = distance(in.edge_nearness_uv, vec2<f32>(0.0, 0.0));
-        let distB = distance(in.edge_nearness_uv, vec2<f32>(1.0, 0.0));
-        let distC = distance(in.edge_nearness_uv, vec2<f32>(0.5, 1.0));
-        dist_to_edge = min(distA, min(distB, distC));
-    }
-    // let edge_uv_x = (in.edge_nearness_uv[0] - 0.5) * 2.0;
-    // let edge_uv_y = (in.edge_nearness_uv[1] - 0.5) * 2.0;
-    // let proximity_to_edge = pow(edge_uv_x, 4.0) + pow(edge_uv_y, 4.0);
+    let dist_to_center = distance(in.polygon_uv, vec2<f32>(0.0, 0.0));
 
-    pbr_input.material.base_color = dist_to_edge * pbr_input.material.base_color
-        + (1.0 - dist_to_edge) * edge_color;
+    pbr_input.material.base_color = (1.0 - dist_to_center) * pbr_input.material.base_color
+        + dist_to_center * edge_color;
 
     // Boilerplate.
 

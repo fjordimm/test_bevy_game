@@ -55,21 +55,9 @@ fn spawn_some_stuff(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
 ) {
-    commands.spawn((
-        PlayingStateEntity,
-        Mesh3d(meshes.add(create_cuboid_mesh())),
-        MeshMaterial3d(
-            materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-                base_color: Color::hsv(0., 1., 1.),
-                edge_color: Color::hsv(240., 1., 1.),
-                ..default()
-            })),
-        ),
-        Transform::default(),
-    ));
     // commands.spawn((
     //     PlayingStateEntity,
-    //     Mesh3d(meshes.add(create_simple_triangle_mesh())),
+    //     Mesh3d(meshes.add(create_cuboid_mesh())),
     //     MeshMaterial3d(
     //         materials.add(primary_shader_material(PrimaryShaderMaterialProps {
     //             base_color: Color::hsv(0., 1., 1.),
@@ -79,6 +67,18 @@ fn spawn_some_stuff(
     //     ),
     //     Transform::default(),
     // ));
+    commands.spawn((
+        PlayingStateEntity,
+        Mesh3d(meshes.add(create_simple_triangle_mesh())),
+        MeshMaterial3d(
+            materials.add(primary_shader_material(PrimaryShaderMaterialProps {
+                base_color: Color::hsv(0., 1., 1.),
+                edge_color: Color::hsv(240., 1., 1.),
+                ..default()
+            })),
+        ),
+        Transform::default(),
+    ));
 
     // commands.spawn((
     //     PlayingStateEntity,
