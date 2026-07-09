@@ -4,8 +4,9 @@ use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_tim
 
 use crate::game::{
     core::states::OverallState,
+    geometry::cuboid::create_cuboid,
     playing_state::{
-        primary_shader::plugin::{ATTRIBUTE_TEST1, PrimaryShaderMaterial, primary_shader_material},
+        primary_shader::plugin::{PrimaryShaderMaterial, primary_shader_material},
         sets::DuringPlayingUnpaused,
         tags::PlayingStateEntity,
         world::TimeOfDay,
@@ -54,12 +55,7 @@ fn spawn_some_stuff(
 ) {
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(
-            meshes.add(
-                Mesh::from(Cuboid::new(1., 1., 1.))
-                    .with_inserted_attribute(ATTRIBUTE_TEST1, vec![[0.1, 0.2, 0.3]; 24]),
-            ),
-        ),
+        Mesh3d(meshes.add(create_cuboid())),
         MeshMaterial3d(materials.add(primary_shader_material(
             Color::hsv(0., 1., 1.),
             Color::hsv(0., 0., 1.),
