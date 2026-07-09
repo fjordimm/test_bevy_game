@@ -4,7 +4,7 @@ use bevy_mesh::{Indices, PrimitiveTopology};
 use crate::game::playing_state::primary_shader::plugin::ATTRIBUTE_TEST1;
 
 #[allow(unused)]
-pub fn create_cuboid() -> Mesh {
+pub fn create_cuboid_mesh() -> Mesh {
     Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::RENDER_WORLD, // TODO: is this optimal?
@@ -83,35 +83,35 @@ pub fn create_cuboid() -> Mesh {
         Mesh::ATTRIBUTE_UV_0,
         vec![
             // Assigning the UV coords for the top side.
-            [0.0, 0.2],
             [0.0, 0.0],
             [1.0, 0.0],
-            [1.0, 0.2],
+            [1.0, 1.0],
+            [0.0, 1.0],
             // Assigning the UV coords for the bottom side.
-            [0.0, 0.45],
-            [0.0, 0.25],
-            [1.0, 0.25],
-            [1.0, 0.45],
+            [0.0, 1.0],
+            [1.0, 1.0],
+            [1.0, 0.0],
+            [0.0, 0.0],
             // Assigning the UV coords for the right side.
-            [1.0, 0.45],
-            [0.0, 0.45],
-            [0.0, 0.2],
-            [1.0, 0.2],
+            [1.0, 1.0],
+            [0.0, 1.0],
+            [0.0, 0.0],
+            [1.0, 0.0],
             // Assigning the UV coords for the left side.
-            [1.0, 0.45],
-            [0.0, 0.45],
-            [0.0, 0.2],
-            [1.0, 0.2],
+            [0.0, 1.0],
+            [1.0, 1.0],
+            [1.0, 0.0],
+            [0.0, 0.0],
             // Assigning the UV coords for the back side.
-            [0.0, 0.45],
-            [0.0, 0.2],
-            [1.0, 0.2],
-            [1.0, 0.45],
+            [0.0, 1.0],
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
             // Assigning the UV coords for the forward side.
-            [0.0, 0.45],
-            [0.0, 0.2],
-            [1.0, 0.2],
-            [1.0, 0.45],
+            [1.0, 1.0],
+            [1.0, 0.0],
+            [0.0, 0.0],
+            [0.0, 1.0],
         ],
     )
     .with_inserted_attribute(ATTRIBUTE_TEST1, vec![[0.1, 0.2, 0.3]; 24])

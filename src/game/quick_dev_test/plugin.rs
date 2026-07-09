@@ -4,9 +4,11 @@ use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_tim
 
 use crate::game::{
     core::states::OverallState,
-    geometry::cuboid::create_cuboid,
+    geometry::cuboid::create_cuboid_mesh,
     playing_state::{
-        primary_shader::plugin::{PrimaryShaderMaterial, primary_shader_material},
+        primary_shader::plugin::{
+            PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
+        },
         sets::DuringPlayingUnpaused,
         tags::PlayingStateEntity,
         world::TimeOfDay,
@@ -52,14 +54,20 @@ fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
+    let test_texture: Handle<Image> = asset_server.load("misc/thing.png");
+
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(meshes.add(create_cuboid())),
-        MeshMaterial3d(materials.add(primary_shader_material(
-            Color::hsv(0., 1., 1.),
-            Color::hsv(0., 0., 1.),
-        ))),
+        Mesh3d(meshes.add(create_cuboid_mesh())),
+        MeshMaterial3d(
+            materials.add(primary_shader_material(PrimaryShaderMaterialProps {
+                base_color: Color::hsv(0., 0., 1.),
+                edge_color: Color::hsv(0., 0., 1.),
+                texture: Some(test_texture),
+            })),
+        ),
         Transform::default(),
     ));
 

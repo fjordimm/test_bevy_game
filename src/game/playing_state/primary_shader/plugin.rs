@@ -19,14 +19,31 @@ impl Plugin for PrimaryShaderPlugin {
     }
 }
 
+pub struct PrimaryShaderMaterialProps {
+    pub base_color: Color,
+    pub edge_color: Color,
+    pub texture: Option<Handle<Image>>,
+}
+
+impl Default for PrimaryShaderMaterialProps {
+    fn default() -> Self {
+        Self {
+            base_color: Color::WHITE,
+            edge_color: Color::WHITE,
+            texture: None,
+        }
+    }
+}
+
 pub type PrimaryShaderMaterial = ExtendedMaterial<StandardMaterial, __PrimaryShaderExtension>;
 
-pub fn primary_shader_material(base_color: Color, edge_color: Color) -> PrimaryShaderMaterial {
-    let edge_color = edge_color.to_linear();
+pub fn primary_shader_material(props: PrimaryShaderMaterialProps) -> PrimaryShaderMaterial {
+    let edge_color = props.edge_color.to_linear();
 
     PrimaryShaderMaterial {
         base: StandardMaterial {
-            base_color: base_color,
+            base_color: props.base_color,
+            base_color_texture: props.texture,
             perceptual_roughness: 1.,
             metallic: 0.,
             reflectance: 0.,
