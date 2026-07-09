@@ -1,8 +1,11 @@
 #import bevy_pbr::{
+    forward_io::{UncompressedVertex, VertexOutput, decompress_vertex},
     pbr_fragment::pbr_input_from_standard_material,
     pbr_functions::apply_pbr_lighting,
-    mesh_functions::get_world_from_local,
-    mesh_functions::mesh_position_local_to_clip,
+    mesh::morph_vertex,
+    mesh_functions,
+    skinning,
+    view_transformations::position_world_to_clip,
 }
 
 @group(#{MATERIAL_BIND_GROUP}) @binding(100) var<uniform> edge_color: vec3<f32>;
@@ -15,17 +18,73 @@ struct Vertex {
     @location(3) test1: vec3<f32>,
 }
 
-struct VertexOutput {
-    @builtin(position) clip_position: vec4<f32>,
-}
-
 @vertex
 fn vertex(in: Vertex) -> VertexOutput {
+    // Most code here was copied from https://github.com/bevyengine/bevy/blob/main/crates/bevy_pbr/src/render/mesh.wgsl
+
     var out: VertexOutput;
-    out.clip_position = mesh_position_local_to_clip(
-        get_world_from_local(in.instance_index),
-        vec4<f32>(in.position, 1.0),
+    let uncompressed_vertex_no_morph = decompress_vertex(in, in.instance_index);
+#ifdef MORPH_TARGETS
+    var vertex = morph_vertex(uncompressed_vertex_no_morph, in.instance_index);
+#else
+    var vertex = uncompressed_vertex_no_morph;
+#endif
+
+    let mesh_world_from_local = mesh_functions::get_world_from_local(in.instance_index);
+
+#ifdef SKINNED
+    var world_from_local = skinning::skin_model(
+        vertex.joint_indices,
+        vertex.joint_weights,
+        in.instance_index
     );
+#else
+    var world_from_local = mesh_world_from_local;
+#endif
+
+#ifdef VERTEX_NORMALS
+#ifdef SKINNED
+    out.world_normal = skinning::skin_normals(world_from_local, vertex.normal);
+#else
+    out.world_normal = mesh_functions::mesh_normal_local_to_world(
+        vertex.normal,
+        in.instance_index
+    );
+#endif
+#endif
+
+#ifdef VERTEX_POSITIONS
+    out.world_position = mesh_functions::mesh_position_local_to_world(world_from_local, vec4<f32>(vertex.position, 1.0));
+    out.position = position_world_to_clip(out.world_position.xyz);
+#endif
+
+#ifdef VERTEX_UVS_A
+    out.uv = vertex.uv;
+#endif
+#ifdef VERTEX_UVS_B
+    out.uv_b = vertex.uv_b;
+#endif
+
+#ifdef VERTEX_TANGENTS
+    out.world_tangent = mesh_functions::mesh_tangent_local_to_world(
+        world_from_local,
+        vertex.tangent,
+        in.instance_index
+    );
+#endif
+
+#ifdef VERTEX_COLORS
+    out.color = vertex.color;
+#endif
+
+#ifdef VERTEX_OUTPUT_INSTANCE_INDEX
+    out.instance_index = in.instance_index;
+#endif
+
+#ifdef VISIBILITY_RANGE_DITHER
+    out.visibility_range_dither = mesh_functions::get_visibility_range_dither_level(
+        in.instance_index, mesh_world_from_local[3]);
+#endif
 
     return out;
 }
