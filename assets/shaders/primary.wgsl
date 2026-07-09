@@ -79,12 +79,19 @@ fn fragment(
 
     // Edge highlighting.
 
-    let edge_uv_x = (in.edge_nearness_uv[0] - 0.5) * 2.0;
-    let edge_uv_y = (in.edge_nearness_uv[1] - 0.5) * 2.0;
-    let proximity_to_edge = pow(edge_uv_x, 4.0) + pow(edge_uv_y, 4.0);
+    var dist_to_edge: f32;
+    {
+        let distA = distance(in.edge_nearness_uv, vec2<f32>(0.0, 0.0));
+        let distB = distance(in.edge_nearness_uv, vec2<f32>(1.0, 0.0));
+        let distC = distance(in.edge_nearness_uv, vec2<f32>(0.5, 1.0));
+        dist_to_edge = min(distA, min(distB, distC));
+    }
+    // let edge_uv_x = (in.edge_nearness_uv[0] - 0.5) * 2.0;
+    // let edge_uv_y = (in.edge_nearness_uv[1] - 0.5) * 2.0;
+    // let proximity_to_edge = pow(edge_uv_x, 4.0) + pow(edge_uv_y, 4.0);
 
-    pbr_input.material.base_color = (1.0 - proximity_to_edge) * pbr_input.material.base_color
-        + proximity_to_edge * edge_color;
+    pbr_input.material.base_color = dist_to_edge * pbr_input.material.base_color
+        + (1.0 - dist_to_edge) * edge_color;
 
     // Boilerplate.
 

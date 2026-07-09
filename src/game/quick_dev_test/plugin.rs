@@ -4,7 +4,7 @@ use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_tim
 
 use crate::game::{
     core::states::OverallState,
-    geometry::cuboid::create_cuboid_mesh,
+    geometry::{cuboid::create_cuboid_mesh, simple_triangle::create_simple_triangle_mesh},
     playing_state::{
         primary_shader::plugin::{
             PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
@@ -67,6 +67,18 @@ fn spawn_some_stuff(
         ),
         Transform::default(),
     ));
+    // commands.spawn((
+    //     PlayingStateEntity,
+    //     Mesh3d(meshes.add(create_simple_triangle_mesh())),
+    //     MeshMaterial3d(
+    //         materials.add(primary_shader_material(PrimaryShaderMaterialProps {
+    //             base_color: Color::hsv(0., 1., 1.),
+    //             edge_color: Color::hsv(240., 1., 1.),
+    //             ..default()
+    //         })),
+    //     ),
+    //     Transform::default(),
+    // ));
 
     // commands.spawn((
     //     PlayingStateEntity,

@@ -120,8 +120,8 @@ pub fn create_cuboid_mesh() -> Mesh {
             // Assigning the UV coords for the top side.
             [0.0, 0.0],
             [1.0, 0.0],
-            [1.0, 1.0],
-            [0.0, 1.0],
+            [0.5, 1.0],
+            [0.5, 1.0],
             // Assigning the UV coords for the bottom side.
             [0.0, 1.0],
             [1.0, 1.0],
