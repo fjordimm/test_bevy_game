@@ -1,10 +1,13 @@
 use std::time::Duration;
 
-use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_timer};
+use bevy::{
+    input::mouse::MouseWheel, prelude::*, render::render_resource::Face,
+    time::common_conditions::on_timer,
+};
 
 use crate::game::{
     core::states::OverallState,
-    geometry::{cuboid::create_cuboid_mesh, simple_triangle::create_simple_triangle_mesh},
+    geometry::cuboid::create_cuboid_mesh,
     playing_state::{
         primary_shader::plugin::{
             PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
@@ -54,10 +57,24 @@ fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
+    commands.spawn((
+        PlayingStateEntity,
+        Mesh3d(meshes.add(create_cuboid_mesh())),
+        MeshMaterial3d(
+            materials.add(primary_shader_material(PrimaryShaderMaterialProps {
+                base_color: Color::hsv(0., 1., 1.),
+                edge_color: Color::hsv(240., 1., 1.),
+                normal_map_texture: Some(asset_server.load("misc/bump.png")),
+                ..default()
+            })),
+        ),
+        Transform::default(),
+    ));
     // commands.spawn((
     //     PlayingStateEntity,
-    //     Mesh3d(meshes.add(create_cuboid_mesh())),
+    //     Mesh3d(meshes.add(create_simple_triangle_mesh())),
     //     MeshMaterial3d(
     //         materials.add(primary_shader_material(PrimaryShaderMaterialProps {
     //             base_color: Color::hsv(0., 1., 1.),
@@ -67,18 +84,6 @@ fn spawn_some_stuff(
     //     ),
     //     Transform::default(),
     // ));
-    commands.spawn((
-        PlayingStateEntity,
-        Mesh3d(meshes.add(create_simple_triangle_mesh())),
-        MeshMaterial3d(
-            materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-                base_color: Color::hsv(0., 1., 1.),
-                edge_color: Color::hsv(240., 1., 1.),
-                ..default()
-            })),
-        ),
-        Transform::default(),
-    ));
 
     // commands.spawn((
     //     PlayingStateEntity,

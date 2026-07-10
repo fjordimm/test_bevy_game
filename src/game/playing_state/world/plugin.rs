@@ -44,12 +44,13 @@ fn on_enter(mut commands: Commands, mut time_of_day: ResMut<TimeOfDay>) {
         Transform::default().looking_at(Vec3::new(-0.1, -1., -0.2), Dir3::Y),
     ));
 
+    // commands.spawn(bundle);
+
     time_of_day.0 = 0.5;
 }
 
 fn update_sunlight(
     sunlight_q: Option<Single<(&mut Transform, &mut DirectionalLight), With<SunlightTag>>>,
-    ambient_light_q: Option<Single<&mut AmbientLight, With<CameraForPlayer>>>,
     computed_skybox_values: Res<ComputedSkyboxValues>,
 ) {
     if let Some(mut sunlight) = alrms!(sunlight_q) {
@@ -60,12 +61,5 @@ fn update_sunlight(
 
         sunlight.1.illuminance = f32::max(0., computed_skybox_values.sun_position.y)
             * light_consts::lux::AMBIENT_DAYLIGHT;
-    }
-
-    if let Some(mut ambient_light) = alrms!(ambient_light_q) {
-        ambient_light.brightness = lerp(
-            30.0..=80.,
-            f32::max(0., computed_skybox_values.sun_position.y),
-        );
     }
 }

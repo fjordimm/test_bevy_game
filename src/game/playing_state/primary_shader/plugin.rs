@@ -23,6 +23,7 @@ pub struct PrimaryShaderMaterialProps {
     pub base_color: Color,
     pub edge_color: Color,
     pub texture: Option<Handle<Image>>,
+    pub normal_map_texture: Option<Handle<Image>>,
 }
 
 impl Default for PrimaryShaderMaterialProps {
@@ -31,6 +32,7 @@ impl Default for PrimaryShaderMaterialProps {
             base_color: Color::WHITE,
             edge_color: Color::WHITE,
             texture: None,
+            normal_map_texture: None,
         }
     }
 }
@@ -44,6 +46,7 @@ pub fn primary_shader_material(props: PrimaryShaderMaterialProps) -> PrimaryShad
         base: StandardMaterial {
             base_color: props.base_color,
             base_color_texture: props.texture,
+            normal_map_texture: props.normal_map_texture,
             perceptual_roughness: 1.,
             metallic: 0.,
             reflectance: 0.,
@@ -69,8 +72,9 @@ pub struct __PrimaryShaderExtension {
     edge_color: Vec4,
 }
 
-pub const ATTRIBUTE_POLYGON_UV: MeshVertexAttribute =
-    MeshVertexAttribute::new("PolygonUV", 54784352, VertexFormat::Float32x2);
+// TODOr
+// pub const ATTRIBUTE_POLYGONITY0: MeshVertexAttribute =
+//     MeshVertexAttribute::new("Polygonity0", 54784352, VertexFormat::Float32x4);
 
 impl MaterialExtension for __PrimaryShaderExtension {
     fn vertex_shader() -> ShaderRef {
@@ -91,7 +95,8 @@ impl MaterialExtension for __PrimaryShaderExtension {
             Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
             Mesh::ATTRIBUTE_NORMAL.at_shader_location(1),
             Mesh::ATTRIBUTE_UV_0.at_shader_location(2),
-            ATTRIBUTE_POLYGON_UV.at_shader_location(3),
+            Mesh::ATTRIBUTE_TANGENT.at_shader_location(3),
+            // ATTRIBUTE_POLYGONITY0.at_shader_location(3), // TODOr
         ])?;
 
         descriptor.vertex.buffers = vec![vertex_layout];
