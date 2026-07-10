@@ -37,9 +37,9 @@ impl Plugin for WorldPlugin {
 pub struct SunlightTag;
 
 const ABOVE_AMBIENT_LIGHT_ILLUMINANCE: f32 = 300.;
-const ABOVE_AMBIENT_LIGHT_COLOR: Color = Color::hsv(198., 0.25, 1.);
+const ABOVE_AMBIENT_LIGHT_COLOR: Color = Color::hsv(228., 0.18, 1.);
 const BELOW_AMBIENT_LIGHT_ILLUMINANCE: f32 = 150.;
-const BELOW_AMBIENT_LIGHT_COLOR: Color = Color::hsv(45., 0.07, 1.);
+const BELOW_AMBIENT_LIGHT_COLOR: Color = Color::hsv(169., 0.05, 1.);
 
 fn on_enter(
     mut commands: Commands,
@@ -82,7 +82,7 @@ fn on_enter(
         },
         Transform::default().looking_at(vec3(-1., -1., 1.), Dir3::Y),
     ));
-    // Warm lighting from below:
+    // Warm(er) lighting from below:
     commands.spawn((
         PlayingStateEntity,
         DirectionalLight {

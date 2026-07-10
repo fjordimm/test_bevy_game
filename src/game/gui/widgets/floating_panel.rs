@@ -992,7 +992,7 @@ fn enforce_min_size(
         &GuiFloatingPanelRelations,
         &mut GuiFloatingPanelState,
         &Node,
-    ) /* TODO Changed<GuiFloatingPanelState>*/>,
+    )>,
     title_bar_q: Query<
         &ComputedNode,
         (

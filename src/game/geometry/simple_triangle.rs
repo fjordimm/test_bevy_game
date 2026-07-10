@@ -5,7 +5,7 @@ use bevy_mesh::{Indices, PrimitiveTopology};
 pub fn create_simple_triangle_mesh() -> Mesh {
     Mesh::new(
         PrimitiveTopology::TriangleList,
-        RenderAssetUsages::RENDER_WORLD, // TODO: is this optimal?
+        RenderAssetUsages::RENDER_WORLD,
     )
     .with_inserted_attribute(
         Mesh::ATTRIBUTE_POSITION,

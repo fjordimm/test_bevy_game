@@ -7,7 +7,7 @@ use bevy::{
 
 use crate::game::{
     core::states::OverallState,
-    geometry::cuboid::create_cuboid_mesh,
+    geometry::{cuboid::create_cuboid_mesh, dodecahedron::create_dodecahedron_mesh},
     playing_state::{
         primary_shader::plugin::{
             PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
@@ -63,55 +63,16 @@ fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
-    asset_server: Res<AssetServer>,
 ) {
-    let normal_map_tex = asset_server
-        .load_with_settings("misc/nm3.png", |settings: &mut ImageLoaderSettings| {
-            settings.is_srgb = false
-        });
-
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(meshes.add(create_cuboid_mesh())),
+        Mesh3d(meshes.add(create_dodecahedron_mesh())),
         MeshMaterial3d(
             materials.add(primary_shader_material(PrimaryShaderMaterialProps {
                 base_color: Color::hsv(0., 0., 1.),
-                normal_map_texture: Some(normal_map_tex),
                 ..default()
             })),
         ),
         Transform::default(),
     ));
-    // commands.spawn((
-    //     PlayingStateEntity,
-    //     Mesh3d(meshes.add(create_cuboid_mesh())),
-    //     MeshMaterial3d(
-    //         materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-    //             base_color: Color::hsv(0., 1., 1.),
-    //             edge_color: Color::hsv(240., 1., 1.),
-    //             normal_map_texture: Some(asset_server.load("misc/nm1.png")),
-    //             ..default()
-    //         })),
-    //     ),
-    //     Transform::default(),
-    // ));
-    // commands.spawn((
-    //     PlayingStateEntity,
-    //     Mesh3d(meshes.add(create_simple_triangle_mesh())),
-    //     MeshMaterial3d(
-    //         materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-    //             base_color: Color::hsv(0., 1., 1.),
-    //             edge_color: Color::hsv(240., 1., 1.),
-    //             ..default()
-    //         })),
-    //     ),
-    //     Transform::default(),
-    // ));
-
-    // commands.spawn((
-    //     PlayingStateEntity,
-    //     Mesh3d(meshes.add(Tetrahedron::default())),
-    //     MeshMaterial3d(materials.add(Color::hsv(270., 1., 1.))),
-    //     Transform::from_xyz(0., 2., 0.),
-    // ));
 }
