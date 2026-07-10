@@ -4,8 +4,11 @@ use bevy_inspector_egui::egui::lerp;
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        player::tags::CameraForPlayer, sets::DuringPlayingUnpaused, skybox::ComputedSkyboxValues,
-        tags::PlayingStateEntity, world::TimeOfDay,
+        player::tags::CameraForPlayer,
+        sets::DuringPlayingUnpaused,
+        skybox::ComputedSkyboxValues,
+        tags::PlayingStateEntity,
+        world::{SeasonOfYear, TimeOfDay},
     },
     util::alrms,
 };
@@ -17,6 +20,7 @@ impl Plugin for WorldPlugin {
         #[rustfmt::skip]
         app
             .insert_resource(TimeOfDay(0.))
+            .insert_resource(SeasonOfYear(0.))
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
                     .in_set(DuringPlayingUnpaused::General)
@@ -32,7 +36,11 @@ impl Plugin for WorldPlugin {
 #[derive(Component)]
 pub struct SunlightTag;
 
-fn on_enter(mut commands: Commands, mut time_of_day: ResMut<TimeOfDay>) {
+fn on_enter(
+    mut commands: Commands,
+    mut time_of_day: ResMut<TimeOfDay>,
+    mut season_of_year: ResMut<SeasonOfYear>,
+) {
     commands.spawn((
         PlayingStateEntity,
         SunlightTag,
@@ -44,9 +52,10 @@ fn on_enter(mut commands: Commands, mut time_of_day: ResMut<TimeOfDay>) {
         Transform::default().looking_at(Vec3::new(-0.1, -1., -0.2), Dir3::Y),
     ));
 
-    // commands.spawn(bundle);
+    // TODO
 
     time_of_day.0 = 0.5;
+    season_of_year.0 = 0.0;
 }
 
 fn update_sunlight(

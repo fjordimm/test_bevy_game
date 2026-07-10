@@ -8,6 +8,8 @@
         apply_pbr_lighting,
         main_pass_post_lighting_processing
     },
+    mesh_view_bindings as view_bindings,
+    lighting,
 }
 
 @group(#{MATERIAL_BIND_GROUP}) @binding(100) var<uniform> edge_color: vec4<f32>;
@@ -87,6 +89,15 @@ fn fragment(
     out = apply_pbr_lighting(pbr_input);
 
     // Could modify color here too. // TODOr
+
+    let n_directional_lights = view_bindings::lights.n_directional_lights;
+    for (var i: u32 = 0u; i < n_directional_lights; i = i + 1u) {
+        // let light = &view_bindings::lights.directional_lights[i];
+
+        // let LdotN = dot((*light).direction_to_light, in.world_normal);
+
+        // out += vec4<f32>(vec3<f32>(1.0) * LdotN, 1.0);
+    }
 
     // Boilerplate.
 

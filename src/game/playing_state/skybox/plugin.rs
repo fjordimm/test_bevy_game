@@ -5,8 +5,11 @@ use bevy::{prelude::*, render::render_resource::*, shader::ShaderRef};
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        player::tags::CameraForPlayer, sets::DuringPlayingUnpaused, skybox::ComputedSkyboxValues,
-        tags::PlayingStateEntity, world::TimeOfDay,
+        player::tags::CameraForPlayer,
+        sets::DuringPlayingUnpaused,
+        skybox::ComputedSkyboxValues,
+        tags::PlayingStateEntity,
+        world::{SeasonOfYear, TimeOfDay},
     },
     util::{alrms, alrro},
 };
@@ -38,9 +41,10 @@ fn spawn_skybox(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<SkyboxMaterial>>,
     time_of_day: Res<TimeOfDay>,
+    season_of_year: Res<SeasonOfYear>,
     mut computed_skybox_values: ResMut<ComputedSkyboxValues>,
 ) {
-    compute_skybox_values(time_of_day.0, &mut computed_skybox_values);
+    compute_skybox_values(time_of_day.0, season_of_year.0, &mut computed_skybox_values);
 
     commands.spawn((
         PlayingStateEntity,
@@ -61,6 +65,7 @@ fn update_skybox(
     skybox_transf_q: Option<Single<&mut Transform, (With<SkyboxTag>, Without<CameraForPlayer>)>>,
     mut materials: ResMut<Assets<SkyboxMaterial>>,
     time_of_day: Res<TimeOfDay>,
+    season_of_year: Res<SeasonOfYear>,
     mut computed_skybox_values: ResMut<ComputedSkyboxValues>,
 ) {
     // Move it to be the same position as the camera.
@@ -73,7 +78,7 @@ fn update_skybox(
 
     // Update the shader uniforms.
 
-    compute_skybox_values(time_of_day.0, &mut computed_skybox_values);
+    compute_skybox_values(time_of_day.0, season_of_year.0, &mut computed_skybox_values);
 
     materials.iter_mut().for_each(|(_, mat)| {
         mat.sun_position = computed_skybox_values.sun_position;
@@ -99,7 +104,15 @@ impl Material for SkyboxMaterial {
     }
 }
 
-fn compute_skybox_values(time_of_day: f32, computed_skybox_values: &mut ComputedSkyboxValues) {
+fn compute_skybox_values(
+    time_of_day: f32,
+    season_of_year: f32,
+    computed_skybox_values: &mut ComputedSkyboxValues,
+) {
     computed_skybox_values.sun_position = Vec3::NEG_Z.rotate_x(time_of_day * PI);
+    computed_skybox_values.sun_position = computed_skybox_values
+        .sun_position
+        .rotate_z(season_of_year * PI);
+
     computed_skybox_values.sky_rotation_inv = Mat3::from_rotation_x(-time_of_day * PI);
 }

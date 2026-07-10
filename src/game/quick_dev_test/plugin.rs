@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use bevy::{
-    input::mouse::MouseWheel, prelude::*, render::render_resource::Face,
-    time::common_conditions::on_timer,
+    image::ImageLoaderSettings, input::mouse::MouseWheel, prelude::*,
+    render::render_resource::Face, time::common_conditions::on_timer,
 };
 
 use crate::game::{
@@ -14,7 +14,7 @@ use crate::game::{
         },
         sets::DuringPlayingUnpaused,
         tags::PlayingStateEntity,
-        world::TimeOfDay,
+        world::{SeasonOfYear, TimeOfDay},
     },
 };
 
@@ -45,11 +45,17 @@ fn after_a_sec(/* mut gui_scale: ResMut<GuiScale> */) {
 }
 
 fn rotate_sun(
+    keys: Res<ButtonInput<KeyCode>>,
     mut mouse_wheel_reader: MessageReader<MouseWheel>,
     mut time_of_day: ResMut<TimeOfDay>,
+    mut season_of_year: ResMut<SeasonOfYear>,
 ) {
     for mouse_wheel_msg in mouse_wheel_reader.read() {
-        time_of_day.0 += -0.03 * mouse_wheel_msg.y;
+        if keys.pressed(KeyCode::ControlLeft) {
+            season_of_year.0 += 0.03 * mouse_wheel_msg.y;
+        } else {
+            time_of_day.0 += -0.03 * mouse_wheel_msg.y;
+        }
     }
 }
 
@@ -59,6 +65,11 @@ fn spawn_some_stuff(
     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
+    let normal_map_tex = asset_server
+        .load_with_settings("misc/nm3.png", |settings: &mut ImageLoaderSettings| {
+            settings.is_srgb = false
+        });
+
     commands.spawn((
         PlayingStateEntity,
         Mesh3d(meshes.add(create_cuboid_mesh())),
@@ -66,12 +77,25 @@ fn spawn_some_stuff(
             materials.add(primary_shader_material(PrimaryShaderMaterialProps {
                 base_color: Color::hsv(0., 1., 1.),
                 edge_color: Color::hsv(240., 1., 1.),
-                normal_map_texture: Some(asset_server.load("misc/bump.png")),
+                normal_map_texture: Some(normal_map_tex),
                 ..default()
             })),
         ),
         Transform::default(),
     ));
+    // commands.spawn((
+    //     PlayingStateEntity,
+    //     Mesh3d(meshes.add(create_cuboid_mesh())),
+    //     MeshMaterial3d(
+    //         materials.add(primary_shader_material(PrimaryShaderMaterialProps {
+    //             base_color: Color::hsv(0., 1., 1.),
+    //             edge_color: Color::hsv(240., 1., 1.),
+    //             normal_map_texture: Some(asset_server.load("misc/nm1.png")),
+    //             ..default()
+    //         })),
+    //     ),
+    //     Transform::default(),
+    // ));
     // commands.spawn((
     //     PlayingStateEntity,
     //     Mesh3d(meshes.add(create_simple_triangle_mesh())),
