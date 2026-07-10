@@ -75,8 +75,7 @@ fn spawn_some_stuff(
         Mesh3d(meshes.add(create_cuboid_mesh())),
         MeshMaterial3d(
             materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-                base_color: Color::hsv(0., 1., 1.),
-                edge_color: Color::hsv(240., 1., 1.),
+                base_color: Color::hsv(0., 0., 1.),
                 normal_map_texture: Some(normal_map_tex),
                 ..default()
             })),

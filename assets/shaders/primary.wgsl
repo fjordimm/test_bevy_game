@@ -12,7 +12,7 @@
     lighting,
 }
 
-@group(#{MATERIAL_BIND_GROUP}) @binding(100) var<uniform> edge_color: vec4<f32>;
+// @group(#{MATERIAL_BIND_GROUP}) @binding(100) var<uniform> edge_color: vec4<f32>; // TODOr
 
 struct Vertex {
     @builtin(instance_index) instance_index: u32,

@@ -21,7 +21,6 @@ impl Plugin for PrimaryShaderPlugin {
 
 pub struct PrimaryShaderMaterialProps {
     pub base_color: Color,
-    pub edge_color: Color,
     pub texture: Option<Handle<Image>>,
     pub normal_map_texture: Option<Handle<Image>>,
 }
@@ -30,7 +29,6 @@ impl Default for PrimaryShaderMaterialProps {
     fn default() -> Self {
         Self {
             base_color: Color::WHITE,
-            edge_color: Color::WHITE,
             texture: None,
             normal_map_texture: None,
         }
@@ -40,8 +38,6 @@ impl Default for PrimaryShaderMaterialProps {
 pub type PrimaryShaderMaterial = ExtendedMaterial<StandardMaterial, __PrimaryShaderExtension>;
 
 pub fn primary_shader_material(props: PrimaryShaderMaterialProps) -> PrimaryShaderMaterial {
-    let edge_color = props.edge_color.to_linear();
-
     PrimaryShaderMaterial {
         base: StandardMaterial {
             base_color: props.base_color,
@@ -60,16 +56,14 @@ pub fn primary_shader_material(props: PrimaryShaderMaterialProps) -> PrimaryShad
             fog_enabled: true,
             ..default()
         },
-        extension: __PrimaryShaderExtension {
-            edge_color: vec4(edge_color.red, edge_color.green, edge_color.blue, 1.),
-        },
+        extension: __PrimaryShaderExtension {},
     }
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct __PrimaryShaderExtension {
-    #[uniform(100)]
-    edge_color: Vec4,
+    // #[uniform(100)]
+    // edge_color: Vec4,
 }
 
 // TODOr

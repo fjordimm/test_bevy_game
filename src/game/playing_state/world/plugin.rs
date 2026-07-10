@@ -36,11 +36,18 @@ impl Plugin for WorldPlugin {
 #[derive(Component)]
 pub struct SunlightTag;
 
+const ABOVE_AMBIENT_LIGHT_ILLUMINANCE: f32 = 300.;
+const ABOVE_AMBIENT_LIGHT_COLOR: Color = Color::hsv(198., 0.25, 1.);
+const BELOW_AMBIENT_LIGHT_ILLUMINANCE: f32 = 150.;
+const BELOW_AMBIENT_LIGHT_COLOR: Color = Color::hsv(45., 0.07, 1.);
+
 fn on_enter(
     mut commands: Commands,
     mut time_of_day: ResMut<TimeOfDay>,
     mut season_of_year: ResMut<SeasonOfYear>,
 ) {
+    // Sunlight.
+
     commands.spawn((
         PlayingStateEntity,
         SunlightTag,
@@ -49,10 +56,55 @@ fn on_enter(
             shadows_enabled: false,
             ..default()
         },
-        Transform::default().looking_at(Vec3::new(-0.1, -1., -0.2), Dir3::Y),
+        Transform::default().looking_at(vec3(0., -1., 0.), Dir3::Y),
     ));
 
-    // TODO
+    // "Ambient" light, coming from four directions (pointed towards the vertices of a tetrahedron).
+
+    // Cool lighting from above:
+    commands.spawn((
+        PlayingStateEntity,
+        DirectionalLight {
+            color: ABOVE_AMBIENT_LIGHT_COLOR,
+            shadows_enabled: false,
+            illuminance: ABOVE_AMBIENT_LIGHT_ILLUMINANCE,
+            ..default()
+        },
+        Transform::default().looking_at(vec3(1., -1., -1.), Dir3::Y),
+    ));
+    commands.spawn((
+        PlayingStateEntity,
+        DirectionalLight {
+            color: ABOVE_AMBIENT_LIGHT_COLOR,
+            shadows_enabled: false,
+            illuminance: ABOVE_AMBIENT_LIGHT_ILLUMINANCE,
+            ..default()
+        },
+        Transform::default().looking_at(vec3(-1., -1., 1.), Dir3::Y),
+    ));
+    // Warm lighting from below:
+    commands.spawn((
+        PlayingStateEntity,
+        DirectionalLight {
+            color: BELOW_AMBIENT_LIGHT_COLOR,
+            shadows_enabled: false,
+            illuminance: BELOW_AMBIENT_LIGHT_ILLUMINANCE,
+            ..default()
+        },
+        Transform::default().looking_at(vec3(-1., 1., -1.), Dir3::Y),
+    ));
+    commands.spawn((
+        PlayingStateEntity,
+        DirectionalLight {
+            color: BELOW_AMBIENT_LIGHT_COLOR,
+            shadows_enabled: false,
+            illuminance: BELOW_AMBIENT_LIGHT_ILLUMINANCE,
+            ..default()
+        },
+        Transform::default().looking_at(vec3(1., 1., 1.), Dir3::Y),
+    ));
+
+    // Reset sun position.
 
     time_of_day.0 = 0.5;
     season_of_year.0 = 0.0;
