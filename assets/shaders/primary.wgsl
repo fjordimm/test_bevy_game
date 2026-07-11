@@ -12,8 +12,6 @@
     lighting,
 }
 
-// @group(#{MATERIAL_BIND_GROUP}) @binding(100) var<uniform> edge_color: vec4<f32>; // TODOr
-
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
     @location(0) position: vec3<f32>,
@@ -79,8 +77,6 @@ fn fragment(
 
     // Could modify color here too. // TODOr
 
-    // let ambient_upwardness = in.world_normal
-
     // Boilerplate.
 
     pbr_input.material.base_color = alpha_discard(pbr_input.material, pbr_input.material.base_color);
@@ -90,14 +86,9 @@ fn fragment(
 
     // Could modify color here too. // TODOr
 
-    let n_directional_lights = view_bindings::lights.n_directional_lights;
-    for (var i: u32 = 0u; i < n_directional_lights; i = i + 1u) {
-        // let light = &view_bindings::lights.directional_lights[i];
-
-        // let LdotN = dot((*light).direction_to_light, in.world_normal);
-
-        // out += vec4<f32>(vec3<f32>(1.0) * LdotN, 1.0);
-    }
+    // let n_directional_lights = view_bindings::lights.n_directional_lights;
+    // for (var i: u32 = 0u; i < n_directional_lights; i = i + 1u) {
+    // }
 
     // Boilerplate.
 

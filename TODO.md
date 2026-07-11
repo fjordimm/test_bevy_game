@@ -31,6 +31,7 @@
 - When dragging floating panels around, they should order themselves correctly (most recently dragged goes on top).
 
 ## Optimizations
+- If I don't need uv coords or anything for my primary shader, than try implementing meshes that don't use repeated vertices, while still keeping flat shading.
 - Don't repeatedly use commands.entity(...) but use EntityCommands directly, wherever possible.
 - When in release profile, the functions in util like `alrms`, `alrmo`, `alrrs`, and `alrro` should all just pass the input through without executing code.
 

@@ -62,6 +62,7 @@ pub fn primary_shader_material(props: PrimaryShaderMaterialProps) -> PrimaryShad
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct __PrimaryShaderExtension {
+    // TODOr
     // #[uniform(100)]
     // edge_color: Vec4,
 }

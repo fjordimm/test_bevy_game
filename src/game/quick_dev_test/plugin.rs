@@ -1,13 +1,10 @@
 use std::time::Duration;
 
-use bevy::{
-    image::ImageLoaderSettings, input::mouse::MouseWheel, prelude::*,
-    render::render_resource::Face, time::common_conditions::on_timer,
-};
+use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_timer};
 
 use crate::game::{
     core::states::OverallState,
-    geometry::{cuboid::create_cuboid_mesh, dodecahedron::create_dodecahedron_mesh},
+    geometry::dodecahedron::create_dodecahedron_mesh,
     playing_state::{
         primary_shader::plugin::{
             PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
