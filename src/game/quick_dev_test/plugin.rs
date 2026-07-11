@@ -4,7 +4,7 @@ use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_tim
 
 use crate::game::{
     core::states::OverallState,
-    geometry::dodecahedron::create_dodecahedron_mesh,
+    geometry::{dodecahedron::dodecahedron_mesh, triangle::triangle_mesh},
     playing_state::{
         primary_shader::plugin::{
             PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
@@ -63,13 +63,8 @@ fn spawn_some_stuff(
 ) {
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(meshes.add(create_dodecahedron_mesh())),
-        MeshMaterial3d(
-            materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-                base_color: Color::hsv(0., 0., 1.),
-                ..default()
-            })),
-        ),
+        Mesh3d(meshes.add(dodecahedron_mesh())),
+        MeshMaterial3d(materials.add(primary_shader_material(default()))),
         Transform::default(),
     ));
 }

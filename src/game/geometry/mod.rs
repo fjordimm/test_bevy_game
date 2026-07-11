@@ -1,3 +1,3 @@
-pub mod cuboid;
+pub mod cube;
 pub mod dodecahedron;
-pub mod simple_triangle;
+pub mod triangle;

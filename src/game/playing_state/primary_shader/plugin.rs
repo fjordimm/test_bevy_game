@@ -19,30 +19,20 @@ impl Plugin for PrimaryShaderPlugin {
     }
 }
 
-pub struct PrimaryShaderMaterialProps {
-    pub base_color: Color,
-    pub texture: Option<Handle<Image>>,
-    pub normal_map_texture: Option<Handle<Image>>,
-}
+pub struct PrimaryShaderMaterialProps {}
 
 impl Default for PrimaryShaderMaterialProps {
     fn default() -> Self {
-        Self {
-            base_color: Color::WHITE,
-            texture: None,
-            normal_map_texture: None,
-        }
+        Self {}
     }
 }
 
 pub type PrimaryShaderMaterial = ExtendedMaterial<StandardMaterial, __PrimaryShaderExtension>;
 
-pub fn primary_shader_material(props: PrimaryShaderMaterialProps) -> PrimaryShaderMaterial {
+pub fn primary_shader_material(_props: PrimaryShaderMaterialProps) -> PrimaryShaderMaterial {
     PrimaryShaderMaterial {
         base: StandardMaterial {
-            base_color: props.base_color,
-            base_color_texture: props.texture,
-            normal_map_texture: props.normal_map_texture,
+            base_color: Color::WHITE,
             perceptual_roughness: 1.,
             metallic: 0.,
             reflectance: 0.,
@@ -88,7 +78,8 @@ impl MaterialExtension for __PrimaryShaderExtension {
     ) -> Result<(), SpecializedMeshPipelineError> {
         let vertex_layout = layout.0.get_layout(&[
             Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
-            // ATTRIBUTE_POLYGONITY0.at_shader_location(1), // TODOr
+            Mesh::ATTRIBUTE_COLOR.at_shader_location(1),
+            // ATTRIBUTE_POLYGONITY0.at_shader_location(2), // TODOr
         ])?;
 
         descriptor.vertex.buffers = vec![vertex_layout];

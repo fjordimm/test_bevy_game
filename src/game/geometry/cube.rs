@@ -2,7 +2,7 @@ use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology};
 
 #[allow(unused)]
-pub fn create_cuboid_mesh() -> Mesh {
+pub fn cube_mesh() -> Mesh {
     Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::RENDER_WORLD,

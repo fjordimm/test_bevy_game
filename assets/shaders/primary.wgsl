@@ -15,18 +15,21 @@
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
     @location(0) position: vec3<f32>,
+    @location(1) color: vec4<f32>,
 }
 
 struct CustomVertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) world_position: vec4<f32>,
-    @location(4) @interpolate(flat) instance_index: u32,
+    @location(1) color: vec4<f32>,
+    @location(2) @interpolate(flat) instance_index: u32,
 }
 
 fn to_pbr_vertex_output(og: CustomVertexOutput) -> VertexOutput {
     var ret: VertexOutput;
     ret.position = og.position;
     ret.world_position = og.world_position;
+    ret.color = og.color;
     ret.instance_index = og.instance_index;
 
     return ret;
@@ -37,13 +40,17 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
     // Boilerplate.
 
     var out: CustomVertexOutput;
-    var world_from_local = mesh_functions::get_world_from_local(in.instance_index);
+
+    let world_from_local = mesh_functions::get_world_from_local(in.instance_index);
     out.world_position = mesh_functions::mesh_position_local_to_world(world_from_local, vec4<f32>(in.position, 1.0));
+
     out.position = position_world_to_clip(out.world_position.xyz);
+    out.color = in.color;
     // out.visibility_range_dither = mesh_functions::get_visibility_range_dither_level(
     //     in.instance_index,
     //     mesh_world_from_local[3]
     // );
+
     out.instance_index = in.instance_index;
 
     // Return value.
@@ -59,8 +66,13 @@ fn fragment(
     // Boilerplate.
 
     var pbr_vertex_output = to_pbr_vertex_output(in);
+
+    // Compute normal (only allows for flat shading).
+
     let world_pos = in.world_position.xyz;
     pbr_vertex_output.world_normal = normalize(cross(dpdy(world_pos), dpdx(world_pos)));
+
+    // Boilerplate.
     
     var pbr_input = pbr_input_from_standard_material(pbr_vertex_output, is_front);
 
