@@ -15,17 +15,11 @@
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
     @location(0) position: vec3<f32>,
-    @location(1) normal: vec3<f32>,
-    @location(2) uv: vec2<f32>,
-    @location(3) tangent: vec4<f32>,
 }
 
 struct CustomVertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) world_position: vec4<f32>,
-    @location(1) world_normal: vec3<f32>,
-    @location(2) uv: vec2<f32>,
-    @location(3) tangent: vec4<f32>,
     @location(4) @interpolate(flat) instance_index: u32,
 }
 
@@ -33,9 +27,6 @@ fn to_pbr_vertex_output(og: CustomVertexOutput) -> VertexOutput {
     var ret: VertexOutput;
     ret.position = og.position;
     ret.world_position = og.world_position;
-    ret.world_normal = og.world_normal;
-    ret.uv = og.uv;
-    ret.world_tangent = og.tangent;
     ret.instance_index = og.instance_index;
 
     return ret;
@@ -47,14 +38,8 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
 
     var out: CustomVertexOutput;
     var world_from_local = mesh_functions::get_world_from_local(in.instance_index);
-    out.world_normal = mesh_functions::mesh_normal_local_to_world(
-        in.normal,
-        in.instance_index
-    );
     out.world_position = mesh_functions::mesh_position_local_to_world(world_from_local, vec4<f32>(in.position, 1.0));
     out.position = position_world_to_clip(out.world_position.xyz);
-    out.uv = in.uv;
-    out.tangent = in.tangent;
     // out.visibility_range_dither = mesh_functions::get_visibility_range_dither_level(
     //     in.instance_index,
     //     mesh_world_from_local[3]
@@ -72,8 +57,12 @@ fn fragment(
     @builtin(front_facing) is_front: bool,
 ) -> @location(0) vec4<f32> {
     // Boilerplate.
+
+    var pbr_vertex_output = to_pbr_vertex_output(in);
+    let world_pos = in.world_position.xyz;
+    pbr_vertex_output.world_normal = normalize(cross(dpdy(world_pos), dpdx(world_pos)));
     
-    var pbr_input = pbr_input_from_standard_material(to_pbr_vertex_output(in), is_front);
+    var pbr_input = pbr_input_from_standard_material(pbr_vertex_output, is_front);
 
     // Could modify color here too. // TODOr
 
