@@ -32,7 +32,6 @@ pub type PrimaryShaderMaterial = ExtendedMaterial<StandardMaterial, __PrimarySha
 pub fn primary_shader_material(_props: PrimaryShaderMaterialProps) -> PrimaryShaderMaterial {
     PrimaryShaderMaterial {
         base: StandardMaterial {
-            base_color: Color::WHITE,
             perceptual_roughness: 1.,
             metallic: 0.,
             reflectance: 0.,

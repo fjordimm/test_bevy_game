@@ -38,3 +38,9 @@
 ## Features
 - Add TabGroups to gui stuff
 - Add VSync as an option in user settings. Right now it is disabled (see present_mode in build_bevy_app.rs)
+- Shapes
+    - Pentagon
+    - Dodec
+    - Indented Dodec
+    - Pentagonal Prism
+    - Augmented Pentagonal Prism

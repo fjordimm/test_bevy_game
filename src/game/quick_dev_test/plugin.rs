@@ -4,11 +4,9 @@ use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_tim
 
 use crate::game::{
     core::states::OverallState,
-    geometry::{dodecahedron::dodecahedron_mesh, triangle::triangle_mesh},
+    geometry::cdodec::cdodec_mesh,
     playing_state::{
-        primary_shader::plugin::{
-            PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
-        },
+        primary_shader::plugin::{PrimaryShaderMaterial, primary_shader_material},
         sets::DuringPlayingUnpaused,
         tags::PlayingStateEntity,
         world::{SeasonOfYear, TimeOfDay},
@@ -63,7 +61,7 @@ fn spawn_some_stuff(
 ) {
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(meshes.add(dodecahedron_mesh())),
+        Mesh3d(meshes.add(cdodec_mesh())),
         MeshMaterial3d(materials.add(primary_shader_material(default()))),
         Transform::default(),
     ));

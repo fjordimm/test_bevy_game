@@ -1,3 +1,4 @@
+pub mod cdodec;
 pub mod cube;
-pub mod dodecahedron;
+pub mod dodec;
 pub mod triangle;

@@ -1,9 +1,11 @@
+/* A dodecahedron. */
+
 use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology};
 
 #[allow(unused)]
 #[rustfmt::skip]
-pub fn dodecahedron_mesh() -> Mesh {
+pub fn dodec_mesh() -> Mesh {
     Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::RENDER_WORLD,
@@ -17,13 +19,13 @@ pub fn dodecahedron_mesh() -> Mesh {
             [0.36327124301247765, -0.5, -0.11803409227961423],
             [0.0, -0.5, -0.38196590772038574],
             [-0.36327124301247765, -0.5, -0.11803409227961423],
-            // First middle row
+            // First middle ring of vertices
             [-0.36327124301247765, -0.11803409227961423, 0.5],
             [0.36327124301247765, -0.11803409227961423, 0.5],
             [0.5877852224164513, -0.11803409227961423, -0.19098295386019287],
             [0.0, -0.11803409227961423, -0.6180340922796143],
             [-0.5877852224164513, -0.11803409227961423, -0.19098295386019287],
-            // Second middle row
+            // Second middle ring of vertices
             [0.0, 0.11803409227961423, 0.6180340922796143],
             [0.5877852224164513, 0.11803409227961423, 0.19098295386019287],
             [0.36327124301247765, 0.11803409227961423, -0.5],
@@ -41,53 +43,53 @@ pub fn dodecahedron_mesh() -> Mesh {
         Mesh::ATTRIBUTE_COLOR,
         vec![
             // Bottom pentagon
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            // First middle row
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            // Second middle row
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            // First middle ring of vertices
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            // Second middle ring of vertices
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
             // Top pentagon
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
+            [1.0, 0.0, 0.0, 1.0],
         ],
     )
     .with_inserted_indices(Indices::U32(vec![
         // Bottom pentagon
         0, 3, 1, 3, 2, 1, 3, 0, 4,
-        // First sideways row pentagon #1
+        // First sideways pentagon #1
         0, 1, 10, 10, 1, 6, 10, 5, 0,
-        // First sideways row pentagon #2
+        // First sideways pentagon #2
         1, 2, 11, 11, 2, 7, 11, 6, 1,
-        // First sideways row pentagon #3
+        // First sideways pentagon #3
         2, 3, 12, 12, 3, 8, 12, 7, 2,
-        // First sideways row pentagon #4
+        // First sideways pentagon #4
         3, 4, 13, 13, 4, 9, 13, 8, 3,
-        // First sideways row pentagon #5
+        // First sideways pentagon #5
         4, 0, 14, 14, 0, 5, 14, 9, 4,
-        // Second sideways row pentagon #1
+        // Second sideways pentagon #1
         16, 15, 6, 6, 15, 10, 6, 11, 16,
-        // Second sideways row pentagon #2
+        // Second sideways pentagon #2
         17, 16, 7, 7, 16, 11, 7, 12, 17,
-        // Second sideways row pentagon #3
+        // Second sideways pentagon #3
         18, 17, 8, 8, 17, 12, 8, 13, 18,
-        // Second sideways row pentagon #4
+        // Second sideways pentagon #4
         19, 18, 9, 9, 18, 13, 9, 14, 19,
-        // Second sideways row pentagon #5
+        // Second sideways pentagon #5
         15, 19, 5, 5, 19, 14, 5, 10, 15,
         // Top pentagon
         17, 18, 15, 15, 18, 19, 15, 16, 17,
