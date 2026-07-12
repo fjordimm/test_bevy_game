@@ -20,7 +20,7 @@
 - My primary shader.
     - Edge highlighting.
         - Document what values to pass to my new vertex attribute.
-- Terrain!
+- Terrain.
 
 ## Should Do At Some Point
 - Make dev vs release profiles in Cargo.toml.
