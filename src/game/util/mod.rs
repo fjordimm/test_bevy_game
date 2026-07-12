@@ -117,3 +117,13 @@ pub fn get_entity_components(world: &World, entity: Entity) -> String {
 
     ret
 }
+
+pub fn col_to_array(col: Color) -> [f32; 3] {
+    let c = col.to_linear();
+    [c.red, c.green, c.blue]
+}
+
+pub fn col_to_array4(col: Color) -> [f32; 4] {
+    let c = col.to_linear();
+    [c.red, c.green, c.blue, c.alpha]
+}

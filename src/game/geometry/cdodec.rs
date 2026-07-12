@@ -3,6 +3,8 @@
 use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology};
 
+use crate::game::util::col_to_array4;
+
 #[allow(unused)]
 #[rustfmt::skip]
 pub fn cdodec_mesh() -> Mesh {
@@ -91,13 +93,13 @@ pub fn cdodec_mesh() -> Mesh {
             [1.0, 1.0, 1.0, 1.0],
             [1.0, 1.0, 1.0, 1.0],
             // Top pentagon
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
+            col_to_array4(Color::hsv(0., 1., 1.)),
+            col_to_array4(Color::hsv(72., 1., 1.)),
+            col_to_array4(Color::hsv(144., 1., 1.)),
+            col_to_array4(Color::hsv(216., 1., 1.)),
+            col_to_array4(Color::hsv(288., 1., 1.)),
             // Top central vertex
-            [1.0, 1.0, 1.0, 1.0],
+            col_to_array4(Color::hsv(0., 0., 0.5)),
         ],
     )
     .with_inserted_indices(Indices::U32(vec![
