@@ -1,6 +1,7 @@
 mod build_bevy_app;
 mod core;
 mod geometry;
+mod graphics;
 mod gui;
 mod main_menu_state;
 mod playing_state;

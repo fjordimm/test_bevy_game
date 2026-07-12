@@ -3,8 +3,6 @@
 use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology};
 
-use crate::game::util::col_to_array4;
-
 #[allow(unused)]
 #[rustfmt::skip]
 pub fn cdodec_mesh() -> Mesh {

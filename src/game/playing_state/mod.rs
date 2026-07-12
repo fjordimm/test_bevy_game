@@ -1,7 +1,6 @@
 pub mod pause_menu;
 pub mod player;
 pub mod plugin;
-pub mod primary_shader;
 pub mod sets;
 pub mod skybox;
 pub mod states;

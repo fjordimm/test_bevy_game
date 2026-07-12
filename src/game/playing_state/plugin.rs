@@ -5,7 +5,6 @@ use crate::game::{
     playing_state::{
         pause_menu::plugin::PauseMenuPlugin,
         player::{plugin::PlayerPlugin, tags::CameraForPlayer},
-        primary_shader::plugin::PrimaryShaderPlugin,
         sets::{
             DURING_PLAYING_UNPAUSED_LIST, DuringPlaying, DuringPlayingUnpaused,
             DuringPlayingUnpausedW,
@@ -53,7 +52,6 @@ impl Plugin for PlayingStatePlugin {
                 playing_state_entity_check
                     .in_set(DuringPlaying)
             ) // TODO: only do this in debug mode
-            .add_plugins(PrimaryShaderPlugin)
             .add_plugins(SkyboxPlugin)
             .add_plugins(WorldPlugin)
             .add_plugins(PauseMenuPlugin)

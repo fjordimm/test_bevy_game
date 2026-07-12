@@ -11,6 +11,7 @@ use crate::game::{
         sets::{GLOBAL_STARTUP_ORDERING_ORDER, GlobalStartupOrdering},
         states::{MouseMode, OverallState},
     },
+    graphics::plugin::GraphicsPlugin,
     gui::{make_global_gui_root, plugin::GuiPlugin},
     main_menu_state::plugin::MainMenuStatePlugin,
     playing_state::plugin::PlayingStatePlugin,
@@ -46,6 +47,7 @@ impl Plugin for CorePlugin {
             .add_systems(OnEnter(MouseMode::Grabbed), on_enter_mouse_grabbed)
             .add_systems(OnExit(MouseMode::Grabbed), on_exit_mouse_grabbed)
             .add_plugins(RandomPlugin)
+            .add_plugins(GraphicsPlugin)
             .add_plugins(GuiPlugin)
             .add_plugins(MainMenuStatePlugin)
             .add_plugins(PlayingStatePlugin)

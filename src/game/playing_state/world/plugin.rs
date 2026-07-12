@@ -1,10 +1,8 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::egui::lerp;
 
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        player::tags::CameraForPlayer,
         sets::DuringPlayingUnpaused,
         skybox::ComputedSkyboxValues,
         tags::PlayingStateEntity,

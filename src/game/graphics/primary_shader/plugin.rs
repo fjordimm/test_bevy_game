@@ -6,7 +6,7 @@ use bevy::{
     },
     shader::ShaderRef,
 };
-use bevy_mesh::{MeshVertexAttribute, MeshVertexBufferLayoutRef, VertexFormat};
+use bevy_mesh::MeshVertexBufferLayoutRef;
 
 pub struct PrimaryShaderPlugin;
 
