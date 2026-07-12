@@ -93,13 +93,13 @@ pub fn cdodec_mesh() -> Mesh {
             [1.0, 1.0, 1.0, 1.0],
             [1.0, 1.0, 1.0, 1.0],
             // Top pentagon
-            col_to_array4(Color::hsv(0., 1., 1.)),
-            col_to_array4(Color::hsv(72., 1., 1.)),
-            col_to_array4(Color::hsv(144., 1., 1.)),
-            col_to_array4(Color::hsv(216., 1., 1.)),
-            col_to_array4(Color::hsv(288., 1., 1.)),
+            [1.0, 1.0, 1.0, 1.0],
+            [1.0, 1.0, 1.0, 1.0],
+            [1.0, 1.0, 1.0, 1.0],
+            [1.0, 1.0, 1.0, 1.0],
+            [1.0, 1.0, 1.0, 1.0],
             // Top central vertex
-            col_to_array4(Color::hsv(0., 0., 0.5)),
+            [1.0, 1.0, 1.0, 1.0],
         ],
     )
     .with_inserted_indices(Indices::U32(vec![
