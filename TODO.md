@@ -17,9 +17,9 @@
 - Test if everything works correctly when you change the `GuiScale`.
 
 ## Currently Working On
-- My primary shader.
-    - Edge highlighting.
-        - Document what values to pass to my new vertex attribute.
+- Post-processing shader ideas:
+    - Kuwahara filter / anisotropic blend
+    - Distance-dependent blur
 - Terrain.
 
 ## Should Do At Some Point

@@ -11,6 +11,10 @@
     mesh_view_bindings as view_bindings,
     lighting,
 }
+#import "shaders/util_noise.wgsl"::simplex_noise_3d
+
+const ADDED_SNOISE_SCALE: f32 = 50.0;
+const ADDED_SNOISE_INTENSITY: f32 = 0.9;
 
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
@@ -21,8 +25,8 @@ struct Vertex {
 struct CustomVertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) world_position: vec4<f32>,
-    @location(1) color: vec4<f32>,
-    @location(2) @interpolate(flat) instance_index: u32,
+    @location(2) color: vec4<f32>,
+    @location(3) @interpolate(flat) instance_index: u32,
 }
 
 fn to_pbr_vertex_output(og: CustomVertexOutput) -> VertexOutput {
@@ -41,14 +45,14 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
 
     var out: CustomVertexOutput;
 
-    let world_from_local = mesh_functions::get_world_from_local(in.instance_index);
-    out.world_position = mesh_functions::mesh_position_local_to_world(world_from_local, vec4<f32>(in.position, 1.0));
+    let world_mat = mesh_functions::get_world_from_local(in.instance_index);
+    out.world_position = mesh_functions::mesh_position_local_to_world(world_mat, vec4<f32>(in.position, 1.0));
 
     out.position = position_world_to_clip(out.world_position.xyz);
     out.color = in.color;
     // out.visibility_range_dither = mesh_functions::get_visibility_range_dither_level(
     //     in.instance_index,
-    //     mesh_world_from_local[3]
+    //     world_mat[3]
     // );
 
     out.instance_index = in.instance_index;
@@ -77,6 +81,12 @@ fn fragment(
     var pbr_input = pbr_input_from_standard_material(pbr_vertex_output, is_front);
 
     // Could modify color here too. // TODOr
+
+    // var snoise = simplex_noise_3d(ADDED_SNOISE_SCALE * in.world_position.xyz);
+    // snoise = 1.0 + ADDED_SNOISE_INTENSITY * snoise;
+    // pbr_input.material.base_color.r *= snoise;
+    // pbr_input.material.base_color.g *= snoise;
+    // pbr_input.material.base_color.b *= snoise;
 
     // Boilerplate.
 

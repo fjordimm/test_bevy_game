@@ -74,14 +74,6 @@ impl ViewNode for PostProcessorNode {
         &'static DynamicUniformIndex<PostProcessorSettings>,
     );
 
-    // TODO: read this
-    // Runs the node logic
-    // This is where you encode draw commands.
-    //
-    // This will run on every view on which the graph is running.
-    // If you don't want your effect to run on every camera,
-    // you'll need to make sure you have a marker component as part of [`ViewQuery`]
-    // to identify which camera(s) should run the effect.
     fn run(
         &self,
         _graph: &mut RenderGraphContext,
@@ -190,13 +182,13 @@ fn init_post_process_pipeline(
 
 #[derive(Component, Default, Clone, Copy, ExtractComponent, ShaderType)]
 struct PostProcessorSettings {
-    intensity: f32,
+    _unused: Vec4,
 }
 
 fn add_to_camera(mut commands: Commands, camera_q: Query<Entity, Added<CameraForPlayer>>) {
     camera_q.iter().for_each(|camera| {
         commands
             .entity(camera)
-            .insert(PostProcessorSettings { intensity: 0.02 });
+            .insert(PostProcessorSettings { _unused: default() });
     });
 }

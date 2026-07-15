@@ -31,6 +31,10 @@ impl Plugin for QuickDevTestPlugin {
                 spawn_some_stuff
                     .in_set(DuringPlayingUnpaused::General)
             )
+            .add_systems(Update,
+                move_doodad
+                    .in_set(DuringPlayingUnpaused::General)
+            )
         ;
     }
 }
@@ -54,6 +58,9 @@ fn rotate_sun(
     }
 }
 
+#[derive(Component)]
+struct Doodad;
+
 fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -64,5 +71,12 @@ fn spawn_some_stuff(
         Mesh3d(meshes.add(dodec_mesh())),
         MeshMaterial3d(materials.add(primary_shader_material(default()))),
         Transform::default(),
+        Doodad,
     ));
+}
+
+fn move_doodad(mut doodad_q: Query<&mut Transform, With<Doodad>>) {
+    doodad_q.iter_mut().for_each(|mut transf| {
+        // transf.translation += vec3(0.001, 0.0, 0.0);
+    });
 }
