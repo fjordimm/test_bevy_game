@@ -77,6 +77,6 @@ fn spawn_some_stuff(
 
 fn move_doodad(mut doodad_q: Query<&mut Transform, With<Doodad>>) {
     doodad_q.iter_mut().for_each(|mut transf| {
-        // transf.translation += vec3(0.001, 0.0, 0.0);
+        transf.translation += vec3(0.0005, 0.0, 0.0);
     });
 }

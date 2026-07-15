@@ -21,6 +21,7 @@
     - Kuwahara filter / anisotropic blend
     - Distance-dependent blur
 - Terrain.
+    - Consider Worley noise.
 
 ## Should Do At Some Point
 - Make dev vs release profiles in Cargo.toml.
