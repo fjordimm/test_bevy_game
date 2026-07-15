@@ -52,21 +52,40 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
     let dx = 1.0 / f32(texture_dimensions.x);
     let dy = 1.0 / f32(texture_dimensions.y);
     
-    let m = textureSample(screen_texture, texture_sampler, in.uv);
-    let n = textureSample(screen_texture, texture_sampler, in.uv + vec2<f32>(0.0, -dy));
-    let s = textureSample(screen_texture, texture_sampler, in.uv + vec2<f32>(0.0, dy));
-    let e = textureSample(screen_texture, texture_sampler, in.uv + vec2<f32>(dx, 0.0));
-    let w = textureSample(screen_texture, texture_sampler, in.uv + vec2<f32>(-dx, 0.0));
+    // let m = textureSample(screen_texture, texture_sampler, in.uv);
+    // let n = textureSample(screen_texture, texture_sampler, in.uv + vec2<f32>(0.0, -dy));
+    // let s = textureSample(screen_texture, texture_sampler, in.uv + vec2<f32>(0.0, dy));
+    // let e = textureSample(screen_texture, texture_sampler, in.uv + vec2<f32>(dx, 0.0));
+    // let w = textureSample(screen_texture, texture_sampler, in.uv + vec2<f32>(-dx, 0.0));
 
-    let cdx = color_brightness(e) - color_brightness(m);
-    let cdy = color_brightness(s) - color_brightness(m);
-    var f = normalize(vec2<f32>(cdx, cdy));
+    // let cdx = color_brightness(e) - color_brightness(m);
+    // let cdy = color_brightness(s) - color_brightness(m);
+    // var f = normalize(vec2<f32>(cdx, cdy));
 
+    var cdx = 0.0;
+    var cdy = 0.0;
+    {
+        let N = 30;
+        for (var i = 0; i < N; i++) {
+            for (var j = 0; j < N; j++) {
+                let pixel = textureSample(screen_texture, texture_sampler, in.uv);
+                let right_pixel = textureSample(screen_texture, texture_sampler, in.uv + vec2<f32>(dx, 0.0));
+                let below_pixel = textureSample(screen_texture, texture_sampler, in.uv + vec2<f32>(0.0, dy));
+
+                cdx += color_brightness(right_pixel) - color_brightness(pixel);
+                cdy += color_brightness(below_pixel) - color_brightness(pixel);
+            }
+        }
+        cdx /= f32(N * N);
+        cdy /= f32(N * N);
+    }
+
+    var f = vec2<f32>(cdx, cdy);
     f = rotate_vec2_90(f);
 
-    let intensity = 0.01;
+    let intensity = 0.1;
     return textureSample(screen_texture, texture_sampler, in.uv + intensity * f);
-
+    // return vec4<f32>(f.x, 0.0, -f.x, 1.0);
 
 
 
