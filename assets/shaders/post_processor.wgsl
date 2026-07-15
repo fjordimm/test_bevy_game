@@ -65,7 +65,7 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
     var cdx = 0.0;
     var cdy = 0.0;
     {
-        let N = 30;
+        let N = 15;
         for (var i = 0; i < N; i++) {
             for (var j = 0; j < N; j++) {
                 let pixel = textureSample(screen_texture, texture_sampler, in.uv);
