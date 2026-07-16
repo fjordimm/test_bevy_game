@@ -11,8 +11,9 @@
     mesh_view_bindings as view_bindings,
     lighting,
 }
-#import "shaders/util_noise.wgsl"::simplex_noise_3d
 #import "shaders/util.wgsl"::smoothstep_skew_right
+#import "shaders/util.wgsl"::smoothstep_skew_left
+#import "shaders/util_noise.wgsl"::worley_2d
 
 const ADDED_SNOISE_SCALE: f32 = 5.0;
 
@@ -75,32 +76,6 @@ fn fragment(
     in: CustomVertexOutput,
     @builtin(front_facing) is_front: bool,
 ) -> @location(0) vec4<f32> {
-    // TODOr
-
-    let uv = in.lposition.xz * 7.0;
-
-    let gird = floor(uv);
-    let coord = fract(uv) - 0.5;
-
-    var distancePoint = 1.0;
-    for (var i = -1; i <= 1; i++) {
-        for (var j = -1; j <= 1; j++) {
-            let near = vec2(f32(i), f32(j));
-
-            let point = near + 0.5 * sin(6.2831 * random2(gird + near));
-
-            let currentDistance = length(coord - point);
-
-            distancePoint = min(distancePoint, currentDistance);
-        }
-    }
-
-    let col = vec3(smoothstep(0.2, 2.0, 1.7 - distancePoint));;
-
-    return vec4(col, 1.0);
-
-
-
     // Boilerplate.
 
     var pbr_vertex_output = to_pbr_vertex_output(in);
@@ -129,6 +104,10 @@ fn fragment(
     // pbr_input.material.base_color.g *= snoise;
     // pbr_input.material.base_color.b *= snoise;
 
+    let wnoise = smoothstep(0.0, 1.0, 1.0 - worley_2d(in.lposition.xz * 15.0));
+    pbr_input.material.base_color = vec4(wnoise, wnoise, wnoise, 1.0);
+    return vec4(wnoise, wnoise, wnoise, 1.0);
+
     // Boilerplate.
 
     pbr_input.material.base_color = alpha_discard(pbr_input.material, pbr_input.material.base_color);
@@ -149,9 +128,4 @@ fn fragment(
     // Return value.
 
     return out;
-}
-
-fn random2(p: vec2<f32>) -> vec2<f32>
-{
-    return fract(sin(vec2(dot(p + 0.5, vec2(213.1, 322.2)), dot(p + 0.5, vec2(513.1, 312.2)))) * 51312.1234);
 }

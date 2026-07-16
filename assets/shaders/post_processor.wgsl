@@ -201,10 +201,13 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
 
 
 
-
-
-
     return textureSample(screen_texture, texture_sampler, in.uv);
+}
+
+// TODO: remove all these helpers
+
+fn permute_3_(x: vec3<f32>) -> vec3<f32> {
+    return (((x * 34.) + 1.) * x) % vec3(289.);
 }
 
 fn dist2(c1: vec3<f32>, c2: vec3<f32>) -> f32 {
