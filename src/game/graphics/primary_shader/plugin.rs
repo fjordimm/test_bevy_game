@@ -19,17 +19,13 @@ impl Plugin for PrimaryShaderPlugin {
     }
 }
 
-pub struct PrimaryShaderMaterialProps {}
-
-impl Default for PrimaryShaderMaterialProps {
-    fn default() -> Self {
-        Self {}
-    }
+pub struct PrimaryShaderMaterialProps {
+    pub test_tex: Handle<Image>,
 }
 
 pub type PrimaryShaderMaterial = ExtendedMaterial<StandardMaterial, __PrimaryShaderExtension>;
 
-pub fn primary_shader_material(_props: PrimaryShaderMaterialProps) -> PrimaryShaderMaterial {
+pub fn primary_shader_material(props: PrimaryShaderMaterialProps) -> PrimaryShaderMaterial {
     PrimaryShaderMaterial {
         base: StandardMaterial {
             perceptual_roughness: 1.,
@@ -45,15 +41,17 @@ pub fn primary_shader_material(_props: PrimaryShaderMaterialProps) -> PrimarySha
             fog_enabled: true,
             ..default()
         },
-        extension: __PrimaryShaderExtension {},
+        extension: __PrimaryShaderExtension {
+            test_tex: props.test_tex,
+        },
     }
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct __PrimaryShaderExtension {
-    // TODOr
-    // #[uniform(100)]
-    // edge_color: Vec4,
+    #[texture(100, dimension = "3d")]
+    #[sampler(101)]
+    test_tex: Handle<Image>,
 }
 
 // TODOr

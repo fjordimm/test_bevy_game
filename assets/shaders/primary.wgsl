@@ -11,11 +11,9 @@
     mesh_view_bindings as view_bindings,
     lighting,
 }
-#import "shaders/util.wgsl"::smoothstep_skew_right
-#import "shaders/util.wgsl"::smoothstep_skew_left
-#import "shaders/util_noise.wgsl"::worley_2d
 
-const ADDED_SNOISE_SCALE: f32 = 5.0;
+@group(#{MATERIAL_BIND_GROUP}) @binding(100) var test_tex: texture_3d<f32>;
+@group(#{MATERIAL_BIND_GROUP}) @binding(101) var test_tex_sampler: sampler;
 
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
@@ -91,22 +89,10 @@ fn fragment(
 
     // Could modify color here too. // TODOr
 
-    // var snoise = 0.0;
-    // snoise += simplex_noise_3d(ADDED_SNOISE_SCALE * in.lposition);
-    // snoise += simplex_noise_3d(2.0 * ADDED_SNOISE_SCALE * in.lposition) / 2.0;
-    // snoise += simplex_noise_3d(4.0 * ADDED_SNOISE_SCALE * in.lposition) / 4.0;
-    // snoise += simplex_noise_3d(8.0 * ADDED_SNOISE_SCALE * in.lposition) / 8.0;
+    let adjusted_pos = vec3(0.5, 0.5, 0.5) + 0.5 * in.lposition;
 
-    // snoise = 1.0 - abs(snoise);
-    // snoise = smoothstep_skew_right(0.0, 1.0, 10.0, snoise);
-
-    // pbr_input.material.base_color.r *= snoise;
-    // pbr_input.material.base_color.g *= snoise;
-    // pbr_input.material.base_color.b *= snoise;
-
-    let wnoise = smoothstep(0.0, 1.0, 1.0 - worley_2d(in.lposition.xz * 15.0));
-    pbr_input.material.base_color = vec4(wnoise, wnoise, wnoise, 1.0);
-    return vec4(wnoise, wnoise, wnoise, 1.0);
+    pbr_input.material.base_color = textureSample(test_tex, test_tex_sampler, adjusted_pos);
+    return pbr_input.material.base_color;
 
     // Boilerplate.
 

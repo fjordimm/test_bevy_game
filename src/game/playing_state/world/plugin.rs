@@ -34,9 +34,9 @@ impl Plugin for WorldPlugin {
 #[derive(Component)]
 pub struct SunlightTag;
 
-const ABOVE_AMBIENT_LIGHT_ILLUMINANCE: f32 = 300.;
+const ABOVE_AMBIENT_LIGHT_ILLUMINANCE: f32 = 1000.;
 const ABOVE_AMBIENT_LIGHT_COLOR: Color = Color::hsv(228., 0.18, 1.);
-const BELOW_AMBIENT_LIGHT_ILLUMINANCE: f32 = 150.;
+const BELOW_AMBIENT_LIGHT_ILLUMINANCE: f32 = 500.;
 const BELOW_AMBIENT_LIGHT_COLOR: Color = Color::hsv(169., 0.05, 1.);
 
 fn on_enter(

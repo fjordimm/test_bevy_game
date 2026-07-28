@@ -1,16 +1,25 @@
 use std::time::Duration;
 
-use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_timer};
+use bevy::{
+    input::mouse::MouseWheel,
+    prelude::*,
+    render::render_resource::{Extent3d, TextureDimension, TextureFormat},
+    time::common_conditions::on_timer,
+};
+use bytemuck::cast_slice;
 
 use crate::game::{
     core::states::OverallState,
     geometry::dodec::dodec_mesh,
-    graphics::primary_shader::plugin::{PrimaryShaderMaterial, primary_shader_material},
+    graphics::primary_shader::plugin::{
+        PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
+    },
     playing_state::{
         sets::DuringPlayingUnpaused,
         tags::PlayingStateEntity,
         world::{SeasonOfYear, TimeOfDay},
     },
+    util::alrmo,
 };
 
 pub struct QuickDevTestPlugin;
@@ -65,18 +74,62 @@ fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
+    mut images: ResMut<Assets<Image>>,
 ) {
     commands.spawn((
         PlayingStateEntity,
         Mesh3d(meshes.add(dodec_mesh())),
-        MeshMaterial3d(materials.add(primary_shader_material(default()))),
+        MeshMaterial3d(
+            materials.add(primary_shader_material(PrimaryShaderMaterialProps {
+                test_tex: images.add(make_test_tex()),
+            })),
+        ),
         Transform::default(),
         Doodad,
     ));
 }
 
-fn move_doodad(mut doodad_q: Query<&mut Transform, With<Doodad>>) {
-    doodad_q.iter_mut().for_each(|mut transf| {
-        // transf.translation += vec3(0.0005, 0.0, 0.0);
-    });
+fn move_doodad(/*mut doodad_q: Query<&mut Transform, With<Doodad>>*/) {
+    // doodad_q.iter_mut().for_each(|mut transf| {
+    //     transf.translation += vec3(0.0005, 0.0, 0.0);
+    // });
+}
+
+fn make_test_tex() -> Image {
+    const TEX_SIZE: u32 = 16;
+    const FILE_PATH: &str = "assets/generated/textures/test_tex.bin";
+
+    // let mut data = Vec::<u16>::with_capacity((4 * TEX_SIZE * TEX_SIZE * TEX_SIZE) as usize);
+    // for x in 0..TEX_SIZE {
+    //     for y in 0..TEX_SIZE {
+    //         for z in 0..TEX_SIZE {
+    //             let r = y as f64 / TEX_SIZE as f64;
+    //             let g = y as f64 / TEX_SIZE as f64;
+    //             let b = y as f64 / TEX_SIZE as f64;
+
+    //             data.extend([
+    //                 f16::from_f64(r).to_bits(),
+    //                 f16::from_f64(g).to_bits(),
+    //                 f16::from_f64(b).to_bits(),
+    //                 f16::from_f64(1.0).to_bits(),
+    //             ]);
+    //         }
+    //     }
+    // }
+
+    if let Some(data) = alrmo!(std::fs::read(FILE_PATH)) {
+        Image::new(
+            Extent3d {
+                width: TEX_SIZE,
+                height: TEX_SIZE,
+                depth_or_array_layers: TEX_SIZE,
+            },
+            TextureDimension::D3,
+            cast_slice(&data).to_vec(),
+            TextureFormat::Rgba16Float,
+            default(),
+        )
+    } else {
+        panic!()
+    }
 }

@@ -20,6 +20,7 @@
 - Post-processing shader ideas:
     - Kuwahara filter / anisotropic blend
     - Distance-dependent blur
+- Textures?
 - Terrain.
     - Consider Worley noise.
 
@@ -30,6 +31,7 @@
 - Make floating panels move correctly when the window is resized.
 - Make the camera cursor movement proportional to the window size.
 - When dragging floating panels around, they should order themselves correctly (most recently dragged goes on top).
+- Get rid of post-processor if not using it.
 
 ## Optimizations
 - If I don't need uv coords or anything for my primary shader, than try implementing meshes that don't use repeated vertices, while still keeping flat shading.

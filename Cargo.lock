@@ -4967,6 +4967,8 @@ dependencies = [
  "bevy_mesh",
  "bevy_prng",
  "bevy_rand",
+ "bytemuck",
+ "half",
  "rand 0.10.1",
  "rand_core 0.10.1",
  "rand_distr 0.6.0",

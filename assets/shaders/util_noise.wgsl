@@ -7,7 +7,7 @@ fn worley_2d(pos: vec2<f32>) -> f32 {
     for (var i = -1; i <= 1; i++) {
         for (var j = -1; j <= 1; j++) {
             let near = vec2(f32(i), f32(j));
-            let point = near + 0.5 * sin(6.2831 * random2(grid + near));
+            let point = near + 0.25 * sin(6.2831 * random2(grid + near));
             let cand_dist = length(coord - point);
             pnt_dist = min(pnt_dist, cand_dist);
         }

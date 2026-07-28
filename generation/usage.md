@@ -1,0 +1,1 @@
+Run these from the repo's root directory.
