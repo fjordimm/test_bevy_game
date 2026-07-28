@@ -90,6 +90,7 @@ fn fragment(
     // Could modify color here too. // TODOr
 
     let adjusted_pos = vec3(0.5, 0.5, 0.5) + 0.5 * in.lposition;
+    // let adjusted_pos = vec3(0.5, 0.5, 0.5) + in.lposition; // TODO: this instead of above
 
     pbr_input.material.base_color = textureSample(test_tex, test_tex_sampler, adjusted_pos);
     return pbr_input.material.base_color;

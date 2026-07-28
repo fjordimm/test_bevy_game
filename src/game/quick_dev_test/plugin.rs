@@ -96,26 +96,8 @@ fn move_doodad(/*mut doodad_q: Query<&mut Transform, With<Doodad>>*/) {
 }
 
 fn make_test_tex() -> Image {
-    const TEX_SIZE: u32 = 16;
+    const TEX_SIZE: u32 = 32; // IMPORTANT: This must match in the Python code that generates the binary file.
     const FILE_PATH: &str = "assets/generated/textures/test_tex.bin";
-
-    // let mut data = Vec::<u16>::with_capacity((4 * TEX_SIZE * TEX_SIZE * TEX_SIZE) as usize);
-    // for x in 0..TEX_SIZE {
-    //     for y in 0..TEX_SIZE {
-    //         for z in 0..TEX_SIZE {
-    //             let r = y as f64 / TEX_SIZE as f64;
-    //             let g = y as f64 / TEX_SIZE as f64;
-    //             let b = y as f64 / TEX_SIZE as f64;
-
-    //             data.extend([
-    //                 f16::from_f64(r).to_bits(),
-    //                 f16::from_f64(g).to_bits(),
-    //                 f16::from_f64(b).to_bits(),
-    //                 f16::from_f64(1.0).to_bits(),
-    //             ]);
-    //         }
-    //     }
-    // }
 
     if let Some(data) = alrmo!(std::fs::read(FILE_PATH)) {
         Image::new(
