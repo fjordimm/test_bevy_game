@@ -1,12 +1,6 @@
 use std::time::Duration;
 
-use bevy::{
-    input::mouse::MouseWheel,
-    prelude::*,
-    render::render_resource::{Extent3d, TextureDimension, TextureFormat},
-    time::common_conditions::on_timer,
-};
-use bytemuck::cast_slice;
+use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_timer};
 
 use crate::game::{
     core::states::OverallState,
@@ -19,7 +13,6 @@ use crate::game::{
         tags::PlayingStateEntity,
         world::{SeasonOfYear, TimeOfDay},
     },
-    util::alrmo,
 };
 
 pub struct QuickDevTestPlugin;
@@ -74,14 +67,13 @@ fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
-    mut images: ResMut<Assets<Image>>,
 ) {
     commands.spawn((
         PlayingStateEntity,
         Mesh3d(meshes.add(dodec_mesh())),
         MeshMaterial3d(
             materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-                test_tex: images.add(make_test_tex()),
+                texturing_scale: 1.,
             })),
         ),
         Transform::default(),
@@ -93,25 +85,4 @@ fn move_doodad(/*mut doodad_q: Query<&mut Transform, With<Doodad>>*/) {
     // doodad_q.iter_mut().for_each(|mut transf| {
     //     transf.translation += vec3(0.0005, 0.0, 0.0);
     // });
-}
-
-fn make_test_tex() -> Image {
-    const TEX_SIZE: u32 = 32; // IMPORTANT: This must match in the Python code that generates the binary file.
-    const FILE_PATH: &str = "assets/generated/textures/test_tex.bin";
-
-    if let Some(data) = alrmo!(std::fs::read(FILE_PATH)) {
-        Image::new(
-            Extent3d {
-                width: TEX_SIZE,
-                height: TEX_SIZE,
-                depth_or_array_layers: TEX_SIZE,
-            },
-            TextureDimension::D3,
-            cast_slice(&data).to_vec(),
-            TextureFormat::Rgba16Float,
-            default(),
-        )
-    } else {
-        panic!()
-    }
 }

@@ -11,9 +11,9 @@
     mesh_view_bindings as view_bindings,
     lighting,
 }
+#import "shaders/util_noise.wgsl"::simplex_noise_3d;
 
-@group(#{MATERIAL_BIND_GROUP}) @binding(100) var test_tex: texture_3d<f32>;
-@group(#{MATERIAL_BIND_GROUP}) @binding(101) var test_tex_sampler: sampler;
+@group(#{MATERIAL_BIND_GROUP}) @binding(100) var<uniform> texturing_scale: f32;
 
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
@@ -88,12 +88,6 @@ fn fragment(
     var pbr_input = pbr_input_from_standard_material(pbr_vertex_output, is_front);
 
     // Could modify color here too. // TODOr
-
-    let adjusted_pos = vec3(0.5, 0.5, 0.5) + 0.5 * in.lposition;
-    // let adjusted_pos = vec3(0.5, 0.5, 0.5) + in.lposition; // TODO: this instead of above
-
-    pbr_input.material.base_color = textureSample(test_tex, test_tex_sampler, adjusted_pos);
-    return pbr_input.material.base_color;
 
     // Boilerplate.
 

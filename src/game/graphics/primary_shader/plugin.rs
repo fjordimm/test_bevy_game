@@ -20,7 +20,15 @@ impl Plugin for PrimaryShaderPlugin {
 }
 
 pub struct PrimaryShaderMaterialProps {
-    pub test_tex: Handle<Image>,
+    pub texturing_scale: f32,
+}
+
+impl Default for PrimaryShaderMaterialProps {
+    fn default() -> Self {
+        Self {
+            texturing_scale: 1.,
+        }
+    }
 }
 
 pub type PrimaryShaderMaterial = ExtendedMaterial<StandardMaterial, __PrimaryShaderExtension>;
@@ -42,16 +50,15 @@ pub fn primary_shader_material(props: PrimaryShaderMaterialProps) -> PrimaryShad
             ..default()
         },
         extension: __PrimaryShaderExtension {
-            test_tex: props.test_tex,
+            texturing_scale: props.texturing_scale,
         },
     }
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct __PrimaryShaderExtension {
-    #[texture(100, dimension = "3d")]
-    #[sampler(101)]
-    test_tex: Handle<Image>,
+    #[uniform(100)]
+    texturing_scale: f32,
 }
 
 // TODOr
