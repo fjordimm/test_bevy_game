@@ -1,4 +1,4 @@
 pub mod cdodec;
 pub mod cube;
 pub mod dodec;
-pub mod triangle;
+pub mod test_triangle;

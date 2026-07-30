@@ -6,7 +6,7 @@ use crate::game::{
         sets::DuringPlayingUnpaused,
         skybox::ComputedSkyboxValues,
         tags::PlayingStateEntity,
-        world::{SeasonOfYear, TimeOfDay},
+        world::{SeasonOfYear, TimeOfDay, terrain::plugin::TerrainPlugin},
     },
     util::alrms,
 };
@@ -27,6 +27,7 @@ impl Plugin for WorldPlugin {
                 update_sunlight
                     .in_set(DuringPlayingUnpaused::General)
             )
+            .add_plugins(TerrainPlugin)
         ;
     }
 }

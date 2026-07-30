@@ -17,12 +17,10 @@
 - Test if everything works correctly when you change the `GuiScale`.
 
 ## Currently Working On
-- Post-processing shader ideas:
-    - Kuwahara filter / anisotropic blend
-    - Distance-dependent blur
-- Textures?
+- Don't use commands.set_state
 - Terrain.
     - Consider Worley noise.
+- Make a resource to store predefined mesh materials.
 
 ## Should Do At Some Point
 - Make dev vs release profiles in Cargo.toml.

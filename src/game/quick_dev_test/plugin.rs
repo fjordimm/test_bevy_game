@@ -11,7 +11,7 @@ use crate::game::{
     playing_state::{
         sets::DuringPlayingUnpaused,
         tags::PlayingStateEntity,
-        world::{SeasonOfYear, TimeOfDay},
+        world::{SeasonOfYear, TimeOfDay, terrain::terrain_chunk::SpawnTerrainChunk},
     },
 };
 
@@ -31,10 +31,6 @@ impl Plugin for QuickDevTestPlugin {
             )
             .add_systems(OnEnter(OverallState::Playing),
                 spawn_some_stuff
-                    .in_set(DuringPlayingUnpaused::General)
-            )
-            .add_systems(Update,
-                move_doodad
                     .in_set(DuringPlayingUnpaused::General)
             )
         ;
@@ -60,29 +56,24 @@ fn rotate_sun(
     }
 }
 
-#[derive(Component)]
-struct Doodad;
-
 fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
+    mut stc_messages: MessageWriter<SpawnTerrainChunk>,
 ) {
-    commands.spawn((
-        PlayingStateEntity,
-        Mesh3d(meshes.add(dodec_mesh())),
-        MeshMaterial3d(
-            materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-                texturing_scale: 1.,
-            })),
-        ),
-        Transform::default(),
-        Doodad,
-    ));
-}
+    if false {
+        commands.spawn((
+            PlayingStateEntity,
+            Mesh3d(meshes.add(dodec_mesh())),
+            MeshMaterial3d(
+                materials.add(primary_shader_material(PrimaryShaderMaterialProps {
+                    texturing_scale: 1.,
+                })),
+            ),
+            Transform::default(),
+        ));
+    }
 
-fn move_doodad(/*mut doodad_q: Query<&mut Transform, With<Doodad>>*/) {
-    // doodad_q.iter_mut().for_each(|mut transf| {
-    //     transf.translation += vec3(0.0005, 0.0, 0.0);
-    // });
+    stc_messages.write(SpawnTerrainChunk);
 }

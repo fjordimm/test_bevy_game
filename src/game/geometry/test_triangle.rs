@@ -2,7 +2,7 @@ use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology};
 
 #[allow(unused)]
-pub fn triangle_mesh() -> Mesh {
+pub fn test_triangle_mesh() -> Mesh {
     Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::RENDER_WORLD,

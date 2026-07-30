@@ -5,10 +5,7 @@ use crate::game::{
     playing_state::{
         pause_menu::plugin::PauseMenuPlugin,
         player::{plugin::PlayerPlugin, tags::CameraForPlayer},
-        sets::{
-            DURING_PLAYING_UNPAUSED_LIST, DuringPlaying, DuringPlayingUnpaused,
-            DuringPlayingUnpausedW,
-        },
+        sets::{DURING_PLAYING_UNPAUSED_LIST, DuringPlaying, DuringPlayingUnpausedW},
         skybox::plugin::SkyboxPlugin,
         states::PauseState,
         tags::PlayingStateEntity,
@@ -34,15 +31,16 @@ impl Plugin for PlayingStatePlugin {
                 DURING_PLAYING_UNPAUSED_LIST.chain(),
             ))
             .init_state::<PauseState>()
-            .add_systems(OnEnter(OverallState::Playing),
+            .add_systems(OnEnter(OverallState::EnteringPlaying),
                 on_enter
-                    .in_set(DuringPlayingUnpausedW)
-                    .before(<[DuringPlayingUnpaused; _]>::from(DURING_PLAYING_UNPAUSED_LIST).first().unwrap().clone())
+            )
+            .add_systems(OnEnter(OverallState::EnteringPlaying),
+                |mut commands: Commands| {
+                    commands.set_state(OverallState::Playing);
+                }
             )
             .add_systems(OnExit(OverallState::Playing),
                 on_exit
-                    .in_set(DuringPlayingUnpausedW)
-                    .after(<[DuringPlayingUnpaused; _]>::from(DURING_PLAYING_UNPAUSED_LIST).last().unwrap().clone())
             )
             .add_systems(Update,
                 toggle_pause
