@@ -15,6 +15,7 @@
 - Make sure there are no 'entity leaks', i.e. make sure everything gets despawned when exiting states, especially exiting `OverallState::Playing`. The Primary Debug Menu has an entity counter.
 - Search project for 'todo'. And search project for 'debug!'.
 - Test if everything works correctly when you change the `GuiScale`.
+- Make sure the first time you enter `OverallState::Playing` works the exact same as when you exit to the menu and then go back.
 
 ## Currently Working On
 - Don't use commands.set_state

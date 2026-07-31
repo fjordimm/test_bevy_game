@@ -33,6 +33,9 @@ impl Plugin for PlayerPlugin {
             .add_systems(OnExit(OverallState::Playing),
                 free_cursor
             )
+            .add_systems(OnEnter(OverallState::EnteringPlaying),
+                reset_rot_o
+            )
             .add_systems(Update,
                 rotate_and_move
                     .in_set(DuringPlayingUnpaused::General)
@@ -49,6 +52,13 @@ fn free_cursor(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
     next_mouse_mode.set(MouseMode::Free);
 }
 
+#[derive(Resource)]
+struct RotO(Option<(f32, f32)>); // (yaw, pitch)
+
+fn reset_rot_o(mut commands: Commands) {
+    commands.insert_resource(RotO(None));
+}
+
 fn rotate_and_move(
     time: Res<Time>,
     movement_settings: Res<PlayerMovementSettings>,
@@ -56,15 +66,15 @@ fn rotate_and_move(
     key_bindings: Res<KeyBindings>,
     mut mouse_motion: MessageReader<MouseMotion>,
     camera_transf_q: Option<Single<&mut Transform, With<CameraForPlayer>>>,
-    mut rot_o: Local<Option<(f32, f32)>>, // (yaw, pitch)
+    mut rot_o: ResMut<RotO>,
 ) {
     if let Some(mut camera_transf) = alrms!(camera_transf_q) {
-        if let None = *rot_o {
+        if let None = rot_o.0 {
             let real_rot = camera_transf.rotation.to_euler(EulerRot::YXZ);
-            *rot_o = Some((real_rot.0, real_rot.1));
+            rot_o.0 = Some((real_rot.0, real_rot.1));
         }
 
-        if let Some(rot) = alrms!(&mut *rot_o) {
+        if let Some(rot) = alrms!(&mut rot_o.0) {
             // Rotation
 
             mouse_motion.read().for_each(|ev| {

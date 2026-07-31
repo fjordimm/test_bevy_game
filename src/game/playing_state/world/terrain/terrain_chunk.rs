@@ -56,7 +56,7 @@ fn handle_spawn_terrain_chunk(
 #[derive(Component)]
 pub struct TerrainChunk {}
 
-const N: u32 = 16; // TODOr
+const N: u32 = 64; // TODOr
 
 fn generate_mesh(terrain_func: &TerrainFunc) -> Mesh {
     let mut positions = Vec::<[f32; 3]>::with_capacity(((N + 1) * (N + 1) + N * N) as usize);
@@ -65,19 +65,25 @@ fn generate_mesh(terrain_func: &TerrainFunc) -> Mesh {
 
     for r in 0..=N {
         for c in 0..=N {
-            let h: f32 = terrain_func.at(r as f32, c as f32);
+            let rr = r as f32 /* + rand::random_range(-0.2..0.2) */;
+            let cr = c as f32 /* + rand::random_range(-0.2..0.2) */;
 
-            positions.push([r as f32, h, c as f32]);
-            colors.push([1., 1., 1., 1.]);
+            let h: f32 = terrain_func.at(rr, cr);
+
+            positions.push([rr, h, cr]);
+            colors.push([0.2, 0.6, 0.05, 1.]);
         }
     }
 
     for r in 0..N {
         for c in 0..N {
-            let h: f32 = terrain_func.at(0.5 + r as f32, 0.5 + c as f32);
+            let rr = 0.5 + r as f32 /* + rand::random_range(-0.2..0.2) */;
+            let cr = 0.5 + c as f32 /* + rand::random_range(-0.2..0.2) */;
 
-            positions.push([0.5 + r as f32, h, 0.5 + c as f32]);
-            colors.push([1., 1., 1., 1.]);
+            let h: f32 = terrain_func.at(rr, cr);
+
+            positions.push([rr, h, cr]);
+            colors.push([0.2, 0.6, 0.05, 1.]);
         }
     }
 
