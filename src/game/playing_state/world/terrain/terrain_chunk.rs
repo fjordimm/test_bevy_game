@@ -5,7 +5,11 @@ use crate::game::{
     graphics::primary_shader::plugin::{
         PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
     },
-    playing_state::{sets::DuringPlayingUnpaused, tags::PlayingStateEntity},
+    playing_state::{
+        sets::DuringPlayingUnpaused,
+        tags::PlayingStateEntity,
+        world::terrain::{plugin::TheTerrainFunc, terrain_func::TerrainFunc},
+    },
 };
 
 pub struct TerrainChunkPlugin;
@@ -31,11 +35,12 @@ fn handle_spawn_terrain_chunk(
     mut messages: MessageReader<SpawnTerrainChunk>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
+    terrain_func: Res<TheTerrainFunc>,
 ) {
     messages.read().for_each(|_| {
         commands.spawn((
             PlayingStateEntity,
-            Mesh3d(meshes.add(generate_mesh())),
+            Mesh3d(meshes.add(generate_mesh(&terrain_func.0))),
             // TODO: reuse a material for all terrain chunks
             MeshMaterial3d(
                 materials.add(primary_shader_material(PrimaryShaderMaterialProps {
@@ -51,28 +56,28 @@ fn handle_spawn_terrain_chunk(
 #[derive(Component)]
 pub struct TerrainChunk {}
 
-const N: u32 = 3; // TODOr
+const N: u32 = 16; // TODOr
 
-fn generate_mesh() -> Mesh {
+fn generate_mesh(terrain_func: &TerrainFunc) -> Mesh {
     let mut positions = Vec::<[f32; 3]>::with_capacity(((N + 1) * (N + 1) + N * N) as usize);
     let mut colors = Vec::<[f32; 4]>::with_capacity(((N + 1) * (N + 1) + N * N) as usize);
     let mut indices = Vec::<u32>::with_capacity((4 * N) as usize);
 
     for r in 0..=N {
         for c in 0..=N {
-            let h: f32 = rand::random_range(-0.2..0.2);
+            let h: f32 = terrain_func.at(r as f32, c as f32);
 
             positions.push([r as f32, h, c as f32]);
-            colors.push([1., 0., 0., 1.]);
+            colors.push([1., 1., 1., 1.]);
         }
     }
 
     for r in 0..N {
         for c in 0..N {
-            let h: f32 = rand::random_range(-0.2..0.2);
+            let h: f32 = terrain_func.at(0.5 + r as f32, 0.5 + c as f32);
 
             positions.push([0.5 + r as f32, h, 0.5 + c as f32]);
-            colors.push([0., 0., 1., 1.]);
+            colors.push([1., 1., 1., 1.]);
         }
     }
 
@@ -90,11 +95,6 @@ fn generate_mesh() -> Mesh {
             indices.extend_from_slice(&[tl, bl, center]);
         }
     }
-
-    // indices.extend_from_slice(&[0, 1, 4]);
-    // indices.extend_from_slice(&[1, 3, 4]);
-    // indices.extend_from_slice(&[3, 2, 4]);
-    // indices.extend_from_slice(&[2, 0, 4]);
 
     Mesh::new(
         PrimitiveTopology::TriangleList,

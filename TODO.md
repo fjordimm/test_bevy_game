@@ -35,6 +35,7 @@
 - If I don't need uv coords or anything for my primary shader, than try implementing meshes that don't use repeated vertices, while still keeping flat shading.
 - Don't repeatedly use commands.entity(...) but use EntityCommands directly, wherever possible.
 - When in release profile, the functions in util like `alrms`, `alrmo`, `alrrs`, and `alrro` should all just pass the input through without executing code.
+- TerrainFunc::at uses f32 for both input and output, but the underlying noise functions use f64, so it's casting back and forth every time. Could you find an implementation of the noise functions that use f32?
 
 ## Features
 - Add TabGroups to gui stuff
