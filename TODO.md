@@ -37,6 +37,7 @@
 - Don't repeatedly use commands.entity(...) but use EntityCommands directly, wherever possible.
 - When in release profile, the functions in util like `alrms`, `alrmo`, `alrrs`, and `alrro` should all just pass the input through without executing code.
 - TerrainFunc::at uses f32 for both input and output, but the underlying noise functions use f64, so it's casting back and forth every time. Could you find an implementation of the noise functions that use f32?
+- Just pass three f32s for vertex colors, not four. Actually, you should get rid of vertices being individually colored and have like 8 colors or something passed in as a uniform, and each vertex has an index to that color.
 
 ## Features
 - Add TabGroups to gui stuff
@@ -47,3 +48,4 @@
     - Indented Dodec
     - Pentagonal Prism
     - Augmented Pentagonal Prism
+- Randomize the x & z position of terrain vertices slightly.
