@@ -57,7 +57,7 @@ fn spawn_skybox(
         PlayingStateEntity,
         SkyboxTag,
         Mesh3d(meshes.add(alrro!(
-            Mesh::from(Sphere::new(10_000.)).with_inverted_winding()
+            Mesh::from(Sphere::new(1_000_000.)).with_inverted_winding()
         ))),
         MeshMaterial3d(materials.add(SkyboxMaterial {
             sun_position: computed_skybox_values.sun_position,
