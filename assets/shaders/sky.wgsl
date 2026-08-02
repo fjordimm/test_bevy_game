@@ -1,4 +1,7 @@
-#import bevy_pbr::forward_io::VertexOutput
+#import bevy_pbr::{
+    mesh_functions,
+    view_transformations::position_world_to_clip,
+}
 #import "shaders/util.wgsl"::PI;
 #import "shaders/util.wgsl"::gradient_noise;
 #import "shaders/util.wgsl"::reduce_banding;
@@ -40,12 +43,47 @@ const STARS_TIME_RANGE_FACTOR: f32 = 80.0;
 @group(#{MATERIAL_BIND_GROUP}) @binding(0) var<uniform> sun_position: vec3<f32>;
 @group(#{MATERIAL_BIND_GROUP}) @binding(1) var<uniform> sky_rotation_matrix: mat3x3<f32>;
 
+struct Vertex {
+    @builtin(instance_index) instance_index: u32,
+    @location(0) position: vec3<f32>,
+}
+
+struct CustomVertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(1) lposition: vec3<f32>,
+    @location(3) @interpolate(flat) instance_index: u32,
+}
+
+@vertex
+fn vertex(in: Vertex) -> CustomVertexOutput {
+    // Boilerplate.
+
+    var out: CustomVertexOutput;
+
+    let world_mat = mesh_functions::get_world_from_local(in.instance_index);
+    let world_position = mesh_functions::mesh_position_local_to_world(world_mat, vec4<f32>(in.position, 1.0));
+
+    out.position = position_world_to_clip(world_position.xyz);
+
+    // Added this to pass the local 3d position.
+
+    out.lposition = in.position;
+
+    // Boilerplate.
+
+    out.instance_index = in.instance_index;
+
+    // Return value.
+
+    return out;
+}
+
 @fragment
-fn fragment(vertout: VertexOutput) -> @location(0) vec4<f32> {
+fn fragment(vertout: CustomVertexOutput) -> @location(0) vec4<f32> {
     var color = vec3<f32>(0.0, 0.0, 0.0);
 
     let sun_pos = normalize(sun_position);
-    let dir: vec3<f32> = normalize(vertout.world_position.xyz);
+    let dir: vec3<f32> = normalize(vertout.lposition.xyz);
 
     let day_amount = smoothstep(0.0, 1.0, sun_pos.y + TWILIGHT_OFFSET);
 
