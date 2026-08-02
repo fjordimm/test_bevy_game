@@ -11,7 +11,7 @@ use crate::game::{
     playing_state::{
         sets::DuringPlayingUnpaused,
         tags::PlayingStateEntity,
-        world::{SeasonOfYear, TimeOfDay, terrain::terrain_chunk::SpawnTerrainChunk},
+        world::{SeasonOfYear, TimeOfDay, terrain::plugin::SpawnTerrainChunk},
     },
 };
 
@@ -62,18 +62,16 @@ fn spawn_some_stuff(
     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
     mut stc_messages: MessageWriter<SpawnTerrainChunk>,
 ) {
-    if false {
-        commands.spawn((
-            PlayingStateEntity,
-            Mesh3d(meshes.add(dodec_mesh())),
-            MeshMaterial3d(
-                materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-                    texturing_scale: 1.,
-                })),
-            ),
-            Transform::default(),
-        ));
-    }
+    commands.spawn((
+        PlayingStateEntity,
+        Mesh3d(meshes.add(dodec_mesh())),
+        MeshMaterial3d(
+            materials.add(primary_shader_material(PrimaryShaderMaterialProps {
+                texturing_scale: 1.,
+            })),
+        ),
+        Transform::default(),
+    ));
 
-    stc_messages.write(SpawnTerrainChunk);
+    stc_messages.write(SpawnTerrainChunk::new(1., 0, 0));
 }

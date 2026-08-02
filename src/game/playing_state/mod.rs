@@ -1,6 +1,7 @@
 pub mod pause_menu;
 pub mod player;
 pub mod plugin;
+pub mod reusable_materials;
 pub mod sets;
 pub mod skybox;
 pub mod states;

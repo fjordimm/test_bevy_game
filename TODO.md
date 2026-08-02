@@ -21,7 +21,8 @@
 - Don't use commands.set_state
 - Terrain.
     - Consider Worley noise.
-- Make a resource to store predefined mesh materials.
+- Make a resource to store predefined mesh materials (or maybe do this individually for each thing that needs it?).
+- Get rid of DuringPlayingUnpausedW.
 
 ## Should Do At Some Point
 - Make dev vs release profiles in Cargo.toml.
@@ -38,6 +39,7 @@
 - When in release profile, the functions in util like `alrms`, `alrmo`, `alrrs`, and `alrro` should all just pass the input through without executing code.
 - TerrainFunc::at uses f32 for both input and output, but the underlying noise functions use f64, so it's casting back and forth every time. Could you find an implementation of the noise functions that use f32?
 - Just pass three f32s for vertex colors, not four. Actually, you should get rid of vertices being individually colored and have like 8 colors or something passed in as a uniform, and each vertex has an index to that color.
+- The function that generates the mesh for terrain chunks could be optimized. Most notably, it makes a big 2d array.
 
 ## Features
 - Add TabGroups to gui stuff

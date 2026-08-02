@@ -2,9 +2,11 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::{resources::KeyBindings, states::OverallState},
+    graphics::primary_shader::plugin::PrimaryShaderMaterial,
     playing_state::{
         pause_menu::plugin::PauseMenuPlugin,
         player::{plugin::PlayerPlugin, tags::CameraForPlayer},
+        reusable_materials::ReusableMaterials,
         sets::{DURING_PLAYING_UNPAUSED_LIST, DuringPlaying, DuringPlayingUnpausedW},
         skybox::plugin::SkyboxPlugin,
         states::PauseState,
@@ -58,8 +60,12 @@ impl Plugin for PlayingStatePlugin {
     }
 }
 
-fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<PauseState>>) {
-    next_pause_state.set(PauseState::Unpaused);
+fn on_enter(
+    mut commands: Commands,
+    mut next_pause_state: ResMut<NextState<PauseState>>,
+    mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
+) {
+    commands.insert_resource(ReusableMaterials::new(&mut materials));
 
     commands.spawn((
         PlayingStateEntity,
@@ -75,6 +81,8 @@ fn on_enter(mut commands: Commands, mut next_pause_state: ResMut<NextState<Pause
             ..default()
         },
     ));
+
+    next_pause_state.set(PauseState::Unpaused);
 }
 
 fn on_exit(

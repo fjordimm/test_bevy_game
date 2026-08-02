@@ -2,14 +2,14 @@ use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology};
 
 use crate::game::{
-    graphics::primary_shader::plugin::{
-        PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
-    },
+    graphics::primary_shader::plugin::PrimaryShaderMaterial,
     playing_state::{
-        sets::DuringPlayingUnpaused,
+        reusable_materials::ReusableMaterials,
+        sets::DuringPlaying,
         tags::PlayingStateEntity,
-        world::terrain::{plugin::TheTerrainFunc, terrain_func::TerrainFunc},
+        world::terrain::{resources::TheTerrainFunc, terrain_func::TerrainFunc},
     },
+    util::alrmo,
 };
 
 pub struct TerrainChunkPlugin;
@@ -18,10 +18,10 @@ impl Plugin for TerrainChunkPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_message::<SpawnTerrainChunk>()
+            .add_message::<GenerateMeshes>()
             .add_systems(Update,
-                handle_spawn_terrain_chunk
-                    .in_set(DuringPlayingUnpaused::General)
+                handle_generate_meshes
+                    .in_set(DuringPlaying)
             )
         ;
     }
@@ -42,41 +42,94 @@ impl Plugin for TerrainChunkPlugin {
 //     });
 // }
 
-#[derive(Message)]
-pub struct SpawnTerrainChunk;
-
-fn handle_spawn_terrain_chunk(
-    mut commands: Commands,
-    mut messages: MessageReader<SpawnTerrainChunk>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
-    terrain_func: Res<TheTerrainFunc>,
-) {
-    messages.read().for_each(|_| {
-        commands.spawn((
-            PlayingStateEntity,
-            Mesh3d(meshes.add(generate_meshes(&terrain_func.0).1)),
-            // TODO: reuse a material for all terrain chunks
-            MeshMaterial3d(
-                materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-                    texturing_scale: 1.,
-                })),
-            ),
-            Transform::default(),
-            TerrainChunk {},
-        ));
-    });
+pub(super) fn chunk_bundle(
+    material: Handle<PrimaryShaderMaterial>,
+    scale: f32,
+    off_x: i32,
+    off_z: i32,
+) -> impl Bundle {
+    (
+        PlayingStateEntity,
+        MeshMaterial3d(material),
+        Transform::from_xyz(scale * off_x as f32, 0., scale * off_z as f32),
+        TerrainChunk {
+            scale: scale,
+            off_x: off_x,
+            off_z: off_z,
+            has_generated_mesh: false,
+            perimeter_entity: Entity::PLACEHOLDER,
+        },
+    )
 }
 
 #[derive(Component)]
-pub struct TerrainChunk {}
+pub(super) struct TerrainChunk {
+    pub scale: f32,
+    pub off_x: i32,
+    pub off_z: i32,
+    pub has_generated_mesh: bool,
+    pub perimeter_entity: Entity, // The child entity that has the perimeter mesh.
+}
+
+#[derive(Component)]
+pub(super) struct TerrainChunkPerimeter;
+
+impl TerrainChunk {
+    pub fn generate_mesh_nonredundantly(
+        &mut self,
+        gm_messages: &mut MessageWriter<GenerateMeshes>,
+        entity: &Entity,
+    ) {
+        if !self.has_generated_mesh {
+            gm_messages.write(GenerateMeshes(*entity));
+        }
+    }
+}
+
+#[derive(Message)]
+pub(super) struct GenerateMeshes(Entity);
+
+fn handle_generate_meshes(
+    mut commands: Commands,
+    mut messages: MessageReader<GenerateMeshes>,
+    mut chunk_q: Query<&mut TerrainChunk>,
+    terrain_func: Res<TheTerrainFunc>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    reusable_materials: Res<ReusableMaterials>,
+) {
+    messages.read().for_each(|msg| {
+        if let Some(mut chunk) = alrmo!(chunk_q.get_mut(msg.0)) {
+            let (prim_mesh, perim_mesh) = create_meshes(
+                &terrain_func.0,
+                chunk.scale,
+                chunk.scale * chunk.off_x as f32,
+                chunk.scale * chunk.off_z as f32,
+            );
+
+            commands.entity(msg.0).insert(Mesh3d(meshes.add(prim_mesh)));
+
+            let perimeter = commands
+                .spawn((
+                    PlayingStateEntity,
+                    TerrainChunkPerimeter,
+                    MeshMaterial3d(reusable_materials.terrain.clone()),
+                    Mesh3d(meshes.add(perim_mesh)),
+                ))
+                .id();
+            commands.entity(msg.0).add_child(perimeter);
+            chunk.perimeter_entity = perimeter;
+
+            chunk.has_generated_mesh = true;
+        }
+    });
+}
 
 const CW: usize = 4; // Chunk Width (and height).
 
-// Generates two meshes: 1) the inner mesh, 2) the outer mesh, which together make up a CWxCW grid of squares.
+// Generates two meshes: 1) the inner mesh, 2) the outer mesh (perimeter), which together make up a CWxCW grid of squares.
 // The outer mesh is just the outermost squares, and the inner mesh is the full CWxCW grid minus the outer mesh squares.
 // Each square has four corner vertices, plus one in the middle, and has four triangles connecting them all.
-fn generate_meshes(terrain_func: &TerrainFunc) -> (Mesh, Mesh) {
+fn create_meshes(terrain_func: &TerrainFunc, scale: f32, off_x: f32, off_z: f32) -> (Mesh, Mesh) {
     let mut inner_positions =
         Vec::<[f32; 3]>::with_capacity((CW - 1) * (CW - 1) + (CW - 2) * (CW - 2));
     let mut inner_colors =
@@ -102,14 +155,14 @@ fn generate_meshes(terrain_func: &TerrainFunc) -> (Mesh, Mesh) {
     // Corner vertices.
     for r in 0..=CW {
         for c in 0..=CW {
-            let rf = r as f32;
-            let cf = c as f32;
+            let rf = scale * r as f32;
+            let cf = scale * c as f32;
 
-            let h: f32 = terrain_func.at(rf, cf);
+            let h: f32 = terrain_func.at(rf + off_x, cf + off_z);
 
             // Inner vertices.
             if r > 0 && r < CW && c > 0 && c < CW {
-                inner_positions.push([rf, h, cf]);
+                inner_positions.push([rf + off_x, h, cf + off_z]);
                 inner_colors.push([1., 1., 1., 1.]);
 
                 inner_indices_c[r][c] = inner_vc;
@@ -118,7 +171,7 @@ fn generate_meshes(terrain_func: &TerrainFunc) -> (Mesh, Mesh) {
 
             // Outer vertices.
             if r <= 1 || r >= CW - 1 || c <= 1 || c >= CW - 1 {
-                outer_positions.push([rf, h, cf]);
+                outer_positions.push([rf + off_x, h, cf + off_z]);
                 outer_colors.push([1., 1., 1., 1.]);
 
                 outer_indices_c[r][c] = outer_vc;
@@ -130,14 +183,14 @@ fn generate_meshes(terrain_func: &TerrainFunc) -> (Mesh, Mesh) {
     // Middle vertices.
     for r in 0..CW {
         for c in 0..CW {
-            let rf = 0.5 + r as f32;
-            let cf = 0.5 + c as f32;
+            let rf = scale * (0.5 + r as f32);
+            let cf = scale * (0.5 + c as f32);
 
-            let h: f32 = terrain_func.at(rf, cf);
+            let h: f32 = terrain_func.at(rf + off_x, cf + off_z);
 
             // Inner vertices.
             if r > 0 && r < CW - 1 && c > 0 && c < CW - 1 {
-                inner_positions.push([rf, h, cf]);
+                inner_positions.push([rf + off_x, h, cf + off_z]);
                 inner_colors.push([1., 1., 1., 1.]);
 
                 inner_indices_m[r][c] = inner_vc;
@@ -147,7 +200,7 @@ fn generate_meshes(terrain_func: &TerrainFunc) -> (Mesh, Mesh) {
 
             // Outer vertices.
             if r == 0 || r == CW - 1 || c == 0 || c == CW - 1 {
-                outer_positions.push([rf, h, cf]);
+                outer_positions.push([rf + off_x, h, cf + off_z]);
                 outer_colors.push([1., 1., 1., 1.]);
 
                 outer_indices_m[r][c] = outer_vc;
