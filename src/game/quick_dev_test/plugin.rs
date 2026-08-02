@@ -9,10 +9,12 @@ use crate::game::{
         PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
     },
     playing_state::{
+        player::tags::{CameraForPlayer, PlayerBody},
         sets::{DuringPlayingUnpaused, OnEnterPlaying},
         tags::PlayingStateEntity,
-        world::{SeasonOfYear, TimeOfDay, terrain::plugin::SpawnTerrainChunk},
+        world::{SeasonOfYear, TimeOfDay},
     },
+    util::alrms,
 };
 
 pub struct QuickDevTestPlugin;
@@ -27,6 +29,10 @@ impl Plugin for QuickDevTestPlugin {
             )
             .add_systems(Update,
                 rotate_sun
+                    .in_set(DuringPlayingUnpaused::General)
+            )
+            .add_systems(Update,
+                move_player_body_to_cam
                     .in_set(DuringPlayingUnpaused::General)
             )
             .add_systems(OnEnter(OverallState::Playing),
@@ -56,11 +62,25 @@ fn rotate_sun(
     }
 }
 
+fn move_player_body_to_cam(
+    keys: Res<ButtonInput<KeyCode>>,
+    player_body_q: Option<Single<&mut Transform, With<PlayerBody>>>,
+    camera_q: Option<Single<&Transform, (With<CameraForPlayer>, Without<PlayerBody>)>>,
+) {
+    if keys.pressed(KeyCode::BracketLeft) {
+        if let Some(mut player_body) = alrms!(player_body_q) {
+            if let Some(camera) = alrms!(camera_q) {
+                player_body.translation.x = camera.translation.x;
+                player_body.translation.z = camera.translation.z;
+            }
+        }
+    }
+}
+
 fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
-    mut stc_messages: MessageWriter<SpawnTerrainChunk>,
 ) {
     commands.spawn((
         PlayingStateEntity,
@@ -72,7 +92,4 @@ fn spawn_some_stuff(
         ),
         Transform::default(),
     ));
-
-    stc_messages.write(SpawnTerrainChunk::new(100., 0, 0));
-    stc_messages.write(SpawnTerrainChunk::new(100., 1, 0));
 }

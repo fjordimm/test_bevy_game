@@ -42,7 +42,7 @@ impl Plugin for TerrainChunkPlugin {
 //     });
 // }
 
-const CW: usize = 4; // Chunk Width (and height).
+const CW: usize = 3; // Chunk Width (and height).
 
 pub(super) fn chunk_bundle(
     material: Handle<PrimaryShaderMaterial>,
@@ -55,7 +55,7 @@ pub(super) fn chunk_bundle(
         MeshMaterial3d(material),
         Transform::from_xyz(
             scale * CW as f32 * off_x as f32,
-            0.,
+            rand::random_range(-1.0..1.0),
             scale * CW as f32 * off_z as f32,
         ),
         TerrainChunk {

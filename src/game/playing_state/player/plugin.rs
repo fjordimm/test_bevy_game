@@ -8,9 +8,13 @@ use crate::game::{
         states::{MouseMode, OverallState},
     },
     playing_state::{
-        player::{resources::PlayerMovementSettings, tags::CameraForPlayer},
+        player::{
+            resources::PlayerMovementSettings,
+            tags::{CameraForPlayer, PlayerBody},
+        },
         sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying, OnExitPlaying},
         states::PauseState,
+        tags::PlayingStateEntity,
     },
     util::alrms,
 };
@@ -35,11 +39,15 @@ impl Plugin for PlayerPlugin {
             )
             .add_systems(OnEnter(OverallState::Playing),
                 reset_rot_o
-                    .in_set(OnEnterPlaying::Setup)
+                    .in_set(OnEnterPlaying::ResourceSetup)
             )
             .add_systems(Update,
                 rotate_and_move
                     .in_set(DuringPlayingUnpaused::General)
+            )
+            .add_systems(OnEnter(OverallState::Playing),
+                spawn_player_body
+                    .in_set(OnEnterPlaying::General)
             )
         ;
     }
@@ -118,4 +126,18 @@ fn rotate_and_move(
             camera_transf.translation += velocity * movement_settings.speed * time.delta_secs();
         }
     }
+}
+
+fn spawn_player_body(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    commands.spawn((
+        PlayingStateEntity,
+        PlayerBody,
+        Mesh3d(meshes.add(Capsule3d::new(1., 500.))),
+        MeshMaterial3d(materials.add(Color::linear_rgb(1., 0., 1.))),
+        Transform::from_xyz(0., 0., 0.),
+    ));
 }
