@@ -6,7 +6,7 @@ use crate::game::{
     core::states::OverallState,
     playing_state::{
         player::tags::CameraForPlayer,
-        sets::DuringPlayingUnpaused,
+        sets::{DuringPlayingUnpaused, OnEnterPlaying},
         skybox::ComputedSkyboxValues,
         tags::PlayingStateEntity,
         world::{SeasonOfYear, TimeOfDay},
@@ -24,6 +24,7 @@ impl Plugin for SkyboxPlugin {
             .insert_resource(ComputedSkyboxValues { sun_position: Vec3::NEG_Z, sky_rotation_inv: Mat3::IDENTITY })
             .add_systems(OnEnter(OverallState::Playing),
                 spawn_skybox
+                    .in_set(OnEnterPlaying::General)
             )
             .add_systems(Update,
                 update_skybox

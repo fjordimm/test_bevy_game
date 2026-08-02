@@ -7,7 +7,7 @@
 
 - Prefer using resources rather than consts for constant arbitrary values.
 - Be consistent on when to use the 'Tag' suffix.
-- Add systems using proper sets (PlayingStateSet).
+- Add systems using proper sets (DuringPlaying/DuringPlayingUnpaused, OnEnterPlaying, OnExitPlaying).
 - Put more `#[allow(unused)]` where you need them.
 
 ### Tests
@@ -18,11 +18,11 @@
 - Make sure the first time you enter `OverallState::Playing` works the exact same as when you exit to the menu and then go back.
 
 ## Currently Working On
+- Make an ExitingPlaying state.
 - Don't use commands.set_state
 - Terrain.
     - Consider Worley noise.
 - Make a resource to store predefined mesh materials (or maybe do this individually for each thing that needs it?).
-- Get rid of DuringPlayingUnpausedW.
 
 ## Should Do At Some Point
 - Make dev vs release profiles in Cargo.toml.

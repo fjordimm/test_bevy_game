@@ -9,7 +9,7 @@ use crate::game::{
         PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
     },
     playing_state::{
-        sets::DuringPlayingUnpaused,
+        sets::{DuringPlayingUnpaused, OnEnterPlaying},
         tags::PlayingStateEntity,
         world::{SeasonOfYear, TimeOfDay, terrain::plugin::SpawnTerrainChunk},
     },
@@ -31,7 +31,7 @@ impl Plugin for QuickDevTestPlugin {
             )
             .add_systems(OnEnter(OverallState::Playing),
                 spawn_some_stuff
-                    .in_set(DuringPlayingUnpaused::General)
+                    .in_set(OnEnterPlaying::General)
             )
         ;
     }

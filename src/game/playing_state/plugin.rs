@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_ecs::entity::Entities;
 
 use crate::game::{
     core::{resources::KeyBindings, states::OverallState},
@@ -7,7 +8,10 @@ use crate::game::{
         pause_menu::plugin::PauseMenuPlugin,
         player::{plugin::PlayerPlugin, tags::CameraForPlayer},
         reusable_materials::ReusableMaterials,
-        sets::{DURING_PLAYING_UNPAUSED_LIST, DuringPlaying, DuringPlayingUnpausedW},
+        sets::{
+            DURING_PLAYING_UNPAUSED_LIST, DuringPlaying, ON_ENTER_PLAYING_LIST,
+            ON_EXIT_PLAYING_LIST, OnEnterPlaying, OnExitPlaying,
+        },
         skybox::plugin::SkyboxPlugin,
         states::PauseState,
         tags::PlayingStateEntity,
@@ -25,24 +29,25 @@ impl Plugin for PlayingStatePlugin {
             .configure_sets(Update, (
                 DuringPlaying
                     .run_if(in_state(OverallState::Playing)),
-                DuringPlayingUnpausedW
+                DURING_PLAYING_UNPAUSED_LIST
                     .in_set(DuringPlaying)
                     .run_if(in_state(PauseState::Unpaused)),
-                DURING_PLAYING_UNPAUSED_LIST
-                    .in_set(DuringPlayingUnpausedW),
                 DURING_PLAYING_UNPAUSED_LIST.chain(),
             ))
-            .init_state::<PauseState>()
-            .add_systems(OnEnter(OverallState::EnteringPlaying),
-                on_enter
+            .configure_sets(OnEnter(OverallState::Playing),
+                ON_ENTER_PLAYING_LIST.chain()
             )
-            .add_systems(OnEnter(OverallState::EnteringPlaying),
-                |mut commands: Commands| {
-                    commands.set_state(OverallState::Playing);
-                }
+            .configure_sets(OnExit(OverallState::Playing),
+                ON_EXIT_PLAYING_LIST.chain()
+            )
+            .init_state::<PauseState>()
+            .add_systems(OnEnter(OverallState::Playing),
+                on_enter
+                    .in_set(OnEnterPlaying::PlayingStatePluginUseOnly)
             )
             .add_systems(OnExit(OverallState::Playing),
                 on_exit
+                    .in_set(OnExitPlaying::PlayingStatePluginUseOnly)
             )
             .add_systems(Update,
                 toggle_pause
@@ -87,11 +92,14 @@ fn on_enter(
 
 fn on_exit(
     mut commands: Commands,
+    entities: &Entities,
     all_entities_q: Query<Entity, With<PlayingStateEntity>>,
     mut next_pause_state: ResMut<NextState<PauseState>>,
 ) {
     all_entities_q.iter().for_each(|entity| {
-        commands.entity(entity).despawn();
+        if entities.contains(entity) {
+            commands.entity(entity).try_despawn();
+        }
     });
 
     next_pause_state.set(PauseState::Limbo);

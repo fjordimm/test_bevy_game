@@ -9,7 +9,7 @@ use crate::game::{
     },
     playing_state::{
         player::{resources::PlayerMovementSettings, tags::CameraForPlayer},
-        sets::{DuringPlaying, DuringPlayingUnpaused},
+        sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying, OnExitPlaying},
         states::PauseState,
     },
     util::alrms,
@@ -28,13 +28,14 @@ impl Plugin for PlayerPlugin {
             )
             .add_systems(OnExit(PauseState::Unpaused),
                 free_cursor
-                    .in_set(DuringPlaying)
             )
             .add_systems(OnExit(OverallState::Playing),
                 free_cursor
+                    .in_set(OnExitPlaying::General)
             )
-            .add_systems(OnEnter(OverallState::EnteringPlaying),
+            .add_systems(OnEnter(OverallState::Playing),
                 reset_rot_o
+                    .in_set(OnEnterPlaying::Setup)
             )
             .add_systems(Update,
                 rotate_and_move

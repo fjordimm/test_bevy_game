@@ -6,7 +6,7 @@ use crate::game::{
     core::states::OverallState,
     playing_state::{
         reusable_materials::ReusableMaterials,
-        sets::DuringPlaying,
+        sets::{DuringPlaying, OnEnterPlaying},
         world::terrain::{
             resources::TheTerrainFunc,
             terrain_chunk::{GenerateMeshes, TerrainChunk, TerrainChunkPlugin, chunk_bundle},
@@ -24,8 +24,9 @@ impl Plugin for TerrainPlugin {
         #[rustfmt::skip]
         app
             .add_message::<SpawnTerrainChunk>()
-            .add_systems(OnEnter(OverallState::EnteringPlaying),
+            .add_systems(OnEnter(OverallState::Playing),
                 on_enter
+                    .in_set(OnEnterPlaying::Setup)
             )
             .add_systems(Update,
                 handle_spawn_terrain_chunk

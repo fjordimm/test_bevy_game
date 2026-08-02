@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        sets::DuringPlayingUnpaused,
+        sets::{DuringPlayingUnpaused, OnEnterPlaying},
         skybox::ComputedSkyboxValues,
         tags::PlayingStateEntity,
         world::{SeasonOfYear, TimeOfDay, terrain::plugin::TerrainPlugin},
@@ -21,7 +21,7 @@ impl Plugin for WorldPlugin {
             .insert_resource(SeasonOfYear(0.))
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
-                    .in_set(DuringPlayingUnpaused::General)
+                    .in_set(OnEnterPlaying::General)
             )
             .add_systems(Update,
                 update_sunlight
