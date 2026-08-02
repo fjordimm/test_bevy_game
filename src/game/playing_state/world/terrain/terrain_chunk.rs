@@ -7,7 +7,7 @@ use crate::game::{
         reusable_materials::ReusableMaterials,
         sets::DuringPlaying,
         tags::PlayingStateEntity,
-        world::terrain::{resources::TheTerrainFunc, terrain_func::TerrainFunc},
+        world::terrain::{plugin::CW, resources::TheTerrainFunc, terrain_func::TerrainFunc},
     },
     util::alrmo,
 };
@@ -42,8 +42,6 @@ impl Plugin for TerrainChunkPlugin {
 //     });
 // }
 
-const CW: usize = 3; // Chunk Width (and height).
-
 pub(super) fn chunk_bundle(
     material: Handle<PrimaryShaderMaterial>,
     scale: f32,
@@ -55,7 +53,7 @@ pub(super) fn chunk_bundle(
         MeshMaterial3d(material),
         Transform::from_xyz(
             scale * CW as f32 * off_x as f32,
-            rand::random_range(-1.0..1.0),
+            0.,
             scale * CW as f32 * off_z as f32,
         ),
         TerrainChunk {
@@ -130,6 +128,27 @@ fn handle_generate_meshes(
     });
 }
 
+// TODOr
+const TEMP_VERTEX_COLOR1: [f32; 4] = [0., 0., 1., 1.];
+const TEMP_VERTEX_COLOR2: [f32; 4] = [0., 0.5, 0., 1.];
+fn temp_vertex_color(scale: f32, off_x: f32, off_z: f32) -> [f32; 4] {
+    let mut off_x_i = (off_x / (scale * CW as f32) - 0.5).round() as i32;
+    let mut off_z_i = (off_z / (scale * CW as f32) - 0.5).round() as i32;
+
+    if off_x_i < 0 {
+        off_x_i += 1;
+    }
+    if off_z_i < 0 {
+        off_z_i += 1;
+    }
+
+    if ((off_x_i + off_z_i) % 2) == 0 {
+        TEMP_VERTEX_COLOR1
+    } else {
+        TEMP_VERTEX_COLOR2
+    }
+}
+
 // Generates two meshes: 1) the inner mesh, 2) the outer mesh (perimeter), which together make up a CWxCW grid of squares.
 // The outer mesh is just the outermost squares, and the inner mesh is the full CWxCW grid minus the outer mesh squares.
 // Each square has four corner vertices, plus one in the middle, and has four triangles connecting them all.
@@ -167,7 +186,7 @@ fn create_meshes(terrain_func: &TerrainFunc, scale: f32, off_x: f32, off_z: f32)
             // Inner vertices.
             if r > 0 && r < CW && c > 0 && c < CW {
                 inner_positions.push([rf, h, cf]);
-                inner_colors.push([1., 1., 1., 1.]);
+                inner_colors.push(temp_vertex_color(scale, off_x, off_z));
 
                 inner_indices_c[r][c] = inner_vc;
                 inner_vc += 1;
@@ -176,7 +195,7 @@ fn create_meshes(terrain_func: &TerrainFunc, scale: f32, off_x: f32, off_z: f32)
             // Outer vertices.
             if r <= 1 || r >= CW - 1 || c <= 1 || c >= CW - 1 {
                 outer_positions.push([rf, h, cf]);
-                outer_colors.push([1., 1., 1., 1.]);
+                outer_colors.push(temp_vertex_color(scale, off_x, off_z));
 
                 outer_indices_c[r][c] = outer_vc;
                 outer_vc += 1;
@@ -195,7 +214,7 @@ fn create_meshes(terrain_func: &TerrainFunc, scale: f32, off_x: f32, off_z: f32)
             // Inner vertices.
             if r > 0 && r < CW - 1 && c > 0 && c < CW - 1 {
                 inner_positions.push([rf, h, cf]);
-                inner_colors.push([1., 1., 1., 1.]);
+                inner_colors.push(temp_vertex_color(scale, off_x, off_z));
 
                 inner_indices_m[r][c] = inner_vc;
 
@@ -205,7 +224,7 @@ fn create_meshes(terrain_func: &TerrainFunc, scale: f32, off_x: f32, off_z: f32)
             // Outer vertices.
             if r == 0 || r == CW - 1 || c == 0 || c == CW - 1 {
                 outer_positions.push([rf, h, cf]);
-                outer_colors.push([1., 1., 1., 1.]);
+                outer_colors.push(temp_vertex_color(scale, off_x, off_z));
 
                 outer_indices_m[r][c] = outer_vc;
 

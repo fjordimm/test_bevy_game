@@ -5,6 +5,7 @@ use bevy::{prelude::*, time::common_conditions::on_timer};
 use crate::game::{
     core::states::OverallState,
     playing_state::{
+        player::tags::PlayerBody,
         reusable_materials::ReusableMaterials,
         sets::{DuringPlaying, OnEnterPlaying},
         world::terrain::{
@@ -14,8 +15,10 @@ use crate::game::{
         },
     },
     random::{Prng, rands::GeneralRand},
-    util::alrmo,
+    util::{alrmo, alrrs},
 };
+
+const UPDATE_CHUNKS_INTERVAL: u64 = 100; // In milliseconds.
 
 pub struct TerrainPlugin;
 
@@ -35,7 +38,7 @@ impl Plugin for TerrainPlugin {
             .add_systems(Update,
                 update_chunks
                     .in_set(DuringPlaying)
-                    .run_if(on_timer(Duration::from_secs(3)))
+                    .run_if(on_timer(Duration::from_millis(UPDATE_CHUNKS_INTERVAL)))
             )
             .add_plugins(TerrainChunkPlugin)
         ;
@@ -101,31 +104,21 @@ fn handle_spawn_terrain_chunk(
     });
 }
 
-const L0_RENDER_DIST: i32 = 1;
+pub(super) const CW: usize = 8; // Chunk Width (and height).
+const CSCALE: f32 = 1.;
+const L0_RENDER_DIST: i32 = 2;
 
 fn update_chunks(
+    player_q: Option<Single<&Transform, With<PlayerBody>>>,
     chunk_dict: Res<ChunkDict>,
     mut chunk_q: Query<&mut TerrainChunk>,
     mut gm_messages: MessageWriter<GenerateMeshes>,
     mut stc_messages: MessageWriter<SpawnTerrainChunk>,
 ) {
-    // let update_chunk = |x: i32, z: i32| {
-    //     let entity = chunk_dict.0.get(&ChunkKey::new(x, z));
-    //     if let Some(entity) = entity {
-    //         if let Some(mut chunk) = alrmo!(chunk_q.get_mut(*entity)) {
-    //             chunk.generate_mesh_nonredundantly(&mut gm_messages, entity);
-    //         }
+    let player_tran = alrrs!(player_q);
 
-    //         // TODO: change visibility.
-    //     } else {
-    //         // TODO: stop using magic values for scale
-    //         stc_messages.write(SpawnTerrainChunk::new(1., x, z));
-    //     }
-    // };
-
-    // TODOc
-    let x_center: i32 = 0;
-    let z_center: i32 = 0;
+    let x_center: i32 = (player_tran.translation.x / (CSCALE * CW as f32) - 0.5).round() as i32;
+    let z_center: i32 = (player_tran.translation.z / (CSCALE * CW as f32) - 0.5).round() as i32;
 
     // Spirals out from (x_center, z_center), covering a square which goes L0_RENDER_DIST in each direction.
     let mut x = x_center;
@@ -154,7 +147,7 @@ fn update_chunks(
                 // TODO: change visibility.
             } else {
                 // TODO: stop using magic values for scale
-                stc_messages.write(SpawnTerrainChunk::new(1., x, z));
+                stc_messages.write(SpawnTerrainChunk::new(CSCALE, x, z));
             }
         }
 
