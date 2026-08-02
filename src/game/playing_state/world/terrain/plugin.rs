@@ -109,12 +109,17 @@ const CSCALE: f32 = 1.;
 const L0_RENDER_DIST: i32 = 2;
 
 fn update_chunks(
+    mut commands: Commands,
     player_q: Option<Single<&Transform, With<PlayerBody>>>,
     chunk_dict: Res<ChunkDict>,
-    mut chunk_q: Query<&mut TerrainChunk>,
+    mut chunk_q: Query<(Entity, &mut TerrainChunk)>,
     mut gm_messages: MessageWriter<GenerateMeshes>,
     mut stc_messages: MessageWriter<SpawnTerrainChunk>,
 ) {
+    chunk_q.iter().for_each(|(entity, _)| {
+        commands.entity(entity).insert(Visibility::Hidden);
+    });
+
     let player_tran = alrrs!(player_q);
 
     let x_center: i32 = (player_tran.translation.x / (CSCALE * CW as f32) - 0.5).round() as i32;
@@ -138,13 +143,12 @@ fn update_chunks(
 
         // Actual code using (x, z) outside of the spiral logic.
         {
-            let entity = chunk_dict.0.get(&ChunkKey::new(x, z));
-            if let Some(entity) = entity {
-                if let Some(mut chunk) = alrmo!(chunk_q.get_mut(*entity)) {
+            if let Some(entity) = chunk_dict.0.get(&ChunkKey::new(x, z)) {
+                if let Some((_, mut chunk)) = alrmo!(chunk_q.get_mut(*entity)) {
                     chunk.generate_mesh_nonredundantly(&mut gm_messages, entity);
                 }
 
-                // TODO: change visibility.
+                commands.entity(*entity).insert(Visibility::Visible);
             } else {
                 // TODO: stop using magic values for scale
                 stc_messages.write(SpawnTerrainChunk::new(CSCALE, x, z));
