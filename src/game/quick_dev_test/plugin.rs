@@ -72,11 +72,11 @@ fn scrolling(
 
             movement_settings.speed = movement_settings.speed.pow(1. - 0.01 * mouse_wheel_msg.y);
 
-            if movement_settings.speed < 0.75 {
-                movement_settings.speed = 0.75;
+            if movement_settings.speed < 0.25 {
+                movement_settings.speed = 0.25;
             }
-            if movement_settings.speed > 3072. {
-                movement_settings.speed = 3072.;
+            if movement_settings.speed > 4000. {
+                movement_settings.speed = 4000.;
             }
         }
     }

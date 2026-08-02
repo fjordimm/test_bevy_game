@@ -1,31 +1,7 @@
 use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology};
 
-use crate::game::{
-    graphics::primary_shader::plugin::PrimaryShaderMaterial,
-    playing_state::{
-        reusable_materials::ReusableMaterials,
-        sets::DuringPlaying,
-        tags::PlayingStateEntity,
-        world::terrain::{plugin::CW, resources::TheTerrainFunc, terrain_func::TerrainFunc},
-    },
-    util::alrmo,
-};
-
-pub struct TerrainChunkPlugin;
-
-impl Plugin for TerrainChunkPlugin {
-    fn build(&self, app: &mut App) {
-        #[rustfmt::skip]
-        app
-            .add_message::<GenerateMeshes>()
-            .add_systems(Update,
-                handle_generate_meshes
-                    .in_set(DuringPlaying)
-            )
-        ;
-    }
-}
+use crate::game::playing_state::world::terrain::{plugin::CW, terrain_func::TerrainFunc};
 
 // TODOr
 // fn todor1(mesh_q: Query<&Mesh3d, With<TerrainChunk>>, mut meshes: ResMut<Assets<Mesh>>) {
@@ -41,92 +17,6 @@ impl Plugin for TerrainChunkPlugin {
 //         }
 //     });
 // }
-
-pub(super) fn chunk_bundle(
-    material: Handle<PrimaryShaderMaterial>,
-    scale: f32,
-    off_x: i32,
-    off_z: i32,
-) -> impl Bundle {
-    (
-        PlayingStateEntity,
-        MeshMaterial3d(material),
-        Transform::from_xyz(
-            scale * CW as f32 * off_x as f32,
-            0.,
-            scale * CW as f32 * off_z as f32,
-        ),
-        TerrainChunk {
-            scale: scale,
-            off_x: off_x,
-            off_z: off_z,
-            has_generated_mesh: false,
-            perimeter_entity: Entity::PLACEHOLDER,
-        },
-    )
-}
-
-#[derive(Component)]
-pub(super) struct TerrainChunk {
-    pub scale: f32,
-    pub off_x: i32,
-    pub off_z: i32,
-    pub has_generated_mesh: bool,
-    pub perimeter_entity: Entity, // The child entity that has the perimeter mesh.
-}
-
-#[derive(Component)]
-pub(super) struct TerrainChunkPerimeter;
-
-impl TerrainChunk {
-    pub fn generate_mesh_nonredundantly(
-        &mut self,
-        gm_messages: &mut MessageWriter<GenerateMeshes>,
-        entity: &Entity,
-    ) {
-        if !self.has_generated_mesh {
-            gm_messages.write(GenerateMeshes(*entity));
-        }
-    }
-}
-
-#[derive(Message)]
-pub(super) struct GenerateMeshes(Entity);
-
-fn handle_generate_meshes(
-    mut commands: Commands,
-    mut messages: MessageReader<GenerateMeshes>,
-    mut chunk_q: Query<&mut TerrainChunk>,
-    terrain_func: Res<TheTerrainFunc>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    reusable_materials: Res<ReusableMaterials>,
-) {
-    messages.read().for_each(|msg| {
-        if let Some(mut chunk) = alrmo!(chunk_q.get_mut(msg.0)) {
-            let (prim_mesh, perim_mesh) = create_meshes(
-                &terrain_func.0,
-                chunk.scale,
-                chunk.scale * CW as f32 * chunk.off_x as f32,
-                chunk.scale * CW as f32 * chunk.off_z as f32,
-            );
-
-            commands.entity(msg.0).insert(Mesh3d(meshes.add(prim_mesh)));
-
-            let perimeter = commands
-                .spawn((
-                    PlayingStateEntity,
-                    TerrainChunkPerimeter,
-                    MeshMaterial3d(reusable_materials.terrain.clone()),
-                    Mesh3d(meshes.add(perim_mesh)),
-                ))
-                .id();
-            commands.entity(msg.0).add_child(perimeter);
-            chunk.perimeter_entity = perimeter;
-
-            chunk.has_generated_mesh = true;
-        }
-    });
-}
 
 // TODOr
 const TEMP_VERTEX_COLOR1: [f32; 4] = [0., 0., 1., 1.];
@@ -152,7 +42,12 @@ fn temp_vertex_color(scale: f32, off_x: f32, off_z: f32) -> [f32; 4] {
 // Generates two meshes: 1) the inner mesh, 2) the outer mesh (perimeter), which together make up a CWxCW grid of squares.
 // The outer mesh is just the outermost squares, and the inner mesh is the full CWxCW grid minus the outer mesh squares.
 // Each square has four corner vertices, plus one in the middle, and has four triangles connecting them all.
-fn create_meshes(terrain_func: &TerrainFunc, scale: f32, off_x: f32, off_z: f32) -> (Mesh, Mesh) {
+pub(super) fn create_terrain_meshes(
+    terrain_func: &TerrainFunc,
+    scale: f32,
+    off_x: f32,
+    off_z: f32,
+) -> (Mesh, Mesh) {
     let mut inner_positions =
         Vec::<[f32; 3]>::with_capacity((CW - 1) * (CW - 1) + (CW - 2) * (CW - 2));
     let mut inner_colors =
