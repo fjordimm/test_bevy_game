@@ -73,5 +73,6 @@ fn spawn_some_stuff(
         Transform::default(),
     ));
 
-    stc_messages.write(SpawnTerrainChunk::new(1., 0, 0));
+    stc_messages.write(SpawnTerrainChunk::new(100., 0, 0));
+    stc_messages.write(SpawnTerrainChunk::new(100., 1, 0));
 }

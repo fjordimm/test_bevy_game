@@ -42,6 +42,8 @@ impl Plugin for TerrainChunkPlugin {
 //     });
 // }
 
+const CW: usize = 4; // Chunk Width (and height).
+
 pub(super) fn chunk_bundle(
     material: Handle<PrimaryShaderMaterial>,
     scale: f32,
@@ -51,7 +53,11 @@ pub(super) fn chunk_bundle(
     (
         PlayingStateEntity,
         MeshMaterial3d(material),
-        Transform::from_xyz(scale * off_x as f32, 0., scale * off_z as f32),
+        Transform::from_xyz(
+            scale * CW as f32 * off_x as f32,
+            0.,
+            scale * CW as f32 * off_z as f32,
+        ),
         TerrainChunk {
             scale: scale,
             off_x: off_x,
@@ -102,8 +108,8 @@ fn handle_generate_meshes(
             let (prim_mesh, perim_mesh) = create_meshes(
                 &terrain_func.0,
                 chunk.scale,
-                chunk.scale * chunk.off_x as f32,
-                chunk.scale * chunk.off_z as f32,
+                chunk.scale * CW as f32 * chunk.off_x as f32,
+                chunk.scale * CW as f32 * chunk.off_z as f32,
             );
 
             commands.entity(msg.0).insert(Mesh3d(meshes.add(prim_mesh)));
@@ -123,8 +129,6 @@ fn handle_generate_meshes(
         }
     });
 }
-
-const CW: usize = 4; // Chunk Width (and height).
 
 // Generates two meshes: 1) the inner mesh, 2) the outer mesh (perimeter), which together make up a CWxCW grid of squares.
 // The outer mesh is just the outermost squares, and the inner mesh is the full CWxCW grid minus the outer mesh squares.
@@ -162,7 +166,7 @@ fn create_meshes(terrain_func: &TerrainFunc, scale: f32, off_x: f32, off_z: f32)
 
             // Inner vertices.
             if r > 0 && r < CW && c > 0 && c < CW {
-                inner_positions.push([rf + off_x, h, cf + off_z]);
+                inner_positions.push([rf, h, cf]);
                 inner_colors.push([1., 1., 1., 1.]);
 
                 inner_indices_c[r][c] = inner_vc;
@@ -171,7 +175,7 @@ fn create_meshes(terrain_func: &TerrainFunc, scale: f32, off_x: f32, off_z: f32)
 
             // Outer vertices.
             if r <= 1 || r >= CW - 1 || c <= 1 || c >= CW - 1 {
-                outer_positions.push([rf + off_x, h, cf + off_z]);
+                outer_positions.push([rf, h, cf]);
                 outer_colors.push([1., 1., 1., 1.]);
 
                 outer_indices_c[r][c] = outer_vc;
@@ -190,7 +194,7 @@ fn create_meshes(terrain_func: &TerrainFunc, scale: f32, off_x: f32, off_z: f32)
 
             // Inner vertices.
             if r > 0 && r < CW - 1 && c > 0 && c < CW - 1 {
-                inner_positions.push([rf + off_x, h, cf + off_z]);
+                inner_positions.push([rf, h, cf]);
                 inner_colors.push([1., 1., 1., 1.]);
 
                 inner_indices_m[r][c] = inner_vc;
@@ -200,7 +204,7 @@ fn create_meshes(terrain_func: &TerrainFunc, scale: f32, off_x: f32, off_z: f32)
 
             // Outer vertices.
             if r == 0 || r == CW - 1 || c == 0 || c == CW - 1 {
-                outer_positions.push([rf + off_x, h, cf + off_z]);
+                outer_positions.push([rf, h, cf]);
                 outer_colors.push([1., 1., 1., 1.]);
 
                 outer_indices_m[r][c] = outer_vc;

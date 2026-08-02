@@ -18,11 +18,9 @@
 - Make sure the first time you enter `OverallState::Playing` works the exact same as when you exit to the menu and then go back.
 
 ## Currently Working On
-- Make an ExitingPlaying state.
-- Don't use commands.set_state
+- Don't use commands.set_state.
 - Terrain.
     - Consider Worley noise.
-- Make a resource to store predefined mesh materials (or maybe do this individually for each thing that needs it?).
 
 ## Should Do At Some Point
 - Make dev vs release profiles in Cargo.toml.
