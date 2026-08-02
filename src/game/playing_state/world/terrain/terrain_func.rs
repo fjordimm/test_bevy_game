@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use noise::{NoiseFn, OpenSimplex};
 use rand::Rng;
+use rand_distr::num_traits::Pow;
 
 use crate::game::random::Prng;
 
@@ -29,7 +30,7 @@ impl TerrainFunc {
 
         let mut y = 0.;
 
-        let mut frq = 0.01;
+        let mut frq = 0.001;
         let mut amp = 8.;
         for i in 0..NUM_OCTAVES {
             y += amp * self.octaves[i].get([frq * x, frq * z]);
@@ -37,6 +38,10 @@ impl TerrainFunc {
             frq *= 2.;
             amp *= 0.5;
         }
+
+        y = 2.0.pow(y);
+
+        y *= 10.;
 
         y as f32
     }

@@ -104,8 +104,8 @@ fn handle_spawn_terrain_chunk(
     });
 }
 
-pub(super) const CW: usize = 8; // Chunk Width (and height).
-const CSCALE: f32 = 1.;
+pub(super) const CW: usize = 16; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
+const CSCALE: f32 = 100.;
 const L0_RENDER_DIST: i32 = 2;
 
 fn update_chunks(

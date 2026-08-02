@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_timer};
+use rand_distr::num_traits::Pow;
 
 use crate::game::{
     core::states::OverallState,
@@ -9,7 +10,10 @@ use crate::game::{
         PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
     },
     playing_state::{
-        player::tags::{CameraForPlayer, PlayerBody},
+        player::{
+            resources::PlayerMovementSettings,
+            tags::{CameraForPlayer, PlayerBody},
+        },
         sets::{DuringPlayingUnpaused, OnEnterPlaying},
         tags::PlayingStateEntity,
         world::{SeasonOfYear, TimeOfDay},
@@ -28,7 +32,7 @@ impl Plugin for QuickDevTestPlugin {
                     .run_if(on_timer(Duration::from_secs(1)).and(run_once))
             )
             .add_systems(Update,
-                rotate_sun
+                scrolling
                     .in_set(DuringPlayingUnpaused::General)
             )
             .add_systems(Update,
@@ -47,17 +51,33 @@ fn after_a_sec(/* mut gui_scale: ResMut<GuiScale> */) {
     // gui_scale.0 = 5.;
 }
 
-fn rotate_sun(
+fn scrolling(
     keys: Res<ButtonInput<KeyCode>>,
     mut mouse_wheel_reader: MessageReader<MouseWheel>,
     mut time_of_day: ResMut<TimeOfDay>,
     mut season_of_year: ResMut<SeasonOfYear>,
+    mut movement_settings: ResMut<PlayerMovementSettings>,
 ) {
     for mouse_wheel_msg in mouse_wheel_reader.read() {
         if keys.pressed(KeyCode::ControlLeft) {
-            season_of_year.0 += 0.03 * mouse_wheel_msg.y;
+            // Move sun.
+
+            if keys.pressed(KeyCode::AltLeft) {
+                season_of_year.0 += 0.03 * mouse_wheel_msg.y;
+            } else {
+                time_of_day.0 += -0.03 * mouse_wheel_msg.y;
+            }
         } else {
-            time_of_day.0 += -0.03 * mouse_wheel_msg.y;
+            // Change movement speed.
+
+            movement_settings.speed = movement_settings.speed.pow(1. + 0.01 * mouse_wheel_msg.y);
+
+            if movement_settings.speed < 0.75 {
+                movement_settings.speed = 0.75;
+            }
+            if movement_settings.speed > 1000. {
+                movement_settings.speed = 1000.;
+            }
         }
     }
 }
