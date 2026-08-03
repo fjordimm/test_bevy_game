@@ -54,6 +54,7 @@ pub(super) const CW: usize = 16; // Chunk Width (and height). Minimum value: 3 (
 const L0_CHUNK_SCALE: f32 = 25.;
 const L0_RENDER_DIST: i32 = 2;
 const MAX_LOD: i32 = 2;
+const LOD_PROPORTION: f32 = 1.5;
 
 fn chunk_bundle(
     material: Handle<PrimaryShaderMaterial>,
@@ -188,11 +189,11 @@ fn update_chunks(
             *visibility = Visibility::Hidden;
         });
 
-    let player_tran = alrrs!(player_q);
+    let player_transf = alrrs!(player_q);
     let x_center: i32 =
-        (player_tran.translation.x / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i32;
+        (player_transf.translation.x / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i32;
     let z_center: i32 =
-        (player_tran.translation.z / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i32;
+        (player_transf.translation.z / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i32;
 
     // Spirals out from (x_center, z_center), covering a square which goes L0_RENDER_DIST in each direction.
     let mut x = x_center;
@@ -217,6 +218,7 @@ fn update_chunks(
                     &mut commands,
                     &mut chunk_q,
                     &reusable_materials,
+                    &player_transf,
                     *l0_chunk_entity,
                 );
             } else {
@@ -269,6 +271,7 @@ fn update_chunk_and_subchunks(
     commands: &mut Commands,
     chunk_q: &mut Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
     reusable_materials: &ReusableMaterials,
+    player_transf: &Transform,
     entity: Entity,
 ) {
     if let Some((_, mut tc, mut visibility)) = alrmo!(chunk_q.get_mut(entity)) {
@@ -276,7 +279,17 @@ fn update_chunk_and_subchunks(
         let sx = tc.off_x * 2;
         let sz = tc.off_z * 2;
 
-        if tc.lod < MAX_LOD
+        let should_do_subchunks = {
+            let real_x = (tc.off_x as f32 + 0.5) * tc.scale * CW as f32;
+            let real_z = (tc.off_z as f32 + 0.5) * tc.scale * CW as f32;
+            let dist_to_player = ((player_transf.translation.x - real_x).powi(2)
+                + (player_transf.translation.z - real_z).powi(2))
+            .sqrt();
+
+            tc.lod < MAX_LOD && dist_to_player < LOD_PROPORTION * tc.scale * CW as f32
+        };
+
+        if should_do_subchunks
             && tc.subchunk_tl != Entity::PLACEHOLDER
             && tc.subchunk_tr != Entity::PLACEHOLDER
             && tc.subchunk_bl != Entity::PLACEHOLDER
@@ -288,10 +301,10 @@ fn update_chunk_and_subchunks(
             let tr = tc.subchunk_tr;
             let bl = tc.subchunk_bl;
             let br = tc.subchunk_br;
-            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, tl);
-            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, tr);
-            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, bl);
-            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, br);
+            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, player_transf, tl);
+            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, player_transf, tr);
+            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, player_transf, bl);
+            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, player_transf, br);
         } else {
             // This is the case when its at the max lod or not all subchunks exist.
 
@@ -299,7 +312,7 @@ fn update_chunk_and_subchunks(
 
             // Create the subchunks that don't exist.
 
-            if tc.lod < MAX_LOD {
+            if should_do_subchunks {
                 if tc.subchunk_tl == Entity::PLACEHOLDER {
                     tc.subchunk_tl = commands
                         .spawn(chunk_bundle(
