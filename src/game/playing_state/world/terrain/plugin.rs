@@ -19,7 +19,7 @@ use crate::game::{
     util::{alrmo, alrrs},
 };
 
-const UPDATE_CHUNKS_INTERVAL: u64 = 250; // In milliseconds.
+const UPDATE_CHUNKS_INTERVAL: u64 = 2000; // In milliseconds.
 
 pub struct TerrainPlugin;
 
