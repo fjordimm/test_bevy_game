@@ -19,9 +19,9 @@ use crate::game::playing_state::world::terrain::{plugin::CW, terrain_func::Terra
 // }
 
 // TODOr
-const TEMP_VERTEX_COLOR1: [f32; 4] = [0., 0., 1., 1.];
-const TEMP_VERTEX_COLOR2: [f32; 4] = [0., 0.5, 0., 1.];
 fn temp_vertex_color(scale: f32, off_x: f32, off_z: f32) -> [f32; 4] {
+    let pre_checkerboard_color = Color::hsv(scale.log2() * 100., 1., 1.);
+
     let mut off_x_i = (off_x / (scale * CW as f32) - 0.5).round() as i32;
     let mut off_z_i = (off_z / (scale * CW as f32) - 0.5).round() as i32;
 
@@ -32,11 +32,14 @@ fn temp_vertex_color(scale: f32, off_x: f32, off_z: f32) -> [f32; 4] {
         off_z_i += 1;
     }
 
-    if ((off_x_i + off_z_i) % 2) == 0 {
-        TEMP_VERTEX_COLOR1
+    let color = if ((off_x_i + off_z_i) % 2) == 0 {
+        pre_checkerboard_color
     } else {
-        TEMP_VERTEX_COLOR2
-    }
+        pre_checkerboard_color.with_saturation(0.75)
+    };
+
+    let color = color.to_srgba();
+    [color.red, color.green, color.blue, 1.]
 }
 
 // Generates two meshes: 1) the inner mesh, 2) the outer mesh (perimeter), which together make up a CWxCW grid of squares.

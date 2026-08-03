@@ -489,7 +489,7 @@ fn get_active_chunk_at(
                     return Some(c_entity);
                 }
 
-                *c_visibility = Visibility::Visible;
+                // *c_visibility = Visibility::Visible;
 
                 debug!("current lod: {}", c_tc.lod);
                 debug!(
