@@ -30,6 +30,7 @@
 - Make the camera cursor movement proportional to the window size.
 - When dragging floating panels around, they should order themselves correctly (most recently dragged goes on top).
 - Get rid of post-processor if not using it.
+- Instead of having the Z-Indexing stuff in gui/usage.md, just have a few sub-divs under the gui root which you add things to.
 
 ## Optimizations
 - If I don't need uv coords or anything for my primary shader, than try implementing meshes that don't use repeated vertices, while still keeping flat shading.

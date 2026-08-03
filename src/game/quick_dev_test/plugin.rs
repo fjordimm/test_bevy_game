@@ -4,18 +4,12 @@ use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_tim
 use rand_distr::num_traits::Pow;
 
 use crate::game::{
-    core::states::OverallState,
-    geometry::dodec::dodec_mesh,
-    graphics::primary_shader::plugin::{
-        PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
-    },
     playing_state::{
         player::{
             resources::PlayerMovementSettings,
             tags::{CameraForPlayer, PlayerBody},
         },
-        sets::{DuringPlayingUnpaused, OnEnterPlaying},
-        tags::PlayingStateEntity,
+        sets::DuringPlayingUnpaused,
         world::{SeasonOfYear, TimeOfDay},
     },
     util::alrms,
@@ -39,10 +33,10 @@ impl Plugin for QuickDevTestPlugin {
                 move_player_body_to_cam
                     .in_set(DuringPlayingUnpaused::General)
             )
-            .add_systems(OnEnter(OverallState::Playing),
-                spawn_some_stuff
-                    .in_set(OnEnterPlaying::General)
-            )
+            // .add_systems(OnEnter(OverallState::Playing),
+            //     spawn_some_stuff
+            //         .in_set(OnEnterPlaying::General)
+            // )
         ;
     }
 }
@@ -97,19 +91,19 @@ fn move_player_body_to_cam(
     }
 }
 
-fn spawn_some_stuff(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
-) {
-    commands.spawn((
-        PlayingStateEntity,
-        Mesh3d(meshes.add(dodec_mesh())),
-        MeshMaterial3d(
-            materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-                texturing_scale: 1.,
-            })),
-        ),
-        Transform::default(),
-    ));
-}
+// fn spawn_some_stuff(
+//     mut commands: Commands,
+//     mut meshes: ResMut<Assets<Mesh>>,
+//     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
+// ) {
+//     commands.spawn((
+//         PlayingStateEntity,
+//         Mesh3d(meshes.add(dodec_mesh())),
+//         MeshMaterial3d(
+//             materials.add(primary_shader_material(PrimaryShaderMaterialProps {
+//                 texturing_scale: 1.,
+//             })),
+//         ),
+//         Transform::default(),
+//     ));
+// }
