@@ -19,7 +19,7 @@ use crate::game::{
     util::{alrmo, alrrs},
 };
 
-const UPDATE_CHUNKS_INTERVAL: u64 = 2000; // In milliseconds.
+const UPDATE_CHUNKS_INTERVAL: u64 = 250; // In milliseconds.
 
 pub struct TerrainPlugin;
 
@@ -177,11 +177,19 @@ fn update_chunks(
     reusable_materials: Res<ReusableMaterials>,
     mut gm_messages: MessageWriter<GenerateMeshes>,
 ) {
+    // Update the perimeters to match surrounding chunks with different lods.
+    chunk_q.iter().for_each(|(_, tc, _)| {
+        let tc_lod = tc.lod;
+        let tc_off_x = tc.off_x;
+        let tc_off_z = tc.off_z;
+        let _ = get_surrounding_chunk_lods(&*l0_chunk_dict, &chunk_q, tc_lod, tc_off_x, tc_off_z);
+    });
+
     chunk_q
         .iter_mut()
         .for_each(|(entity, mut tc, mut visibility)| {
             // Generate meshes for chunks that don't already have them (but only if they were left visible).
-            if let Visibility::Visible = *visibility {
+            if *visibility == Visibility::Visible {
                 tc.generate_mesh_nonredundantly(&mut gm_messages, &entity);
             }
 
@@ -393,44 +401,22 @@ fn update_chunk_and_subchunks(
             // Stuff for this chunk.
 
             *visibility = Visibility::Visible;
-
-            let tc_lod = tc.lod;
-            let tc_off_x = tc.off_x;
-            let tc_off_z = tc.off_z;
-
-            // TODOr
-            if tc_lod == 2 && tc_off_x == 2 && tc_off_z == 1 {
-                // *visibility = Visibility::Hidden;
-
-                debug!("---------------------------------------------------------------");
-                debug!("---------------------------------------------------------------");
-                debug!("---------------------------------------------------------------");
-                debug!(
-                    "{:?}",
-                    get_surrounding_chunk_lods(l0_chunk_dict, chunk_q, tc_lod, tc_off_x, tc_off_z)
-                );
-            }
         }
     }
 }
 
-// TODO: make chunk_q & instead of &mut.
 // Return value is ordered as (north, east, south, west).
 fn get_surrounding_chunk_lods(
     l0_chunk_dict: &L0ChunkDict,
-    chunk_q: &mut Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
+    chunk_q: &Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
     tc_lod: i32,
     tc_off_x: i32,
     tc_off_z: i32,
 ) -> (Option<i32>, Option<i32>, Option<i32>, Option<i32>) {
-    // let north_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x, tc_off_z - 1);
-    // let east_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x + 1, tc_off_z);
+    let north_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x, tc_off_z - 1);
+    let east_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x + 1, tc_off_z);
     let south_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x, tc_off_z + 1);
-    // let west_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x - 1, tc_off_z);
-    let north_entity = None;
-    let east_entity = None;
-    // let south_entity = None;
-    let west_entity = None;
+    let west_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x - 1, tc_off_z);
 
     let north = match north_entity {
         Some(e) => match alrmo!(chunk_q.get(e)) {
@@ -467,7 +453,7 @@ fn get_surrounding_chunk_lods(
 // Stops zeroing in at `coords_lod` (lod of the coords).
 fn get_active_chunk_at(
     l0_chunk_dict: &L0ChunkDict,
-    chunk_q: &mut Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
+    chunk_q: &Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
     coords_lod: i32,
     x: i32,
     z: i32,
@@ -476,36 +462,13 @@ fn get_active_chunk_at(
     let l0_z = z / 2i32.pow(coords_lod as u32);
 
     if let Some(l0_chunk_entity) = l0_chunk_dict.0.get(&ChunkKey::new(l0_x, l0_z)) {
-        if let Some((l0_entity, l0_tc, l0_visibility)) = alrmo!(chunk_q.get_mut(*l0_chunk_entity)) {
+        if let Some((l0_entity, l0_tc, l0_visibility)) = alrmo!(chunk_q.get(*l0_chunk_entity)) {
             let (mut c_entity, mut c_tc, mut c_visibility) = (l0_entity, l0_tc, l0_visibility);
-
-            debug!("Zeroing In.....................");
-            debug!("original lod: {}", coords_lod);
-            debug!("original coords: {:?}", (x, z));
-            debug!("-----");
 
             loop {
                 if c_tc.lod == coords_lod || *c_visibility == Visibility::Visible {
                     return Some(c_entity);
                 }
-
-                // *c_visibility = Visibility::Visible;
-
-                debug!("current lod: {}", c_tc.lod);
-                debug!(
-                    "current coords: {:?}",
-                    (
-                        x / 2i32.pow((coords_lod - c_tc.lod) as u32),
-                        z / 2i32.pow((coords_lod - c_tc.lod) as u32)
-                    )
-                );
-                debug!(
-                    "new coords: {:?}",
-                    (
-                        x / 2i32.pow((coords_lod - (c_tc.lod + 1)) as u32),
-                        z / 2i32.pow((coords_lod - (c_tc.lod + 1)) as u32)
-                    )
-                );
 
                 let subchunk_entity = match (
                     ((x / 2i32.pow((coords_lod - (c_tc.lod + 1)) as u32)) % 2).abs(),
@@ -521,7 +484,7 @@ fn get_active_chunk_at(
                     }
                 };
 
-                if let Ok((new_entity, new_tc, new_visibility)) = chunk_q.get_mut(subchunk_entity) {
+                if let Ok((new_entity, new_tc, new_visibility)) = chunk_q.get(subchunk_entity) {
                     (c_entity, c_tc, c_visibility) = (new_entity, new_tc, new_visibility);
                 } else {
                     return Some(c_entity);

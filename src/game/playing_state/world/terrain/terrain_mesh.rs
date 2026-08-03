@@ -20,7 +20,7 @@ use crate::game::playing_state::world::terrain::{plugin::CW, terrain_func::Terra
 
 // TODOr
 fn temp_vertex_color(scale: f32, off_x: f32, off_z: f32) -> [f32; 4] {
-    let pre_checkerboard_color = Color::hsv(scale.log2() * 100., 1., 1.);
+    let pre_checkerboard_color = Color::hsv(scale.log2() * 70., 1., 1.);
 
     let mut off_x_i = (off_x / (scale * CW as f32) - 0.5).round() as i32;
     let mut off_z_i = (off_z / (scale * CW as f32) - 0.5).round() as i32;
@@ -33,9 +33,9 @@ fn temp_vertex_color(scale: f32, off_x: f32, off_z: f32) -> [f32; 4] {
     }
 
     let color = if ((off_x_i + off_z_i) % 2) == 0 {
-        pre_checkerboard_color
+        Color::hsv(pre_checkerboard_color.hue(), 0.9, 1.)
     } else {
-        pre_checkerboard_color.with_saturation(0.75)
+        Color::hsv(pre_checkerboard_color.hue(), 1., 0.75)
     };
 
     let color = color.to_srgba();
