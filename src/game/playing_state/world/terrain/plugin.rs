@@ -51,7 +51,7 @@ fn on_enter(mut commands: Commands, mut prng: Single<&mut Prng, With<GeneralRand
 }
 
 pub(super) const CW: usize = 16; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
-const L0_CHUNK_SCALE: f32 = 25.;
+const L0_CHUNK_SCALE: f32 = 4.;
 const L0_RENDER_DIST: i32 = 2;
 const MAX_LOD: i32 = 2;
 const LOD_PROPORTION: f32 = 1.5;
@@ -216,6 +216,7 @@ fn update_chunks(
             if let Some(l0_chunk_entity) = l0_chunk_dict.0.get(&ChunkKey::new(x, z)) {
                 update_chunk_and_subchunks(
                     &mut commands,
+                    &l0_chunk_dict,
                     &mut chunk_q,
                     &reusable_materials,
                     &player_transf,
@@ -269,6 +270,7 @@ fn update_chunks(
 
 fn update_chunk_and_subchunks(
     commands: &mut Commands,
+    l0_chunk_dict: &L0ChunkDict,
     chunk_q: &mut Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
     reusable_materials: &ReusableMaterials,
     player_transf: &Transform,
@@ -289,26 +291,52 @@ fn update_chunk_and_subchunks(
             tc.lod < MAX_LOD && dist_to_player < LOD_PROPORTION * tc.scale * CW as f32
         };
 
+        let tl = tc.subchunk_tl;
+        let tr = tc.subchunk_tr;
+        let bl = tc.subchunk_bl;
+        let br = tc.subchunk_br;
         if should_do_subchunks
-            && tc.subchunk_tl != Entity::PLACEHOLDER
-            && tc.subchunk_tr != Entity::PLACEHOLDER
-            && tc.subchunk_bl != Entity::PLACEHOLDER
-            && tc.subchunk_br != Entity::PLACEHOLDER
+            && tl != Entity::PLACEHOLDER
+            && tr != Entity::PLACEHOLDER
+            && bl != Entity::PLACEHOLDER
+            && br != Entity::PLACEHOLDER
         {
             // This is the case when all subchunks exist.
 
-            let tl = tc.subchunk_tl;
-            let tr = tc.subchunk_tr;
-            let bl = tc.subchunk_bl;
-            let br = tc.subchunk_br;
-            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, player_transf, tl);
-            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, player_transf, tr);
-            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, player_transf, bl);
-            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, player_transf, br);
+            update_chunk_and_subchunks(
+                commands,
+                l0_chunk_dict,
+                chunk_q,
+                reusable_materials,
+                player_transf,
+                tl,
+            );
+            update_chunk_and_subchunks(
+                commands,
+                l0_chunk_dict,
+                chunk_q,
+                reusable_materials,
+                player_transf,
+                tr,
+            );
+            update_chunk_and_subchunks(
+                commands,
+                l0_chunk_dict,
+                chunk_q,
+                reusable_materials,
+                player_transf,
+                bl,
+            );
+            update_chunk_and_subchunks(
+                commands,
+                l0_chunk_dict,
+                chunk_q,
+                reusable_materials,
+                player_transf,
+                br,
+            );
         } else {
             // This is the case when its at the max lod or not all subchunks exist.
-
-            *visibility = Visibility::Visible;
 
             // Create the subchunks that don't exist.
 
@@ -361,6 +389,115 @@ fn update_chunk_and_subchunks(
                         .id();
                 }
             }
+
+            // Stuff for this chunk.
+
+            *visibility = Visibility::Visible;
+
+            let tc_lod = tc.lod;
+            let tc_off_x = tc.off_x;
+            let tc_off_z = tc.off_z;
+
+            if tc_lod == 2 && tc_off_x == 2 && tc_off_z == 1 {
+                debug!(
+                    "{:?}",
+                    get_surrounding_chunk_lods(l0_chunk_dict, chunk_q, tc_lod, tc_off_x, tc_off_z)
+                );
+            }
         }
+    }
+}
+
+// Return value is ordered as (north, east, south, west).
+fn get_surrounding_chunk_lods(
+    l0_chunk_dict: &L0ChunkDict,
+    chunk_q: &Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
+    tc_lod: i32,
+    tc_off_x: i32,
+    tc_off_z: i32,
+) -> (Option<i32>, Option<i32>, Option<i32>, Option<i32>) {
+    let north_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x, tc_off_z - 1);
+    let east_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x + 1, tc_off_z);
+    let south_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x, tc_off_z + 1);
+    let west_entity =
+        get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x - 1, tc_off_z + 1);
+
+    let north = match north_entity {
+        Some(e) => match alrmo!(chunk_q.get(e)) {
+            Some((_, tc, _)) => Some(tc.lod),
+            None => None,
+        },
+        None => None,
+    };
+    let east = match east_entity {
+        Some(e) => match alrmo!(chunk_q.get(e)) {
+            Some((_, tc, _)) => Some(tc.lod),
+            None => None,
+        },
+        None => None,
+    };
+    let south = match south_entity {
+        Some(e) => match alrmo!(chunk_q.get(e)) {
+            Some((_, tc, _)) => Some(tc.lod),
+            None => None,
+        },
+        None => None,
+    };
+    let west = match west_entity {
+        Some(e) => match alrmo!(chunk_q.get(e)) {
+            Some((_, tc, _)) => Some(tc.lod),
+            None => None,
+        },
+        None => None,
+    };
+
+    (north, east, south, west)
+}
+
+// Stops zeroing in at `coords_lod` (lod of the coords).
+fn get_active_chunk_at(
+    l0_chunk_dict: &L0ChunkDict,
+    chunk_q: &Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
+    coords_lod: i32,
+    x: i32,
+    z: i32,
+) -> Option<Entity> {
+    let l0_x = x / 2i32.pow(coords_lod as u32);
+    let l0_z = z / 2i32.pow(coords_lod as u32);
+
+    if let Some(l0_chunk_entity) = l0_chunk_dict.0.get(&ChunkKey::new(l0_x, l0_z)) {
+        if let Some((l0_entity, l0_tc, l0_visibility)) = alrmo!(chunk_q.get(*l0_chunk_entity)) {
+            let (mut c_entity, mut c_tc, mut c_visibility) = (l0_entity, l0_tc, l0_visibility);
+
+            loop {
+                if l0_tc.lod == coords_lod || *c_visibility == Visibility::Visible {
+                    return Some(c_entity);
+                }
+
+                let subchunk_entity = match (
+                    ((x / 2i32.pow((coords_lod - c_tc.lod + 1) as u32)) % 2).abs(),
+                    ((z / 2i32.pow((coords_lod - c_tc.lod + 1) as u32)) % 2).abs(),
+                ) {
+                    (0, 0) => c_tc.subchunk_tl,
+                    (1, 0) => c_tc.subchunk_tr,
+                    (0, 1) => c_tc.subchunk_bl,
+                    (1, 1) => c_tc.subchunk_bl,
+                    _ => {
+                        error!("The terrain generation zeroing in logic is incorrect.");
+                        return None;
+                    }
+                };
+
+                if let Ok((new_entity, new_tc, new_visibility)) = chunk_q.get(subchunk_entity) {
+                    (c_entity, c_tc, c_visibility) = (new_entity, new_tc, new_visibility);
+                } else {
+                    return Some(c_entity);
+                }
+            }
+        } else {
+            None
+        }
+    } else {
+        None
     }
 }

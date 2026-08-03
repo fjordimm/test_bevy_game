@@ -19,6 +19,7 @@ use crate::game::{
             text::{GuiTextInterface, gui_text_h2, gui_text_m},
         },
     },
+    playing_state::player::tags::CameraForPlayer,
 };
 
 pub struct PrimaryDebugMenuPlugin;
@@ -34,7 +35,7 @@ impl Plugin for PrimaryDebugMenuPlugin {
             .add_systems(Update, toggle_debug_menu)
             .add_systems(Update,
                 update
-                    .run_if(on_timer(Duration::from_millis(250)))
+                    .run_if(on_timer(Duration::from_millis(100)))
             )
         ;
     }
@@ -57,6 +58,9 @@ struct OverallStatePlayingSection;
 
 #[derive(Component)]
 struct TransformEntityCountText;
+
+#[derive(Component)]
+struct CamPositionText;
 
 fn spawn_primary_debug_menu(
     mut commands: Commands,
@@ -129,6 +133,11 @@ fn spawn_primary_debug_menu(
                         p.spawn(gui_text_m("Transform Entity Count: "));
                         p.spawn((TransformEntityCountText, gui_text_m("-")));
                     }));
+
+                    p.spawn(gui_div_p()).insert(gui_children(|p| {
+                        p.spawn(gui_text_m("Cam Position: "));
+                        p.spawn((CamPositionText, gui_text_m("-")));
+                    }));
                 }));
             }));
         }))
@@ -159,6 +168,7 @@ fn update(
             With<FpsText>,
             Without<EntityCountText>,
             Without<TransformEntityCountText>,
+            Without<CamPositionText>,
         ),
     >,
     mut entity_count_text: Query<
@@ -167,17 +177,29 @@ fn update(
             With<EntityCountText>,
             Without<FpsText>,
             Without<TransformEntityCountText>,
+            Without<CamPositionText>,
         ),
     >,
-    transform_q: Query<(), With<Transform>>,
     mut transform_entity_count_text: Query<
         GuiTextInterface,
         (
             With<TransformEntityCountText>,
             Without<FpsText>,
             Without<EntityCountText>,
+            Without<CamPositionText>,
         ),
     >,
+    transform_q: Query<(), With<Transform>>,
+    mut cam_position_text: Query<
+        GuiTextInterface,
+        (
+            With<CamPositionText>,
+            Without<TransformEntityCountText>,
+            Without<FpsText>,
+            Without<EntityCountText>,
+        ),
+    >,
+    camera_q: Option<Single<&Transform, With<CameraForPlayer>>>,
 ) {
     fps_text.iter_mut().for_each(|mut text| {
         text.set_content(
@@ -200,4 +222,15 @@ fn update(
     transform_entity_count_text.iter_mut().for_each(|mut text| {
         text.set_content(transform_q.iter().count().to_string());
     });
+
+    if let Some(camera_transf) = camera_q {
+        cam_position_text.iter_mut().for_each(|mut text| {
+            let t = camera_transf.translation;
+            text.set_content(format!("{:.2}, {:.2}, {:.2}", t.x, t.y, t.z));
+        });
+    } else {
+        cam_position_text.iter_mut().for_each(|mut text| {
+            text.set_content(String::from("-"));
+        });
+    }
 }
