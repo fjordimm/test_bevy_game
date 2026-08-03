@@ -19,7 +19,7 @@ use crate::game::{
     util::{alrmo, alrrs},
 };
 
-const UPDATE_CHUNKS_INTERVAL: u64 = 500; // In milliseconds.
+const UPDATE_CHUNKS_INTERVAL: u64 = 2000; // In milliseconds.
 
 pub struct TerrainPlugin;
 
@@ -78,6 +78,9 @@ fn chunk_bundle(
             has_generated_mesh: false,
             perimeter_entity: Entity::PLACEHOLDER,
             subchunk_tl: Entity::PLACEHOLDER,
+            subchunk_tr: Entity::PLACEHOLDER,
+            subchunk_bl: Entity::PLACEHOLDER,
+            subchunk_br: Entity::PLACEHOLDER,
         },
         Visibility::Visible,
     )
@@ -92,6 +95,9 @@ struct TerrainChunk {
     has_generated_mesh: bool,
     perimeter_entity: Entity, // The child entity that has the perimeter mesh.
     subchunk_tl: Entity,
+    subchunk_tr: Entity,
+    subchunk_bl: Entity,
+    subchunk_br: Entity,
 }
 
 #[derive(Component)]
@@ -266,26 +272,81 @@ fn update_chunk_and_subchunks(
     entity: Entity,
 ) {
     if let Some((_, mut tc, mut visibility)) = alrmo!(chunk_q.get_mut(entity)) {
-        *visibility = Visibility::Visible;
-
         let sscale = tc.scale * 0.5;
         let sx = tc.off_x * 2;
         let sz = tc.off_z * 2;
 
-        if tc.lod < MAX_LOD {
-            if tc.subchunk_tl == Entity::PLACEHOLDER {
-                tc.subchunk_tl = commands
-                    .spawn(chunk_bundle(
-                        reusable_materials.terrain.clone(),
-                        tc.lod + 1,
-                        sscale,
-                        sx,
-                        sz,
-                    ))
-                    .id();
-            } else {
-                let sentity = tc.subchunk_tl;
-                update_chunk_and_subchunks(commands, chunk_q, reusable_materials, sentity);
+        if tc.lod < MAX_LOD
+            && tc.subchunk_tl != Entity::PLACEHOLDER
+            && tc.subchunk_tr != Entity::PLACEHOLDER
+            && tc.subchunk_bl != Entity::PLACEHOLDER
+            && tc.subchunk_br != Entity::PLACEHOLDER
+        {
+            // This is the case when all subchunks exist.
+
+            let tl = tc.subchunk_tl;
+            let tr = tc.subchunk_tr;
+            let bl = tc.subchunk_bl;
+            let br = tc.subchunk_br;
+            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, tl);
+            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, tr);
+            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, bl);
+            update_chunk_and_subchunks(commands, chunk_q, reusable_materials, br);
+        } else {
+            // This is the case when its at the max lod or not all subchunks exist.
+
+            *visibility = Visibility::Visible;
+
+            // Create the subchunks that don't exist.
+
+            if tc.lod < MAX_LOD {
+                if tc.subchunk_tl == Entity::PLACEHOLDER {
+                    tc.subchunk_tl = commands
+                        .spawn(chunk_bundle(
+                            reusable_materials.terrain.clone(),
+                            tc.lod + 1,
+                            sscale,
+                            sx,
+                            sz,
+                        ))
+                        .id();
+                }
+
+                if tc.subchunk_tr == Entity::PLACEHOLDER {
+                    tc.subchunk_tr = commands
+                        .spawn(chunk_bundle(
+                            reusable_materials.terrain.clone(),
+                            tc.lod + 1,
+                            sscale,
+                            sx + 1,
+                            sz,
+                        ))
+                        .id();
+                }
+
+                if tc.subchunk_bl == Entity::PLACEHOLDER {
+                    tc.subchunk_bl = commands
+                        .spawn(chunk_bundle(
+                            reusable_materials.terrain.clone(),
+                            tc.lod + 1,
+                            sscale,
+                            sx,
+                            sz + 1,
+                        ))
+                        .id();
+                }
+
+                if tc.subchunk_br == Entity::PLACEHOLDER {
+                    tc.subchunk_br = commands
+                        .spawn(chunk_bundle(
+                            reusable_materials.terrain.clone(),
+                            tc.lod + 1,
+                            sscale,
+                            sx + 1,
+                            sz + 1,
+                        ))
+                        .id();
+                }
             }
         }
     }
