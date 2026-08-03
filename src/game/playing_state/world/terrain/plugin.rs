@@ -47,15 +47,17 @@ impl Plugin for TerrainPlugin {
 
 fn on_enter(mut commands: Commands, mut prng: Single<&mut Prng, With<GeneralRand>>) {
     commands.insert_resource(TheTerrainFunc(TerrainFunc::new(&mut prng)));
-    commands.insert_resource(ChunkDict(HashMap::new()));
+    commands.insert_resource(L0ChunkDict(HashMap::new()));
 }
 
 pub(super) const CW: usize = 16; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
-const C_SCALE: f32 = 25.;
+const L0_CHUNK_SCALE: f32 = 25.;
 const L0_RENDER_DIST: i32 = 2;
+const MAX_LOD: i32 = 2;
 
 fn chunk_bundle(
     material: Handle<PrimaryShaderMaterial>,
+    lod: i32,
     scale: f32,
     off_x: i32,
     off_z: i32,
@@ -69,6 +71,7 @@ fn chunk_bundle(
             scale * CW as f32 * off_z as f32,
         ),
         TerrainChunk {
+            lod,
             scale: scale,
             off_x: off_x,
             off_z: off_z,
@@ -82,6 +85,7 @@ fn chunk_bundle(
 
 #[derive(Component)]
 struct TerrainChunk {
+    lod: i32,
     scale: f32,
     off_x: i32,
     off_z: i32,
@@ -156,12 +160,12 @@ impl ChunkKey {
 }
 
 #[derive(Resource)]
-struct ChunkDict(HashMap<ChunkKey, Entity>);
+struct L0ChunkDict(HashMap<ChunkKey, Entity>);
 
 fn update_chunks(
     mut commands: Commands,
     player_q: Option<Single<&Transform, With<PlayerBody>>>,
-    mut chunk_dict: ResMut<ChunkDict>,
+    mut l0_chunk_dict: ResMut<L0ChunkDict>,
     mut chunk_q: Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
     reusable_materials: Res<ReusableMaterials>,
     mut gm_messages: MessageWriter<GenerateMeshes>,
@@ -179,8 +183,10 @@ fn update_chunks(
         });
 
     let player_tran = alrrs!(player_q);
-    let x_center: i32 = (player_tran.translation.x / (C_SCALE * CW as f32) - 0.5).round() as i32;
-    let z_center: i32 = (player_tran.translation.z / (C_SCALE * CW as f32) - 0.5).round() as i32;
+    let x_center: i32 =
+        (player_tran.translation.x / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i32;
+    let z_center: i32 =
+        (player_tran.translation.z / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i32;
 
     // Spirals out from (x_center, z_center), covering a square which goes L0_RENDER_DIST in each direction.
     let mut x = x_center;
@@ -200,39 +206,25 @@ fn update_chunks(
 
         // Actual code using (x, z) outside of the spiral logic.
         {
-            if let Some(entity) = chunk_dict.0.get(&ChunkKey::new(x, z)) {
-                if let Some((_, mut tc, mut visibility)) = alrmo!(chunk_q.get_mut(*entity)) {
-                    *visibility = Visibility::Visible;
-
-                    if tc.subchunk_tl == Entity::PLACEHOLDER {
-                        tc.subchunk_tl = commands
-                            .spawn(chunk_bundle(
-                                reusable_materials.terrain.clone(),
-                                C_SCALE * 0.5,
-                                x * 2,
-                                z * 2,
-                            ))
-                            .id();
-                    } else {
-                        let tc_subchunk_tl = tc.subchunk_tl;
-                        if let Some((_, _, mut visibility)) =
-                            alrmo!(chunk_q.get_mut(tc_subchunk_tl))
-                        {
-                            *visibility = Visibility::Visible;
-                        }
-                    }
-                }
+            if let Some(l0_chunk_entity) = l0_chunk_dict.0.get(&ChunkKey::new(x, z)) {
+                update_chunk_and_subchunks(
+                    &mut commands,
+                    &mut chunk_q,
+                    &reusable_materials,
+                    *l0_chunk_entity,
+                );
             } else {
                 let entity = commands
                     .spawn(chunk_bundle(
                         reusable_materials.terrain.clone(),
-                        C_SCALE,
+                        0,
+                        L0_CHUNK_SCALE,
                         x,
                         z,
                     ))
                     .id();
 
-                chunk_dict.0.insert(ChunkKey::new(x, z), entity);
+                l0_chunk_dict.0.insert(ChunkKey::new(x, z), entity);
             }
         }
 
@@ -263,6 +255,38 @@ fn update_chunks(
             }
 
             side_countdown = side_len;
+        }
+    }
+}
+
+fn update_chunk_and_subchunks(
+    commands: &mut Commands,
+    chunk_q: &mut Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
+    reusable_materials: &ReusableMaterials,
+    entity: Entity,
+) {
+    if let Some((_, mut tc, mut visibility)) = alrmo!(chunk_q.get_mut(entity)) {
+        *visibility = Visibility::Visible;
+
+        let sscale = tc.scale * 0.5;
+        let sx = tc.off_x * 2;
+        let sz = tc.off_z * 2;
+
+        if tc.lod < MAX_LOD {
+            if tc.subchunk_tl == Entity::PLACEHOLDER {
+                tc.subchunk_tl = commands
+                    .spawn(chunk_bundle(
+                        reusable_materials.terrain.clone(),
+                        tc.lod + 1,
+                        sscale,
+                        sx,
+                        sz,
+                    ))
+                    .id();
+            } else {
+                let sentity = tc.subchunk_tl;
+                update_chunk_and_subchunks(commands, chunk_q, reusable_materials, sentity);
+            }
         }
     }
 }
