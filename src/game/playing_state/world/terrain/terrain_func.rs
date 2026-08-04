@@ -1,6 +1,10 @@
 use bevy::prelude::*;
+use bevy_rand::{
+    seed::RngSeed,
+    traits::{ForkableAsSeed, SeedSource},
+};
 use noise::{NoiseFn, OpenSimplex};
-use rand::Rng;
+use rand::{Rng, SeedableRng};
 use rand_distr::num_traits::Pow;
 
 use crate::game::random::Prng;
@@ -12,11 +16,12 @@ pub struct TerrainFunc {
 const NUM_OCTAVES: usize = 15;
 
 impl TerrainFunc {
-    pub fn new(prng: &mut Prng) -> Self {
+    pub fn new(seed: [u8; 8]) -> Self {
         let mut me = TerrainFunc {
             octaves: Vec::with_capacity(NUM_OCTAVES),
         };
 
+        let mut prng = Prng::from_seed(seed);
         for _ in 0..NUM_OCTAVES {
             me.octaves.push(OpenSimplex::new(prng.next_u32()));
         }
@@ -30,8 +35,8 @@ impl TerrainFunc {
 
         let mut y = 0.;
 
-        let mut frq = 0.001;
-        let mut amp = 8.;
+        let mut frq = 0.0005;
+        let mut amp = 6.;
         for i in 0..NUM_OCTAVES {
             y += amp * self.octaves[i].get([frq * x, frq * z]);
 
@@ -41,7 +46,7 @@ impl TerrainFunc {
 
         y = 2.0.pow(y);
 
-        y *= 10.;
+        y *= 15.;
 
         y as f32
     }

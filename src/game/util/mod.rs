@@ -127,3 +127,7 @@ pub fn col_to_array4(col: Color) -> [f32; 4] {
     let c = col.to_linear();
     [c.red, c.green, c.blue, c.alpha]
 }
+
+pub fn seed_from_u64(inp: u64) -> [u8; 8] {
+    inp.to_le_bytes()
+}

@@ -17,10 +17,10 @@ use crate::game::{
         },
     },
     random::{Prng, rands::GeneralRand},
-    util::{alrmo, alrms, alrrs},
+    util::{alrmo, alrms, alrrs, seed_from_u64},
 };
 
-const UPDATE_CHUNKS_INTERVAL: u64 = 2000; // In milliseconds.
+const UPDATE_CHUNKS_INTERVAL: u64 = 800; // In milliseconds.
 
 pub struct TerrainPlugin;
 
@@ -46,17 +46,18 @@ impl Plugin for TerrainPlugin {
     }
 }
 
-fn on_enter(mut commands: Commands, mut prng: Single<&mut Prng, With<GeneralRand>>) {
-    commands.insert_resource(TheTerrainFunc(TerrainFunc::new(&mut prng)));
+fn on_enter(mut commands: Commands) {
+    // TODO: change the seed to not be this arbitrary number.
+    commands.insert_resource(TheTerrainFunc(TerrainFunc::new(seed_from_u64(12345))));
     commands.insert_resource(L0ChunkDict(HashMap::new()));
 }
 
-pub(super) const CW: usize = 16; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
-const MAX_LOD: i32 = 8;
-const LL_CHUNK_SCALE: f32 = 1.;
+pub(super) const CW: usize = 32; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
+const MAX_LOD: i32 = 6;
+const LL_CHUNK_SCALE: f32 = 3.;
 const L0_CHUNK_SCALE: f32 = LL_CHUNK_SCALE * 2u32.pow(MAX_LOD as u32) as f32;
 const L0_RENDER_DIST: i32 = 2;
-const LOD_PROPORTION: f32 = 1.5;
+const LOD_PROPORTION: f32 = 2.5;
 
 fn chunk_bundle(
     material: Handle<PrimaryShaderMaterial>,
@@ -79,11 +80,11 @@ fn chunk_bundle(
             off_x: off_x,
             off_z: off_z,
             has_generated_mesh: false,
-            perimeter_entity: Entity::PLACEHOLDER,
-            subchunk_tl: Entity::PLACEHOLDER,
-            subchunk_tr: Entity::PLACEHOLDER,
-            subchunk_bl: Entity::PLACEHOLDER,
-            subchunk_br: Entity::PLACEHOLDER,
+            perimeter_entity: None,
+            subchunk_tl: None,
+            subchunk_tr: None,
+            subchunk_bl: None,
+            subchunk_br: None,
         },
         Visibility::Visible,
     )
@@ -96,11 +97,11 @@ struct TerrainChunk {
     off_x: i32,
     off_z: i32,
     has_generated_mesh: bool,
-    perimeter_entity: Entity, // The child entity that has the perimeter mesh.
-    subchunk_tl: Entity,
-    subchunk_tr: Entity,
-    subchunk_bl: Entity,
-    subchunk_br: Entity,
+    perimeter_entity: Option<Entity>, // The child entity that has the perimeter mesh.
+    subchunk_tl: Option<Entity>,
+    subchunk_tr: Option<Entity>,
+    subchunk_bl: Option<Entity>,
+    subchunk_br: Option<Entity>,
 }
 
 #[derive(Component)]
@@ -154,7 +155,7 @@ fn handle_generate_meshes(
                 ))
                 .id();
             commands.entity(msg.0).add_child(perimeter);
-            tc.perimeter_entity = perimeter;
+            tc.perimeter_entity = Some(perimeter);
 
             tc.has_generated_mesh = true;
         }
@@ -193,9 +194,11 @@ fn update_chunks(
         // let tc_off_z = tc.off_z;
         // let _ = get_surrounding_chunk_lods(&*l0_chunk_dict, &chunk_q, tc_lod, tc_off_x, tc_off_z);
 
-        if let Some((tcp, mesh3d)) = alrmo!(chunk_perim_q.get(tc.perimeter_entity)) {
-            if let Some(mesh) = alrms!(meshes.get_mut(mesh3d.0.id())) {
-                change_mesh_from_perim_lod_positions(mesh, &tcp.perim_lod_positions[0]);
+        if let Some(perim_entity) = tc.perimeter_entity {
+            if let Some((tcp, mesh3d)) = alrmo!(chunk_perim_q.get(perim_entity)) {
+                if let Some(mesh) = alrms!(meshes.get_mut(mesh3d.0.id())) {
+                    change_mesh_from_perim_lod_positions(mesh, &tcp.perim_lod_positions[0]);
+                }
             }
         }
     });
@@ -319,10 +322,10 @@ fn update_chunk_and_subchunks(
         let bl = tc.subchunk_bl;
         let br = tc.subchunk_br;
         if should_do_subchunks
-            && tl != Entity::PLACEHOLDER
-            && tr != Entity::PLACEHOLDER
-            && bl != Entity::PLACEHOLDER
-            && br != Entity::PLACEHOLDER
+            && let Some(tl) = tl
+            && let Some(tr) = tr
+            && let Some(bl) = bl
+            && let Some(br) = br
         {
             // This is the case when all subchunks exist.
 
@@ -364,52 +367,60 @@ fn update_chunk_and_subchunks(
             // Create the subchunks that don't exist.
 
             if should_do_subchunks {
-                if tc.subchunk_tl == Entity::PLACEHOLDER {
-                    tc.subchunk_tl = commands
-                        .spawn(chunk_bundle(
-                            reusable_materials.terrain.clone(),
-                            tc.lod + 1,
-                            sscale,
-                            sx,
-                            sz,
-                        ))
-                        .id();
+                if tc.subchunk_tl.is_none() {
+                    tc.subchunk_tl = Some(
+                        commands
+                            .spawn(chunk_bundle(
+                                reusable_materials.terrain.clone(),
+                                tc.lod + 1,
+                                sscale,
+                                sx,
+                                sz,
+                            ))
+                            .id(),
+                    );
                 }
 
-                if tc.subchunk_tr == Entity::PLACEHOLDER {
-                    tc.subchunk_tr = commands
-                        .spawn(chunk_bundle(
-                            reusable_materials.terrain.clone(),
-                            tc.lod + 1,
-                            sscale,
-                            sx + 1,
-                            sz,
-                        ))
-                        .id();
+                if tc.subchunk_tr.is_none() {
+                    tc.subchunk_tr = Some(
+                        commands
+                            .spawn(chunk_bundle(
+                                reusable_materials.terrain.clone(),
+                                tc.lod + 1,
+                                sscale,
+                                sx + 1,
+                                sz,
+                            ))
+                            .id(),
+                    );
                 }
 
-                if tc.subchunk_bl == Entity::PLACEHOLDER {
-                    tc.subchunk_bl = commands
-                        .spawn(chunk_bundle(
-                            reusable_materials.terrain.clone(),
-                            tc.lod + 1,
-                            sscale,
-                            sx,
-                            sz + 1,
-                        ))
-                        .id();
+                if tc.subchunk_bl.is_none() {
+                    tc.subchunk_bl = Some(
+                        commands
+                            .spawn(chunk_bundle(
+                                reusable_materials.terrain.clone(),
+                                tc.lod + 1,
+                                sscale,
+                                sx,
+                                sz + 1,
+                            ))
+                            .id(),
+                    );
                 }
 
-                if tc.subchunk_br == Entity::PLACEHOLDER {
-                    tc.subchunk_br = commands
-                        .spawn(chunk_bundle(
-                            reusable_materials.terrain.clone(),
-                            tc.lod + 1,
-                            sscale,
-                            sx + 1,
-                            sz + 1,
-                        ))
-                        .id();
+                if tc.subchunk_br.is_none() {
+                    tc.subchunk_br = Some(
+                        commands
+                            .spawn(chunk_bundle(
+                                reusable_materials.terrain.clone(),
+                                tc.lod + 1,
+                                sscale,
+                                sx + 1,
+                                sz + 1,
+                            ))
+                            .id(),
+                    );
                 }
             }
 
@@ -499,10 +510,12 @@ fn get_active_chunk_at(
                     }
                 };
 
-                if let Ok((new_entity, new_tc, new_visibility)) = chunk_q.get(subchunk_entity) {
-                    (c_entity, c_tc, c_visibility) = (new_entity, new_tc, new_visibility);
-                } else {
-                    return Some(c_entity);
+                if let Some(subchunk_entity) = alrms!(subchunk_entity) {
+                    if let Ok((new_entity, new_tc, new_visibility)) = chunk_q.get(subchunk_entity) {
+                        (c_entity, c_tc, c_visibility) = (new_entity, new_tc, new_visibility);
+                    } else {
+                        return Some(c_entity);
+                    }
                 }
             }
         } else {

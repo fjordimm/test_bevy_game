@@ -228,7 +228,7 @@ pub(super) fn create_terrain_meshes(
 
     let outer_mesh = Mesh::new(
         PrimitiveTopology::TriangleList,
-        RenderAssetUsages::RENDER_WORLD,
+        RenderAssetUsages::RENDER_WORLD | RenderAssetUsages::MAIN_WORLD,
     )
     .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, outer_positions)
     .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, outer_colors)
@@ -281,7 +281,7 @@ pub(super) fn change_mesh_from_perim_lod_positions(
     if let Some(VertexAttributeValues::Float32x3(positions)) =
         alrms!(mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION))
     {
-        positions[0][1] += 0.1;
+        // positions[0][1] += 0.1;
     } else {
         error!("Positions attribute was not in an expected form.");
     }
