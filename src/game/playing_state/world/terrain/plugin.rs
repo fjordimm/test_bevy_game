@@ -1,4 +1,4 @@
-use std::{collections::HashMap, hash::Hash, time::Duration};
+use std::{collections::HashMap, hash::Hash, sync::LazyLock, time::Duration};
 
 use bevy::{prelude::*, time::common_conditions::on_timer};
 
@@ -11,12 +11,13 @@ use crate::game::{
         sets::{DuringPlaying, OnEnterPlaying},
         tags::PlayingStateEntity,
         world::terrain::{
-            resources::TheTerrainFunc, terrain_func::TerrainFunc,
-            terrain_mesh::create_terrain_meshes,
+            resources::TheTerrainFunc,
+            terrain_func::TerrainFunc,
+            terrain_mesh::{change_mesh_from_perim_lod_positions, create_terrain_meshes},
         },
     },
     random::{Prng, rands::GeneralRand},
-    util::{alrmo, alrrs},
+    util::{alrmo, alrms, alrrs},
 };
 
 const UPDATE_CHUNKS_INTERVAL: u64 = 2000; // In milliseconds.
@@ -51,9 +52,10 @@ fn on_enter(mut commands: Commands, mut prng: Single<&mut Prng, With<GeneralRand
 }
 
 pub(super) const CW: usize = 16; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
-const L0_CHUNK_SCALE: f32 = 4.;
+const MAX_LOD: i32 = 8;
+const LL_CHUNK_SCALE: f32 = 1.;
+const L0_CHUNK_SCALE: f32 = LL_CHUNK_SCALE * 2u32.pow(MAX_LOD as u32) as f32;
 const L0_RENDER_DIST: i32 = 2;
-const MAX_LOD: i32 = 2;
 const LOD_PROPORTION: f32 = 1.5;
 
 fn chunk_bundle(
@@ -102,7 +104,9 @@ struct TerrainChunk {
 }
 
 #[derive(Component)]
-struct TerrainChunkPerimeter;
+struct TerrainChunkPerimeter {
+    perim_lod_positions: Vec<Vec<[f32; 3]>>,
+}
 
 impl TerrainChunk {
     fn generate_mesh_nonredundantly(
@@ -128,12 +132,13 @@ fn handle_generate_meshes(
     reusable_materials: Res<ReusableMaterials>,
 ) {
     messages.read().for_each(|msg| {
-        if let Some(mut chunk) = alrmo!(chunk_q.get_mut(msg.0)) {
-            let (prim_mesh, perim_mesh) = create_terrain_meshes(
+        if let Some(mut tc) = alrmo!(chunk_q.get_mut(msg.0)) {
+            let (prim_mesh, perim_mesh, perim_lod_positions) = create_terrain_meshes(
                 &terrain_func.0,
-                chunk.scale,
-                chunk.scale * CW as f32 * chunk.off_x as f32,
-                chunk.scale * CW as f32 * chunk.off_z as f32,
+                tc.scale,
+                tc.scale * CW as f32 * tc.off_x as f32,
+                tc.scale * CW as f32 * tc.off_z as f32,
+                tc.lod as usize,
             );
 
             commands.entity(msg.0).insert(Mesh3d(meshes.add(prim_mesh)));
@@ -141,15 +146,17 @@ fn handle_generate_meshes(
             let perimeter = commands
                 .spawn((
                     PlayingStateEntity,
-                    TerrainChunkPerimeter,
+                    TerrainChunkPerimeter {
+                        perim_lod_positions: perim_lod_positions,
+                    },
                     MeshMaterial3d(reusable_materials.terrain.clone()),
                     Mesh3d(meshes.add(perim_mesh)),
                 ))
                 .id();
             commands.entity(msg.0).add_child(perimeter);
-            chunk.perimeter_entity = perimeter;
+            tc.perimeter_entity = perimeter;
 
-            chunk.has_generated_mesh = true;
+            tc.has_generated_mesh = true;
         }
     });
 }
@@ -176,13 +183,21 @@ fn update_chunks(
     mut chunk_q: Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
     reusable_materials: Res<ReusableMaterials>,
     mut gm_messages: MessageWriter<GenerateMeshes>,
+    mut chunk_perim_q: Query<(&TerrainChunkPerimeter, &Mesh3d)>,
+    mut meshes: ResMut<Assets<Mesh>>,
 ) {
     // Update the perimeters to match surrounding chunks with different lods.
     chunk_q.iter().for_each(|(_, tc, _)| {
-        let tc_lod = tc.lod;
-        let tc_off_x = tc.off_x;
-        let tc_off_z = tc.off_z;
-        let _ = get_surrounding_chunk_lods(&*l0_chunk_dict, &chunk_q, tc_lod, tc_off_x, tc_off_z);
+        // let tc_lod = tc.lod;
+        // let tc_off_x = tc.off_x;
+        // let tc_off_z = tc.off_z;
+        // let _ = get_surrounding_chunk_lods(&*l0_chunk_dict, &chunk_q, tc_lod, tc_off_x, tc_off_z);
+
+        if let Some((tcp, mesh3d)) = alrmo!(chunk_perim_q.get(tc.perimeter_entity)) {
+            if let Some(mesh) = alrms!(meshes.get_mut(mesh3d.0.id())) {
+                change_mesh_from_perim_lod_positions(mesh, &tcp.perim_lod_positions[0]);
+            }
+        }
     });
 
     chunk_q
