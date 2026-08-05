@@ -136,7 +136,7 @@ fn spawn_player_body(
     commands.spawn((
         PlayingStateEntity,
         PlayerBody,
-        Mesh3d(meshes.add(Capsule3d::new(1., 500.))),
+        Mesh3d(meshes.add(Capsule3d::new(0.25, 1000.))),
         MeshMaterial3d(materials.add(Color::linear_rgb(1., 0., 1.))),
         Transform::from_xyz(0., 0., 0.),
     ));

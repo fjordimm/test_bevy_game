@@ -52,8 +52,8 @@ fn on_enter(mut commands: Commands) {
 }
 
 pub(super) const CW: usize = 32; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
-const MAX_LOD: i32 = 6;
-const LL_CHUNK_SCALE: f32 = 3.;
+const MAX_LOD: i32 = 4;
+const LL_CHUNK_SCALE: f32 = 6.;
 const L0_CHUNK_SCALE: f32 = LL_CHUNK_SCALE * 2u32.pow(MAX_LOD as u32) as f32;
 const L0_RENDER_DIST: i32 = 2;
 const LOD_PROPORTION: f32 = 2.5;
