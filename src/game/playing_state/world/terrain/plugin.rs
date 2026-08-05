@@ -507,8 +507,26 @@ fn get_active_chunk_at(
     x: i32,
     z: i32,
 ) -> Option<Entity> {
-    let l0_x = x / 2i32.pow(coords_lod as u32);
-    let l0_z = z / 2i32.pow(coords_lod as u32);
+    let x_neg_offset = match x.is_negative() {
+        true => -1,
+        false => 0,
+    };
+    let z_neg_offset = match z.is_negative() {
+        true => -1,
+        false => 0,
+    };
+
+    let x = match x.is_negative() {
+        true => x + 1,
+        false => x,
+    };
+    let z = match z.is_negative() {
+        true => z + 1,
+        false => z,
+    };
+
+    let l0_x = x / 2i32.pow(coords_lod as u32) + x_neg_offset;
+    let l0_z = z / 2i32.pow(coords_lod as u32) + z_neg_offset;
 
     if let Some(l0_chunk_entity) = l0_chunk_dict.0.get(&ChunkKey::new(l0_x, l0_z)) {
         if let Some((l0_entity, l0_tc, l0_visibility)) = alrmo!(chunk_q.get(*l0_chunk_entity)) {
@@ -520,8 +538,8 @@ fn get_active_chunk_at(
                 }
 
                 let subchunk_entity = match (
-                    ((x / 2i32.pow((coords_lod - (c_tc.lod + 1)) as u32)) % 2).abs(),
-                    ((z / 2i32.pow((coords_lod - (c_tc.lod + 1)) as u32)) % 2).abs(),
+                    ((x / 2i32.pow((coords_lod - (c_tc.lod + 1)) as u32) + x_neg_offset) % 2).abs(),
+                    ((z / 2i32.pow((coords_lod - (c_tc.lod + 1)) as u32) + z_neg_offset) % 2).abs(),
                 ) {
                     (0, 0) => c_tc.subchunk_tl,
                     (1, 0) => c_tc.subchunk_tr,

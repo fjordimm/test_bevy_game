@@ -449,18 +449,3 @@ pub(super) fn change_mesh_from_perim_lod_positions(
         error!("Positions attribute was not in an expected form.");
     }
 }
-
-// TODOr
-// fn todor1(mesh_q: Query<&Mesh3d, With<TerrainChunk>>, mut meshes: ResMut<Assets<Mesh>>) {
-//     mesh_q.iter().for_each(|mesh_handle| {
-//         if let Some(mesh) = alrms!(meshes.get_mut(mesh_handle.0.id())) {
-//             if let Some(VertexAttributeValues::Float32x3(positions)) =
-//                 alrms!(mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION))
-//             {
-//                 positions[0][1] += 0.1;
-//             } else {
-//                 error!("Positions attribute was not in an expected form.");
-//             }
-//         }
-//     });
-// }
