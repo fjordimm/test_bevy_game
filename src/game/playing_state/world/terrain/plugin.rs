@@ -1,4 +1,4 @@
-use std::{collections::HashMap, hash::Hash, sync::LazyLock, time::Duration};
+use std::{collections::HashMap, hash::Hash, time::Duration};
 
 use bevy::{prelude::*, time::common_conditions::on_timer};
 
@@ -16,7 +16,6 @@ use crate::game::{
             terrain_mesh::{change_mesh_from_perim_lod_positions, create_terrain_meshes},
         },
     },
-    random::{Prng, rands::GeneralRand},
     util::{alrmo, alrms, alrrs, seed_from_u64},
 };
 
@@ -184,20 +183,44 @@ fn update_chunks(
     mut chunk_q: Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
     reusable_materials: Res<ReusableMaterials>,
     mut gm_messages: MessageWriter<GenerateMeshes>,
-    mut chunk_perim_q: Query<(&TerrainChunkPerimeter, &Mesh3d)>,
+    chunk_perim_q: Query<(&TerrainChunkPerimeter, &Mesh3d)>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
     // Update the perimeters to match surrounding chunks with different lods.
     chunk_q.iter().for_each(|(_, tc, _)| {
-        // let tc_lod = tc.lod;
-        // let tc_off_x = tc.off_x;
-        // let tc_off_z = tc.off_z;
-        // let _ = get_surrounding_chunk_lods(&*l0_chunk_dict, &chunk_q, tc_lod, tc_off_x, tc_off_z);
-
         if let Some(perim_entity) = tc.perimeter_entity {
+            let tc_lod = tc.lod;
+            let tc_off_x = tc.off_x;
+            let tc_off_z = tc.off_z;
+            let surrounding_lods =
+                get_surrounding_chunk_lods(&*l0_chunk_dict, &chunk_q, tc_lod, tc_off_x, tc_off_z);
+            let north_lod = match surrounding_lods.0 {
+                Some(lod) => lod as usize,
+                None => tc_lod as usize,
+            };
+            let east_lod = match surrounding_lods.1 {
+                Some(lod) => lod as usize,
+                None => tc_lod as usize,
+            };
+            let south_lod = match surrounding_lods.2 {
+                Some(lod) => lod as usize,
+                None => tc_lod as usize,
+            };
+            let west_lod = match surrounding_lods.3 {
+                Some(lod) => lod as usize,
+                None => tc_lod as usize,
+            };
+
             if let Some((tcp, mesh3d)) = alrmo!(chunk_perim_q.get(perim_entity)) {
                 if let Some(mesh) = alrms!(meshes.get_mut(mesh3d.0.id())) {
-                    change_mesh_from_perim_lod_positions(mesh, &tcp.perim_lod_positions[0]);
+                    change_mesh_from_perim_lod_positions(
+                        mesh,
+                        &tcp.perim_lod_positions,
+                        north_lod,
+                        east_lod,
+                        south_lod,
+                        west_lod,
+                    );
                 }
             }
         }
@@ -510,12 +533,14 @@ fn get_active_chunk_at(
                     }
                 };
 
-                if let Some(subchunk_entity) = alrms!(subchunk_entity) {
-                    if let Ok((new_entity, new_tc, new_visibility)) = chunk_q.get(subchunk_entity) {
+                if let Some(subchunk_entity) = subchunk_entity {
+                    if let Some((new_entity, new_tc, new_visibility)) =
+                        alrmo!(chunk_q.get(subchunk_entity))
+                    {
                         (c_entity, c_tc, c_visibility) = (new_entity, new_tc, new_visibility);
-                    } else {
-                        return Some(c_entity);
                     }
+                } else {
+                    return Some(c_entity);
                 }
             }
         } else {

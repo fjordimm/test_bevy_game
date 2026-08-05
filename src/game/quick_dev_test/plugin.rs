@@ -69,8 +69,8 @@ fn scrolling(
             if movement_settings.speed < 0.25 {
                 movement_settings.speed = 0.25;
             }
-            if movement_settings.speed > 4000. {
-                movement_settings.speed = 4000.;
+            if movement_settings.speed > 10_000. {
+                movement_settings.speed = 10_000.;
             }
         }
     }

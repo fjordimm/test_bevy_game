@@ -293,6 +293,8 @@ pub(super) fn create_terrain_meshes(
             base_lod + 1
         ];
     for i in (0..=base_lod).rev() {
+        let quantization_factor = 2usize.pow((base_lod - i) as u32);
+
         // North.
         for j in 0..=CW {
             lod_connecting_perimeters[i].push(quantized_position(
@@ -303,7 +305,7 @@ pub(super) fn create_terrain_meshes(
                 j,
                 0,
                 true,
-                0,
+                quantization_factor,
             ));
         }
 
@@ -316,8 +318,8 @@ pub(super) fn create_terrain_meshes(
                 off_z,
                 CW,
                 j,
-                true,
-                0,
+                false,
+                quantization_factor,
             ));
         }
 
@@ -331,7 +333,7 @@ pub(super) fn create_terrain_meshes(
                 j,
                 CW,
                 true,
-                0,
+                quantization_factor,
             ));
         }
 
@@ -344,8 +346,8 @@ pub(super) fn create_terrain_meshes(
                 off_z,
                 0,
                 j,
-                true,
-                0,
+                false,
+                quantization_factor,
             ));
         }
     }
@@ -384,7 +386,7 @@ fn quantized_position(
 
     let h: f32 = terrain_func.at(rf + off_x, cf + off_z);
 
-    [rf, h + 1., cf]
+    [rf, h + (1. * scale * (quantization_factor - 1) as f32), cf]
 
     // // If East-West.
     // if !quantization_direction_is_ns {
@@ -408,13 +410,40 @@ fn quantized_position(
 
 pub(super) fn change_mesh_from_perim_lod_positions(
     mesh: &mut Mesh,
-    perim_lod_positions: &Vec<[f32; 3]>,
+    perim_lod_positions: &Vec<Vec<[f32; 3]>>,
+    north_lod: usize,
+    east_lod: usize,
+    south_lod: usize,
+    west_lod: usize,
 ) {
     if let Some(VertexAttributeValues::Float32x3(positions)) =
         alrms!(mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION))
     {
-        for i in 0..perim_lod_positions.len() {
-            positions[i] = perim_lod_positions[i];
+        // for i in 0..perim_lod_positions.len() {
+        //     positions[i] = perim_lod_positions[i];
+        // }
+
+        // North.
+        for i in 0..=CW {
+            positions[i] = perim_lod_positions[north_lod][i];
+        }
+
+        // East.
+        for i in 0..CW - 1 {
+            let offset_index = (CW + 1) + i;
+            positions[offset_index] = perim_lod_positions[east_lod][offset_index];
+        }
+
+        // South.
+        for i in 0..=CW {
+            let offset_index = (CW + 1) + (CW - 1) + i;
+            positions[offset_index] = perim_lod_positions[south_lod][offset_index];
+        }
+
+        // West.
+        for i in 0..CW - 1 {
+            let offset_index = (CW + 1) + (CW - 1) + (CW + 1) + i;
+            positions[offset_index] = perim_lod_positions[west_lod][offset_index];
         }
     } else {
         error!("Positions attribute was not in an expected form.");
