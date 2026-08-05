@@ -65,73 +65,205 @@ pub(super) fn create_terrain_meshes(
     let mut inner_vc: u32 = 0;
     let mut outer_vc: u32 = 0;
 
-    // Corner vertices.
-    for r in 0..=CW {
-        for c in 0..=CW {
-            let rf = scale * r as f32;
+    // Corner vertices (inner mesh only).
+    for c in 1..CW {
+        for r in 1..CW {
             let cf = scale * c as f32;
+            let rf = scale * r as f32;
 
-            let h: f32 = terrain_func.at(rf + off_x, cf + off_z);
+            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
 
-            // Inner vertices.
-            if r > 0 && r < CW && c > 0 && c < CW {
-                inner_positions.push([rf, h, cf]);
-                inner_colors.push(temp_vertex_color(scale, off_x, off_z));
+            inner_positions.push([cf, h, rf]);
+            inner_colors.push(temp_vertex_color(scale, off_x, off_z));
 
-                inner_indices_c[r][c] = inner_vc;
-                inner_vc += 1;
-            }
+            inner_indices_c[c][r] = inner_vc;
+            inner_vc += 1;
+        }
+    }
 
-            // Outer vertices.
-            if r <= 1 || r >= CW - 1 || c <= 1 || c >= CW - 1 {
-                outer_positions.push([rf, h, cf]);
-                outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+    // Corner vertices (outer mesh only).
+    // These are in the order that they are to make `change_mesh_from_perim_lod_positions` easier to write.
+    {
+        // The outermost corner vertices.
 
-                outer_indices_c[r][c] = outer_vc;
-                outer_vc += 1;
-            }
+        // North.
+        for i in 0..=CW {
+            let c = i;
+            let r = 0;
+
+            let cf = scale * c as f32;
+            let rf = scale * r as f32;
+
+            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+
+            outer_positions.push([cf, h, rf]);
+            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+
+            outer_indices_c[c][r] = outer_vc;
+            outer_vc += 1;
+        }
+
+        // East.
+        for i in 1..CW {
+            let c = CW;
+            let r = i;
+
+            let cf = scale * c as f32;
+            let rf = scale * r as f32;
+
+            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+
+            outer_positions.push([cf, h, rf]);
+            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+
+            outer_indices_c[c][r] = outer_vc;
+            outer_vc += 1;
+        }
+
+        // South.
+        for i in 0..=CW {
+            let c = i;
+            let r = CW;
+
+            let cf = scale * c as f32;
+            let rf = scale * r as f32;
+
+            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+
+            outer_positions.push([cf, h, rf]);
+            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+
+            outer_indices_c[c][r] = outer_vc;
+            outer_vc += 1;
+        }
+
+        // West.
+        for i in 1..CW {
+            let c = 0;
+            let r = i;
+
+            let cf = scale * c as f32;
+            let rf = scale * r as f32;
+
+            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+
+            outer_positions.push([cf, h, rf]);
+            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+
+            outer_indices_c[c][r] = outer_vc;
+            outer_vc += 1;
+        }
+
+        // Second-to-outermost corner vertices.
+
+        // North.
+        for i in 1..CW {
+            let c = i;
+            let r = 1;
+
+            let cf = scale * c as f32;
+            let rf = scale * r as f32;
+
+            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+
+            outer_positions.push([cf, h, rf]);
+            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+
+            outer_indices_c[c][r] = outer_vc;
+            outer_vc += 1;
+        }
+
+        // East.
+        for i in 2..CW - 1 {
+            let c = CW - 1;
+            let r = i;
+
+            let cf = scale * c as f32;
+            let rf = scale * r as f32;
+
+            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+
+            outer_positions.push([cf, h, rf]);
+            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+
+            outer_indices_c[c][r] = outer_vc;
+            outer_vc += 1;
+        }
+
+        // South.
+        for i in 1..CW {
+            let c = i;
+            let r = CW - 1;
+
+            let cf = scale * c as f32;
+            let rf = scale * r as f32;
+
+            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+
+            outer_positions.push([cf, h, rf]);
+            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+
+            outer_indices_c[c][r] = outer_vc;
+            outer_vc += 1;
+        }
+
+        // West.
+        for i in 2..CW - 1 {
+            let c = 1;
+            let r = i;
+
+            let cf = scale * c as f32;
+            let rf = scale * r as f32;
+
+            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+
+            outer_positions.push([cf, h, rf]);
+            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+
+            outer_indices_c[c][r] = outer_vc;
+            outer_vc += 1;
         }
     }
 
     // Middle vertices.
-    for r in 0..CW {
-        for c in 0..CW {
-            let rf = scale * (0.5 + r as f32);
+    for c in 0..CW {
+        for r in 0..CW {
             let cf = scale * (0.5 + c as f32);
+            let rf = scale * (0.5 + r as f32);
 
-            let h: f32 = terrain_func.at(rf + off_x, cf + off_z);
+            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
 
             // Inner vertices.
-            if r > 0 && r < CW - 1 && c > 0 && c < CW - 1 {
-                inner_positions.push([rf, h, cf]);
+            if c > 0 && c < CW - 1 && r > 0 && r < CW - 1 {
+                inner_positions.push([cf, h, rf]);
                 inner_colors.push(temp_vertex_color(scale, off_x, off_z));
 
-                inner_indices_m[r][c] = inner_vc;
+                inner_indices_m[c][r] = inner_vc;
 
                 inner_vc += 1;
             }
 
             // Outer vertices.
-            if r == 0 || r == CW - 1 || c == 0 || c == CW - 1 {
-                outer_positions.push([rf, h, cf]);
+            if c == 0 || c == CW - 1 || r == 0 || r == CW - 1 {
+                outer_positions.push([cf, h, rf]);
                 outer_colors.push(temp_vertex_color(scale, off_x, off_z));
 
-                outer_indices_m[r][c] = outer_vc;
+                outer_indices_m[c][r] = outer_vc;
 
                 outer_vc += 1;
             }
         }
     }
 
-    for r in 0..CW {
-        for c in 0..CW {
+    for c in 0..CW {
+        for r in 0..CW {
             // Inner triangles.
-            if r > 0 && r < CW - 1 && c > 0 && c < CW - 1 {
-                let center = inner_indices_m[r][c];
-                let tl = inner_indices_c[r][c];
-                let tr = inner_indices_c[r + 1][c];
-                let bl = inner_indices_c[r][c + 1];
-                let br = inner_indices_c[r + 1][c + 1];
+            if c > 0 && c < CW - 1 && r > 0 && r < CW - 1 {
+                let center = inner_indices_m[c][r];
+                let tl = inner_indices_c[c][r];
+                let tr = inner_indices_c[c + 1][r];
+                let bl = inner_indices_c[c][r + 1];
+                let br = inner_indices_c[c + 1][r + 1];
 
                 inner_triangles.extend_from_slice(&[tr, tl, center]);
                 inner_triangles.extend_from_slice(&[br, tr, center]);
@@ -140,12 +272,12 @@ pub(super) fn create_terrain_meshes(
             }
 
             // Outer triangles.
-            if r == 0 || r == CW - 1 || c == 0 || c == CW - 1 {
-                let center = outer_indices_m[r][c];
-                let tl = outer_indices_c[r][c];
-                let tr = outer_indices_c[r + 1][c];
-                let bl = outer_indices_c[r][c + 1];
-                let br = outer_indices_c[r + 1][c + 1];
+            if c == 0 || c == CW - 1 || r == 0 || r == CW - 1 {
+                let center = outer_indices_m[c][r];
+                let tl = outer_indices_c[c][r];
+                let tr = outer_indices_c[c + 1][r];
+                let bl = outer_indices_c[c][r + 1];
+                let br = outer_indices_c[c + 1][r + 1];
 
                 outer_triangles.extend_from_slice(&[tr, tl, center]);
                 outer_triangles.extend_from_slice(&[br, tr, center]);
@@ -281,7 +413,9 @@ pub(super) fn change_mesh_from_perim_lod_positions(
     if let Some(VertexAttributeValues::Float32x3(positions)) =
         alrms!(mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION))
     {
-        // positions[0][1] += 0.1;
+        for i in 0..perim_lod_positions.len() {
+            positions[i] = perim_lod_positions[i];
+        }
     } else {
         error!("Positions attribute was not in an expected form.");
     }
