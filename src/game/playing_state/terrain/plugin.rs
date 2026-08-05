@@ -10,7 +10,7 @@ use crate::game::{
         reusable_materials::ReusableMaterials,
         sets::{DuringPlaying, OnEnterPlaying},
         tags::PlayingStateEntity,
-        world::terrain::{
+        terrain::{
             resources::TheTerrainFunc,
             terrain_func::TerrainFunc,
             terrain_mesh::{change_mesh_from_perim_lod_positions, create_terrain_meshes},

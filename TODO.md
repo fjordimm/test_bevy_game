@@ -19,6 +19,7 @@
 
 ## Currently Working On
 - Don't use commands.set_state.
+- Make a lag spike diagnostic.
 - Terrain.
     - Consider Worley noise.
 

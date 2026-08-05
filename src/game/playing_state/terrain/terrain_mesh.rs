@@ -2,7 +2,7 @@ use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology, VertexAttributeValues};
 
 use crate::game::{
-    playing_state::world::terrain::{plugin::CW, terrain_func::TerrainFunc},
+    playing_state::terrain::{plugin::CW, terrain_func::TerrainFunc},
     util::alrms,
 };
 

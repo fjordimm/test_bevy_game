@@ -3,17 +3,17 @@ use bevy::prelude::*;
 use crate::game::{
     core::states::OverallState,
     playing_state::{
+        environment_light::{SeasonOfYear, TimeOfDay},
         sets::{DuringPlayingUnpaused, OnEnterPlaying},
         skybox::ComputedSkyboxValues,
         tags::PlayingStateEntity,
-        world::{SeasonOfYear, TimeOfDay, terrain::plugin::TerrainPlugin},
     },
     util::alrms,
 };
 
-pub struct WorldPlugin;
+pub struct EnvironmentLightPlugin;
 
-impl Plugin for WorldPlugin {
+impl Plugin for EnvironmentLightPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
@@ -27,7 +27,6 @@ impl Plugin for WorldPlugin {
                 update_sunlight
                     .in_set(DuringPlayingUnpaused::General)
             )
-            .add_plugins(TerrainPlugin)
         ;
     }
 }

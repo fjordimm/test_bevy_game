@@ -5,12 +5,12 @@ use rand_distr::num_traits::Pow;
 
 use crate::game::{
     playing_state::{
+        environment_light::{SeasonOfYear, TimeOfDay},
         player::{
             resources::PlayerMovementSettings,
             tags::{CameraForPlayer, PlayerBody},
         },
         sets::DuringPlayingUnpaused,
-        world::{SeasonOfYear, TimeOfDay},
     },
     util::alrms,
 };

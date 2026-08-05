@@ -5,6 +5,7 @@ use crate::game::{
     core::{resources::KeyBindings, states::OverallState},
     graphics::primary_shader::plugin::PrimaryShaderMaterial,
     playing_state::{
+        environment_light::plugin::EnvironmentLightPlugin,
         pause_menu::plugin::PauseMenuPlugin,
         player::{plugin::PlayerPlugin, tags::CameraForPlayer},
         reusable_materials::ReusableMaterials,
@@ -15,7 +16,7 @@ use crate::game::{
         skybox::plugin::SkyboxPlugin,
         states::PauseState,
         tags::PlayingStateEntity,
-        world::plugin::WorldPlugin,
+        terrain::plugin::TerrainPlugin,
     },
     util::get_entity_components,
 };
@@ -58,7 +59,8 @@ impl Plugin for PlayingStatePlugin {
                     .in_set(DuringPlaying)
             ) // TODO: only do this in debug mode
             .add_plugins(SkyboxPlugin)
-            .add_plugins(WorldPlugin)
+            .add_plugins(EnvironmentLightPlugin)
+            .add_plugins(TerrainPlugin)
             .add_plugins(PauseMenuPlugin)
             .add_plugins(PlayerPlugin)
         ;

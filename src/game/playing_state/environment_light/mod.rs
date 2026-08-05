@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 
 pub mod plugin;
-pub mod terrain;
 
 #[derive(Resource)]
 pub struct TimeOfDay(pub f32);
