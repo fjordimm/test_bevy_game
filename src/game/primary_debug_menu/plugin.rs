@@ -8,6 +8,7 @@ use bevy::{
 
 use crate::game::{
     core::resources::{GlobalGuiRoot, KeyBindings},
+    diagnosis::resources::LagSpikeDiag,
     gui::{
         gui_children,
         resources::GuiThemeComputed,
@@ -49,6 +50,9 @@ struct CoreSection;
 
 #[derive(Component)]
 struct FpsText;
+
+#[derive(Component)]
+struct LagSpikeText;
 
 #[derive(Component)]
 struct EntityCountText;
@@ -110,6 +114,11 @@ fn spawn_primary_debug_menu(
                     }));
 
                     p.spawn(gui_div_p()).insert(gui_children(|p| {
+                        p.spawn(gui_text_m("Recent Stutter (ms): "));
+                        p.spawn((LagSpikeText, gui_text_m("-")));
+                    }));
+
+                    p.spawn(gui_div_p()).insert(gui_children(|p| {
                         p.spawn(gui_text_m("Entity Count: "));
                         p.spawn((EntityCountText, gui_text_m("-")));
                     }));
@@ -166,16 +175,29 @@ fn update(
         GuiTextInterface,
         (
             With<FpsText>,
+            Without<LagSpikeText>,
             Without<EntityCountText>,
             Without<TransformEntityCountText>,
             Without<CamPositionText>,
         ),
     >,
+    mut lag_spike_text: Query<
+        GuiTextInterface,
+        (
+            With<LagSpikeText>,
+            Without<FpsText>,
+            Without<EntityCountText>,
+            Without<TransformEntityCountText>,
+            Without<CamPositionText>,
+        ),
+    >,
+    lag_spike_diag: Res<LagSpikeDiag>,
     mut entity_count_text: Query<
         GuiTextInterface,
         (
             With<EntityCountText>,
             Without<FpsText>,
+            Without<LagSpikeText>,
             Without<TransformEntityCountText>,
             Without<CamPositionText>,
         ),
@@ -185,6 +207,7 @@ fn update(
         (
             With<TransformEntityCountText>,
             Without<FpsText>,
+            Without<LagSpikeText>,
             Without<EntityCountText>,
             Without<CamPositionText>,
         ),
@@ -196,6 +219,7 @@ fn update(
             With<CamPositionText>,
             Without<TransformEntityCountText>,
             Without<FpsText>,
+            Without<LagSpikeText>,
             Without<EntityCountText>,
         ),
     >,
@@ -208,6 +232,10 @@ fn update(
                 Some(measurement) => (measurement.value as i32).to_string(),
             },
         );
+    });
+
+    lag_spike_text.iter_mut().for_each(|mut text| {
+        text.set_content(format!("{}", lag_spike_diag.0));
     });
 
     entity_count_text.iter_mut().for_each(|mut text| {

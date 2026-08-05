@@ -1,5 +1,6 @@
 mod build_bevy_app;
 mod core;
+mod diagnosis;
 mod geometry;
 mod graphics;
 mod gui;

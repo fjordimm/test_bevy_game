@@ -1,9 +1,7 @@
 use bevy::{
-    diagnostic::{EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
     prelude::*,
     window::{CursorGrabMode, CursorOptions, PrimaryWindow},
 };
-use bevy_rand::plugin::EntropyPlugin;
 
 use crate::game::{
     core::{
@@ -11,13 +9,7 @@ use crate::game::{
         sets::{GLOBAL_STARTUP_ORDERING_ORDER, GlobalStartupOrdering},
         states::{MouseMode, OverallState},
     },
-    graphics::plugin::GraphicsPlugin,
-    gui::{make_global_gui_root, plugin::GuiPlugin},
-    main_menu_state::plugin::MainMenuStatePlugin,
-    playing_state::plugin::PlayingStatePlugin,
-    primary_debug_menu::plugin::PrimaryDebugMenuPlugin,
-    quick_dev_test::plugin::QuickDevTestPlugin,
-    random::{Prng, plugin::RandomPlugin},
+    gui::make_global_gui_root,
     util::alrms,
 };
 
@@ -27,10 +19,6 @@ impl Plugin for CorePlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            // External Plugins
-            .add_plugins(EntropyPlugin::<Prng>::default())
-            .add_plugins(FrameTimeDiagnosticsPlugin::new(120))
-            .add_plugins(EntityCountDiagnosticsPlugin::default())
             // Relevant Stuff
             .init_resource::<KeyBindings>()
             .init_state::<MouseMode>()
@@ -46,13 +34,6 @@ impl Plugin for CorePlugin {
             )
             .add_systems(OnEnter(MouseMode::Grabbed), on_enter_mouse_grabbed)
             .add_systems(OnExit(MouseMode::Grabbed), on_exit_mouse_grabbed)
-            .add_plugins(RandomPlugin)
-            .add_plugins(GraphicsPlugin)
-            .add_plugins(GuiPlugin)
-            .add_plugins(MainMenuStatePlugin)
-            .add_plugins(PlayingStatePlugin)
-            .add_plugins(QuickDevTestPlugin)
-            .add_plugins(PrimaryDebugMenuPlugin)
         ;
     }
 }
