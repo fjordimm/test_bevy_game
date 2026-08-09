@@ -61,8 +61,8 @@ fn spawn_main_menu_gui(
 
                 p.spawn(gui_button(default()))
                     .insert(gui_child(gui_text_h2("Play")))
-                    .observe(|_: On<Pointer<Click>>, mut commands: Commands| {
-                        commands.set_state(OverallState::Playing);
+                    .observe(|_: On<Pointer<Click>>, mut next_overall_state: ResMut<NextState<OverallState>>| {
+                        next_overall_state.set(OverallState::Playing);
                     });
 
                 p.spawn(gui_button(default()))

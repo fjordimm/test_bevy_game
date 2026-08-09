@@ -46,8 +46,8 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(GlobalGuiRoot(gui_root));
 }
 
-fn start_game(mut commands: Commands) {
-    commands.set_state(OverallState::MainMenu);
+fn start_game(mut next_overall_state: ResMut<NextState<OverallState>>) {
+    next_overall_state.set(OverallState::MainMenu);
 }
 
 fn on_enter_mouse_grabbed(

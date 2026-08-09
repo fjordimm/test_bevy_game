@@ -62,14 +62,14 @@ fn spawn_pause_menu(
 
                 p.spawn(gui_button(default()))
                     .insert(gui_child(gui_text_h2("Continue")))
-                    .observe(|_: On<Pointer<Click>>, mut commands: Commands| {
-                        commands.set_state(PauseState::Unpaused);
+                    .observe(|_: On<Pointer<Click>>, mut next_pause_state: ResMut<NextState<PauseState>>| {
+                        next_pause_state.set(PauseState::Unpaused);
                     });
 
                 p.spawn(gui_button(default()))
                     .insert(gui_child(gui_text_h2("Exit")))
-                    .observe(|_: On<Pointer<Click>>, mut commands: Commands| {
-                        commands.set_state(OverallState::MainMenu);
+                    .observe(|_: On<Pointer<Click>>, mut next_overall_state: ResMut<NextState<OverallState>>| {
+                        next_overall_state.set(OverallState::MainMenu);
                     });
             }));
         }))

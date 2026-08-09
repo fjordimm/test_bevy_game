@@ -18,8 +18,6 @@
 - Make sure the first time you enter `OverallState::Playing` works the exact same as when you exit to the menu and then go back.
 
 ## Currently Working On
-- Don't use commands.set_state.
-- Make a lag spike diagnostic.
 - Terrain.
     - Consider Worley noise.
 
