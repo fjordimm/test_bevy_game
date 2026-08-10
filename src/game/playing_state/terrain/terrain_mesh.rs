@@ -419,10 +419,6 @@ pub(super) fn change_mesh_from_perim_lod_positions(
     if let Some(VertexAttributeValues::Float32x3(positions)) =
         alrms!(mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION))
     {
-        // for i in 0..perim_lod_positions.len() {
-        //     positions[i] = perim_lod_positions[i];
-        // }
-
         // North.
         for i in 0..=CW {
             positions[i] = perim_lod_positions[north_lod][i];

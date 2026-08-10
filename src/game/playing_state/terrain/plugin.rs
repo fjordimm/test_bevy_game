@@ -51,12 +51,12 @@ fn on_enter(mut commands: Commands) {
     commands.insert_resource(L0ChunkDict(HashMap::new()));
 }
 
-pub(super) const CW: usize = 32; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
+pub(super) const CW: usize = 16; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
 const MAX_LOD: i32 = 4;
 const LL_CHUNK_SCALE: f32 = 6.;
 const L0_CHUNK_SCALE: f32 = LL_CHUNK_SCALE * 2u32.pow(MAX_LOD as u32) as f32;
-const L0_RENDER_DIST: i32 = 2;
-const LOD_PROPORTION: f32 = 2.5;
+const L0_RENDER_DIST: i32 = 5;
+const LOD_PROPORTION: f32 = 0.3; // Higher means more high LOD chunks and less low LOD chunks. Should be between 0 and 
 
 fn chunk_bundle(
     material: Handle<PrimaryShaderMaterial>,
@@ -337,7 +337,8 @@ fn update_chunk_and_subchunks(
                 + (player_transf.translation.z - real_z).powi(2))
             .sqrt();
 
-            tc.lod < MAX_LOD && dist_to_player < LOD_PROPORTION * tc.scale * CW as f32
+            tc.lod < MAX_LOD
+                && dist_to_player < LOD_PROPORTION * (L0_RENDER_DIST as f32) * tc.scale * CW as f32
         };
 
         let tl = tc.subchunk_tl;
