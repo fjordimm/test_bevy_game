@@ -1,6 +1,6 @@
 use std::{collections::HashMap, hash::Hash, time::Duration};
 
-use bevy::{prelude::*, time::common_conditions::on_timer};
+use bevy::{camera::visibility, prelude::*, time::common_conditions::on_timer};
 use priority_queue::PriorityQueue;
 
 use crate::game::{
@@ -13,7 +13,7 @@ use crate::game::{
         terrain::{
             resources::{TerrainLodProportion, TheTerrainFunc},
             terrain_func::TerrainFunc,
-            terrain_mesh::create_terrain_mesh,
+            terrain_mesh::{change_mesh_from_perim_lod_vertices, create_terrain_mesh},
         },
     },
     util::{alrmo, alrms, alrrs, seed_from_u64},
@@ -88,12 +88,6 @@ fn chunk_bundle(
 ) -> impl Bundle {
     (
         PlayingStateEntity,
-        MeshMaterial3d(reusable_materials.terrain.clone()),
-        Transform::from_xyz(
-            scale * CW as f32 * off_x as f32,
-            0.,
-            scale * CW as f32 * off_z as f32,
-        ),
         Chunk {
             lod,
             scale: scale,
@@ -103,6 +97,12 @@ fn chunk_bundle(
             has_mesh: false,
             perimeter_entity: None,
         },
+        Transform::from_xyz(
+            scale * CW as f32 * off_x as f32,
+            0.,
+            scale * CW as f32 * off_z as f32,
+        ),
+        MeshMaterial3d(reusable_materials.terrain.clone()),
         Visibility::Hidden,
     )
 }
@@ -138,15 +138,15 @@ struct ChunkPerimeter {
 
 // Has a mesh and is visible, or is in queue for a mesh.
 #[derive(Component)]
-struct IsActiveChunk;
+struct ActiveOrQueued;
 
 fn inactivate_all_chunks(
     mut commands: Commands,
-    mut chunk_q: Query<(Entity, &mut Visibility), (With<Chunk>, With<IsActiveChunk>)>,
+    mut chunk_q: Query<(Entity, &mut Visibility), (With<Chunk>, With<ActiveOrQueued>)>,
 ) {
     chunk_q.iter_mut().for_each(|(entity, mut visibility)| {
         *visibility = Visibility::Hidden;
-        commands.entity(entity).remove::<IsActiveChunk>();
+        commands.entity(entity).remove::<ActiveOrQueued>();
     });
 }
 
@@ -188,7 +188,7 @@ fn activate_chunks(
 
                 if let Some((_, mut cc, _)) = alrmo!(chunk_q.get_mut(l0_chunk_entity)) {
                     cc.queue_for_mesh_nonredundantly(&mut mesh_gen_queue, l0_chunk_entity);
-                    commands.entity(l0_chunk_entity).insert(IsActiveChunk);
+                    commands.entity(l0_chunk_entity).insert(ActiveOrQueued);
 
                     if cc.has_mesh {
                         activate_chunk_or_subchunks(
@@ -343,7 +343,7 @@ fn activate_chunk_or_subchunks(
 
                 let tl_has_mesh = if let Ok((_, mut cc, _)) = chunk_q.get_mut(tl) {
                     cc.queue_for_mesh_nonredundantly(mesh_gen_queue, tl);
-                    commands.entity(tl).insert(IsActiveChunk);
+                    commands.entity(tl).insert(ActiveOrQueued);
 
                     cc.has_mesh
                 } else {
@@ -351,7 +351,7 @@ fn activate_chunk_or_subchunks(
                 };
                 let tr_has_mesh = if let Ok((_, mut cc, _)) = chunk_q.get_mut(tr) {
                     cc.queue_for_mesh_nonredundantly(mesh_gen_queue, tr);
-                    commands.entity(tr).insert(IsActiveChunk);
+                    commands.entity(tr).insert(ActiveOrQueued);
 
                     cc.has_mesh
                 } else {
@@ -359,7 +359,7 @@ fn activate_chunk_or_subchunks(
                 };
                 let bl_has_mesh = if let Ok((_, mut cc, _)) = chunk_q.get_mut(bl) {
                     cc.queue_for_mesh_nonredundantly(mesh_gen_queue, bl);
-                    commands.entity(bl).insert(IsActiveChunk);
+                    commands.entity(bl).insert(ActiveOrQueued);
 
                     cc.has_mesh
                 } else {
@@ -367,7 +367,7 @@ fn activate_chunk_or_subchunks(
                 };
                 let br_has_mesh = if let Ok((_, mut cc, _)) = chunk_q.get_mut(br) {
                     cc.queue_for_mesh_nonredundantly(mesh_gen_queue, br);
-                    commands.entity(br).insert(IsActiveChunk);
+                    commands.entity(br).insert(ActiveOrQueued);
 
                     cc.has_mesh
                 } else {
@@ -427,11 +427,106 @@ fn activate_chunk_or_subchunks(
             *visibility = Visibility::Visible;
         }
     } else {
-        commands.entity(entity).remove::<IsActiveChunk>();
+        commands.entity(entity).remove::<ActiveOrQueued>();
     }
 }
 
-fn update_chunk_perimeters() {}
+fn update_chunk_perimeters(
+    chunk_dicts: Res<ChunkDicts>,
+    chunk_q: Query<(&Chunk, &Visibility), With<ActiveOrQueued>>,
+    chunk_perim_q: Query<(&ChunkPerimeter, &Mesh3d)>,
+    mut meshes: ResMut<Assets<Mesh>>,
+) {
+    chunk_q.iter().for_each(|(cc, visibility)| {
+        if *visibility == Visibility::Visible {
+            if let Some(perim_entity) = alrms!(cc.perimeter_entity) {
+                let surrounding_lods =
+                    get_surrounding_chunk_lods(&chunk_dicts, &chunk_q, cc.lod, cc.off_x, cc.off_z);
+                let north_lod = match surrounding_lods.0 {
+                    Some(lod) => lod,
+                    None => cc.lod,
+                };
+                let east_lod = match surrounding_lods.1 {
+                    Some(lod) => lod,
+                    None => cc.lod,
+                };
+                let south_lod = match surrounding_lods.2 {
+                    Some(lod) => lod,
+                    None => cc.lod,
+                };
+                let west_lod = match surrounding_lods.3 {
+                    Some(lod) => lod,
+                    None => cc.lod,
+                };
+
+                if let Some((cpc, mesh3d)) = alrmo!(chunk_perim_q.get(perim_entity)) {
+                    if let Some(mesh) = alrms!(meshes.get_mut(mesh3d.0.id())) {
+                        change_mesh_from_perim_lod_vertices(
+                            mesh,
+                            &cpc.perim_lod_verticies,
+                            north_lod,
+                            east_lod,
+                            south_lod,
+                            west_lod,
+                        );
+                    }
+                }
+            }
+        }
+    });
+}
+
+fn get_surrounding_chunk_lods(
+    chunk_dicts: &ChunkDicts,
+    chunk_q: &Query<(&Chunk, &Visibility), With<ActiveOrQueued>>,
+    coords_lod: usize,
+    x: i64,
+    z: i64,
+) -> (Option<usize>, Option<usize>, Option<usize>, Option<usize>) {
+    let north = get_active_chunk_lod_at(chunk_dicts, chunk_q, coords_lod, x, z - 1);
+    let east = get_active_chunk_lod_at(chunk_dicts, chunk_q, coords_lod, x + 1, z);
+    let south = get_active_chunk_lod_at(chunk_dicts, chunk_q, coords_lod, x, z + 1);
+    let west = get_active_chunk_lod_at(chunk_dicts, chunk_q, coords_lod, x - 1, z);
+
+    (north, east, south, west)
+}
+
+fn get_active_chunk_lod_at(
+    chunk_dicts: &ChunkDicts,
+    chunk_q: &Query<(&Chunk, &Visibility), With<ActiveOrQueued>>,
+    coords_lod: usize,
+    x: i64,
+    z: i64,
+) -> Option<usize> {
+    let mut lod = coords_lod;
+    let mut x = x;
+    let mut z = z;
+    loop {
+        if let Some(entity) = chunk_dicts.0[lod].0.get(&ChunkDictKey::new(x, z)) {
+            if let Ok((cc, visibility)) = chunk_q.get(*entity) {
+                if *visibility == Visibility::Visible {
+                    return Some(cc.lod);
+                }
+            }
+        }
+
+        if lod == 0 {
+            return None;
+        }
+
+        lod -= 1;
+        x = if x.is_negative() {
+            (x + 1) / 2 - 1
+        } else {
+            x / 2
+        };
+        z = if z.is_negative() {
+            (z + 1) / 2 - 1
+        } else {
+            z / 2
+        };
+    }
+}
 
 #[derive(Resource)]
 struct MeshGenQueue(PriorityQueue<Entity, usize>);
@@ -445,7 +540,7 @@ impl MeshGenQueue {
 fn gen_next_mesh_in_queue(
     mut commands: Commands,
     mut mesh_gen_queue: ResMut<MeshGenQueue>,
-    mut chunk_q: Query<(&mut Chunk, Option<&IsActiveChunk>)>,
+    mut chunk_q: Query<(&mut Chunk, Option<&ActiveOrQueued>)>,
     terrain_func: Res<TheTerrainFunc>,
     mut meshes: ResMut<Assets<Mesh>>,
     reusable_materials: Res<ReusableMaterials>,
@@ -471,8 +566,10 @@ fn gen_next_mesh_in_queue(
                         ChunkPerimeter {
                             perim_lod_verticies: perim_lod_vertices,
                         },
+                        Transform::default(),
                         MeshMaterial3d(reusable_materials.terrain.clone()),
                         Mesh3d(meshes.add(perim_mesh)),
+                        Visibility::Inherited,
                     ))
                     .id();
                 commands.entity(entity).add_child(perimeter);
