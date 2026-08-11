@@ -3,11 +3,16 @@ use noise::{NoiseFn, SuperSimplex};
 use rand::{Rng, SeedableRng};
 use worley_noise::WorleyNoise;
 
-use crate::game::{random::Prng, util::lerp};
+use crate::game::{
+    playing_state::terrain::terrain_func_functions::{lerp_remap, sigmoid},
+    random::Prng,
+};
 
 pub struct TerrainFunc {
     rough: OctavedNoiseSampler,
-    mountains_worleys: [WorleyNoise; 5],
+    mountains_placement_overall: OctavedNoiseSampler,
+    mountains_placement_detail: OctavedNoiseSampler,
+    mountains_w: [WorleyNoise; 4],
 }
 
 impl TerrainFunc {
@@ -16,14 +21,9 @@ impl TerrainFunc {
 
         Self {
             rough: OctavedNoiseSampler::new(&mut prng, 5, 0.005),
-            mountains_worleys: std::array::from_fn(|_| {
-                let mut worley = WorleyNoise::new();
-                worley.permutate_seeded(
-                    WorleyNoise::DEFAULT_PERMUTATION_BITS,
-                    prng.next_u64() as u128,
-                );
-                worley
-            }),
+            mountains_placement_overall: OctavedNoiseSampler::new(&mut prng, 1, 0.000156),
+            mountains_placement_detail: OctavedNoiseSampler::new(&mut prng, 2, 0.000247),
+            mountains_w: make_worley_noise_array(&mut prng),
         }
     }
 
@@ -33,16 +33,48 @@ impl TerrainFunc {
 
         let mut h = 0.;
 
-        let bruff = lerp(self.rough.sample(x, z), -1., 1., 0.92, 1.);
+        let mountains_placement = {
+            let mut val = 0.;
 
-        let mut frq = 0.0009;
-        let mut amp = 800.;
-        self.mountains_worleys.iter().for_each(|worley| {
-            h += amp * bruff * worley.value_2d(x * frq, z * frq);
+            val += sigmoid(20. * (self.mountains_placement_overall.sample(x, z) - 0.2))
+                * (230f64.powf(1. - self.mountains_placement_detail.sample(x, z).abs()) / 230.);
 
-            frq *= 1.5;
-            amp *= 0.5;
-        });
+            val
+        };
+        let mountains = {
+            let mut val = 0.;
+
+            let texture = lerp_remap(self.rough.sample(x, z), -1., 1., 0.92, 1.);
+
+            let mut frq = 0.0007;
+            let mut amp = 500.;
+            self.mountains_w.iter().for_each(|worley| {
+                val += amp * texture * worley.value_2d(x * frq, z * frq);
+
+                frq *= 1.6;
+                amp *= 0.55;
+            });
+
+            val
+        };
+        h += mountains_placement * mountains;
+
+        // {
+        //     let mut mountains = 0.;
+
+        //     let mountain_texture = rebound(self.rough.sample(x, z), -1., 1., 0.92, 1.);
+
+        //     let mut frq = 0.0007;
+        //     let mut amp = 250.;
+        //     self.mountains_w.iter().for_each(|worley| {
+        //         mountains += amp * mountain_texture * worley.value_2d(x * frq, z * frq);
+
+        //         frq *= 1.6;
+        //         amp *= 0.55;
+        //     });
+
+        //     h += 25f64.powf(self.mountains_placement_detail.sample(x, z)) * mountains;
+        // }
 
         h as f32
     }
@@ -82,4 +114,15 @@ impl OctavedNoiseSampler {
 
         h / final_amp
     }
+}
+
+fn make_worley_noise_array<const N: usize>(prng: &mut Prng) -> [WorleyNoise; N] {
+    std::array::from_fn(|_| {
+        let mut worley = WorleyNoise::new();
+        worley.permutate_seeded(
+            WorleyNoise::DEFAULT_PERMUTATION_BITS,
+            prng.next_u64() as u128,
+        );
+        worley
+    })
 }

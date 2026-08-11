@@ -50,7 +50,7 @@ pub(super) const CW: usize = 16; // Chunk Width (and height). Minimum value: 3 (
 const MAX_LOD: usize = 4;
 const LL_CHUNK_SCALE: f32 = 6.; // LL stands for Last-LOD (the highest LOD).
 const L0_CHUNK_SCALE: f32 = LL_CHUNK_SCALE * 2u32.pow(MAX_LOD as u32) as f32;
-const L0_RENDER_DIST: i64 = 5;
+const L0_RENDER_DIST: i64 = 10;
 
 fn on_enter1(world: &mut World) {
     // TODO: change the seed to not be this arbitrary number.
@@ -58,7 +58,7 @@ fn on_enter1(world: &mut World) {
 }
 
 fn on_enter2(mut commands: Commands) {
-    commands.insert_resource(TerrainLodProportion(0.3));
+    commands.insert_resource(TerrainLodProportion(0.15));
     commands.insert_resource(ChunkDicts(std::array::from_fn(|_| {
         ChunkDict(HashMap::new())
     })));
