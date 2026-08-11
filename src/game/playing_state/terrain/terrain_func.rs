@@ -44,9 +44,6 @@ impl TerrainFunc {
 
         y *= 15.;
 
-        // TODOr
-        y *= 10.;
-
         y as f32
     }
 }

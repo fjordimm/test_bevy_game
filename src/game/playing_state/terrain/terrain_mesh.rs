@@ -8,6 +8,9 @@ use crate::game::{
 
 // TODOr
 fn temp_vertex_color(scale: f32, off_x: f32, off_z: f32) -> [f32; 4] {
+    // TODOr
+    return [0.4, 0.7, 0.1, 1.0];
+
     let pre_checkerboard_color = Color::hsv((scale.log2().abs() * 222.) % 360., 1., 1.);
 
     let mut off_x_i = (off_x / (scale * CW as f32) - 0.5).round() as i32;

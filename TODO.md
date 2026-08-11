@@ -19,6 +19,7 @@
 
 ## Currently Working On
 - Terrain.
+    - Add hysteresis for changing LODs.
     - Consider Worley noise.
 
 ## Should Do At Some Point

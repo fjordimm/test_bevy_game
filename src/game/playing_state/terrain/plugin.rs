@@ -1,6 +1,6 @@
 use std::{collections::HashMap, hash::Hash, time::Duration};
 
-use bevy::{camera::visibility, prelude::*, time::common_conditions::on_timer};
+use bevy::{prelude::*, time::common_conditions::on_timer};
 use priority_queue::PriorityQueue;
 
 use crate::game::{
@@ -55,7 +55,7 @@ const L0_RENDER_DIST: i64 = 5;
 fn on_enter(mut commands: Commands) {
     // TODO: change the seed to not be this arbitrary number.
     commands.insert_resource(TheTerrainFunc(TerrainFunc::new(seed_from_u64(12345))));
-    commands.insert_resource(TerrainLodProportion(0.1));
+    commands.insert_resource(TerrainLodProportion(0.3));
     commands.insert_resource(ChunkDicts(std::array::from_fn(|_| {
         ChunkDict(HashMap::new())
     })));
