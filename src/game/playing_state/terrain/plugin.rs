@@ -1,19 +1,19 @@
 use std::{collections::HashMap, hash::Hash, time::Duration};
 
 use bevy::{prelude::*, time::common_conditions::on_timer};
+use priority_queue::PriorityQueue;
 
 use crate::game::{
     core::states::OverallState,
-    graphics::primary_shader::plugin::PrimaryShaderMaterial,
     playing_state::{
         player::tags::PlayerBody,
         reusable_materials::ReusableMaterials,
         sets::{DuringPlaying, OnEnterPlaying},
         tags::PlayingStateEntity,
         terrain::{
-            resources::TheTerrainFunc,
+            resources::{TerrainLodProportion, TheTerrainFunc},
             terrain_func::TerrainFunc,
-            terrain_mesh::{change_mesh_from_perim_lod_positions, create_terrain_meshes},
+            terrain_mesh::create_terrain_mesh,
         },
     },
     util::{alrmo, alrms, alrrs, seed_from_u64},
@@ -27,222 +27,143 @@ impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_message::<GenerateMeshes>()
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
                     .in_set(OnEnterPlaying::ResourceSetup)
             )
             .add_systems(Update,
-                handle_generate_meshes
-                    .in_set(DuringPlaying)
-            )
-            .add_systems(Update,
-                update_chunks
+                (inactivate_all_chunks, activate_chunks, update_chunk_perimeters)
+                    .chain()
                     .in_set(DuringPlaying)
                     .run_if(on_timer(Duration::from_millis(UPDATE_CHUNKS_INTERVAL)))
+            )
+            .add_systems(Update,
+                gen_next_mesh_in_queue
+                    .in_set(DuringPlaying)
+                    .after(update_chunk_perimeters)
             )
         ;
     }
 }
 
+pub(super) const CW: usize = 16; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
+const MAX_LOD: usize = 4;
+const LL_CHUNK_SCALE: f32 = 6.; // LL stands for Last-LOD (the highest LOD).
+const L0_CHUNK_SCALE: f32 = LL_CHUNK_SCALE * 2u32.pow(MAX_LOD as u32) as f32;
+const L0_RENDER_DIST: i64 = 5;
+
 fn on_enter(mut commands: Commands) {
     // TODO: change the seed to not be this arbitrary number.
     commands.insert_resource(TheTerrainFunc(TerrainFunc::new(seed_from_u64(12345))));
-    commands.insert_resource(L0ChunkDict(HashMap::new()));
+    commands.insert_resource(TerrainLodProportion(0.3));
+    commands.insert_resource(ChunkDicts(std::array::from_fn(|_| {
+        ChunkDict(HashMap::new())
+    })));
+    commands.insert_resource(MeshGenQueue(PriorityQueue::new()));
 }
 
-pub(super) const CW: usize = 16; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
-const MAX_LOD: i32 = 4;
-const LL_CHUNK_SCALE: f32 = 6.;
-const L0_CHUNK_SCALE: f32 = LL_CHUNK_SCALE * 2u32.pow(MAX_LOD as u32) as f32;
-const L0_RENDER_DIST: i32 = 5;
-const LOD_PROPORTION: f32 = 0.3; // Higher means more high LOD chunks and less low LOD chunks. Should be between 0 and 
+#[derive(Resource)]
+struct ChunkDicts([ChunkDict; MAX_LOD + 1]);
+
+struct ChunkDict(HashMap<ChunkDictKey, Entity>);
+
+#[derive(PartialEq, Eq, Hash)]
+struct ChunkDictKey {
+    x: i64,
+    z: i64,
+}
+
+impl ChunkDictKey {
+    fn new(x: i64, z: i64) -> Self {
+        Self { x: x, z: z }
+    }
+}
 
 fn chunk_bundle(
-    material: Handle<PrimaryShaderMaterial>,
-    lod: i32,
+    reusable_materials: &ReusableMaterials,
+    lod: usize,
     scale: f32,
-    off_x: i32,
-    off_z: i32,
+    off_x: i64,
+    off_z: i64,
 ) -> impl Bundle {
     (
         PlayingStateEntity,
-        MeshMaterial3d(material),
+        MeshMaterial3d(reusable_materials.terrain.clone()),
         Transform::from_xyz(
             scale * CW as f32 * off_x as f32,
             0.,
             scale * CW as f32 * off_z as f32,
         ),
-        TerrainChunk {
+        Chunk {
             lod,
             scale: scale,
             off_x: off_x,
             off_z: off_z,
-            has_generated_mesh: false,
+            has_been_queued_for_mesh: false,
+            has_mesh: false,
             perimeter_entity: None,
-            subchunk_tl: None,
-            subchunk_tr: None,
-            subchunk_bl: None,
-            subchunk_br: None,
         },
-        Visibility::Visible,
+        Visibility::Hidden,
     )
 }
 
 #[derive(Component)]
-struct TerrainChunk {
-    lod: i32,
+struct Chunk {
+    lod: usize,
     scale: f32,
-    off_x: i32,
-    off_z: i32,
-    has_generated_mesh: bool,
+    off_x: i64,
+    off_z: i64,
+    has_been_queued_for_mesh: bool,
+    has_mesh: bool,
     perimeter_entity: Option<Entity>, // The child entity that has the perimeter mesh.
-    subchunk_tl: Option<Entity>,
-    subchunk_tr: Option<Entity>,
-    subchunk_bl: Option<Entity>,
-    subchunk_br: Option<Entity>,
+}
+
+impl Chunk {
+    fn queue_for_mesh_nonredundantly(
+        &mut self,
+        mesh_gen_queue: &mut ResMut<MeshGenQueue>,
+        entity: Entity,
+    ) {
+        if !self.has_been_queued_for_mesh {
+            mesh_gen_queue.queue_chunk(entity, self.lod);
+            self.has_been_queued_for_mesh = true;
+        }
+    }
 }
 
 #[derive(Component)]
-struct TerrainChunkPerimeter {
-    perim_lod_positions: Vec<Vec<[f32; 3]>>,
+struct ChunkPerimeter {
+    perim_lod_verticies: Vec<Vec<[f32; 3]>>,
 }
 
-impl TerrainChunk {
-    fn generate_mesh_nonredundantly(
-        &mut self,
-        gm_messages: &mut MessageWriter<GenerateMeshes>,
-        entity: &Entity,
-    ) {
-        if !self.has_generated_mesh {
-            gm_messages.write(GenerateMeshes(*entity));
-        }
-    }
-}
+// Has a mesh and is visible, or is in queue for a mesh.
+#[derive(Component)]
+struct IsActiveChunk;
 
-#[derive(Message)]
-struct GenerateMeshes(Entity);
-
-fn handle_generate_meshes(
+fn inactivate_all_chunks(
     mut commands: Commands,
-    mut messages: MessageReader<GenerateMeshes>,
-    mut chunk_q: Query<&mut TerrainChunk>,
-    terrain_func: Res<TheTerrainFunc>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    reusable_materials: Res<ReusableMaterials>,
+    mut chunk_q: Query<(Entity, &mut Visibility), (With<Chunk>, With<IsActiveChunk>)>,
 ) {
-    messages.read().for_each(|msg| {
-        if let Some(mut tc) = alrmo!(chunk_q.get_mut(msg.0)) {
-            let (prim_mesh, perim_mesh, perim_lod_positions) = create_terrain_meshes(
-                &terrain_func.0,
-                tc.scale,
-                tc.scale * CW as f32 * tc.off_x as f32,
-                tc.scale * CW as f32 * tc.off_z as f32,
-                tc.lod as usize,
-            );
-
-            commands.entity(msg.0).insert(Mesh3d(meshes.add(prim_mesh)));
-
-            let perimeter = commands
-                .spawn((
-                    PlayingStateEntity,
-                    TerrainChunkPerimeter {
-                        perim_lod_positions: perim_lod_positions,
-                    },
-                    MeshMaterial3d(reusable_materials.terrain.clone()),
-                    Mesh3d(meshes.add(perim_mesh)),
-                ))
-                .id();
-            commands.entity(msg.0).add_child(perimeter);
-            tc.perimeter_entity = Some(perimeter);
-
-            tc.has_generated_mesh = true;
-        }
+    chunk_q.iter_mut().for_each(|(entity, mut visibility)| {
+        *visibility = Visibility::Hidden;
+        commands.entity(entity).remove::<IsActiveChunk>();
     });
 }
 
-#[derive(PartialEq, Eq, Hash)]
-struct ChunkKey {
-    x: i32,
-    z: i32,
-}
-
-impl ChunkKey {
-    fn new(x: i32, z: i32) -> Self {
-        Self { x: x, z: z }
-    }
-}
-
-#[derive(Resource)]
-struct L0ChunkDict(HashMap<ChunkKey, Entity>);
-
-fn update_chunks(
+fn activate_chunks(
     mut commands: Commands,
     player_q: Option<Single<&Transform, With<PlayerBody>>>,
-    mut l0_chunk_dict: ResMut<L0ChunkDict>,
-    mut chunk_q: Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
+    mut chunk_dicts: ResMut<ChunkDicts>,
+    mut chunk_q: Query<(Entity, &mut Chunk, &mut Visibility)>,
+    lod_proportion: Res<TerrainLodProportion>,
     reusable_materials: Res<ReusableMaterials>,
-    mut gm_messages: MessageWriter<GenerateMeshes>,
-    chunk_perim_q: Query<(&TerrainChunkPerimeter, &Mesh3d)>,
-    mut meshes: ResMut<Assets<Mesh>>,
+    mut mesh_gen_queue: ResMut<MeshGenQueue>,
 ) {
-    // Update the perimeters to match surrounding chunks with different lods.
-    chunk_q.iter().for_each(|(_, tc, _)| {
-        if let Some(perim_entity) = tc.perimeter_entity {
-            let tc_lod = tc.lod;
-            let tc_off_x = tc.off_x;
-            let tc_off_z = tc.off_z;
-            let surrounding_lods =
-                get_surrounding_chunk_lods(&*l0_chunk_dict, &chunk_q, tc_lod, tc_off_x, tc_off_z);
-            let north_lod = match surrounding_lods.0 {
-                Some(lod) => lod as usize,
-                None => tc_lod as usize,
-            };
-            let east_lod = match surrounding_lods.1 {
-                Some(lod) => lod as usize,
-                None => tc_lod as usize,
-            };
-            let south_lod = match surrounding_lods.2 {
-                Some(lod) => lod as usize,
-                None => tc_lod as usize,
-            };
-            let west_lod = match surrounding_lods.3 {
-                Some(lod) => lod as usize,
-                None => tc_lod as usize,
-            };
-
-            if let Some((tcp, mesh3d)) = alrmo!(chunk_perim_q.get(perim_entity)) {
-                if let Some(mesh) = alrms!(meshes.get_mut(mesh3d.0.id())) {
-                    change_mesh_from_perim_lod_positions(
-                        mesh,
-                        &tcp.perim_lod_positions,
-                        north_lod,
-                        east_lod,
-                        south_lod,
-                        west_lod,
-                    );
-                }
-            }
-        }
-    });
-
-    chunk_q
-        .iter_mut()
-        .for_each(|(entity, mut tc, mut visibility)| {
-            // Generate meshes for chunks that don't already have them (but only if they were left visible).
-            if *visibility == Visibility::Visible {
-                tc.generate_mesh_nonredundantly(&mut gm_messages, &entity);
-            }
-
-            // Set all chunks to be hidden. The rest of this function will set the appropriate ones to be visible.
-            *visibility = Visibility::Hidden;
-        });
-
     let player_transf = alrrs!(player_q);
-    let x_center: i32 =
-        (player_transf.translation.x / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i32;
-    let z_center: i32 =
-        (player_transf.translation.z / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i32;
+    let x_center =
+        (player_transf.translation.x / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i64;
+    let z_center =
+        (player_transf.translation.z / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i64;
 
     // Spirals out from (x_center, z_center), covering a square which goes L0_RENDER_DIST in each direction.
     let mut x = x_center;
@@ -262,27 +183,32 @@ fn update_chunks(
 
         // Actual code using (x, z) outside of the spiral logic.
         {
-            if let Some(l0_chunk_entity) = l0_chunk_dict.0.get(&ChunkKey::new(x, z)) {
-                update_chunk_and_subchunks(
-                    &mut commands,
-                    &l0_chunk_dict,
-                    &mut chunk_q,
-                    &reusable_materials,
-                    &player_transf,
-                    *l0_chunk_entity,
-                );
+            if let Some(l0_chunk_entity) = chunk_dicts.0[0].0.get(&ChunkDictKey::new(x, z)) {
+                let l0_chunk_entity = *l0_chunk_entity;
+
+                if let Some((_, mut cc, _)) = alrmo!(chunk_q.get_mut(l0_chunk_entity)) {
+                    cc.queue_for_mesh_nonredundantly(&mut mesh_gen_queue, l0_chunk_entity);
+                    commands.entity(l0_chunk_entity).insert(IsActiveChunk);
+
+                    if cc.has_mesh {
+                        activate_chunk_or_subchunks(
+                            &mut commands,
+                            &mut chunk_dicts,
+                            &mut chunk_q,
+                            &reusable_materials,
+                            lod_proportion.0,
+                            &player_transf,
+                            &mut mesh_gen_queue,
+                            l0_chunk_entity,
+                        );
+                    }
+                }
             } else {
                 let entity = commands
-                    .spawn(chunk_bundle(
-                        reusable_materials.terrain.clone(),
-                        0,
-                        L0_CHUNK_SCALE,
-                        x,
-                        z,
-                    ))
+                    .spawn(chunk_bundle(&reusable_materials, 0, L0_CHUNK_SCALE, x, z))
                     .id();
 
-                l0_chunk_dict.0.insert(ChunkKey::new(x, z), entity);
+                chunk_dicts.0[0].0.insert(ChunkDictKey::new(x, z), entity);
             }
         }
 
@@ -317,255 +243,245 @@ fn update_chunks(
     }
 }
 
-fn update_chunk_and_subchunks(
+// Should only be called on chunks who have a mesh.
+fn activate_chunk_or_subchunks(
     commands: &mut Commands,
-    l0_chunk_dict: &L0ChunkDict,
-    chunk_q: &mut Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
-    reusable_materials: &ReusableMaterials,
+    chunk_dicts: &mut ChunkDicts,
+    chunk_q: &mut Query<(Entity, &mut Chunk, &mut Visibility)>,
+    reusable_materials: &Res<ReusableMaterials>,
+    lod_proportion: f32,
     player_transf: &Transform,
+    mesh_gen_queue: &mut ResMut<MeshGenQueue>,
     entity: Entity,
 ) {
-    if let Some((_, mut tc, mut visibility)) = alrmo!(chunk_q.get_mut(entity)) {
-        let sscale = tc.scale * 0.5;
-        let sx = tc.off_x * 2;
-        let sz = tc.off_z * 2;
+    let mut not_doing_subchunks = true;
+
+    if let Some((_, cc, _)) = alrmo!(chunk_q.get(entity)) {
+        let sscale = cc.scale * 0.5;
+        let sx = cc.off_x * 2;
+        let sz = cc.off_z * 2;
 
         let should_do_subchunks = {
-            let real_x = (tc.off_x as f32 + 0.5) * tc.scale * CW as f32;
-            let real_z = (tc.off_z as f32 + 0.5) * tc.scale * CW as f32;
+            let real_x = (cc.off_x as f32 + 0.5) * cc.scale * CW as f32;
+            let real_z = (cc.off_z as f32 + 0.5) * cc.scale * CW as f32;
             let dist_to_player = ((player_transf.translation.x - real_x).powi(2)
                 + (player_transf.translation.z - real_z).powi(2))
             .sqrt();
 
-            tc.lod < MAX_LOD
-                && dist_to_player < LOD_PROPORTION * (L0_RENDER_DIST as f32) * tc.scale * CW as f32
+            cc.lod < MAX_LOD
+                && dist_to_player < L0_RENDER_DIST as f32 * lod_proportion * cc.scale * CW as f32
         };
 
-        let tl = tc.subchunk_tl;
-        let tr = tc.subchunk_tr;
-        let bl = tc.subchunk_bl;
-        let br = tc.subchunk_br;
-        if should_do_subchunks
-            && let Some(tl) = tl
-            && let Some(tr) = tr
-            && let Some(bl) = bl
-            && let Some(br) = br
-        {
-            // This is the case when all subchunks exist.
+        if should_do_subchunks {
+            if let Some(chunk_dict) = alrms!(chunk_dicts.0.get_mut(cc.lod + 1)) {
+                let chunk_dict = &mut chunk_dict.0;
 
-            update_chunk_and_subchunks(
-                commands,
-                l0_chunk_dict,
-                chunk_q,
-                reusable_materials,
-                player_transf,
-                tl,
-            );
-            update_chunk_and_subchunks(
-                commands,
-                l0_chunk_dict,
-                chunk_q,
-                reusable_materials,
-                player_transf,
-                tr,
-            );
-            update_chunk_and_subchunks(
-                commands,
-                l0_chunk_dict,
-                chunk_q,
-                reusable_materials,
-                player_transf,
-                bl,
-            );
-            update_chunk_and_subchunks(
-                commands,
-                l0_chunk_dict,
-                chunk_q,
-                reusable_materials,
-                player_transf,
-                br,
-            );
-        } else {
-            // This is the case when its at the max lod or not all subchunks exist.
+                let tl = {
+                    let sx = sx;
+                    let sz = sz;
 
-            // Create the subchunks that don't exist.
+                    if let Some(subchunk_entity) = chunk_dict.get(&ChunkDictKey::new(sx, sz)) {
+                        *subchunk_entity
+                    } else {
+                        let subchunk_entity = commands
+                            .spawn(chunk_bundle(reusable_materials, cc.lod + 1, sscale, sx, sz))
+                            .id();
 
-            if should_do_subchunks {
-                if tc.subchunk_tl.is_none() {
-                    tc.subchunk_tl = Some(
-                        commands
-                            .spawn(chunk_bundle(
-                                reusable_materials.terrain.clone(),
-                                tc.lod + 1,
-                                sscale,
-                                sx,
-                                sz,
-                            ))
-                            .id(),
-                    );
-                }
+                        chunk_dict.insert(ChunkDictKey::new(sx, sz), subchunk_entity);
 
-                if tc.subchunk_tr.is_none() {
-                    tc.subchunk_tr = Some(
-                        commands
-                            .spawn(chunk_bundle(
-                                reusable_materials.terrain.clone(),
-                                tc.lod + 1,
-                                sscale,
-                                sx + 1,
-                                sz,
-                            ))
-                            .id(),
-                    );
-                }
+                        subchunk_entity
+                    }
+                };
+                let tr = {
+                    let sx = sx + 1;
+                    let sz = sz;
 
-                if tc.subchunk_bl.is_none() {
-                    tc.subchunk_bl = Some(
-                        commands
-                            .spawn(chunk_bundle(
-                                reusable_materials.terrain.clone(),
-                                tc.lod + 1,
-                                sscale,
-                                sx,
-                                sz + 1,
-                            ))
-                            .id(),
-                    );
-                }
+                    if let Some(subchunk_entity) = chunk_dict.get(&ChunkDictKey::new(sx, sz)) {
+                        *subchunk_entity
+                    } else {
+                        let subchunk_entity = commands
+                            .spawn(chunk_bundle(reusable_materials, cc.lod + 1, sscale, sx, sz))
+                            .id();
 
-                if tc.subchunk_br.is_none() {
-                    tc.subchunk_br = Some(
-                        commands
-                            .spawn(chunk_bundle(
-                                reusable_materials.terrain.clone(),
-                                tc.lod + 1,
-                                sscale,
-                                sx + 1,
-                                sz + 1,
-                            ))
-                            .id(),
-                    );
-                }
-            }
+                        chunk_dict.insert(ChunkDictKey::new(sx, sz), subchunk_entity);
 
-            // Stuff for this chunk.
+                        subchunk_entity
+                    }
+                };
+                let bl = {
+                    let sx = sx;
+                    let sz = sz + 1;
 
-            *visibility = Visibility::Visible;
-        }
-    }
-}
+                    if let Some(subchunk_entity) = chunk_dict.get(&ChunkDictKey::new(sx, sz)) {
+                        *subchunk_entity
+                    } else {
+                        let subchunk_entity = commands
+                            .spawn(chunk_bundle(reusable_materials, cc.lod + 1, sscale, sx, sz))
+                            .id();
 
-// Return value is ordered as (north, east, south, west).
-fn get_surrounding_chunk_lods(
-    l0_chunk_dict: &L0ChunkDict,
-    chunk_q: &Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
-    tc_lod: i32,
-    tc_off_x: i32,
-    tc_off_z: i32,
-) -> (Option<i32>, Option<i32>, Option<i32>, Option<i32>) {
-    let north_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x, tc_off_z - 1);
-    let east_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x + 1, tc_off_z);
-    let south_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x, tc_off_z + 1);
-    let west_entity = get_active_chunk_at(l0_chunk_dict, chunk_q, tc_lod, tc_off_x - 1, tc_off_z);
+                        chunk_dict.insert(ChunkDictKey::new(sx, sz), subchunk_entity);
 
-    let north = match north_entity {
-        Some(e) => match alrmo!(chunk_q.get(e)) {
-            Some((_, tc, _)) => Some(tc.lod),
-            None => None,
-        },
-        None => None,
-    };
-    let east = match east_entity {
-        Some(e) => match alrmo!(chunk_q.get(e)) {
-            Some((_, tc, _)) => Some(tc.lod),
-            None => None,
-        },
-        None => None,
-    };
-    let south = match south_entity {
-        Some(e) => match alrmo!(chunk_q.get(e)) {
-            Some((_, tc, _)) => Some(tc.lod),
-            None => None,
-        },
-        None => None,
-    };
-    let west = match west_entity {
-        Some(e) => match alrmo!(chunk_q.get(e)) {
-            Some((_, tc, _)) => Some(tc.lod),
-            None => None,
-        },
-        None => None,
-    };
+                        subchunk_entity
+                    }
+                };
+                let br = {
+                    let sx = sx + 1;
+                    let sz = sz + 1;
 
-    (north, east, south, west)
-}
+                    if let Some(subchunk_entity) = chunk_dict.get(&ChunkDictKey::new(sx, sz)) {
+                        *subchunk_entity
+                    } else {
+                        let subchunk_entity = commands
+                            .spawn(chunk_bundle(reusable_materials, cc.lod + 1, sscale, sx, sz))
+                            .id();
 
-// Stops zeroing in at `coords_lod` (lod of the coords).
-fn get_active_chunk_at(
-    l0_chunk_dict: &L0ChunkDict,
-    chunk_q: &Query<(Entity, &mut TerrainChunk, &mut Visibility)>,
-    coords_lod: i32,
-    x: i32,
-    z: i32,
-) -> Option<Entity> {
-    let x_neg_offset = match x.is_negative() {
-        true => -1,
-        false => 0,
-    };
-    let z_neg_offset = match z.is_negative() {
-        true => -1,
-        false => 0,
-    };
+                        chunk_dict.insert(ChunkDictKey::new(sx, sz), subchunk_entity);
 
-    let x = match x.is_negative() {
-        true => x + 1,
-        false => x,
-    };
-    let z = match z.is_negative() {
-        true => z + 1,
-        false => z,
-    };
-
-    let l0_x = x / 2i32.pow(coords_lod as u32) + x_neg_offset;
-    let l0_z = z / 2i32.pow(coords_lod as u32) + z_neg_offset;
-
-    if let Some(l0_chunk_entity) = l0_chunk_dict.0.get(&ChunkKey::new(l0_x, l0_z)) {
-        if let Some((l0_entity, l0_tc, l0_visibility)) = alrmo!(chunk_q.get(*l0_chunk_entity)) {
-            let (mut c_entity, mut c_tc, mut c_visibility) = (l0_entity, l0_tc, l0_visibility);
-
-            loop {
-                if c_tc.lod == coords_lod || *c_visibility == Visibility::Visible {
-                    return Some(c_entity);
-                }
-
-                let subchunk_entity = match (
-                    ((x / 2i32.pow((coords_lod - (c_tc.lod + 1)) as u32) + x_neg_offset) % 2).abs(),
-                    ((z / 2i32.pow((coords_lod - (c_tc.lod + 1)) as u32) + z_neg_offset) % 2).abs(),
-                ) {
-                    (0, 0) => c_tc.subchunk_tl,
-                    (1, 0) => c_tc.subchunk_tr,
-                    (0, 1) => c_tc.subchunk_bl,
-                    (1, 1) => c_tc.subchunk_br,
-                    _ => {
-                        error!("The terrain generation zeroing in logic is incorrect.");
-                        return None;
+                        subchunk_entity
                     }
                 };
 
-                if let Some(subchunk_entity) = subchunk_entity {
-                    if let Some((new_entity, new_tc, new_visibility)) =
-                        alrmo!(chunk_q.get(subchunk_entity))
-                    {
-                        (c_entity, c_tc, c_visibility) = (new_entity, new_tc, new_visibility);
-                    }
+                let tl_has_mesh = if let Ok((_, mut cc, _)) = chunk_q.get_mut(tl) {
+                    cc.queue_for_mesh_nonredundantly(mesh_gen_queue, tl);
+                    commands.entity(tl).insert(IsActiveChunk);
+
+                    cc.has_mesh
                 } else {
-                    return Some(c_entity);
+                    false
+                };
+                let tr_has_mesh = if let Ok((_, mut cc, _)) = chunk_q.get_mut(tr) {
+                    cc.queue_for_mesh_nonredundantly(mesh_gen_queue, tr);
+                    commands.entity(tr).insert(IsActiveChunk);
+
+                    cc.has_mesh
+                } else {
+                    false
+                };
+                let bl_has_mesh = if let Ok((_, mut cc, _)) = chunk_q.get_mut(bl) {
+                    cc.queue_for_mesh_nonredundantly(mesh_gen_queue, bl);
+                    commands.entity(bl).insert(IsActiveChunk);
+
+                    cc.has_mesh
+                } else {
+                    false
+                };
+                let br_has_mesh = if let Ok((_, mut cc, _)) = chunk_q.get_mut(br) {
+                    cc.queue_for_mesh_nonredundantly(mesh_gen_queue, br);
+                    commands.entity(br).insert(IsActiveChunk);
+
+                    cc.has_mesh
+                } else {
+                    false
+                };
+
+                if tl_has_mesh && tr_has_mesh && bl_has_mesh && br_has_mesh {
+                    activate_chunk_or_subchunks(
+                        commands,
+                        chunk_dicts,
+                        chunk_q,
+                        &reusable_materials,
+                        lod_proportion,
+                        &player_transf,
+                        mesh_gen_queue,
+                        tl,
+                    );
+                    activate_chunk_or_subchunks(
+                        commands,
+                        chunk_dicts,
+                        chunk_q,
+                        &reusable_materials,
+                        lod_proportion,
+                        &player_transf,
+                        mesh_gen_queue,
+                        tr,
+                    );
+                    activate_chunk_or_subchunks(
+                        commands,
+                        chunk_dicts,
+                        chunk_q,
+                        &reusable_materials,
+                        lod_proportion,
+                        &player_transf,
+                        mesh_gen_queue,
+                        bl,
+                    );
+                    activate_chunk_or_subchunks(
+                        commands,
+                        chunk_dicts,
+                        chunk_q,
+                        &reusable_materials,
+                        lod_proportion,
+                        &player_transf,
+                        mesh_gen_queue,
+                        br,
+                    );
+
+                    not_doing_subchunks = false;
                 }
             }
-        } else {
-            None
+        }
+    }
+
+    if not_doing_subchunks {
+        if let Some((_, _, mut visibility)) = alrmo!(chunk_q.get_mut(entity)) {
+            *visibility = Visibility::Visible;
         }
     } else {
-        None
+        commands.entity(entity).remove::<IsActiveChunk>();
+    }
+}
+
+fn update_chunk_perimeters() {}
+
+#[derive(Resource)]
+struct MeshGenQueue(PriorityQueue<Entity, usize>);
+
+impl MeshGenQueue {
+    fn queue_chunk(&mut self, entity: Entity, lod: usize) {
+        self.0.push(entity, lod);
+    }
+}
+
+fn gen_next_mesh_in_queue(
+    mut commands: Commands,
+    mut mesh_gen_queue: ResMut<MeshGenQueue>,
+    mut chunk_q: Query<(&mut Chunk, Option<&IsActiveChunk>)>,
+    terrain_func: Res<TheTerrainFunc>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    reusable_materials: Res<ReusableMaterials>,
+) {
+    if let Some((entity, _)) = mesh_gen_queue.0.pop() {
+        if let Some((mut cc, is_active_chunk)) = alrmo!(chunk_q.get_mut(entity)) {
+            if let Some(_) = is_active_chunk {
+                let (main_mesh, perim_mesh, perim_lod_vertices) = create_terrain_mesh(
+                    &terrain_func.0,
+                    cc.scale,
+                    cc.scale * CW as f32 * cc.off_x as f32,
+                    cc.scale * CW as f32 * cc.off_z as f32,
+                    cc.lod as usize,
+                );
+
+                commands
+                    .entity(entity)
+                    .insert(Mesh3d(meshes.add(main_mesh)));
+
+                let perimeter = commands
+                    .spawn((
+                        PlayingStateEntity,
+                        ChunkPerimeter {
+                            perim_lod_verticies: perim_lod_vertices,
+                        },
+                        MeshMaterial3d(reusable_materials.terrain.clone()),
+                        Mesh3d(meshes.add(perim_mesh)),
+                    ))
+                    .id();
+                commands.entity(entity).add_child(perimeter);
+                cc.perimeter_entity = Some(perimeter);
+
+                cc.has_mesh = true;
+            } else {
+                cc.has_been_queued_for_mesh = false;
+            }
+        }
     }
 }

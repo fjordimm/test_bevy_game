@@ -19,6 +19,8 @@
 
 ## Currently Working On
 - Terrain.
+    - Make the PQ use LOD as the priority, so that it higher LODs go first.
+    - Chunk generation and stuff.
     - Consider Worley noise.
 
 ## Should Do At Some Point

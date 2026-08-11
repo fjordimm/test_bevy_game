@@ -4301,6 +4301,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "priority-queue"
+version = "2.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93980406f12d9f8140ed5abe7155acb10bb1e69ea55c88960b9c2f117445ef96"
+dependencies = [
+ "equivalent",
+ "indexmap",
+ "serde",
+]
+
+[[package]]
 name = "proc-macro-crate"
 version = "3.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5003,6 +5014,7 @@ dependencies = [
  "bevy_prng",
  "bevy_rand",
  "noise",
+ "priority-queue",
  "rand 0.10.1",
  "rand_core 0.10.1",
  "rand_distr 0.6.0",

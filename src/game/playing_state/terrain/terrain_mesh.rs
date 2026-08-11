@@ -30,13 +30,13 @@ fn temp_vertex_color(scale: f32, off_x: f32, off_z: f32) -> [f32; 4] {
     [color.red, color.green, color.blue, 1.]
 }
 
-// Generates two meshes: 1) the inner mesh, 2) the outer mesh (perimeter), which together make up a CWxCW grid of squares,
+// Generates three things: 1) the inner mesh, 2) the outer mesh (perimeter), which together with the inner mesh make up a CWxCW grid of squares,
 //   and 3) a vec of vecs of positions for the outermost vertices for connecting with different lods.
 // The outer mesh is just the outermost squares, and the inner mesh is the full CWxCW grid minus the outer mesh squares.
 // Each square has four corner vertices, plus one in the middle, and has four triangles connecting them all.
 // The 3rd field of the return value (the vec of vecs of positions) has positions in the order: north edge, east edge, south edge, west edge,
 //   where the north and south edges include the corners but the east and west don't.
-pub(super) fn create_terrain_meshes(
+pub(super) fn create_terrain_mesh(
     terrain_func: &TerrainFunc,
     scale: f32,
     off_x: f32,
@@ -82,7 +82,7 @@ pub(super) fn create_terrain_meshes(
     }
 
     // Corner vertices (outer mesh only).
-    // These are in the order that they are to make `change_mesh_from_perim_lod_positions` easier to write.
+    // These are in the order that they are to make `change_mesh_from_perim_lod_vertices` easier to write.
     {
         // The outermost corner vertices.
 
@@ -408,9 +408,9 @@ fn quantized_position(
     // let h: f32 = terrain_func.at(rf + off_x, cf + off_z);
 }
 
-pub(super) fn change_mesh_from_perim_lod_positions(
+pub(super) fn change_mesh_from_perim_lod_vertices(
     mesh: &mut Mesh,
-    perim_lod_positions: &Vec<Vec<[f32; 3]>>,
+    perim_lod_vertices: &Vec<Vec<[f32; 3]>>,
     north_lod: usize,
     east_lod: usize,
     south_lod: usize,
@@ -421,25 +421,25 @@ pub(super) fn change_mesh_from_perim_lod_positions(
     {
         // North.
         for i in 0..=CW {
-            positions[i] = perim_lod_positions[north_lod][i];
+            positions[i] = perim_lod_vertices[north_lod][i];
         }
 
         // East.
         for i in 0..CW - 1 {
             let offset_index = (CW + 1) + i;
-            positions[offset_index] = perim_lod_positions[east_lod][offset_index];
+            positions[offset_index] = perim_lod_vertices[east_lod][offset_index];
         }
 
         // South.
         for i in 0..=CW {
             let offset_index = (CW + 1) + (CW - 1) + i;
-            positions[offset_index] = perim_lod_positions[south_lod][offset_index];
+            positions[offset_index] = perim_lod_vertices[south_lod][offset_index];
         }
 
         // West.
         for i in 0..CW - 1 {
             let offset_index = (CW + 1) + (CW - 1) + (CW + 1) + i;
-            positions[offset_index] = perim_lod_positions[west_lod][offset_index];
+            positions[offset_index] = perim_lod_vertices[west_lod][offset_index];
         }
     } else {
         error!("Positions attribute was not in an expected form.");
