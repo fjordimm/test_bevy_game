@@ -19,8 +19,6 @@
 
 ## Currently Working On
 - Terrain.
-    - Make the PQ use LOD as the priority, so that it higher LODs go first.
-    - Chunk generation and stuff.
     - Consider Worley noise.
 
 ## Should Do At Some Point
@@ -39,7 +37,8 @@
 - When in release profile, the functions in util like `alrms`, `alrmo`, `alrrs`, and `alrro` should all just pass the input through without executing code.
 - TerrainFunc::at uses f32 for both input and output, but the underlying noise functions use f64, so it's casting back and forth every time. Could you find an implementation of the noise functions that use f32?
 - Just pass three f32s for vertex colors, not four. Actually, you should get rid of vertices being individually colored and have like 8 colors or something passed in as a uniform, and each vertex has an index to that color.
-- The function that generates the mesh for terrain chunks could be optimized. Most notably, it makes a big 2d array.
+- The function that generates the mesh for terrain chunks could be optimized. Most notably, it makes a big 2d array that is then discarded.
+- `terrain_mesh::quantized_position` could be optimized. Each call to `quantized_position` in `create_terrain_mesh` computes the same value multiple times.
 
 ## Features
 - Add TabGroups to gui stuff

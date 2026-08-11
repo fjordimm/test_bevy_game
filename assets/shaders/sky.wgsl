@@ -80,6 +80,9 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
 
 @fragment
 fn fragment(vertout: CustomVertexOutput) -> @location(0) vec4<f32> {
+    // TODOr
+    return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+
     var color = vec3<f32>(0.0, 0.0, 0.0);
 
     let sun_pos = normalize(sun_position);

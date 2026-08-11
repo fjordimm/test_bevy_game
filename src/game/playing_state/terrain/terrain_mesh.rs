@@ -39,10 +39,13 @@ fn temp_vertex_color(scale: f32, off_x: f32, off_z: f32) -> [f32; 4] {
 pub(super) fn create_terrain_mesh(
     terrain_func: &TerrainFunc,
     scale: f32,
-    off_x: f32,
-    off_z: f32,
-    base_lod: usize,
+    off_x: i64,
+    off_z: i64,
+    lod: usize,
 ) -> (Mesh, Mesh, Vec<Vec<[f32; 3]>>) {
+    let off_x_real = CW as f32 * scale * off_x as f32;
+    let off_z_real = CW as f32 * scale * off_z as f32;
+
     let mut inner_positions =
         Vec::<[f32; 3]>::with_capacity((CW - 1) * (CW - 1) + (CW - 2) * (CW - 2));
     let mut inner_colors =
@@ -71,10 +74,10 @@ pub(super) fn create_terrain_mesh(
             let cf = scale * c as f32;
             let rf = scale * r as f32;
 
-            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             inner_positions.push([cf, h, rf]);
-            inner_colors.push(temp_vertex_color(scale, off_x, off_z));
+            inner_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             inner_indices_c[c][r] = inner_vc;
             inner_vc += 1;
@@ -94,10 +97,10 @@ pub(super) fn create_terrain_mesh(
             let cf = scale * c as f32;
             let rf = scale * r as f32;
 
-            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
-            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -111,10 +114,10 @@ pub(super) fn create_terrain_mesh(
             let cf = scale * c as f32;
             let rf = scale * r as f32;
 
-            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
-            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -128,10 +131,10 @@ pub(super) fn create_terrain_mesh(
             let cf = scale * c as f32;
             let rf = scale * r as f32;
 
-            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
-            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -145,10 +148,10 @@ pub(super) fn create_terrain_mesh(
             let cf = scale * c as f32;
             let rf = scale * r as f32;
 
-            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
-            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -164,10 +167,10 @@ pub(super) fn create_terrain_mesh(
             let cf = scale * c as f32;
             let rf = scale * r as f32;
 
-            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
-            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -181,10 +184,10 @@ pub(super) fn create_terrain_mesh(
             let cf = scale * c as f32;
             let rf = scale * r as f32;
 
-            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
-            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -198,10 +201,10 @@ pub(super) fn create_terrain_mesh(
             let cf = scale * c as f32;
             let rf = scale * r as f32;
 
-            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
-            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -215,10 +218,10 @@ pub(super) fn create_terrain_mesh(
             let cf = scale * c as f32;
             let rf = scale * r as f32;
 
-            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
-            outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -231,12 +234,12 @@ pub(super) fn create_terrain_mesh(
             let cf = scale * (0.5 + c as f32);
             let rf = scale * (0.5 + r as f32);
 
-            let h: f32 = terrain_func.at(cf + off_x, rf + off_z);
+            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             // Inner vertices.
             if c > 0 && c < CW - 1 && r > 0 && r < CW - 1 {
                 inner_positions.push([cf, h, rf]);
-                inner_colors.push(temp_vertex_color(scale, off_x, off_z));
+                inner_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
                 inner_indices_m[c][r] = inner_vc;
 
@@ -246,7 +249,7 @@ pub(super) fn create_terrain_mesh(
             // Outer vertices.
             if c == 0 || c == CW - 1 || r == 0 || r == CW - 1 {
                 outer_positions.push([cf, h, rf]);
-                outer_colors.push(temp_vertex_color(scale, off_x, off_z));
+                outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
                 outer_indices_m[c][r] = outer_vc;
 
@@ -288,24 +291,23 @@ pub(super) fn create_terrain_mesh(
     }
 
     let mut lod_connecting_perimeters =
-        vec![
-            Vec::<[f32; 3]>::with_capacity((CW + 1) + (CW - 1) + (CW + 1) + (CW - 1));
-            base_lod + 1
-        ];
-    for i in (0..=base_lod).rev() {
-        let quantization_factor = 2usize.pow((base_lod - i) as u32);
+        vec![Vec::<[f32; 3]>::with_capacity((CW + 1) + (CW - 1) + (CW + 1) + (CW - 1)); lod + 1];
+    for i in (0..=lod).rev() {
+        let quantization_factor = 2i64.pow((lod - i) as u32);
 
         // North.
         for j in 0..=CW {
             lod_connecting_perimeters[i].push(quantized_position(
                 terrain_func,
+                quantization_factor,
                 scale,
                 off_x,
                 off_z,
+                off_x_real,
+                off_z_real,
+                false,
                 j,
                 0,
-                true,
-                quantization_factor,
             ));
         }
 
@@ -313,13 +315,15 @@ pub(super) fn create_terrain_mesh(
         for j in 1..CW {
             lod_connecting_perimeters[i].push(quantized_position(
                 terrain_func,
+                quantization_factor,
                 scale,
                 off_x,
                 off_z,
+                off_x_real,
+                off_z_real,
+                true,
                 CW,
                 j,
-                false,
-                quantization_factor,
             ));
         }
 
@@ -327,13 +331,15 @@ pub(super) fn create_terrain_mesh(
         for j in 0..=CW {
             lod_connecting_perimeters[i].push(quantized_position(
                 terrain_func,
+                quantization_factor,
                 scale,
                 off_x,
                 off_z,
+                off_x_real,
+                off_z_real,
+                false,
                 j,
                 CW,
-                true,
-                quantization_factor,
             ));
         }
 
@@ -341,13 +347,15 @@ pub(super) fn create_terrain_mesh(
         for j in 1..CW {
             lod_connecting_perimeters[i].push(quantized_position(
                 terrain_func,
+                quantization_factor,
                 scale,
                 off_x,
                 off_z,
+                off_x_real,
+                off_z_real,
+                true,
                 0,
                 j,
-                false,
-                quantization_factor,
             ));
         }
     }
@@ -373,39 +381,62 @@ pub(super) fn create_terrain_mesh(
 
 fn quantized_position(
     terrain_func: &TerrainFunc,
+    quantization_factor: i64,
     scale: f32,
-    off_x: f32,
-    off_z: f32,
-    r: usize,
-    c: usize,
+    off_x: i64,
+    off_z: i64,
+    off_x_real: f32,
+    off_z_real: f32,
     quantization_direction_is_ns: bool,
-    quantization_factor: usize,
+    c: usize,
+    r: usize,
 ) -> [f32; 3] {
-    let rf = scale * r as f32;
-    let cf = scale * c as f32;
+    // If North-South.
+    if quantization_direction_is_ns {
+        let ro = r as i64 + (off_z * CW as i64);
+        let roq = if ro.is_negative() {
+            ((ro + 1) / quantization_factor - 1) * quantization_factor
+        } else {
+            (ro / quantization_factor) * quantization_factor
+        };
+        let rq = roq - (off_z * CW as i64);
 
-    let h: f32 = terrain_func.at(rf + off_x, cf + off_z);
+        let rf_q0 = scale * (rq) as f32;
+        let rf_q1 = scale * (rq + quantization_factor) as f32;
+        let lerp_pos = ((ro - roq) as f32) / (quantization_factor as f32);
 
-    [rf, h + (1. * scale * (quantization_factor - 1) as f32), cf]
+        let cf = scale * c as f32;
+        let rf = scale * r as f32;
 
-    // // If East-West.
-    // if !quantization_direction_is_ns {
+        let h_q0 = terrain_func.at(cf + off_x_real, rf_q0 + off_z_real);
+        let h_q1 = terrain_func.at(cf + off_x_real, rf_q1 + off_z_real);
+        let h = (1. - lerp_pos) * h_q0 + (lerp_pos) * h_q1;
 
-    // }
-    // // If North-South.
-    // else {
-    // }
+        [cf, h, rf]
+    }
+    // If East-West.
+    else {
+        let co = c as i64 + (off_x * CW as i64);
+        let coq = if co.is_negative() {
+            ((co + 1) / quantization_factor - 1) * quantization_factor
+        } else {
+            (co / quantization_factor) * quantization_factor
+        };
+        let cq = coq - (off_x * CW as i64);
 
-    // let rf_q0 = scale * ((r / quantization_factor) * quantization_factor) as f32;
-    // let rf_q1 = scale * ((r / quantization_factor + 1) * quantization_factor) as f32;
+        let cf_q0 = scale * (cq) as f32;
+        let cf_q1 = scale * (cq + quantization_factor) as f32;
+        let lerp_pos = ((co - coq) as f32) / (quantization_factor as f32);
 
-    // let cf_q0 = scale * ((c / quantization_factor) * quantization_factor) as f32;
-    // let cf_q1 = scale * ((c / quantization_factor + 1) * quantization_factor) as f32;
+        let cf = scale * c as f32;
+        let rf = scale * r as f32;
 
-    // let rf = scale * r as f32;
-    // let cf = scale * c as f32;
+        let h_q0 = terrain_func.at(cf_q0 + off_x_real, rf + off_z_real);
+        let h_q1 = terrain_func.at(cf_q1 + off_x_real, rf + off_z_real);
+        let h = (1. - lerp_pos) * h_q0 + (lerp_pos) * h_q1;
 
-    // let h: f32 = terrain_func.at(rf + off_x, cf + off_z);
+        [cf, h, rf]
+    }
 }
 
 pub(super) fn change_mesh_from_perim_lod_vertices(

@@ -55,7 +55,7 @@ const L0_RENDER_DIST: i64 = 5;
 fn on_enter(mut commands: Commands) {
     // TODO: change the seed to not be this arbitrary number.
     commands.insert_resource(TheTerrainFunc(TerrainFunc::new(seed_from_u64(12345))));
-    commands.insert_resource(TerrainLodProportion(0.3));
+    commands.insert_resource(TerrainLodProportion(0.1));
     commands.insert_resource(ChunkDicts(std::array::from_fn(|_| {
         ChunkDict(HashMap::new())
     })));
@@ -551,8 +551,8 @@ fn gen_next_mesh_in_queue(
                 let (main_mesh, perim_mesh, perim_lod_vertices) = create_terrain_mesh(
                     &terrain_func.0,
                     cc.scale,
-                    cc.scale * CW as f32 * cc.off_x as f32,
-                    cc.scale * CW as f32 * cc.off_z as f32,
+                    cc.off_x,
+                    cc.off_z,
                     cc.lod as usize,
                 );
 
