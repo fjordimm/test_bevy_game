@@ -2,6 +2,8 @@ use bevy::prelude::*;
 
 pub mod plugin;
 
+// TODO: put these in a new file 'resources.rs' in this module.
+
 #[derive(Resource)]
 pub struct TimeOfDay(pub f32);
 

@@ -28,7 +28,7 @@ impl Plugin for TerrainPlugin {
         #[rustfmt::skip]
         app
             .add_systems(OnEnter(OverallState::Playing),
-                on_enter
+                (on_enter1, on_enter2)
                     .in_set(OnEnterPlaying::ResourceSetup)
             )
             .add_systems(Update,
@@ -52,9 +52,12 @@ const LL_CHUNK_SCALE: f32 = 6.; // LL stands for Last-LOD (the highest LOD).
 const L0_CHUNK_SCALE: f32 = LL_CHUNK_SCALE * 2u32.pow(MAX_LOD as u32) as f32;
 const L0_RENDER_DIST: i64 = 5;
 
-fn on_enter(mut commands: Commands) {
+fn on_enter1(world: &mut World) {
     // TODO: change the seed to not be this arbitrary number.
-    commands.insert_resource(TheTerrainFunc(TerrainFunc::new(seed_from_u64(12345))));
+    world.insert_non_send_resource(TheTerrainFunc(TerrainFunc::new(seed_from_u64(12345))));
+}
+
+fn on_enter2(mut commands: Commands) {
     commands.insert_resource(TerrainLodProportion(0.3));
     commands.insert_resource(ChunkDicts(std::array::from_fn(|_| {
         ChunkDict(HashMap::new())
@@ -541,7 +544,7 @@ fn gen_next_mesh_in_queue(
     mut commands: Commands,
     mut mesh_gen_queue: ResMut<MeshGenQueue>,
     mut chunk_q: Query<(&mut Chunk, Option<&ActiveOrQueued>)>,
-    terrain_func: Res<TheTerrainFunc>,
+    terrain_func: NonSend<TheTerrainFunc>,
     mut meshes: ResMut<Assets<Mesh>>,
     reusable_materials: Res<ReusableMaterials>,
 ) {

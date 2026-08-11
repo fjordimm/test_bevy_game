@@ -7,30 +7,30 @@ use crate::game::{
 };
 
 // TODOr
-fn temp_vertex_color(scale: f32, off_x: f32, off_z: f32) -> [f32; 4] {
+fn temp_vertex_color(_scale: f32, _off_x: f32, _off_z: f32) -> [f32; 4] {
     // TODOr
     return [0.4, 0.7, 0.1, 1.0];
 
-    let pre_checkerboard_color = Color::hsv((scale.log2().abs() * 222.) % 360., 1., 1.);
+    // let pre_checkerboard_color = Color::hsv((scale.log2().abs() * 222.) % 360., 1., 1.);
 
-    let mut off_x_i = (off_x / (scale * CW as f32) - 0.5).round() as i32;
-    let mut off_z_i = (off_z / (scale * CW as f32) - 0.5).round() as i32;
+    // let mut off_x_i = (off_x / (scale * CW as f32) - 0.5).round() as i32;
+    // let mut off_z_i = (off_z / (scale * CW as f32) - 0.5).round() as i32;
 
-    if off_x_i < 0 {
-        off_x_i += 1;
-    }
-    if off_z_i < 0 {
-        off_z_i += 1;
-    }
+    // if off_x_i < 0 {
+    //     off_x_i += 1;
+    // }
+    // if off_z_i < 0 {
+    //     off_z_i += 1;
+    // }
 
-    let color = if ((off_x_i + off_z_i) % 2) == 0 {
-        Color::hsv(pre_checkerboard_color.hue(), 0.9, 1.)
-    } else {
-        Color::hsv(pre_checkerboard_color.hue(), 1., 0.75)
-    };
+    // let color = if ((off_x_i + off_z_i) % 2) == 0 {
+    //     Color::hsv(pre_checkerboard_color.hue(), 0.9, 1.)
+    // } else {
+    //     Color::hsv(pre_checkerboard_color.hue(), 1., 0.75)
+    // };
 
-    let color = color.to_srgba();
-    [color.red, color.green, color.blue, 1.]
+    // let color = color.to_srgba();
+    // [color.red, color.green, color.blue, 1.]
 }
 
 // Generates three things: 1) the inner mesh, 2) the outer mesh (perimeter), which together with the inner mesh make up a CWxCW grid of squares,
