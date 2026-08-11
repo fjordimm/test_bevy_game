@@ -125,7 +125,7 @@ impl Chunk {
         entity: Entity,
     ) {
         if !self.has_been_queued_for_mesh {
-            mesh_gen_queue.queue_chunk(entity, self.lod);
+            mesh_gen_queue.queue_chunk(entity, MAX_LOD - self.lod);
             self.has_been_queued_for_mesh = true;
         }
     }
