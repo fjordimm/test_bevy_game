@@ -1,15 +1,13 @@
 use bevy::prelude::*;
-use noise::{NoiseFn, SuperSimplex, Worley, core::worley::ReturnType};
+use noise::{NoiseFn, SuperSimplex};
 use rand::{Rng, SeedableRng};
+use worley_noise::WorleyNoise;
 
-use crate::game::{
-    random::Prng,
-    util::{lerp, smoothstep_in_bounds_only},
-};
+use crate::game::{random::Prng, util::lerp};
 
 pub struct TerrainFunc {
     rough: OctavedNoiseSampler,
-    mountains_worleys: [Worley; 1],
+    mountains_worleys: [WorleyNoise; 5],
 }
 
 impl TerrainFunc {
@@ -19,9 +17,12 @@ impl TerrainFunc {
         Self {
             rough: OctavedNoiseSampler::new(&mut prng, 5, 0.005),
             mountains_worleys: std::array::from_fn(|_| {
-                Worley::new(prng.next_u32())
-                    .set_return_type(ReturnType::Distance)
-                    .set_distance_function(worley_distance_function)
+                let mut worley = WorleyNoise::new();
+                worley.permutate_seeded(
+                    WorleyNoise::DEFAULT_PERMUTATION_BITS,
+                    prng.next_u64() as u128,
+                );
+                worley
             }),
         }
     }
@@ -32,15 +33,15 @@ impl TerrainFunc {
 
         let mut h = 0.;
 
-        // let bruff = lerp(self.rough.sample(x, z), -1., 1., 0.9, 1.);
+        let bruff = lerp(self.rough.sample(x, z), -1., 1., 0.92, 1.);
 
-        let mut frq = 0.0005;
-        let mut amp = 1500.;
+        let mut frq = 0.0009;
+        let mut amp = 800.;
         self.mountains_worleys.iter().for_each(|worley| {
-            h += amp * worley.get([x * frq, z * frq]);
+            h += amp * bruff * worley.value_2d(x * frq, z * frq);
 
             frq *= 1.5;
-            amp *= 0.3;
+            amp *= 0.5;
         });
 
         h as f32
@@ -81,16 +82,4 @@ impl OctavedNoiseSampler {
 
         h / final_amp
     }
-}
-
-fn worley_distance_function(a: &[f64], b: &[f64]) -> f64 {
-    let mut ret = 0.;
-
-    for i in 0..a.len() {
-        ret += (b[i] - a[i]).powi(2);
-    }
-
-    ret = ret.sqrt();
-
-    smoothstep_in_bounds_only(ret * 2.)
 }
