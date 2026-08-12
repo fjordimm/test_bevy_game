@@ -20,7 +20,7 @@ use crate::game::{
             text::{GuiTextInterface, gui_text_h2, gui_text_m},
         },
     },
-    playing_state::player::tags::CameraForPlayer,
+    playing_state::{coord_rebasing::WorldSpaceEntity, player::tags::CameraForPlayer},
 };
 
 pub struct PrimaryDebugMenuPlugin;
@@ -61,7 +61,10 @@ struct EntityCountText;
 struct OverallStatePlayingSection;
 
 #[derive(Component)]
-struct TransformEntityCountText;
+struct TransformCountText;
+
+#[derive(Component)]
+struct WorldSpaceEntityCountText;
 
 #[derive(Component)]
 struct CamPositionText;
@@ -139,8 +142,13 @@ fn spawn_primary_debug_menu(
                     p.spawn(gui_text_h2("OverallState::Playing"));
 
                     p.spawn(gui_div_p()).insert(gui_children(|p| {
-                        p.spawn(gui_text_m("Transform Entity Count: "));
-                        p.spawn((TransformEntityCountText, gui_text_m("-")));
+                        p.spawn(gui_text_m("Transform Count: "));
+                        p.spawn((TransformCountText, gui_text_m("-")));
+                    }));
+
+                    p.spawn(gui_div_p()).insert(gui_children(|p| {
+                        p.spawn(gui_text_m("WorldSpaceEntity Count: "));
+                        p.spawn((WorldSpaceEntityCountText, gui_text_m("-")));
                     }));
 
                     p.spawn(gui_div_p()).insert(gui_children(|p| {
@@ -177,7 +185,8 @@ fn update(
             With<FpsText>,
             Without<LagSpikeText>,
             Without<EntityCountText>,
-            Without<TransformEntityCountText>,
+            Without<TransformCountText>,
+            Without<WorldSpaceEntityCountText>,
             Without<CamPositionText>,
         ),
     >,
@@ -187,7 +196,8 @@ fn update(
             With<LagSpikeText>,
             Without<FpsText>,
             Without<EntityCountText>,
-            Without<TransformEntityCountText>,
+            Without<TransformCountText>,
+            Without<WorldSpaceEntityCountText>,
             Without<CamPositionText>,
         ),
     >,
@@ -198,29 +208,44 @@ fn update(
             With<EntityCountText>,
             Without<FpsText>,
             Without<LagSpikeText>,
-            Without<TransformEntityCountText>,
+            Without<TransformCountText>,
+            Without<WorldSpaceEntityCountText>,
             Without<CamPositionText>,
         ),
     >,
-    mut transform_entity_count_text: Query<
+    mut transform_count_text: Query<
         GuiTextInterface,
         (
-            With<TransformEntityCountText>,
+            With<TransformCountText>,
             Without<FpsText>,
             Without<LagSpikeText>,
             Without<EntityCountText>,
+            Without<WorldSpaceEntityCountText>,
             Without<CamPositionText>,
         ),
     >,
     transform_q: Query<(), With<Transform>>,
+    mut world_space_entity_count_text: Query<
+        GuiTextInterface,
+        (
+            With<WorldSpaceEntityCountText>,
+            Without<FpsText>,
+            Without<LagSpikeText>,
+            Without<EntityCountText>,
+            Without<TransformCountText>,
+            Without<CamPositionText>,
+        ),
+    >,
+    world_space_entity_q: Query<(), With<WorldSpaceEntity>>,
     mut cam_position_text: Query<
         GuiTextInterface,
         (
             With<CamPositionText>,
-            Without<TransformEntityCountText>,
             Without<FpsText>,
             Without<LagSpikeText>,
             Without<EntityCountText>,
+            Without<TransformCountText>,
+            Without<WorldSpaceEntityCountText>,
         ),
     >,
     camera_q: Option<Single<&Transform, With<CameraForPlayer>>>,
@@ -247,9 +272,15 @@ fn update(
         );
     });
 
-    transform_entity_count_text.iter_mut().for_each(|mut text| {
+    transform_count_text.iter_mut().for_each(|mut text| {
         text.set_content(transform_q.iter().count().to_string());
     });
+
+    world_space_entity_count_text
+        .iter_mut()
+        .for_each(|mut text| {
+            text.set_content(world_space_entity_q.iter().count().to_string());
+        });
 
     if let Some(camera_transf) = camera_q {
         cam_position_text.iter_mut().for_each(|mut text| {

@@ -5,7 +5,7 @@ use bevy::{math::DVec3, prelude::*, time::common_conditions::on_timer};
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        coord_rebasing::resources::CoordRebasingOrigin,
+        coord_rebasing::{CoordRebasingOrigin, WorldSpaceEntity},
         player::tags::PlayerTransf,
         sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
     },
@@ -40,9 +40,6 @@ const REBASE_INTERVAL: u64 = 1500;
 fn on_enter(mut commands: Commands) {
     commands.insert_resource(CoordRebasingOrigin(DVec3::new(0., 0., 0.)));
 }
-
-#[derive(Component)]
-pub(super) struct WorldSpaceEntity;
 
 #[derive(Component)]
 struct LastTransfPosition(Vec3);
