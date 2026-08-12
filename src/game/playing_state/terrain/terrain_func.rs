@@ -59,23 +59,6 @@ impl TerrainFunc {
         };
         h += mountains_placement * mountains;
 
-        // {
-        //     let mut mountains = 0.;
-
-        //     let mountain_texture = rebound(self.rough.sample(x, z), -1., 1., 0.92, 1.);
-
-        //     let mut frq = 0.0007;
-        //     let mut amp = 250.;
-        //     self.mountains_w.iter().for_each(|worley| {
-        //         mountains += amp * mountain_texture * worley.value_2d(x * frq, z * frq);
-
-        //         frq *= 1.6;
-        //         amp *= 0.55;
-        //     });
-
-        //     h += 25f64.powf(self.mountains_placement_detail.sample(x, z)) * mountains;
-        // }
-
         h as f32
     }
 }

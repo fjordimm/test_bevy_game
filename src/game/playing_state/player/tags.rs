@@ -4,4 +4,4 @@ use bevy::prelude::*;
 pub struct CameraForPlayer;
 
 #[derive(Component)]
-pub struct PlayerBody;
+pub struct PlayerTransf;

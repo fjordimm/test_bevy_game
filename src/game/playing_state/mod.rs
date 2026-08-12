@@ -1,3 +1,4 @@
+pub mod coord_rebasing;
 pub mod environment_light;
 pub mod pause_menu;
 pub mod player;

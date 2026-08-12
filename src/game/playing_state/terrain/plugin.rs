@@ -6,7 +6,8 @@ use priority_queue::PriorityQueue;
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        player::tags::PlayerBody,
+        coord_rebasing::world_space_transf,
+        player::tags::PlayerTransf,
         reusable_materials::ReusableMaterials,
         sets::{DuringPlaying, OnEnterPlaying},
         tags::PlayingStateEntity,
@@ -19,32 +20,32 @@ use crate::game::{
     util::{alrmo, alrms, alrrs, seed_from_u64},
 };
 
-const UPDATE_CHUNKS_INTERVAL: u64 = 800; // In milliseconds.
-
 pub struct TerrainPlugin;
 
 impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(OnEnter(OverallState::Playing),
-                (on_enter1, on_enter2)
-                    .in_set(OnEnterPlaying::ResourceSetup)
-            )
-            .add_systems(Update,
-                (inactivate_all_chunks, activate_chunks, update_chunk_perimeters)
-                    .chain()
-                    .in_set(DuringPlaying)
-                    .run_if(on_timer(Duration::from_millis(UPDATE_CHUNKS_INTERVAL)))
-            )
-            .add_systems(Update,
-                gen_next_mesh_in_queue
-                    .in_set(DuringPlaying)
-                    .after(update_chunk_perimeters)
-            )
+            // .add_systems(OnEnter(OverallState::Playing),
+            //     (on_enter1, on_enter2)
+            //         .in_set(OnEnterPlaying::ResourceSetup)
+            // )
+            // .add_systems(Update,
+            //     (inactivate_all_chunks, activate_chunks, update_chunk_perimeters)
+            //         .chain()
+            //         .in_set(DuringPlaying)
+            //         .run_if(on_timer(Duration::from_millis(UPDATE_CHUNKS_INTERVAL)))
+            // )
+            // .add_systems(Update,
+            //     gen_next_mesh_in_queue
+            //         .in_set(DuringPlaying)
+            //         .after(update_chunk_perimeters)
+            // )
         ;
     }
 }
+
+const UPDATE_CHUNKS_INTERVAL: u64 = 800; // In milliseconds.
 
 pub(super) const CW: usize = 16; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
 const MAX_LOD: usize = 4;
@@ -100,11 +101,11 @@ fn chunk_bundle(
             has_mesh: false,
             perimeter_entity: None,
         },
-        Transform::from_xyz(
+        world_space_transf(Transform::from_xyz(
             scale * CW as f32 * off_x as f32,
             0.,
             scale * CW as f32 * off_z as f32,
-        ),
+        )),
         MeshMaterial3d(reusable_materials.terrain.clone()),
         Visibility::Hidden,
     )
@@ -155,7 +156,7 @@ fn inactivate_all_chunks(
 
 fn activate_chunks(
     mut commands: Commands,
-    player_q: Option<Single<&Transform, With<PlayerBody>>>,
+    player_q: Option<Single<&Transform, With<PlayerTransf>>>,
     mut chunk_dicts: ResMut<ChunkDicts>,
     mut chunk_q: Query<(Entity, &mut Chunk, &mut Visibility)>,
     lod_proportion: Res<TerrainLodProportion>,
@@ -200,7 +201,8 @@ fn activate_chunks(
                             &mut chunk_q,
                             &reusable_materials,
                             lod_proportion.0,
-                            &player_transf,
+                            // TODO
+                            &Vec3::new(0., 0., 0.),
                             &mut mesh_gen_queue,
                             l0_chunk_entity,
                         );
@@ -253,7 +255,7 @@ fn activate_chunk_or_subchunks(
     chunk_q: &mut Query<(Entity, &mut Chunk, &mut Visibility)>,
     reusable_materials: &Res<ReusableMaterials>,
     lod_proportion: f32,
-    player_transf: &Transform,
+    player_pos: &Vec3,
     mesh_gen_queue: &mut ResMut<MeshGenQueue>,
     entity: Entity,
 ) {
@@ -267,9 +269,8 @@ fn activate_chunk_or_subchunks(
         let should_do_subchunks = {
             let real_x = (cc.off_x as f32 + 0.5) * cc.scale * CW as f32;
             let real_z = (cc.off_z as f32 + 0.5) * cc.scale * CW as f32;
-            let dist_to_player = ((player_transf.translation.x - real_x).powi(2)
-                + (player_transf.translation.z - real_z).powi(2))
-            .sqrt();
+            let dist_to_player =
+                ((player_pos.x - real_x).powi(2) + (player_pos.z - real_z).powi(2)).sqrt();
 
             cc.lod < MAX_LOD
                 && dist_to_player < L0_RENDER_DIST as f32 * lod_proportion * cc.scale * CW as f32
@@ -384,7 +385,7 @@ fn activate_chunk_or_subchunks(
                         chunk_q,
                         &reusable_materials,
                         lod_proportion,
-                        &player_transf,
+                        &player_pos,
                         mesh_gen_queue,
                         tl,
                     );
@@ -394,7 +395,7 @@ fn activate_chunk_or_subchunks(
                         chunk_q,
                         &reusable_materials,
                         lod_proportion,
-                        &player_transf,
+                        &player_pos,
                         mesh_gen_queue,
                         tr,
                     );
@@ -404,7 +405,7 @@ fn activate_chunk_or_subchunks(
                         chunk_q,
                         &reusable_materials,
                         lod_proportion,
-                        &player_transf,
+                        &player_pos,
                         mesh_gen_queue,
                         bl,
                     );
@@ -414,7 +415,7 @@ fn activate_chunk_or_subchunks(
                         chunk_q,
                         &reusable_materials,
                         lod_proportion,
-                        &player_transf,
+                        &player_pos,
                         mesh_gen_queue,
                         br,
                     );

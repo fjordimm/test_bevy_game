@@ -18,6 +18,8 @@
 - Make sure the first time you enter `OverallState::Playing` works the exact same as when you exit to the menu and then go back.
 
 ## Currently Working On
+- Coordinate rebasing.
+    - Write a note.md file in `coord_rebasing` that explains it.
 - Terrain.
     - Add hysteresis for changing LODs.
     - Consider Worley noise.

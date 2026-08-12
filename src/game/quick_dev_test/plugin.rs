@@ -4,13 +4,20 @@ use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_tim
 use rand_distr::num_traits::Pow;
 
 use crate::game::{
+    core::states::OverallState,
+    geometry::dodec::dodec_mesh,
+    graphics::primary_shader::plugin::{
+        PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
+    },
     playing_state::{
+        coord_rebasing::world_space_transf,
         environment_light::{SeasonOfYear, TimeOfDay},
         player::{
             resources::PlayerMovementSettings,
-            tags::{CameraForPlayer, PlayerBody},
+            tags::{CameraForPlayer, PlayerTransf},
         },
-        sets::DuringPlayingUnpaused,
+        sets::{DuringPlayingUnpaused, OnEnterPlaying},
+        tags::PlayingStateEntity,
     },
     util::alrms,
 };
@@ -33,10 +40,10 @@ impl Plugin for QuickDevTestPlugin {
                 move_player_body_to_cam
                     .in_set(DuringPlayingUnpaused::General)
             )
-            // .add_systems(OnEnter(OverallState::Playing),
-            //     spawn_some_stuff
-            //         .in_set(OnEnterPlaying::General)
-            // )
+            .add_systems(OnEnter(OverallState::Playing),
+                spawn_some_stuff
+                    .in_set(OnEnterPlaying::General)
+            )
         ;
     }
 }
@@ -78,8 +85,8 @@ fn scrolling(
 
 fn move_player_body_to_cam(
     keys: Res<ButtonInput<KeyCode>>,
-    player_body_q: Option<Single<&mut Transform, With<PlayerBody>>>,
-    camera_q: Option<Single<&Transform, (With<CameraForPlayer>, Without<PlayerBody>)>>,
+    player_body_q: Option<Single<&mut Transform, With<PlayerTransf>>>,
+    camera_q: Option<Single<&Transform, (With<CameraForPlayer>, Without<PlayerTransf>)>>,
 ) {
     if keys.pressed(KeyCode::BracketLeft) {
         if let Some(mut player_body) = alrms!(player_body_q) {
@@ -91,19 +98,17 @@ fn move_player_body_to_cam(
     }
 }
 
-// fn spawn_some_stuff(
-//     mut commands: Commands,
-//     mut meshes: ResMut<Assets<Mesh>>,
-//     mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
-// ) {
-//     commands.spawn((
-//         PlayingStateEntity,
-//         Mesh3d(meshes.add(dodec_mesh())),
-//         MeshMaterial3d(
-//             materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-//                 texturing_scale: 1.,
-//             })),
-//         ),
-//         Transform::default(),
-//     ));
-// }
+fn spawn_some_stuff(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
+) {
+    commands.spawn((
+        PlayingStateEntity,
+        Mesh3d(meshes.add(dodec_mesh())),
+        MeshMaterial3d(materials.add(primary_shader_material(
+            PrimaryShaderMaterialProps::default(),
+        ))),
+        world_space_transf(Transform::from_xyz(3., 0., -9.)),
+    ));
+}

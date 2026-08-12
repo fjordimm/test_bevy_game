@@ -5,6 +5,7 @@ use crate::game::{
     core::{resources::KeyBindings, states::OverallState},
     graphics::primary_shader::plugin::PrimaryShaderMaterial,
     playing_state::{
+        coord_rebasing::{plugin::CoordRebasingPlugin, world_space_transf},
         environment_light::plugin::EnvironmentLightPlugin,
         pause_menu::plugin::PauseMenuPlugin,
         player::{plugin::PlayerPlugin, tags::CameraForPlayer},
@@ -63,6 +64,7 @@ impl Plugin for PlayingStatePlugin {
             .add_plugins(TerrainPlugin)
             .add_plugins(PauseMenuPlugin)
             .add_plugins(PlayerPlugin)
+            .add_plugins(CoordRebasingPlugin)
         ;
     }
 }
@@ -82,7 +84,7 @@ fn on_enter(
             fov: 60.0f32.to_radians(),
             ..default()
         }),
-        Transform::from_xyz(0., 3., 7.),
+        world_space_transf(Transform::from_xyz(0., 3., 7.)),
         AmbientLight {
             brightness: 0.,
             ..default()

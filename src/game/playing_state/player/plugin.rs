@@ -10,7 +10,7 @@ use crate::game::{
     playing_state::{
         player::{
             resources::PlayerMovementSettings,
-            tags::{CameraForPlayer, PlayerBody},
+            tags::{CameraForPlayer, PlayerTransf},
         },
         sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying, OnExitPlaying},
         states::PauseState,
@@ -135,7 +135,7 @@ fn spawn_player_body(
 ) {
     commands.spawn((
         PlayingStateEntity,
-        PlayerBody,
+        PlayerTransf,
         Mesh3d(meshes.add(Capsule3d::new(0.25, 1000.))),
         MeshMaterial3d(materials.add(Color::linear_rgb(1., 0., 1.))),
         Transform::from_xyz(0., 0., 0.),
