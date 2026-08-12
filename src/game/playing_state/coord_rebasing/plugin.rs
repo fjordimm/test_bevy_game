@@ -35,7 +35,7 @@ impl Plugin for CoordRebasingPlugin {
     }
 }
 
-const REBASE_INTERVAL: u64 = 1500;
+const REBASE_INTERVAL: u64 = 3000;
 
 fn on_enter(mut commands: Commands) {
     commands.insert_resource(CoordRebasingOrigin(DVec3::new(0., 0., 0.)));
