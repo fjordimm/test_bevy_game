@@ -6,7 +6,7 @@ use priority_queue::PriorityQueue;
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        coord_rebasing::world_space_transf,
+        coord_rebasing::{CoordRebasingOrigin, world_space_transf},
         player::tags::PlayerTransf,
         reusable_materials::ReusableMaterials,
         sets::{DuringPlaying, OnEnterPlaying},
@@ -26,21 +26,21 @@ impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            // .add_systems(OnEnter(OverallState::Playing),
-            //     (on_enter1, on_enter2)
-            //         .in_set(OnEnterPlaying::ResourceSetup)
-            // )
-            // .add_systems(Update,
-            //     (inactivate_all_chunks, activate_chunks, update_chunk_perimeters)
-            //         .chain()
-            //         .in_set(DuringPlaying)
-            //         .run_if(on_timer(Duration::from_millis(UPDATE_CHUNKS_INTERVAL)))
-            // )
-            // .add_systems(Update,
-            //     gen_next_mesh_in_queue
-            //         .in_set(DuringPlaying)
-            //         .after(update_chunk_perimeters)
-            // )
+            .add_systems(OnEnter(OverallState::Playing),
+                (on_enter1, on_enter2)
+                    .in_set(OnEnterPlaying::ResourceSetup)
+            )
+            .add_systems(Update,
+                (inactivate_all_chunks, activate_chunks, update_chunk_perimeters)
+                    .chain()
+                    .in_set(DuringPlaying)
+                    .run_if(on_timer(Duration::from_millis(UPDATE_CHUNKS_INTERVAL)))
+            )
+            .add_systems(Update,
+                gen_next_mesh_in_queue
+                    .in_set(DuringPlaying)
+                    .after(update_chunk_perimeters)
+            )
         ;
     }
 }
@@ -87,6 +87,7 @@ fn chunk_bundle(
     reusable_materials: &ReusableMaterials,
     lod: usize,
     scale: f32,
+    coord_rebasing_origin: &Vec3,
     off_x: i64,
     off_z: i64,
 ) -> impl Bundle {
@@ -101,10 +102,12 @@ fn chunk_bundle(
             has_mesh: false,
             perimeter_entity: None,
         },
-        world_space_transf(Transform::from_xyz(
-            scale * CW as f32 * off_x as f32,
-            0.,
-            scale * CW as f32 * off_z as f32,
+        world_space_transf(Transform::from_translation(
+            Vec3::new(
+                scale * CW as f32 * off_x as f32,
+                0.,
+                scale * CW as f32 * off_z as f32,
+            ) - coord_rebasing_origin,
         )),
         MeshMaterial3d(reusable_materials.terrain.clone()),
         Visibility::Hidden,
@@ -156,6 +159,7 @@ fn inactivate_all_chunks(
 
 fn activate_chunks(
     mut commands: Commands,
+    coord_rebasing_origin: Res<CoordRebasingOrigin>,
     player_q: Option<Single<&Transform, With<PlayerTransf>>>,
     mut chunk_dicts: ResMut<ChunkDicts>,
     mut chunk_q: Query<(Entity, &mut Chunk, &mut Visibility)>,
@@ -163,11 +167,11 @@ fn activate_chunks(
     reusable_materials: Res<ReusableMaterials>,
     mut mesh_gen_queue: ResMut<MeshGenQueue>,
 ) {
-    let player_transf = alrrs!(player_q);
-    let x_center =
-        (player_transf.translation.x / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i64;
-    let z_center =
-        (player_transf.translation.z / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i64;
+    let coord_rebasing_origin = &coord_rebasing_origin.0.as_vec3();
+
+    let player_pos = alrrs!(player_q).translation + coord_rebasing_origin;
+    let x_center = (player_pos.x / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i64;
+    let z_center = (player_pos.z / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i64;
 
     // Spirals out from (x_center, z_center), covering a square which goes L0_RENDER_DIST in each direction.
     let mut x = x_center;
@@ -201,16 +205,23 @@ fn activate_chunks(
                             &mut chunk_q,
                             &reusable_materials,
                             lod_proportion.0,
-                            // TODO
-                            &Vec3::new(0., 0., 0.),
+                            &player_pos,
                             &mut mesh_gen_queue,
+                            coord_rebasing_origin,
                             l0_chunk_entity,
                         );
                     }
                 }
             } else {
                 let entity = commands
-                    .spawn(chunk_bundle(&reusable_materials, 0, L0_CHUNK_SCALE, x, z))
+                    .spawn(chunk_bundle(
+                        &reusable_materials,
+                        0,
+                        L0_CHUNK_SCALE,
+                        coord_rebasing_origin,
+                        x,
+                        z,
+                    ))
                     .id();
 
                 chunk_dicts.0[0].0.insert(ChunkDictKey::new(x, z), entity);
@@ -257,6 +268,7 @@ fn activate_chunk_or_subchunks(
     lod_proportion: f32,
     player_pos: &Vec3,
     mesh_gen_queue: &mut ResMut<MeshGenQueue>,
+    coord_rebasing_origin: &Vec3,
     entity: Entity,
 ) {
     let mut not_doing_subchunks = true;
@@ -288,7 +300,14 @@ fn activate_chunk_or_subchunks(
                         *subchunk_entity
                     } else {
                         let subchunk_entity = commands
-                            .spawn(chunk_bundle(reusable_materials, cc.lod + 1, sscale, sx, sz))
+                            .spawn(chunk_bundle(
+                                reusable_materials,
+                                cc.lod + 1,
+                                sscale,
+                                coord_rebasing_origin,
+                                sx,
+                                sz,
+                            ))
                             .id();
 
                         chunk_dict.insert(ChunkDictKey::new(sx, sz), subchunk_entity);
@@ -304,7 +323,14 @@ fn activate_chunk_or_subchunks(
                         *subchunk_entity
                     } else {
                         let subchunk_entity = commands
-                            .spawn(chunk_bundle(reusable_materials, cc.lod + 1, sscale, sx, sz))
+                            .spawn(chunk_bundle(
+                                reusable_materials,
+                                cc.lod + 1,
+                                sscale,
+                                coord_rebasing_origin,
+                                sx,
+                                sz,
+                            ))
                             .id();
 
                         chunk_dict.insert(ChunkDictKey::new(sx, sz), subchunk_entity);
@@ -320,7 +346,14 @@ fn activate_chunk_or_subchunks(
                         *subchunk_entity
                     } else {
                         let subchunk_entity = commands
-                            .spawn(chunk_bundle(reusable_materials, cc.lod + 1, sscale, sx, sz))
+                            .spawn(chunk_bundle(
+                                reusable_materials,
+                                cc.lod + 1,
+                                sscale,
+                                coord_rebasing_origin,
+                                sx,
+                                sz,
+                            ))
                             .id();
 
                         chunk_dict.insert(ChunkDictKey::new(sx, sz), subchunk_entity);
@@ -336,7 +369,14 @@ fn activate_chunk_or_subchunks(
                         *subchunk_entity
                     } else {
                         let subchunk_entity = commands
-                            .spawn(chunk_bundle(reusable_materials, cc.lod + 1, sscale, sx, sz))
+                            .spawn(chunk_bundle(
+                                reusable_materials,
+                                cc.lod + 1,
+                                sscale,
+                                coord_rebasing_origin,
+                                sx,
+                                sz,
+                            ))
                             .id();
 
                         chunk_dict.insert(ChunkDictKey::new(sx, sz), subchunk_entity);
@@ -387,6 +427,7 @@ fn activate_chunk_or_subchunks(
                         lod_proportion,
                         &player_pos,
                         mesh_gen_queue,
+                        coord_rebasing_origin,
                         tl,
                     );
                     activate_chunk_or_subchunks(
@@ -397,6 +438,7 @@ fn activate_chunk_or_subchunks(
                         lod_proportion,
                         &player_pos,
                         mesh_gen_queue,
+                        coord_rebasing_origin,
                         tr,
                     );
                     activate_chunk_or_subchunks(
@@ -407,6 +449,7 @@ fn activate_chunk_or_subchunks(
                         lod_proportion,
                         &player_pos,
                         mesh_gen_queue,
+                        coord_rebasing_origin,
                         bl,
                     );
                     activate_chunk_or_subchunks(
@@ -417,6 +460,7 @@ fn activate_chunk_or_subchunks(
                         lod_proportion,
                         &player_pos,
                         mesh_gen_queue,
+                        coord_rebasing_origin,
                         br,
                     );
 
