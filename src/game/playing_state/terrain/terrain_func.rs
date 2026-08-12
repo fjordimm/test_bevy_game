@@ -14,6 +14,7 @@ pub struct TerrainFunc {
     mountains_placement_detail: OctavedNoiseSampler,
     mountains_w: [WorleyNoise; 4],
     rivers: OctavedNoiseSampler,
+    ground_detail: OctavedNoiseSampler,
 }
 
 impl TerrainFunc {
@@ -25,7 +26,8 @@ impl TerrainFunc {
             mountains_placement_overall: OctavedNoiseSampler::new(&mut prng, 1, 0.000156),
             mountains_placement_detail: OctavedNoiseSampler::new(&mut prng, 2, 0.000247),
             mountains_w: make_worley_noise_array(&mut prng),
-            rivers: OctavedNoiseSampler::new(&mut prng, 4, 0.0002),
+            rivers: OctavedNoiseSampler::new(&mut prng, 6, 0.00007),
+            ground_detail: OctavedNoiseSampler::new(&mut prng, 5, 0.005),
         }
     }
 
@@ -43,7 +45,7 @@ impl TerrainFunc {
 
             val
         };
-        let mountains = {
+        let mountains_detail = {
             let mut val = 0.;
 
             let texture = lerp_remap(self.rough.sample(x, z), -1., 1., 0.92, 1.);
@@ -59,17 +61,21 @@ impl TerrainFunc {
 
             val
         };
-        h += mountains_placement * mountains;
+        let mountains = mountains_placement * mountains_detail;
+        h += mountains;
 
         let rivers = {
             let mut val = 0.;
 
-            let skinniness = 82.3;
-            val += sigmoid(((skinniness * self.rivers.sample(x, z)).abs() - 2.) * skinniness);
+            let skinniness = 9_000_000.;
+            let river_inp = self.rivers.sample(x, z) + 0.01 * mountains_placement;
+            val += 1. - 1. / (1. + skinniness * river_inp.powi(4));
 
             val
         };
-        h = rivers * (h + 100.);
+        h = rivers * (h + 50.);
+
+        h += 5.3 * self.ground_detail.sample(x, z);
 
         h as f32
     }

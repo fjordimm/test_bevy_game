@@ -1,6 +1,10 @@
 use std::time::Duration;
 
-use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_timer};
+use bevy::{
+    input::mouse::MouseWheel, pbr::OpaqueRendererMethod, prelude::*,
+    time::common_conditions::on_timer,
+};
+use bevy_mesh::MeshVertexAttribute;
 use rand_distr::num_traits::Pow;
 
 use crate::game::{
@@ -101,14 +105,32 @@ fn move_player_body_to_cam(
 fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<PrimaryShaderMaterial>>,
+    mut materials1: ResMut<Assets<PrimaryShaderMaterial>>,
+    mut materials2: ResMut<Assets<StandardMaterial>>,
 ) {
     commands.spawn((
         PlayingStateEntity,
         Mesh3d(meshes.add(dodec_mesh())),
-        MeshMaterial3d(materials.add(primary_shader_material(
+        MeshMaterial3d(materials1.add(primary_shader_material(
             PrimaryShaderMaterialProps::default(),
         ))),
         world_space_transf(Transform::from_xyz(3., 0., -9.)),
+    ));
+
+    // Layer of water.
+    commands.spawn((
+        PlayingStateEntity,
+        Mesh3d(
+            meshes.add(
+                Mesh::from(Plane3d::new(Vec3::Y, Vec2::new(20_000., 20_000.)))
+                    .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, vec![[0., 0., 1., 1.]; 4]),
+            ),
+        ),
+        MeshMaterial3d(materials2.add(StandardMaterial {
+            base_color: Color::srgba(0., 0.1, 0.9, 0.3),
+            alpha_mode: AlphaMode::Blend,
+            ..default()
+        })),
+        Transform::from_xyz(0., 25., 0.),
     ));
 }
