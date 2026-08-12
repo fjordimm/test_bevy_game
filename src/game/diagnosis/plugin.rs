@@ -11,7 +11,7 @@ impl Plugin for DiagnosisPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_plugins(FrameTimeDiagnosticsPlugin::new(120))
+            .add_plugins(FrameTimeDiagnosticsPlugin::new(300))
             .add_plugins(EntityCountDiagnosticsPlugin::default())
             .insert_resource(LagSpikeDiag(0))
             .add_systems(Update, update_largest_recent_lag_spike)

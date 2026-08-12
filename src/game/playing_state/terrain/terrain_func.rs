@@ -13,6 +13,7 @@ pub struct TerrainFunc {
     mountains_placement_overall: OctavedNoiseSampler,
     mountains_placement_detail: OctavedNoiseSampler,
     mountains_w: [WorleyNoise; 4],
+    rivers: OctavedNoiseSampler,
 }
 
 impl TerrainFunc {
@@ -24,6 +25,7 @@ impl TerrainFunc {
             mountains_placement_overall: OctavedNoiseSampler::new(&mut prng, 1, 0.000156),
             mountains_placement_detail: OctavedNoiseSampler::new(&mut prng, 2, 0.000247),
             mountains_w: make_worley_noise_array(&mut prng),
+            rivers: OctavedNoiseSampler::new(&mut prng, 4, 0.0002),
         }
     }
 
@@ -58,6 +60,16 @@ impl TerrainFunc {
             val
         };
         h += mountains_placement * mountains;
+
+        let rivers = {
+            let mut val = 0.;
+
+            let skinniness = 82.3;
+            val += sigmoid(((skinniness * self.rivers.sample(x, z)).abs() - 2.) * skinniness);
+
+            val
+        };
+        h = rivers * (h + 100.);
 
         h as f32
     }
