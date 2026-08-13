@@ -4,8 +4,8 @@ use rand::{Rng, SeedableRng};
 use worley_noise::WorleyNoise;
 
 use crate::game::{
-    playing_state::terrain::terrain_func_functions::{lerp_remap, sigmoid},
     random::Prng,
+    util::mathf64::{lerp_remap, sigmoid},
 };
 
 pub struct TerrainFunc {
@@ -64,8 +64,6 @@ impl TerrainFunc {
         let mountains = mountains_placement * mountains_detail;
         h += mountains;
 
-        h += 12.9 * self.ground_rough.sample(x, z);
-
         let rivers = {
             let mut val = 0.;
 
@@ -76,6 +74,8 @@ impl TerrainFunc {
             val
         };
         h = rivers * (h + 35.);
+
+        h += 12.9 * self.ground_rough.sample(x, z);
 
         h as f32
     }

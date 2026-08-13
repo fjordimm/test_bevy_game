@@ -131,3 +131,33 @@ pub fn col_to_array4(col: Color) -> [f32; 4] {
 pub fn seed_from_u64(inp: u64) -> [u8; 8] {
     inp.to_le_bytes()
 }
+
+pub mod mathf32 {
+    pub fn lerp_remap(
+        x: f32,
+        lower_bound_from: f32,
+        upper_bound_from: f32,
+        lower_bound_to: f32,
+        upper_bound_to: f32,
+    ) -> f32 {
+        ((x - lower_bound_from) / upper_bound_from) * (upper_bound_to - lower_bound_to)
+            + lower_bound_to
+    }
+}
+
+pub mod mathf64 {
+    pub fn lerp_remap(
+        x: f64,
+        lower_bound_from: f64,
+        upper_bound_from: f64,
+        lower_bound_to: f64,
+        upper_bound_to: f64,
+    ) -> f64 {
+        ((x - lower_bound_from) / upper_bound_from) * (upper_bound_to - lower_bound_to)
+            + lower_bound_to
+    }
+
+    pub fn sigmoid(x: f64) -> f64 {
+        1. / (1. + 2f64.powf(-x))
+    }
+}

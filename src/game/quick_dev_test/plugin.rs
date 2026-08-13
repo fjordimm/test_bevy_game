@@ -1,10 +1,6 @@
 use std::time::Duration;
 
-use bevy::{
-    input::mouse::MouseWheel, pbr::OpaqueRendererMethod, prelude::*,
-    time::common_conditions::on_timer,
-};
-use bevy_mesh::MeshVertexAttribute;
+use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_timer};
 use rand_distr::num_traits::Pow;
 
 use crate::game::{

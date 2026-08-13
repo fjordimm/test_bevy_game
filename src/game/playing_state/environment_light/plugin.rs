@@ -8,7 +8,7 @@ use crate::game::{
         skybox::ComputedSkyboxValues,
         tags::PlayingStateEntity,
     },
-    util::alrms,
+    util::{alrms, mathf32::lerp_remap},
 };
 
 pub struct EnvironmentLightPlugin;
@@ -24,20 +24,32 @@ impl Plugin for EnvironmentLightPlugin {
                     .in_set(OnEnterPlaying::General)
             )
             .add_systems(Update,
-                update_sunlight
+                update_environment_lights
                     .in_set(DuringPlayingUnpaused::General)
             )
         ;
     }
 }
 
+const SUNLIGHT_ILLUMINANCE: f32 = 1000.;
+
+const ABOVE_AMBIENT_LIGHT_ILLUMINANCE: f32 = 250.;
+const ABOVE_AMBIENT_LIGHT_COLOR: Color = Color::hsv(228., 0.18, 1.);
+const BELOW_AMBIENT_LIGHT_ILLUMINANCE: f32 = 100.;
+const BELOW_AMBIENT_LIGHT_COLOR: Color = Color::hsv(169., 0.05, 1.);
+
+const SUNLIGHT_Y_LEVEL_OF_MIN: f32 = -0.1;
+const AMBIENT_LIGHT_MIN_FACTOR: f32 = 0.05;
+const AMBIENT_LIGHT_Y_LEVEL_OF_MIN: f32 = -0.25;
+
 #[derive(Component)]
 pub struct SunlightTag;
 
-const ABOVE_AMBIENT_LIGHT_ILLUMINANCE: f32 = 1000.;
-const ABOVE_AMBIENT_LIGHT_COLOR: Color = Color::hsv(228., 0.18, 1.);
-const BELOW_AMBIENT_LIGHT_ILLUMINANCE: f32 = 500.;
-const BELOW_AMBIENT_LIGHT_COLOR: Color = Color::hsv(169., 0.05, 1.);
+#[derive(Component)]
+pub struct AboveAmbientLightTag;
+
+#[derive(Component)]
+pub struct BelowAmbientLightTag;
 
 fn on_enter(
     mut commands: Commands,
@@ -52,6 +64,7 @@ fn on_enter(
         DirectionalLight {
             color: Color::hsv(0., 0., 1.),
             shadows_enabled: false,
+            illuminance: SUNLIGHT_ILLUMINANCE,
             ..default()
         },
         Transform::default().looking_at(vec3(0., -1., 0.), Dir3::Y),
@@ -62,6 +75,7 @@ fn on_enter(
     // Cool lighting from above:
     commands.spawn((
         PlayingStateEntity,
+        AboveAmbientLightTag,
         DirectionalLight {
             color: ABOVE_AMBIENT_LIGHT_COLOR,
             shadows_enabled: false,
@@ -72,6 +86,7 @@ fn on_enter(
     ));
     commands.spawn((
         PlayingStateEntity,
+        AboveAmbientLightTag,
         DirectionalLight {
             color: ABOVE_AMBIENT_LIGHT_COLOR,
             shadows_enabled: false,
@@ -83,6 +98,7 @@ fn on_enter(
     // Warm(er) lighting from below:
     commands.spawn((
         PlayingStateEntity,
+        BelowAmbientLightTag,
         DirectionalLight {
             color: BELOW_AMBIENT_LIGHT_COLOR,
             shadows_enabled: false,
@@ -93,6 +109,7 @@ fn on_enter(
     ));
     commands.spawn((
         PlayingStateEntity,
+        BelowAmbientLightTag,
         DirectionalLight {
             color: BELOW_AMBIENT_LIGHT_COLOR,
             shadows_enabled: false,
@@ -108,9 +125,21 @@ fn on_enter(
     season_of_year.0 = 0.0;
 }
 
-fn update_sunlight(
-    sunlight_q: Option<Single<(&mut Transform, &mut DirectionalLight), With<SunlightTag>>>,
+fn update_environment_lights(
     computed_skybox_values: Res<ComputedSkyboxValues>,
+    sunlight_q: Option<Single<(&mut Transform, &mut DirectionalLight), With<SunlightTag>>>,
+    mut above_ambient_light_q: Query<
+        &mut DirectionalLight,
+        (With<AboveAmbientLightTag>, Without<SunlightTag>),
+    >,
+    mut below_ambient_light_q: Query<
+        &mut DirectionalLight,
+        (
+            With<BelowAmbientLightTag>,
+            Without<SunlightTag>,
+            Without<AboveAmbientLightTag>,
+        ),
+    >,
 ) {
     if let Some(mut sunlight) = alrms!(sunlight_q) {
         sunlight
@@ -118,7 +147,32 @@ fn update_sunlight(
             .look_at(computed_skybox_values.sun_position, Vec3::Y);
         sunlight.0.rotate_local_y(180.0f32.to_radians());
 
-        sunlight.1.illuminance = f32::max(0., computed_skybox_values.sun_position.y)
-            * light_consts::lux::AMBIENT_DAYLIGHT;
+        sunlight.1.illuminance = lerp_remap(
+            computed_skybox_values.sun_position.y,
+            SUNLIGHT_Y_LEVEL_OF_MIN,
+            1.,
+            0.,
+            1.,
+        )
+        .clamp(0., 1.)
+            * SUNLIGHT_ILLUMINANCE;
     }
+
+    let ambient_light_based_on_sun = lerp_remap(
+        computed_skybox_values
+            .sun_position
+            .y
+            .clamp(AMBIENT_LIGHT_Y_LEVEL_OF_MIN, 1.),
+        AMBIENT_LIGHT_Y_LEVEL_OF_MIN,
+        1.,
+        AMBIENT_LIGHT_MIN_FACTOR,
+        1.,
+    );
+
+    above_ambient_light_q.iter_mut().for_each(|mut light| {
+        light.illuminance = ambient_light_based_on_sun * ABOVE_AMBIENT_LIGHT_ILLUMINANCE;
+    });
+    below_ambient_light_q.iter_mut().for_each(|mut light| {
+        light.illuminance = ambient_light_based_on_sun * BELOW_AMBIENT_LIGHT_ILLUMINANCE;
+    });
 }

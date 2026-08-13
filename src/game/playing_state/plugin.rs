@@ -81,7 +81,7 @@ fn on_enter(
         CameraForPlayer,
         Camera3d::default(),
         Projection::Perspective(PerspectiveProjection {
-            fov: 60.0f32.to_radians(),
+            fov: 60f32.to_radians(),
             ..default()
         }),
         world_space_transf(Transform::from_xyz(0., 3., 7.)),

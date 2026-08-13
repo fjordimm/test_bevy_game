@@ -55,7 +55,7 @@ const L0_RENDER_DIST: i64 = 10;
 
 fn on_enter1(world: &mut World) {
     // TODO: change the seed to not be this arbitrary number.
-    world.insert_non_send_resource(TheTerrainFunc(TerrainFunc::new(seed_from_u64(12345))));
+    world.insert_non_send_resource(TheTerrainFunc(TerrainFunc::new(seed_from_u64(123))));
 }
 
 fn on_enter2(mut commands: Commands) {
