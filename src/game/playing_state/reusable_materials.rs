@@ -1,20 +1,22 @@
 use bevy::prelude::*;
 
-use crate::game::graphics::primary_shader::plugin::{
-    PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
+use crate::game::graphics::{
+    primary_material::plugin::PrimaryMaterial,
+    terrain_material::plugin::{TerrainMaterial, terrain_material},
 };
 
 #[derive(Resource)]
 pub struct ReusableMaterials {
-    pub terrain: Handle<PrimaryShaderMaterial>,
+    pub terrain: Handle<TerrainMaterial>,
 }
 
 impl ReusableMaterials {
-    pub fn new(materials: &mut ResMut<Assets<PrimaryShaderMaterial>>) -> Self {
+    pub fn new(
+        _materials_primary: &mut ResMut<Assets<PrimaryMaterial>>,
+        materials_terrain: &mut ResMut<Assets<TerrainMaterial>>,
+    ) -> Self {
         Self {
-            terrain: materials.add(primary_shader_material(PrimaryShaderMaterialProps {
-                texturing_scale: 1.,
-            })),
+            terrain: materials_terrain.add(terrain_material(default())),
         }
     }
 }

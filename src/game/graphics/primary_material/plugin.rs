@@ -1,0 +1,88 @@
+use bevy::{
+    pbr::{ExtendedMaterial, MaterialExtension, MaterialExtensionKey, MaterialExtensionPipeline},
+    prelude::*,
+    render::render_resource::{
+        AsBindGroup, Face, RenderPipelineDescriptor, SpecializedMeshPipelineError,
+    },
+    shader::ShaderRef,
+};
+use bevy_mesh::MeshVertexBufferLayoutRef;
+
+pub struct PrimaryMaterialPlugin;
+
+impl Plugin for PrimaryMaterialPlugin {
+    fn build(&self, app: &mut App) {
+        #[rustfmt::skip]
+        app
+            .add_plugins(MaterialPlugin::<PrimaryMaterial>::default())
+        ;
+    }
+}
+
+pub struct PrimaryMaterialProps {
+    pub texturing_scale: f32,
+}
+
+impl Default for PrimaryMaterialProps {
+    fn default() -> Self {
+        Self {
+            texturing_scale: 1.,
+        }
+    }
+}
+
+pub type PrimaryMaterial = ExtendedMaterial<StandardMaterial, __PrimaryMaterialExtension>;
+
+pub fn primary_material(props: PrimaryMaterialProps) -> PrimaryMaterial {
+    PrimaryMaterial {
+        base: StandardMaterial {
+            perceptual_roughness: 1.,
+            metallic: 0.,
+            reflectance: 0.,
+            diffuse_transmission: 0.,
+            specular_transmission: 0.,
+            thickness: 0.,
+            ior: 1.5,
+            attenuation_distance: 1.0,
+            double_sided: false,
+            cull_mode: Some(Face::Back),
+            fog_enabled: true,
+            ..default()
+        },
+        extension: __PrimaryMaterialExtension {
+            texturing_scale: props.texturing_scale,
+        },
+    }
+}
+
+#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
+pub struct __PrimaryMaterialExtension {
+    #[uniform(100)]
+    texturing_scale: f32,
+}
+
+impl MaterialExtension for __PrimaryMaterialExtension {
+    fn vertex_shader() -> ShaderRef {
+        "shaders/primary_material.wgsl".into()
+    }
+
+    fn fragment_shader() -> ShaderRef {
+        "shaders/primary_material.wgsl".into()
+    }
+
+    fn specialize(
+        _pipeline: &MaterialExtensionPipeline,
+        descriptor: &mut RenderPipelineDescriptor,
+        layout: &MeshVertexBufferLayoutRef,
+        _key: MaterialExtensionKey<Self>,
+    ) -> Result<(), SpecializedMeshPipelineError> {
+        let vertex_layout = layout.0.get_layout(&[
+            Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
+            Mesh::ATTRIBUTE_COLOR.at_shader_location(1),
+        ])?;
+
+        descriptor.vertex.buffers = vec![vertex_layout];
+
+        Ok(())
+    }
+}

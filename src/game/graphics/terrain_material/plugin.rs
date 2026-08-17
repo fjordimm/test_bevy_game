@@ -8,22 +8,22 @@ use bevy::{
 };
 use bevy_mesh::MeshVertexBufferLayoutRef;
 
-pub struct PrimaryShaderPlugin;
+pub struct TerrainMaterialPlugin;
 
-impl Plugin for PrimaryShaderPlugin {
+impl Plugin for TerrainMaterialPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_plugins(MaterialPlugin::<PrimaryShaderMaterial>::default())
+            .add_plugins(MaterialPlugin::<TerrainMaterial>::default())
         ;
     }
 }
 
-pub struct PrimaryShaderMaterialProps {
+pub struct TerrainMaterialProps {
     pub texturing_scale: f32,
 }
 
-impl Default for PrimaryShaderMaterialProps {
+impl Default for TerrainMaterialProps {
     fn default() -> Self {
         Self {
             texturing_scale: 1.,
@@ -31,10 +31,10 @@ impl Default for PrimaryShaderMaterialProps {
     }
 }
 
-pub type PrimaryShaderMaterial = ExtendedMaterial<StandardMaterial, __PrimaryShaderExtension>;
+pub type TerrainMaterial = ExtendedMaterial<StandardMaterial, __TerrainMaterialExtension>;
 
-pub fn primary_shader_material(props: PrimaryShaderMaterialProps) -> PrimaryShaderMaterial {
-    PrimaryShaderMaterial {
+pub fn terrain_material(props: TerrainMaterialProps) -> TerrainMaterial {
+    TerrainMaterial {
         base: StandardMaterial {
             perceptual_roughness: 1.,
             metallic: 0.,
@@ -49,29 +49,25 @@ pub fn primary_shader_material(props: PrimaryShaderMaterialProps) -> PrimaryShad
             fog_enabled: true,
             ..default()
         },
-        extension: __PrimaryShaderExtension {
+        extension: __TerrainMaterialExtension {
             texturing_scale: props.texturing_scale,
         },
     }
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
-pub struct __PrimaryShaderExtension {
+pub struct __TerrainMaterialExtension {
     #[uniform(100)]
     texturing_scale: f32,
 }
 
-// TODOr
-// pub const ATTRIBUTE_POLYGONITY0: MeshVertexAttribute =
-//     MeshVertexAttribute::new("Polygonity0", 54784352, VertexFormat::Float32x4);
-
-impl MaterialExtension for __PrimaryShaderExtension {
+impl MaterialExtension for __TerrainMaterialExtension {
     fn vertex_shader() -> ShaderRef {
-        "shaders/primary.wgsl".into()
+        "shaders/terrain_material.wgsl".into()
     }
 
     fn fragment_shader() -> ShaderRef {
-        "shaders/primary.wgsl".into()
+        "shaders/terrain_material.wgsl".into()
     }
 
     fn specialize(
@@ -80,11 +76,9 @@ impl MaterialExtension for __PrimaryShaderExtension {
         layout: &MeshVertexBufferLayoutRef,
         _key: MaterialExtensionKey<Self>,
     ) -> Result<(), SpecializedMeshPipelineError> {
-        let vertex_layout = layout.0.get_layout(&[
-            Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
-            Mesh::ATTRIBUTE_COLOR.at_shader_location(1),
-            // ATTRIBUTE_POLYGONITY0.at_shader_location(2), // TODOr
-        ])?;
+        let vertex_layout = layout
+            .0
+            .get_layout(&[Mesh::ATTRIBUTE_POSITION.at_shader_location(0)])?;
 
         descriptor.vertex.buffers = vec![vertex_layout];
 

@@ -3,6 +3,7 @@ pub mod environment_light;
 pub mod pause_menu;
 pub mod player;
 pub mod plugin;
+pub mod resources;
 pub mod reusable_materials;
 pub mod sets;
 pub mod skybox;

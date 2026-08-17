@@ -6,8 +6,8 @@ use rand_distr::num_traits::Pow;
 use crate::game::{
     core::states::OverallState,
     geometry::dodec::dodec_mesh,
-    graphics::primary_shader::plugin::{
-        PrimaryShaderMaterial, PrimaryShaderMaterialProps, primary_shader_material,
+    graphics::primary_material::plugin::{
+        PrimaryMaterial, PrimaryMaterialProps, primary_material,
     },
     playing_state::{
         coord_rebasing::world_space_transf,
@@ -73,8 +73,8 @@ fn scrolling(
 
             movement_settings.speed = movement_settings.speed.pow(1. - 0.01 * mouse_wheel_msg.y);
 
-            if movement_settings.speed < 0.25 {
-                movement_settings.speed = 0.25;
+            if movement_settings.speed < 0.05 {
+                movement_settings.speed = 0.05;
             }
             if movement_settings.speed > 10_000. {
                 movement_settings.speed = 10_000.;
@@ -101,14 +101,14 @@ fn move_player_body_to_cam(
 fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials1: ResMut<Assets<PrimaryShaderMaterial>>,
+    mut materials1: ResMut<Assets<PrimaryMaterial>>,
     mut materials2: ResMut<Assets<StandardMaterial>>,
 ) {
     commands.spawn((
         PlayingStateEntity,
         Mesh3d(meshes.add(dodec_mesh())),
-        MeshMaterial3d(materials1.add(primary_shader_material(
-            PrimaryShaderMaterialProps::default(),
+        MeshMaterial3d(materials1.add(primary_material(
+            PrimaryMaterialProps::default(),
         ))),
         world_space_transf(Transform::from_xyz(3., 0., -9.)),
     ));

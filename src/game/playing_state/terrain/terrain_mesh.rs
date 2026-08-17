@@ -10,31 +10,28 @@ use crate::game::{
 const RAND_VERTEX_OFFSET: f32 = 0.2;
 
 // TODOr
-fn temp_vertex_color(_scale: f32, _off_x: f32, _off_z: f32) -> [f32; 4] {
-    // TODOr
-    return [0.4, 0.7, 0.1, 1.0];
+// fn temp_vertex_color(_scale: f32, _off_x: f32, _off_z: f32) -> [f32; 4] {
+//     let pre_checkerboard_color = Color::hsv((scale.log2().abs() * 222.) % 360., 1., 1.);
 
-    // let pre_checkerboard_color = Color::hsv((scale.log2().abs() * 222.) % 360., 1., 1.);
+//     let mut off_x_i = (off_x / (scale * CW as f32) - 0.5).round() as i32;
+//     let mut off_z_i = (off_z / (scale * CW as f32) - 0.5).round() as i32;
 
-    // let mut off_x_i = (off_x / (scale * CW as f32) - 0.5).round() as i32;
-    // let mut off_z_i = (off_z / (scale * CW as f32) - 0.5).round() as i32;
+//     if off_x_i < 0 {
+//         off_x_i += 1;
+//     }
+//     if off_z_i < 0 {
+//         off_z_i += 1;
+//     }
 
-    // if off_x_i < 0 {
-    //     off_x_i += 1;
-    // }
-    // if off_z_i < 0 {
-    //     off_z_i += 1;
-    // }
+//     let color = if ((off_x_i + off_z_i) % 2) == 0 {
+//         Color::hsv(pre_checkerboard_color.hue(), 0.9, 1.)
+//     } else {
+//         Color::hsv(pre_checkerboard_color.hue(), 1., 0.75)
+//     };
 
-    // let color = if ((off_x_i + off_z_i) % 2) == 0 {
-    //     Color::hsv(pre_checkerboard_color.hue(), 0.9, 1.)
-    // } else {
-    //     Color::hsv(pre_checkerboard_color.hue(), 1., 0.75)
-    // };
-
-    // let color = color.to_srgba();
-    // [color.red, color.green, color.blue, 1.]
-}
+//     let color = color.to_srgba();
+//     [color.red, color.green, color.blue, 1.]
+// }
 
 // Generates three things: 1) the inner mesh, 2) the outer mesh (perimeter), which together with the inner mesh make up a CWxCW grid of squares,
 //   and 3) a vec of vecs of positions for the outermost vertices for connecting with different lods.
@@ -49,17 +46,16 @@ pub(super) fn create_terrain_mesh(
     off_z: i64,
     lod: usize,
 ) -> (Mesh, Mesh, Vec<Vec<[f32; 3]>>) {
+    // TODO: get rid of the colors.
+
     let off_x_real = CW as f32 * scale * off_x as f32;
     let off_z_real = CW as f32 * scale * off_z as f32;
 
     let mut inner_positions =
         Vec::<[f32; 3]>::with_capacity((CW - 1) * (CW - 1) + (CW - 2) * (CW - 2));
-    let mut inner_colors =
-        Vec::<[f32; 4]>::with_capacity((CW - 1) * (CW - 1) + (CW - 2) * (CW - 2));
     let mut inner_triangles = Vec::<u32>::with_capacity(4 * (CW - 2));
 
     let mut outer_positions = Vec::<[f32; 3]>::with_capacity(4 * CW + 4 * (CW - 2) + 4 * (CW - 1));
-    let mut outer_colors = Vec::<[f32; 4]>::with_capacity(4 * CW + 4 * (CW - 2) + 4 * (CW - 1));
     let mut outer_triangles = Vec::<u32>::with_capacity(4 * 4 * (CW - 1));
 
     // To keep track of the index of (Corner) vertices given a 2D index.
@@ -90,7 +86,6 @@ pub(super) fn create_terrain_mesh(
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             inner_positions.push([cf, h, rf]);
-            inner_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             inner_indices_c[c][r] = inner_vc;
             inner_vc += 1;
@@ -111,7 +106,6 @@ pub(super) fn create_terrain_mesh(
             let r = 0;
 
             outer_positions.push([0., 0., 0.]);
-            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -123,7 +117,6 @@ pub(super) fn create_terrain_mesh(
             let r = i;
 
             outer_positions.push([0., 0., 0.]);
-            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -135,7 +128,6 @@ pub(super) fn create_terrain_mesh(
             let r = CW;
 
             outer_positions.push([0., 0., 0.]);
-            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -147,7 +139,6 @@ pub(super) fn create_terrain_mesh(
             let r = i;
 
             outer_positions.push([0., 0., 0.]);
-            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -173,7 +164,6 @@ pub(super) fn create_terrain_mesh(
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
-            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -197,7 +187,6 @@ pub(super) fn create_terrain_mesh(
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
-            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -221,7 +210,6 @@ pub(super) fn create_terrain_mesh(
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
-            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -245,7 +233,6 @@ pub(super) fn create_terrain_mesh(
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
-            outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -270,7 +257,6 @@ pub(super) fn create_terrain_mesh(
             // Inner vertices.
             if c > 0 && c < CW - 1 && r > 0 && r < CW - 1 {
                 inner_positions.push([cf, h, rf]);
-                inner_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
                 inner_indices_m[c][r] = inner_vc;
 
@@ -280,7 +266,6 @@ pub(super) fn create_terrain_mesh(
             // Outer vertices.
             if c == 0 || c == CW - 1 || r == 0 || r == CW - 1 {
                 outer_positions.push([cf, h, rf]);
-                outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
                 outer_indices_m[c][r] = outer_vc;
 
@@ -396,7 +381,6 @@ pub(super) fn create_terrain_mesh(
         RenderAssetUsages::RENDER_WORLD,
     )
     .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, inner_positions)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, inner_colors)
     .with_inserted_indices(Indices::U32(inner_triangles));
 
     let outer_mesh = Mesh::new(
@@ -404,7 +388,6 @@ pub(super) fn create_terrain_mesh(
         RenderAssetUsages::RENDER_WORLD | RenderAssetUsages::MAIN_WORLD,
     )
     .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, outer_positions)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, outer_colors)
     .with_inserted_indices(Indices::U32(outer_triangles));
 
     (inner_mesh, outer_mesh, lod_connecting_perimeters)

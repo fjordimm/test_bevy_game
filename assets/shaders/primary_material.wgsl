@@ -51,7 +51,6 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
     out.position = position_world_to_clip(out.world_position.xyz);
 
     // Added this to pass the local 3d position.
-
     out.lposition = in.position;
 
     // Boilerplate.
