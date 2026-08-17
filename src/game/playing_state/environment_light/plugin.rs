@@ -121,7 +121,7 @@ fn on_enter(
 
     // Reset sun position.
 
-    time_of_day.0 = 0.5;
+    time_of_day.0 = 0.25;
     season_of_year.0 = 0.0;
 }
 

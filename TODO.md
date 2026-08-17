@@ -20,10 +20,11 @@
 ## Currently Working On
 - Coordinate rebasing.
     - Write a note.md file in `coord_rebasing` that explains it.
+- Try optimizing the terrain shader by not passing in color vertices.
 - Terrain.
     - Add hysteresis for changing LODs.
     - Consider Worley noise.
-- Instead of using plain `Without<>`s when you need to resolve query conflicts, you should make a type alias for it.
+- Maybe: instead of using plain `Without<>`s when you need to resolve query conflicts, you should make a type alias for it.
 
 ## Should Do At Some Point
 - Make dev vs release profiles in Cargo.toml.
@@ -53,4 +54,3 @@
     - Indented Dodec
     - Pentagonal Prism
     - Augmented Pentagonal Prism
-- Randomize the x & z position of terrain vertices slightly.

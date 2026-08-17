@@ -3,8 +3,11 @@ use bevy_mesh::{Indices, PrimitiveTopology, VertexAttributeValues};
 
 use crate::game::{
     playing_state::terrain::{plugin::CW, terrain_func::TerrainFunc},
-    util::alrms,
+    util::{alrms, mathf32::pseudorand_float2_series},
 };
+
+// Needs to be in range [0.0, 0.25].
+const RAND_VERTEX_OFFSET: f32 = 0.2;
 
 // TODOr
 fn temp_vertex_color(_scale: f32, _off_x: f32, _off_z: f32) -> [f32; 4] {
@@ -74,8 +77,15 @@ pub(super) fn create_terrain_mesh(
     // Corner vertices (inner mesh only).
     for c in 1..CW {
         for r in 1..CW {
-            let cf = scale * c as f32;
-            let rf = scale * r as f32;
+            let mut cf = scale * c as f32;
+            let mut rf = scale * r as f32;
+            let pseudorand_offset = pseudorand_float2_series(
+                &[cf, rf],
+                -RAND_VERTEX_OFFSET * scale,
+                RAND_VERTEX_OFFSET * scale,
+            );
+            cf += pseudorand_offset.0;
+            rf += pseudorand_offset.1;
 
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
@@ -92,17 +102,15 @@ pub(super) fn create_terrain_mesh(
     {
         // The outermost corner vertices.
 
+        // Note that they don't actually calculate the vertex position yet, since
+        //   they will all be replaced with the lod connecting perimeter vertices.
+
         // North.
         for i in 0..=CW {
             let c = i;
             let r = 0;
 
-            let cf = scale * c as f32;
-            let rf = scale * r as f32;
-
-            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
-
-            outer_positions.push([cf, h, rf]);
+            outer_positions.push([0., 0., 0.]);
             outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
@@ -114,12 +122,7 @@ pub(super) fn create_terrain_mesh(
             let c = CW;
             let r = i;
 
-            let cf = scale * c as f32;
-            let rf = scale * r as f32;
-
-            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
-
-            outer_positions.push([cf, h, rf]);
+            outer_positions.push([0., 0., 0.]);
             outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
@@ -131,12 +134,7 @@ pub(super) fn create_terrain_mesh(
             let c = i;
             let r = CW;
 
-            let cf = scale * c as f32;
-            let rf = scale * r as f32;
-
-            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
-
-            outer_positions.push([cf, h, rf]);
+            outer_positions.push([0., 0., 0.]);
             outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
@@ -148,12 +146,7 @@ pub(super) fn create_terrain_mesh(
             let c = 0;
             let r = i;
 
-            let cf = scale * c as f32;
-            let rf = scale * r as f32;
-
-            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
-
-            outer_positions.push([cf, h, rf]);
+            outer_positions.push([0., 0., 0.]);
             outer_colors.push(temp_vertex_color(scale, off_x_real, off_z_real));
 
             outer_indices_c[c][r] = outer_vc;
@@ -167,8 +160,15 @@ pub(super) fn create_terrain_mesh(
             let c = i;
             let r = 1;
 
-            let cf = scale * c as f32;
-            let rf = scale * r as f32;
+            let mut cf = scale * c as f32;
+            let mut rf = scale * r as f32;
+            let pseudorand_offset = pseudorand_float2_series(
+                &[cf, rf],
+                -RAND_VERTEX_OFFSET * scale,
+                RAND_VERTEX_OFFSET * scale,
+            );
+            cf += pseudorand_offset.0;
+            rf += pseudorand_offset.1;
 
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
@@ -184,8 +184,15 @@ pub(super) fn create_terrain_mesh(
             let c = CW - 1;
             let r = i;
 
-            let cf = scale * c as f32;
-            let rf = scale * r as f32;
+            let mut cf = scale * c as f32;
+            let mut rf = scale * r as f32;
+            let pseudorand_offset = pseudorand_float2_series(
+                &[cf, rf],
+                -RAND_VERTEX_OFFSET * scale,
+                RAND_VERTEX_OFFSET * scale,
+            );
+            cf += pseudorand_offset.0;
+            rf += pseudorand_offset.1;
 
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
@@ -201,8 +208,15 @@ pub(super) fn create_terrain_mesh(
             let c = i;
             let r = CW - 1;
 
-            let cf = scale * c as f32;
-            let rf = scale * r as f32;
+            let mut cf = scale * c as f32;
+            let mut rf = scale * r as f32;
+            let pseudorand_offset = pseudorand_float2_series(
+                &[cf, rf],
+                -RAND_VERTEX_OFFSET * scale,
+                RAND_VERTEX_OFFSET * scale,
+            );
+            cf += pseudorand_offset.0;
+            rf += pseudorand_offset.1;
 
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
@@ -218,8 +232,15 @@ pub(super) fn create_terrain_mesh(
             let c = 1;
             let r = i;
 
-            let cf = scale * c as f32;
-            let rf = scale * r as f32;
+            let mut cf = scale * c as f32;
+            let mut rf = scale * r as f32;
+            let pseudorand_offset = pseudorand_float2_series(
+                &[cf, rf],
+                -RAND_VERTEX_OFFSET * scale,
+                RAND_VERTEX_OFFSET * scale,
+            );
+            cf += pseudorand_offset.0;
+            rf += pseudorand_offset.1;
 
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
@@ -234,8 +255,15 @@ pub(super) fn create_terrain_mesh(
     // Middle vertices.
     for c in 0..CW {
         for r in 0..CW {
-            let cf = scale * (0.5 + c as f32);
-            let rf = scale * (0.5 + r as f32);
+            let mut cf = scale * (0.5 + c as f32);
+            let mut rf = scale * (0.5 + r as f32);
+            let pseudorand_offset = pseudorand_float2_series(
+                &[cf, rf],
+                -RAND_VERTEX_OFFSET * scale,
+                RAND_VERTEX_OFFSET * scale,
+            );
+            cf += pseudorand_offset.0;
+            rf += pseudorand_offset.1;
 
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 

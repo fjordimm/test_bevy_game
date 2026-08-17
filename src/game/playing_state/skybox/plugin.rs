@@ -135,10 +135,10 @@ fn compute_skybox_values(
     season_of_year: f32,
     computed_skybox_values: &mut ComputedSkyboxValues,
 ) {
-    computed_skybox_values.sun_position = Vec3::NEG_Z.rotate_x(time_of_day * PI);
+    computed_skybox_values.sun_position = Vec3::NEG_Z.rotate_x(time_of_day * 2. * PI);
     computed_skybox_values.sun_position = computed_skybox_values
         .sun_position
-        .rotate_z(season_of_year * PI);
+        .rotate_z(season_of_year * 2. * PI);
 
-    computed_skybox_values.sky_rotation_inv = Mat3::from_rotation_x(-time_of_day * PI);
+    computed_skybox_values.sky_rotation_inv = Mat3::from_rotation_x(-time_of_day * 2. * PI);
 }

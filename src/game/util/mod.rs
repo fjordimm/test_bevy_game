@@ -133,6 +133,56 @@ pub fn seed_from_u64(inp: u64) -> [u8; 8] {
 }
 
 pub mod mathf32 {
+    use std::hash::{DefaultHasher, Hash, Hasher};
+
+    // MurmurHash3 32-bit
+    pub fn simple_hash(mut inp: u32) -> u32 {
+        inp = inp.wrapping_mul(0xcc9e2d51);
+
+        inp = (inp << 15) | (inp >> 17);
+        inp = inp.wrapping_mul(0x1b873593);
+        inp
+    }
+
+    // Output is in range [0.0, 1.0]
+    pub fn pseudorand_float(inp: f32, min: f32, max: f32) -> f32 {
+        let bits = inp.to_bits();
+        let hashed = simple_hash(bits);
+
+        let outp = (hashed as f32) / (u32::MAX as f32);
+
+        min + outp * (max - min)
+    }
+
+    // Output is in range [0.0, 1.0]
+    pub fn pseudorand_float_series<const N: usize>(inp: &[f32; N], min: f32, max: f32) -> f32 {
+        let mut hasher = DefaultHasher::new();
+        inp.iter().for_each(|item| {
+            item.to_bits().hash(&mut hasher);
+        });
+
+        let outp = (hasher.finish() as f32) / (u64::MAX as f32);
+
+        min + outp * (max - min)
+    }
+
+    // Outputs are in range [0.0, 1.0]
+    pub fn pseudorand_float2_series<const N: usize>(
+        inp: &[f32; N],
+        min: f32,
+        max: f32,
+    ) -> (f32, f32) {
+        let mut hasher = DefaultHasher::new();
+        inp.iter().for_each(|item| {
+            item.to_bits().hash(&mut hasher);
+        });
+
+        let outp1 = (hasher.finish() as u32 as f32) / (u32::MAX as f32);
+        let outp2 = ((hasher.finish() >> 32) as u32 as f32) / (u32::MAX as f32);
+
+        (min + outp1 * (max - min), min + outp2 * (max - min))
+    }
+
     pub fn lerp_remap(
         x: f32,
         lower_bound_from: f32,
