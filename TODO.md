@@ -23,7 +23,6 @@
 - Try optimizing the terrain shader by not passing in color vertices.
 - Terrain.
     - Add hysteresis for changing LODs.
-    - Consider Worley noise.
 - Maybe: instead of using plain `Without<>`s when you need to resolve query conflicts, you should make a type alias for it.
 
 ## Should Do At Some Point
