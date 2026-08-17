@@ -18,6 +18,7 @@
 - Make sure the first time you enter `OverallState::Playing` works the exact same as when you exit to the menu and then go back.
 
 ## Currently Working On
+- Fog.
 - Switch back to `1.0` instead of `1.`.
 - Coordinate rebasing.
     - Write a note.md file in `coord_rebasing` that explains it.
