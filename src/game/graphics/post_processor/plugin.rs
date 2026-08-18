@@ -39,7 +39,7 @@ impl Plugin for PostProcessorPlugin {
                 ExtractComponentPlugin::<PostProcessorSettings>::default(),
                 UniformComponentPlugin::<PostProcessorSettings>::default(),
             ))
-            .add_systems(Update, add_to_camera)
+            .add_systems(Update, add_to_camera) // TODO: optimize condition for this to run
         ;
 
         if let Some(render_app) = alrms!(app.get_sub_app_mut(RenderApp)) {

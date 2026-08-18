@@ -7,8 +7,10 @@ fn gradient_noise(uv: vec2<f32>) -> f32 {
     return fract(52.9829189 * fract(dot(uv, vec2(0.06711056, 0.00583715))));
 }
 
+const REDUCE_BANDING_AMOUNT: f32 = 1.0; // Must be in range [0.0, 1.0];
+const REDUCE_BANDING_AMOUNT_HALF: f32 = 0.5 * REDUCE_BANDING_AMOUNT;
 fn reduce_banding(pixel_pos: vec2<f32>) -> f32 {
-    return (1.0 / 255.0) * gradient_noise(pixel_pos) - (0.5 / 255.0);
+    return (REDUCE_BANDING_AMOUNT / 255.0) * gradient_noise(pixel_pos) - (REDUCE_BANDING_AMOUNT_HALF / 255.0);
 }
 
 // Warning: only works for 0 <= x <= 1

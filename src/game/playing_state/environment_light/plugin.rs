@@ -2,10 +2,10 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::states::OverallState,
+    graphics::global_render_data::resources::GlobalRenderData,
     playing_state::{
         environment_light::{SeasonOfYear, TimeOfDay},
         sets::{DuringPlayingUnpaused, OnEnterPlaying},
-        skybox::ComputedSkyboxValues,
         tags::PlayingStateEntity,
     },
     util::{alrms, mathf32::lerp_remap},
@@ -126,7 +126,7 @@ fn on_enter(
 }
 
 fn update_environment_lights(
-    computed_skybox_values: Res<ComputedSkyboxValues>,
+    global_render_data: Res<GlobalRenderData>,
     sunlight_q: Option<Single<(&mut Transform, &mut DirectionalLight), With<SunlightTag>>>,
     mut above_ambient_light_q: Query<
         &mut DirectionalLight,
@@ -142,13 +142,11 @@ fn update_environment_lights(
     >,
 ) {
     if let Some(mut sunlight) = alrms!(sunlight_q) {
-        sunlight
-            .0
-            .look_at(computed_skybox_values.sun_position, Vec3::Y);
+        sunlight.0.look_at(global_render_data.sun_position, Vec3::Y);
         sunlight.0.rotate_local_y(180.0f32.to_radians());
 
         sunlight.1.illuminance = lerp_remap(
-            computed_skybox_values.sun_position.y,
+            global_render_data.sun_position.y,
             SUNLIGHT_Y_LEVEL_OF_MIN,
             1.,
             0.,
@@ -159,7 +157,7 @@ fn update_environment_lights(
     }
 
     let ambient_light_based_on_sun = lerp_remap(
-        computed_skybox_values
+        global_render_data
             .sun_position
             .y
             .clamp(AMBIENT_LIGHT_Y_LEVEL_OF_MIN, 1.),

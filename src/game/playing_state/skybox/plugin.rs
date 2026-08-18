@@ -1,20 +1,17 @@
 use std::f32::consts::PI;
 
-use bevy::{
-    pbr::{MaterialPipeline, MaterialPipelineKey},
-    prelude::*,
-    render::render_resource::*,
-    shader::ShaderRef,
-};
-use bevy_mesh::MeshVertexBufferLayoutRef;
+use bevy::prelude::*;
 
 use crate::game::{
     core::states::OverallState,
+    graphics::{
+        global_render_data::resources::{GlobalRenderData, GlobalRenderDataHandle},
+        skybox_material::plugin::SkyboxMaterial,
+    },
     playing_state::{
         environment_light::{SeasonOfYear, TimeOfDay},
         player::tags::CameraForPlayer,
         sets::{DuringPlayingUnpaused, OnEnterPlaying},
-        skybox::ComputedSkyboxValues,
         tags::PlayingStateEntity,
     },
     util::{alrms, alrro},
@@ -26,8 +23,6 @@ impl Plugin for SkyboxPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_plugins(MaterialPlugin::<SkyboxMaterial>::default())
-            .insert_resource(ComputedSkyboxValues { sun_position: Vec3::NEG_Z, sky_rotation_inv: Mat3::IDENTITY })
             .add_systems(OnEnter(OverallState::Playing),
                 spawn_skybox
                     .in_set(OnEnterPlaying::General)
@@ -49,10 +44,9 @@ fn spawn_skybox(
     mut materials: ResMut<Assets<SkyboxMaterial>>,
     time_of_day: Res<TimeOfDay>,
     season_of_year: Res<SeasonOfYear>,
-    mut computed_skybox_values: ResMut<ComputedSkyboxValues>,
+    mut global_render_data: ResMut<GlobalRenderData>,
+    global_render_data_handle: Res<GlobalRenderDataHandle>,
 ) {
-    compute_skybox_values(time_of_day.0, season_of_year.0, &mut computed_skybox_values);
-
     commands.spawn((
         PlayingStateEntity,
         SkyboxTag,
@@ -60,20 +54,20 @@ fn spawn_skybox(
             Mesh::from(Sphere::new(1_000_000.)).with_inverted_winding()
         ))),
         MeshMaterial3d(materials.add(SkyboxMaterial {
-            sun_position: computed_skybox_values.sun_position,
-            sky_rotation_inv: computed_skybox_values.sky_rotation_inv,
+            global_render_data: global_render_data_handle.get_handle(),
         })),
         Transform::default(),
     ));
+
+    compute_global_render_data_vals(time_of_day.0, season_of_year.0, &mut global_render_data);
 }
 
 fn update_skybox(
     camera_transf_q: Option<Single<&Transform, With<CameraForPlayer>>>,
     skybox_transf_q: Option<Single<&mut Transform, (With<SkyboxTag>, Without<CameraForPlayer>)>>,
-    mut materials: ResMut<Assets<SkyboxMaterial>>,
     time_of_day: Res<TimeOfDay>,
     season_of_year: Res<SeasonOfYear>,
-    mut computed_skybox_values: ResMut<ComputedSkyboxValues>,
+    mut global_render_data: ResMut<GlobalRenderData>,
 ) {
     // Move it to be the same position as the camera.
 
@@ -83,62 +77,18 @@ fn update_skybox(
         skybox_transf.translation = camera_transf.translation;
     }
 
-    // Update the shader uniforms.
-
-    compute_skybox_values(time_of_day.0, season_of_year.0, &mut computed_skybox_values);
-
-    materials.iter_mut().for_each(|(_, mat)| {
-        mat.sun_position = computed_skybox_values.sun_position;
-        mat.sky_rotation_inv = computed_skybox_values.sky_rotation_inv;
-    });
+    compute_global_render_data_vals(time_of_day.0, season_of_year.0, &mut global_render_data);
 }
 
-#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
-pub struct SkyboxMaterial {
-    #[uniform(0)]
-    pub sun_position: Vec3,
-    #[uniform(1)]
-    pub sky_rotation_inv: Mat3,
-}
-
-impl Material for SkyboxMaterial {
-    fn vertex_shader() -> ShaderRef {
-        "shaders/sky.wgsl".into()
-    }
-
-    fn fragment_shader() -> ShaderRef {
-        "shaders/sky.wgsl".into()
-    }
-
-    fn alpha_mode(&self) -> AlphaMode {
-        AlphaMode::Opaque
-    }
-
-    fn specialize(
-        _pipeline: &MaterialPipeline,
-        descriptor: &mut RenderPipelineDescriptor,
-        layout: &MeshVertexBufferLayoutRef,
-        _key: MaterialPipelineKey<Self>,
-    ) -> Result<(), SpecializedMeshPipelineError> {
-        let vertex_layout = layout
-            .0
-            .get_layout(&[Mesh::ATTRIBUTE_POSITION.at_shader_location(0)])?;
-
-        descriptor.vertex.buffers = vec![vertex_layout];
-
-        Ok(())
-    }
-}
-
-fn compute_skybox_values(
+fn compute_global_render_data_vals(
     time_of_day: f32,
     season_of_year: f32,
-    computed_skybox_values: &mut ComputedSkyboxValues,
+    global_render_data: &mut ResMut<GlobalRenderData>,
 ) {
-    computed_skybox_values.sun_position = Vec3::NEG_Z.rotate_x(time_of_day * 2. * PI);
-    computed_skybox_values.sun_position = computed_skybox_values
+    global_render_data.sun_position = Vec3::NEG_Z.rotate_x(time_of_day * 2. * PI);
+    global_render_data.sun_position = global_render_data
         .sun_position
         .rotate_z(season_of_year * 2. * PI);
 
-    computed_skybox_values.sky_rotation_inv = Mat3::from_rotation_x(-time_of_day * 2. * PI);
+    global_render_data.sky_rotation_inv = Mat3::from_rotation_x(-time_of_day * 2. * PI);
 }

@@ -1,7 +1,3 @@
-#import bevy_pbr::{
-    mesh_functions,
-    view_transformations::position_world_to_clip,
-}
 #import "shaders/util.wgsl"::PI;
 #import "shaders/util.wgsl"::gradient_noise;
 #import "shaders/util.wgsl"::reduce_banding;
@@ -10,6 +6,7 @@
 #import "shaders/util.wgsl"::arc_step_up;
 #import "shaders/util.wgsl"::hash3;
 #import "shaders/util.wgsl"::bell;
+#import "shaders/global_render_data.wgsl"::GlobalRenderData;
 
 const DAY_ZENITH_COLOR = vec3<f32>(0.19, 0.58, 0.97);
 const DAY_HORIZON_COLOR = vec3<f32>(0.32, 0.69, 1.0);
@@ -26,7 +23,7 @@ const SUN_SOFTNESS_INV: f32 = 2.9;
 
 const SUN_GLARE_SIZE_INV: f32 = 80.0;
 const SUN_GLARE_DECAY_INV: f32 = 1.15; // must be >= 1
-const SUN_GLARE_MULTIPLIER: f32 = 0.7;
+const SUN_GLARE_MULTIPLIER: f32 = 0.4;
 
 const SUNSET_COLOR = vec3<f32>(1.0, 0.65, 0.3);
 const SUNSET_BRIGHTNESS: f32 = 0.13;
@@ -40,50 +37,12 @@ const STARS_SCALE: f32 = 230.0;
 const STARS_DENSITY_INV: f32 = 0.995;
 const STARS_TIME_RANGE_FACTOR: f32 = 80.0;
 
-@group(#{MATERIAL_BIND_GROUP}) @binding(0) var<uniform> sun_position: vec3<f32>;
-@group(#{MATERIAL_BIND_GROUP}) @binding(1) var<uniform> sky_rotation_matrix: mat3x3<f32>;
-
-struct Vertex {
-    @builtin(instance_index) instance_index: u32,
-    @location(0) position: vec3<f32>,
-}
-
-struct CustomVertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(1) lposition: vec3<f32>,
-    @location(3) @interpolate(flat) instance_index: u32,
-}
-
-@vertex
-fn vertex(in: Vertex) -> CustomVertexOutput {
-    // Boilerplate.
-
-    var out: CustomVertexOutput;
-
-    let world_mat = mesh_functions::get_world_from_local(in.instance_index);
-    let world_position = mesh_functions::mesh_position_local_to_world(world_mat, vec4<f32>(in.position, 1.0));
-
-    out.position = position_world_to_clip(world_position.xyz);
-
-    // Added this to pass the local 3d position.
-
-    out.lposition = in.position;
-
-    // Boilerplate.
-
-    out.instance_index = in.instance_index;
-
-    // Return value.
-
-    return out;
-}
-
-@fragment
-fn fragment(vertout: CustomVertexOutput) -> @location(0) vec4<f32> {
+// TODO: use & for GlobalRenderData
+fn sky_and_fog(global_render_data: GlobalRenderData, lposition_xyz: vec3<f32>, position_xy: vec2<f32>) -> vec3<f32> {
     var color = vec3<f32>(0.0, 0.0, 0.0);
 
-    let sun_pos = normalize(sun_position);
-    let dir: vec3<f32> = normalize(vertout.lposition.xyz);
+    let sun_pos = normalize(global_render_data.sun_position);
+    let dir: vec3<f32> = normalize(lposition_xyz);
 
     let day_amount = smoothstep(0.0, 1.0, sun_pos.y + TWILIGHT_OFFSET);
 
@@ -105,13 +64,13 @@ fn fragment(vertout: CustomVertexOutput) -> @location(0) vec4<f32> {
     color += SUNSET_BRIGHTNESS * SUNSET_COLOR * (sunset_horizon_glow * sunset_side * sunset_time_multiplier);
 
     // Stars
-    color += STARS_COLOR * local_star_value(sky_rotation_matrix * dir) * clamp(pow(1.0 - day_amount, STARS_TIME_RANGE_FACTOR), 0.0, 1.0);
+    color += STARS_COLOR * _local_star_value(global_render_data.sky_rotation_inv * dir) * clamp(pow(1.0 - day_amount, STARS_TIME_RANGE_FACTOR), 0.0, 1.0);
 
-    color += reduce_banding(vertout.position.xy);
-    return vec4<f32>(color, 1.0);
+    color += reduce_banding(position_xy);
+    return color;
 }
 
-fn local_star_value(dir: vec3<f32>) -> f32 {
+fn _local_star_value(dir: vec3<f32>) -> f32 {
     let grid = dir * STARS_SCALE;
 
     let h = hash3(floor(grid));

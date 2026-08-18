@@ -30,6 +30,7 @@ bevy-inspector-egui = "0.36.0"
 noise = "0.9.0"
 priority-queue = "2.7.0"
 worley-noise = "3.7.2"
+bytemuck = { version = "1.25.2", features = ["derive"] }
 
 # Other
 

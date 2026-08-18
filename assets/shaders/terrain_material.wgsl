@@ -1,7 +1,8 @@
 #import bevy_pbr::{
     forward_io::VertexOutput,
     mesh_functions,
-    view_transformations::position_world_to_clip,
+    view_transformations::position_world_to_view,
+    view_transformations::position_view_to_clip,
     pbr_fragment::pbr_input_from_standard_material,
     pbr_functions::{
         alpha_discard,
@@ -13,6 +14,9 @@
 }
 #import "shaders/util_noise.wgsl"::simplex_noise_3d;
 
+const FOG_START: f32 = 5.0;
+const FOG_END: f32 = 10000.0;
+
 @group(#{MATERIAL_BIND_GROUP}) @binding(100) var<uniform> texturing_scale: f32;
 
 struct Vertex {
@@ -23,7 +27,8 @@ struct Vertex {
 struct CustomVertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) world_position: vec4<f32>,
-    @location(3) @interpolate(flat) instance_index: u32,
+    @location(1) fog_amount: f32,
+    @location(2) @interpolate(flat) instance_index: u32,
 }
 
 fn to_pbr_vertex_output(og: CustomVertexOutput) -> VertexOutput {
@@ -44,7 +49,14 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
     let world_mat = mesh_functions::get_world_from_local(in.instance_index);
     out.world_position = mesh_functions::mesh_position_local_to_world(world_mat, vec4<f32>(in.position, 1.0));
 
-    out.position = position_world_to_clip(out.world_position.xyz);
+    let view_position = position_world_to_view(out.world_position.xyz);
+
+    out.position = position_view_to_clip(view_position);
+
+    // Fog.
+
+    out.fog_amount = (FOG_START - view_position.z) / (FOG_END - FOG_START);
+    out.fog_amount = clamp(out.fog_amount, 0.0, 1.0);
 
     // Boilerplate.
 
@@ -96,6 +108,12 @@ fn fragment(
     // Boilerplate.
 
     out = main_pass_post_lighting_processing(pbr_input, out);
+
+    // Fog.
+
+    let fog = clamp(in.fog_amount, 0.0, 1.0);
+    let fogged_color = (1.0 - fog) * out.rgb + (fog) * vec3(0.0, 1.0, 0.0);
+    out = vec4(fogged_color, 1.0);
 
     // Return value.
 
