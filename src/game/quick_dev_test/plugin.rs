@@ -118,7 +118,7 @@ fn spawn_some_stuff(
         PlayingStateEntity,
         Mesh3d(
             meshes.add(
-                Mesh::from(Plane3d::new(Vec3::Y, Vec2::new(20_000., 20_000.)))
+                Mesh::from(Plane3d::new(Vec3::Y, Vec2::new(15_000., 15_000.)))
                     .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, vec![[0., 0., 1., 1.]; 4]),
             ),
         ),

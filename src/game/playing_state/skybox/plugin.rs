@@ -85,10 +85,10 @@ fn compute_global_render_data_vals(
     season_of_year: f32,
     global_render_data: &mut ResMut<GlobalRenderData>,
 ) {
-    global_render_data.sun_position = Vec3::NEG_Z.rotate_x(time_of_day * 2. * PI);
-    global_render_data.sun_position = global_render_data
-        .sun_position
+    global_render_data.sun_position = Vec3::NEG_Z
+        .rotate_x(time_of_day * 2. * PI)
         .rotate_z(season_of_year * 2. * PI);
 
-    global_render_data.sky_rotation_inv = Mat3::from_rotation_x(-time_of_day * 2. * PI);
+    global_render_data.sky_rotation_inv = Mat3::from_rotation_x(-time_of_day * 2. * PI)
+        * Mat3::from_rotation_z(-season_of_year * 2. * PI);
 }

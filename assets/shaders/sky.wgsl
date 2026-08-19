@@ -15,7 +15,8 @@ const NIGHT_ZENITH_COLOR = vec3<f32>(0.0001, 0.002, 0.003);
 const NIGHT_HORIZON_COLOR = vec3<f32>(0.002, 0.004, 0.006);
 const NIGHT_HORIZON_SQUISH_FACTOR: f32 = 1.7;
 
-const TWILIGHT_OFFSET: f32 = 0.25;
+// This must match environment_light::plugin::AMBIENT_LIGHT_Y_LEVEL_OF_MIN
+const TWILIGHT_OFFSET: f32 = -0.4;
 
 const SUN_COLOR = vec3<f32>(1.0, 0.8, 0.2);
 const SUN_SIZE_INV: f32 = 5000.0;
@@ -37,14 +38,13 @@ const STARS_SCALE: f32 = 230.0;
 const STARS_DENSITY_INV: f32 = 0.995;
 const STARS_TIME_RANGE_FACTOR: f32 = 80.0;
 
-// TODO: use & for GlobalRenderData
-fn sky_and_fog(global_render_data: GlobalRenderData, pos_on_sphere: vec3<f32>, clip_position_xy: vec2<f32>) -> vec3<f32> {
+fn sky(global_render_data: GlobalRenderData, cam_relative_pos: vec3<f32>, clip_position_xy: vec2<f32>) -> vec3<f32> {
     var color = vec3<f32>(0.0, 0.0, 0.0);
 
     let sun_pos = normalize(global_render_data.sun_position);
-    let dir: vec3<f32> = normalize(pos_on_sphere);
+    let dir: vec3<f32> = normalize(cam_relative_pos);
 
-    let day_amount = smoothstep(0.0, 1.0, sun_pos.y + TWILIGHT_OFFSET);
+    let day_amount = smoothstep(0.0, 1.0, sun_pos.y - TWILIGHT_OFFSET);
 
     let day_color = mix(DAY_HORIZON_COLOR, DAY_ZENITH_COLOR, smoothstep_skew_left(0.0, 1.0, DAY_HORIZON_SQUISH_FACTOR, dir.y));
     let night_color = mix(NIGHT_HORIZON_COLOR, NIGHT_ZENITH_COLOR, smoothstep_skew_left(0.0, 1.0, NIGHT_HORIZON_SQUISH_FACTOR, dir.y));
@@ -65,6 +65,34 @@ fn sky_and_fog(global_render_data: GlobalRenderData, pos_on_sphere: vec3<f32>, c
 
     // Stars
     color += STARS_COLOR * _local_star_value(global_render_data.sky_rotation_inv * dir) * clamp(pow(1.0 - day_amount, STARS_TIME_RANGE_FACTOR), 0.0, 1.0);
+
+    color += reduce_banding(clip_position_xy);
+    return color;
+}
+
+fn sky_without_sun_and_stars(global_render_data: GlobalRenderData, cam_relative_pos: vec3<f32>, clip_position_xy: vec2<f32>) -> vec3<f32> {
+    var color = vec3<f32>(0.0, 0.0, 0.0);
+
+    let sun_pos = normalize(global_render_data.sun_position);
+    let dir: vec3<f32> = normalize(cam_relative_pos);
+
+    let day_amount = smoothstep(0.0, 1.0, sun_pos.y - TWILIGHT_OFFSET);
+
+    let day_color = mix(DAY_HORIZON_COLOR, DAY_ZENITH_COLOR, smoothstep_skew_left(0.0, 1.0, DAY_HORIZON_SQUISH_FACTOR, dir.y));
+    let night_color = mix(NIGHT_HORIZON_COLOR, NIGHT_ZENITH_COLOR, smoothstep_skew_left(0.0, 1.0, NIGHT_HORIZON_SQUISH_FACTOR, dir.y));
+    color += mix(night_color, day_color, day_amount);
+
+    // Sun glare
+    let sun_glare_color_lerp = clamp(sun_pos.y, 0.0, 1.0);
+    let sun_glare_color = SUN_COLOR * sun_glare_color_lerp + SUNSET_COLOR * (1.0 - sun_glare_color_lerp);
+    let sun_glare_amount = SUN_GLARE_MULTIPLIER * arc_step_up(SUN_GLARE_DECAY_INV, clamp(sun_pos.y, 0.0, 1.0));
+    color += sun_glare_color * sun_glare_amount * pow(clamp(dot(dir, sun_pos), 0.0, 1.0), SUN_GLARE_SIZE_INV);
+
+    // Sunset
+    let sunset_horizon_glow = bell(SUNSET_HORIZON_CURVE_INV * dir.y);
+    let sunset_side = -1.0 / ((dot(dir, sun_pos) * 0.5 + 0.5) - 1.0 - SUNSET_CURVE_INV);
+    let sunset_time_multiplier = (1.0 - smoothstep_skew_left(0.0, 1.0, SUNSET_TIME_RANGE_INV, abs(sun_pos.y - SUNSET_TIME_RANGE_OFFSET)));
+    color += SUNSET_BRIGHTNESS * SUNSET_COLOR * (sunset_horizon_glow * sunset_side * sunset_time_multiplier);
 
     color += reduce_banding(clip_position_xy);
     return color;

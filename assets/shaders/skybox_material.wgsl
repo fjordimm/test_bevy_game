@@ -3,7 +3,7 @@
     view_transformations::position_world_to_clip,
 }
 #import "shaders/global_render_data.wgsl"::GlobalRenderData;
-#import "shaders/sky_and_fog.wgsl"::sky_and_fog;
+#import "shaders/sky.wgsl"::sky;
 
 @group(#{MATERIAL_BIND_GROUP}) @binding(0) var<storage, read> global_render_data: GlobalRenderData;
 
@@ -14,7 +14,7 @@ struct Vertex {
 
 struct CustomVertexOutput {
     @builtin(position) position: vec4<f32>,
-    @location(1) pos_on_sphere: vec3<f32>,
+    @location(1) cam_relative_pos: vec3<f32>,
     @location(2) @interpolate(flat) instance_index: u32,
 }
 
@@ -31,7 +31,7 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
 
     // Added this to pass the local 3d position.
 
-    out.pos_on_sphere = world_position.xyz;
+    out.cam_relative_pos = world_position.xyz;
 
     // Boilerplate.
 
@@ -44,5 +44,5 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
 
 @fragment
 fn fragment(in: CustomVertexOutput) -> @location(0) vec4<f32> {
-    return vec4(sky_and_fog(global_render_data, in.pos_on_sphere, in.position.xy), 1.0);
+    return vec4(sky(global_render_data, in.cam_relative_pos, in.position.xy), 1.0);
 }

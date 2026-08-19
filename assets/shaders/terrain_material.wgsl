@@ -14,7 +14,7 @@
 }
 #import "shaders/util_noise.wgsl"::simplex_noise_3d;
 #import "shaders/global_render_data.wgsl"::GlobalRenderData;
-#import "shaders/sky_and_fog.wgsl"::sky_and_fog;
+#import "shaders/sky.wgsl"::sky_without_sun_and_stars;
 
 const FOG_START: f32 = 1000.0;
 const FOG_END: f32 = 10000.0;
@@ -30,7 +30,7 @@ struct Vertex {
 struct CustomVertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) world_position: vec4<f32>,
-    @location(1) pos_on_sphere: vec3<f32>,
+    @location(1) cam_relative_pos: vec3<f32>,
     @location(2) fog_amount: f32,
     @location(3) @interpolate(flat) instance_index: u32,
 }
@@ -59,8 +59,8 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
 
     // Added this to pass the local 3d position.
 
-    out.pos_on_sphere = out.world_position.xyz;
-    out.pos_on_sphere -= view_bindings::view.world_position;
+    out.cam_relative_pos = out.world_position.xyz;
+    out.cam_relative_pos -= view_bindings::view.world_position;
 
     // Fog.
 
@@ -120,9 +120,8 @@ fn fragment(
 
     // Fog.
 
-    // let fogged_color = (1.0 - in.fog_amount) * out.rgb + (in.fog_amount) * sky_and_fog(global_render_data, in.lposition.xyz, in.position.xy);
-    let fogged_color = sky_and_fog(global_render_data, in.pos_on_sphere, in.position.xy);
-    out = vec4(fogged_color, 1.0);
+    let fog_color = sky_without_sun_and_stars(global_render_data, in.cam_relative_pos, in.position.xy);
+    out = vec4((1.0 - in.fog_amount) * out.rgb + (in.fog_amount) * fog_color, 1.0);
 
     // Return value.
 
