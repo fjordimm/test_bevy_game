@@ -1,13 +1,21 @@
 
 # Todo List
 
+## Currently Working On
+- Water shader.
+- Do fog for primary material too.
+- Switch back to `1.0` instead of `1.`.
+- Terrain.
+    - Add hysteresis for changing LODs.
+- Maybe: instead of using plain `Without<>`s when you need to resolve query conflicts, you should make a type alias for it.
+
 ## Reminders
 
 ### General
 
+- Add systems using proper sets (DuringPlaying/DuringPlayingUnpaused, OnEnterPlaying, OnExitPlaying).
 - Prefer using resources rather than consts for constant arbitrary values.
 - Be consistent on when to use the 'Tag' suffix.
-- Add systems using proper sets (DuringPlaying/DuringPlayingUnpaused, OnEnterPlaying, OnExitPlaying).
 - Put more `#[allow(unused)]` where you need them.
 
 ### Tests
@@ -16,14 +24,6 @@
 - Search project for 'todo'. And search project for 'debug!'.
 - Test if everything works correctly when you change the `GuiScale`.
 - Make sure the first time you enter `OverallState::Playing` works the exact same as when you exit to the menu and then go back.
-
-## Currently Working On
-- Water shader.
-- Do fog for primary material too.
-- Switch back to `1.0` instead of `1.`.
-- Terrain.
-    - Add hysteresis for changing LODs.
-- Maybe: instead of using plain `Without<>`s when you need to resolve query conflicts, you should make a type alias for it.
 
 ## Should Do At Some Point
 - Make dev vs release profiles in Cargo.toml.
