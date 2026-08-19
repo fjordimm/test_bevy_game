@@ -3,7 +3,6 @@
 
 ## Currently Working On
 - Water shader.
-- Do fog for primary material too.
 - Switch back to `1.0` instead of `1.`.
 - Terrain.
     - Add hysteresis for changing LODs.
