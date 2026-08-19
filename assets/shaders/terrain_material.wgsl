@@ -60,7 +60,7 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
     // Added this to pass the local 3d position.
 
     out.pos_on_sphere = out.world_position.xyz;
-    // out.pos_on_sphere += view_bindings::view.view_from_world[3].xyz;
+    out.pos_on_sphere -= view_bindings::view.world_position;
 
     // Fog.
 

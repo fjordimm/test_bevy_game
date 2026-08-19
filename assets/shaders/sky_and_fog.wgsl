@@ -66,8 +66,7 @@ fn sky_and_fog(global_render_data: GlobalRenderData, pos_on_sphere: vec3<f32>, c
     // Stars
     color += STARS_COLOR * _local_star_value(global_render_data.sky_rotation_inv * dir) * clamp(pow(1.0 - day_amount, STARS_TIME_RANGE_FACTOR), 0.0, 1.0);
 
-    // TODO
-    // color += reduce_banding(clip_position_xy);
+    color += reduce_banding(clip_position_xy);
     return color;
 }
 
