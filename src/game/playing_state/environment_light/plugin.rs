@@ -40,7 +40,7 @@ const BELOW_AMBIENT_LIGHT_COLOR: Color = Color::hsv(169., 0.05, 1.);
 
 const SUNLIGHT_Y_LEVEL_OF_MIN: f32 = -0.1;
 const AMBIENT_LIGHT_MIN_FACTOR: f32 = 0.05;
-const AMBIENT_LIGHT_Y_LEVEL_OF_MIN: f32 = -0.4;
+const AMBIENT_LIGHT_Y_LEVEL_OF_MIN: f32 = -0.4; // This must match "shaders/sky.wgsl"::TWILIGHT_OFFSET
 
 #[derive(Component)]
 pub struct SunlightTag;

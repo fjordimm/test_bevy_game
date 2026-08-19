@@ -11,13 +11,13 @@ use bevy::{
 };
 use bevy_mesh::MeshVertexBufferLayoutRef;
 
-pub struct TerrainMaterialPlugin;
+pub struct WaterMaterialPlugin;
 
-impl Plugin for TerrainMaterialPlugin {
+impl Plugin for WaterMaterialPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_plugins(MaterialPlugin::<TerrainMaterial>::default())
+            .add_plugins(MaterialPlugin::<WaterMaterial>::default())
             .add_systems(Update,
                 fix_storage_buffer_bug
             )
@@ -25,25 +25,21 @@ impl Plugin for TerrainMaterialPlugin {
     }
 }
 
-pub struct TerrainMaterialProps {
-    pub texturing_scale: f32,
-}
+pub struct WaterMaterialProps {}
 
-impl Default for TerrainMaterialProps {
+impl Default for WaterMaterialProps {
     fn default() -> Self {
-        Self {
-            texturing_scale: 1.,
-        }
+        Self {}
     }
 }
 
-pub type TerrainMaterial = ExtendedMaterial<StandardMaterial, __TerrainMaterialExtension>;
+pub type WaterMaterial = ExtendedMaterial<StandardMaterial, __WaterMaterialExtension>;
 
-pub fn terrain_material(
-    props: TerrainMaterialProps,
+pub fn water_material(
+    _props: WaterMaterialProps,
     global_render_data_handle: Handle<ShaderStorageBuffer>,
-) -> TerrainMaterial {
-    TerrainMaterial {
+) -> WaterMaterial {
+    WaterMaterial {
         base: StandardMaterial {
             base_color: Color::WHITE,
             perceptual_roughness: 1.,
@@ -59,28 +55,28 @@ pub fn terrain_material(
             fog_enabled: false,
             ..default()
         },
-        extension: __TerrainMaterialExtension {
+        extension: __WaterMaterialExtension {
             global_render_data_handle: global_render_data_handle,
-            texturing_scale: props.texturing_scale,
+            texturing_scale: 1.,
         },
     }
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
-pub struct __TerrainMaterialExtension {
+pub struct __WaterMaterialExtension {
     #[storage(100, read_only)]
     pub global_render_data_handle: Handle<ShaderStorageBuffer>,
     #[uniform(101)]
     texturing_scale: f32,
 }
 
-impl MaterialExtension for __TerrainMaterialExtension {
+impl MaterialExtension for __WaterMaterialExtension {
     fn vertex_shader() -> ShaderRef {
-        "shaders/terrain_material.wgsl".into()
+        "shaders/water_material.wgsl".into()
     }
 
     fn fragment_shader() -> ShaderRef {
-        "shaders/terrain_material.wgsl".into()
+        "shaders/water_material.wgsl".into()
     }
 
     fn specialize(
@@ -99,6 +95,6 @@ impl MaterialExtension for __TerrainMaterialExtension {
     }
 }
 
-fn fix_storage_buffer_bug(mut materials: ResMut<Assets<TerrainMaterial>>) {
+fn fix_storage_buffer_bug(mut materials: ResMut<Assets<WaterMaterial>>) {
     materials.iter_mut().for_each(|_| {});
 }

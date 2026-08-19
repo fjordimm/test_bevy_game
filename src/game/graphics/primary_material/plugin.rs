@@ -45,6 +45,7 @@ pub fn primary_material(
 ) -> PrimaryMaterial {
     PrimaryMaterial {
         base: StandardMaterial {
+            base_color: Color::WHITE,
             perceptual_roughness: 1.,
             metallic: 0.,
             reflectance: 0.,
@@ -55,7 +56,7 @@ pub fn primary_material(
             attenuation_distance: 1.0,
             double_sided: false,
             cull_mode: Some(Face::Back),
-            fog_enabled: true,
+            fog_enabled: false,
             ..default()
         },
         extension: __PrimaryMaterialExtension {

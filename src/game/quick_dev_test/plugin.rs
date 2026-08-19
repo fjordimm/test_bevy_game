@@ -5,10 +5,11 @@ use rand_distr::num_traits::Pow;
 
 use crate::game::{
     core::states::OverallState,
-    geometry::dodec::dodec_mesh,
+    geometry::{dodec::dodec_mesh, water_layer::water_layer},
     graphics::{
         global_render_data::resources::GlobalRenderDataHandle,
-        primary_material::plugin::{PrimaryMaterial, PrimaryMaterialProps, primary_material},
+        primary_material::plugin::{PrimaryMaterial, primary_material},
+        water_material::plugin::{WaterMaterial, water_material},
     },
     playing_state::{
         coord_rebasing::world_space_transf,
@@ -103,33 +104,27 @@ fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials1: ResMut<Assets<PrimaryMaterial>>,
-    mut materials2: ResMut<Assets<StandardMaterial>>,
+    mut materials2: ResMut<Assets<WaterMaterial>>,
     global_render_data_handle: Res<GlobalRenderDataHandle>,
 ) {
     commands.spawn((
         PlayingStateEntity,
         Mesh3d(meshes.add(dodec_mesh())),
         MeshMaterial3d(materials1.add(primary_material(
-            PrimaryMaterialProps::default(),
+            default(),
             global_render_data_handle.get_handle(),
         ))),
-        world_space_transf(Transform::from_xyz(3., 0., -9.).with_scale(Vec3::splat(500.))),
+        world_space_transf(Transform::from_xyz(3., 0., -9.)),
     ));
 
-    // Layer of water.
+    // Water layer.
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(
-            meshes.add(
-                Mesh::from(Plane3d::new(Vec3::Y, Vec2::new(15_000., 15_000.)))
-                    .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, vec![[0., 0., 1., 1.]; 4]),
-            ),
-        ),
-        MeshMaterial3d(materials2.add(StandardMaterial {
-            base_color: Color::srgba(0., 0.1, 0.9, 0.3),
-            alpha_mode: AlphaMode::Blend,
-            ..default()
-        })),
-        Transform::from_xyz(0., 25., 0.),
+        Mesh3d(meshes.add(water_layer())),
+        MeshMaterial3d(materials2.add(water_material(
+            default(),
+            global_render_data_handle.get_handle(),
+        ))),
+        Transform::from_xyz(0., 25., 0.).with_scale(Vec3::splat(15_000.)),
     ));
 }
