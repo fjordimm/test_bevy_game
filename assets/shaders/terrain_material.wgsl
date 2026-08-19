@@ -13,11 +13,14 @@
     lighting,
 }
 #import "shaders/util_noise.wgsl"::simplex_noise_3d;
+#import "shaders/global_render_data.wgsl"::GlobalRenderData;
+#import "shaders/sky_and_fog.wgsl"::sky_and_fog;
 
-const FOG_START: f32 = 5.0;
+const FOG_START: f32 = 1000.0;
 const FOG_END: f32 = 10000.0;
 
 @group(#{MATERIAL_BIND_GROUP}) @binding(100) var<uniform> texturing_scale: f32;
+@group(#{MATERIAL_BIND_GROUP}) @binding(101) var<storage, read> global_render_data: GlobalRenderData;
 
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
@@ -27,8 +30,9 @@ struct Vertex {
 struct CustomVertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) world_position: vec4<f32>,
-    @location(1) fog_amount: f32,
-    @location(2) @interpolate(flat) instance_index: u32,
+    @location(1) pos_on_sphere: vec3<f32>,
+    @location(2) fog_amount: f32,
+    @location(3) @interpolate(flat) instance_index: u32,
 }
 
 fn to_pbr_vertex_output(og: CustomVertexOutput) -> VertexOutput {
@@ -53,9 +57,14 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
 
     out.position = position_view_to_clip(view_position);
 
+    // Added this to pass the local 3d position.
+
+    out.pos_on_sphere = out.world_position.xyz;
+    // out.pos_on_sphere += view_bindings::view.view_from_world[3].xyz;
+
     // Fog.
 
-    out.fog_amount = (FOG_START - view_position.z) / (FOG_END - FOG_START);
+    out.fog_amount = (-view_position.z - 0.5 - FOG_START) / (FOG_END - FOG_START);
     out.fog_amount = clamp(out.fog_amount, 0.0, 1.0);
 
     // Boilerplate.
@@ -111,8 +120,8 @@ fn fragment(
 
     // Fog.
 
-    let fog = clamp(in.fog_amount, 0.0, 1.0);
-    let fogged_color = (1.0 - fog) * out.rgb + (fog) * vec3(0.0, 1.0, 0.0);
+    // let fogged_color = (1.0 - in.fog_amount) * out.rgb + (in.fog_amount) * sky_and_fog(global_render_data, in.lposition.xyz, in.position.xy);
+    let fogged_color = sky_and_fog(global_render_data, in.pos_on_sphere, in.position.xy);
     out = vec4(fogged_color, 1.0);
 
     // Return value.

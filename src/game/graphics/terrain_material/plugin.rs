@@ -1,8 +1,11 @@
 use bevy::{
     pbr::{ExtendedMaterial, MaterialExtension, MaterialExtensionKey, MaterialExtensionPipeline},
     prelude::*,
-    render::render_resource::{
-        AsBindGroup, Face, RenderPipelineDescriptor, SpecializedMeshPipelineError,
+    render::{
+        render_resource::{
+            AsBindGroup, Face, RenderPipelineDescriptor, SpecializedMeshPipelineError,
+        },
+        storage::ShaderStorageBuffer,
     },
     shader::ShaderRef,
 };
@@ -15,6 +18,9 @@ impl Plugin for TerrainMaterialPlugin {
         #[rustfmt::skip]
         app
             .add_plugins(MaterialPlugin::<TerrainMaterial>::default())
+            .add_systems(Update,
+                fix_storage_buffer_bug
+            )
         ;
     }
 }
@@ -33,7 +39,10 @@ impl Default for TerrainMaterialProps {
 
 pub type TerrainMaterial = ExtendedMaterial<StandardMaterial, __TerrainMaterialExtension>;
 
-pub fn terrain_material(props: TerrainMaterialProps) -> TerrainMaterial {
+pub fn terrain_material(
+    props: TerrainMaterialProps,
+    global_render_data_handle: Handle<ShaderStorageBuffer>,
+) -> TerrainMaterial {
     TerrainMaterial {
         base: StandardMaterial {
             perceptual_roughness: 1.,
@@ -51,6 +60,7 @@ pub fn terrain_material(props: TerrainMaterialProps) -> TerrainMaterial {
         },
         extension: __TerrainMaterialExtension {
             texturing_scale: props.texturing_scale,
+            global_render_data_handle: global_render_data_handle,
         },
     }
 }
@@ -59,6 +69,8 @@ pub fn terrain_material(props: TerrainMaterialProps) -> TerrainMaterial {
 pub struct __TerrainMaterialExtension {
     #[uniform(100)]
     texturing_scale: f32,
+    #[storage(101, read_only)]
+    pub global_render_data_handle: Handle<ShaderStorageBuffer>,
 }
 
 impl MaterialExtension for __TerrainMaterialExtension {
@@ -84,4 +96,8 @@ impl MaterialExtension for __TerrainMaterialExtension {
 
         Ok(())
     }
+}
+
+fn fix_storage_buffer_bug(mut materials: ResMut<Assets<TerrainMaterial>>) {
+    materials.iter_mut().for_each(|_| {});
 }

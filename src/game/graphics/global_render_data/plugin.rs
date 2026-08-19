@@ -1,9 +1,7 @@
 use bevy::{prelude::*, render::storage::ShaderStorageBuffer};
 
 use crate::game::{
-    core::states::OverallState,
     graphics::global_render_data::resources::{GlobalRenderData, GlobalRenderDataHandle},
-    playing_state::sets::OnEnterPlaying,
     util::alrrs,
 };
 
@@ -13,9 +11,8 @@ impl Plugin for GlobalRenderDataPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(OnEnter(OverallState::Playing),
+            .add_systems(Startup,
                 create_global_render_data
-                    .in_set(OnEnterPlaying::ResourceSetup)
             )
             .add_systems(Update,
                 update_global_render_data

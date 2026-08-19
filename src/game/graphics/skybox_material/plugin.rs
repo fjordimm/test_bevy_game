@@ -26,7 +26,7 @@ impl Plugin for SkyboxMaterialPlugin {
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct SkyboxMaterial {
     #[storage(0, read_only)]
-    pub global_render_data: Handle<ShaderStorageBuffer>,
+    pub global_render_data_handle: Handle<ShaderStorageBuffer>,
 }
 
 impl Material for SkyboxMaterial {

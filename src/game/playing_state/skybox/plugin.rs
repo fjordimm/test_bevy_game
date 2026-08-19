@@ -51,10 +51,10 @@ fn spawn_skybox(
         PlayingStateEntity,
         SkyboxTag,
         Mesh3d(meshes.add(alrro!(
-            Mesh::from(Sphere::new(1_000_000.)).with_inverted_winding()
+            Mesh::from(Cuboid::new(1_000_000., 1_000_000., 1_000_000.)).with_inverted_winding()
         ))),
         MeshMaterial3d(materials.add(SkyboxMaterial {
-            global_render_data: global_render_data_handle.get_handle(),
+            global_render_data_handle: global_render_data_handle.get_handle(),
         })),
         Transform::default(),
     ));

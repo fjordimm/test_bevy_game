@@ -38,11 +38,11 @@ const STARS_DENSITY_INV: f32 = 0.995;
 const STARS_TIME_RANGE_FACTOR: f32 = 80.0;
 
 // TODO: use & for GlobalRenderData
-fn sky_and_fog(global_render_data: GlobalRenderData, lposition_xyz: vec3<f32>, position_xy: vec2<f32>) -> vec3<f32> {
+fn sky_and_fog(global_render_data: GlobalRenderData, pos_on_sphere: vec3<f32>, clip_position_xy: vec2<f32>) -> vec3<f32> {
     var color = vec3<f32>(0.0, 0.0, 0.0);
 
     let sun_pos = normalize(global_render_data.sun_position);
-    let dir: vec3<f32> = normalize(lposition_xyz);
+    let dir: vec3<f32> = normalize(pos_on_sphere);
 
     let day_amount = smoothstep(0.0, 1.0, sun_pos.y + TWILIGHT_OFFSET);
 
@@ -66,7 +66,8 @@ fn sky_and_fog(global_render_data: GlobalRenderData, lposition_xyz: vec3<f32>, p
     // Stars
     color += STARS_COLOR * _local_star_value(global_render_data.sky_rotation_inv * dir) * clamp(pow(1.0 - day_amount, STARS_TIME_RANGE_FACTOR), 0.0, 1.0);
 
-    color += reduce_banding(position_xy);
+    // TODO
+    // color += reduce_banding(clip_position_xy);
     return color;
 }
 

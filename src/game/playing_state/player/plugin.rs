@@ -25,7 +25,6 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .init_resource::<PlayerMovementSettings>()
             .add_systems(OnEnter(PauseState::Unpaused),
                 grab_cursor
                     .in_set(DuringPlaying)
@@ -38,7 +37,7 @@ impl Plugin for PlayerPlugin {
                     .in_set(OnExitPlaying::General)
             )
             .add_systems(OnEnter(OverallState::Playing),
-                reset_rot_o
+                on_enter
                     .in_set(OnEnterPlaying::ResourceSetup)
             )
             .add_systems(Update,
@@ -64,7 +63,8 @@ fn free_cursor(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
 #[derive(Resource)]
 struct RotO(Option<(f32, f32)>); // (yaw, pitch)
 
-fn reset_rot_o(mut commands: Commands) {
+fn on_enter(mut commands: Commands) {
+    commands.insert_resource(PlayerMovementSettings::default());
     commands.insert_resource(RotO(None));
 }
 

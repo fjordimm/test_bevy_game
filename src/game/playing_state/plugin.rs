@@ -9,6 +9,7 @@ use bevy_ecs::entity::Entities;
 use crate::game::{
     core::{resources::KeyBindings, states::OverallState},
     graphics::{
+        global_render_data::resources::GlobalRenderDataHandle,
         primary_material::plugin::PrimaryMaterial, terrain_material::plugin::TerrainMaterial,
     },
     playing_state::{
@@ -88,6 +89,7 @@ impl Plugin for PlayingStatePlugin {
 
 fn on_enter(
     mut commands: Commands,
+    global_render_data_handle: Res<GlobalRenderDataHandle>,
     mut materials_primary: ResMut<Assets<PrimaryMaterial>>,
     mut materials_terrain: ResMut<Assets<TerrainMaterial>>,
     mut images: ResMut<Assets<Image>>,
@@ -96,6 +98,7 @@ fn on_enter(
     mut next_pause_state: ResMut<NextState<PauseState>>,
 ) {
     commands.insert_resource(ReusableMaterials::new(
+        global_render_data_handle.get_handle(),
         &mut materials_primary,
         &mut materials_terrain,
     ));

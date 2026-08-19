@@ -19,6 +19,7 @@
 
 ## Currently Working On
 - Fog.
+- Do fog for primary material too.
 - Switch back to `1.0` instead of `1.`.
 - Coordinate rebasing.
     - Write a note.md file in `coord_rebasing` that explains it.

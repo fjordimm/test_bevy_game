@@ -58,3 +58,13 @@ fn hash3(p: vec3<f32>) -> f32 {
 fn bell(x: f32) -> f32 {
     return 1.0 / (1.0 + x * x);
 }
+
+fn lerp_remap(
+    x: f32,
+    lower_bound_from: f32,
+    upper_bound_from: f32,
+    lower_bound_to: f32,
+    upper_bound_to: f32,
+) -> f32 {
+    return ((x - lower_bound_from) / upper_bound_from) * (upper_bound_to - lower_bound_to) + lower_bound_to;
+}

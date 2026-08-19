@@ -15,6 +15,9 @@ impl Plugin for PrimaryMaterialPlugin {
         #[rustfmt::skip]
         app
             .add_plugins(MaterialPlugin::<PrimaryMaterial>::default())
+            .add_systems(Update,
+                fix_storage_buffer_bug
+            )
         ;
     }
 }
@@ -85,4 +88,8 @@ impl MaterialExtension for __PrimaryMaterialExtension {
 
         Ok(())
     }
+}
+
+fn fix_storage_buffer_bug(mut materials: ResMut<Assets<PrimaryMaterial>>) {
+    materials.iter_mut().for_each(|_| {});
 }
