@@ -59,18 +59,18 @@ pub fn terrain_material(
             ..default()
         },
         extension: __TerrainMaterialExtension {
-            texturing_scale: props.texturing_scale,
             global_render_data_handle: global_render_data_handle,
+            texturing_scale: props.texturing_scale,
         },
     }
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct __TerrainMaterialExtension {
-    #[uniform(100)]
-    texturing_scale: f32,
-    #[storage(101, read_only)]
+    #[storage(100, read_only)]
     pub global_render_data_handle: Handle<ShaderStorageBuffer>,
+    #[uniform(101)]
+    texturing_scale: f32,
 }
 
 impl MaterialExtension for __TerrainMaterialExtension {

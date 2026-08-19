@@ -1,8 +1,11 @@
 use bevy::{
     pbr::{ExtendedMaterial, MaterialExtension, MaterialExtensionKey, MaterialExtensionPipeline},
     prelude::*,
-    render::render_resource::{
-        AsBindGroup, Face, RenderPipelineDescriptor, SpecializedMeshPipelineError,
+    render::{
+        render_resource::{
+            AsBindGroup, Face, RenderPipelineDescriptor, SpecializedMeshPipelineError,
+        },
+        storage::ShaderStorageBuffer,
     },
     shader::ShaderRef,
 };
@@ -36,7 +39,10 @@ impl Default for PrimaryMaterialProps {
 
 pub type PrimaryMaterial = ExtendedMaterial<StandardMaterial, __PrimaryMaterialExtension>;
 
-pub fn primary_material(props: PrimaryMaterialProps) -> PrimaryMaterial {
+pub fn primary_material(
+    props: PrimaryMaterialProps,
+    global_render_data_handle: Handle<ShaderStorageBuffer>,
+) -> PrimaryMaterial {
     PrimaryMaterial {
         base: StandardMaterial {
             perceptual_roughness: 1.,
@@ -53,6 +59,7 @@ pub fn primary_material(props: PrimaryMaterialProps) -> PrimaryMaterial {
             ..default()
         },
         extension: __PrimaryMaterialExtension {
+            global_render_data_handle: global_render_data_handle,
             texturing_scale: props.texturing_scale,
         },
     }
@@ -60,7 +67,9 @@ pub fn primary_material(props: PrimaryMaterialProps) -> PrimaryMaterial {
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct __PrimaryMaterialExtension {
-    #[uniform(100)]
+    #[storage(100, read_only)]
+    pub global_render_data_handle: Handle<ShaderStorageBuffer>,
+    #[uniform(101)]
     texturing_scale: f32,
 }
 

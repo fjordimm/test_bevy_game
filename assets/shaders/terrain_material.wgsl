@@ -15,12 +15,11 @@
 #import "shaders/util_noise.wgsl"::simplex_noise_3d;
 #import "shaders/global_render_data.wgsl"::GlobalRenderData;
 #import "shaders/sky.wgsl"::sky_without_sun_and_stars;
+#import "shaders/sky.wgsl"::FOG_START;
+#import "shaders/sky.wgsl"::FOG_END;
 
-const FOG_START: f32 = 1000.0;
-const FOG_END: f32 = 10000.0;
-
-@group(#{MATERIAL_BIND_GROUP}) @binding(100) var<uniform> texturing_scale: f32;
-@group(#{MATERIAL_BIND_GROUP}) @binding(101) var<storage, read> global_render_data: GlobalRenderData;
+@group(#{MATERIAL_BIND_GROUP}) @binding(100) var<storage, read> global_render_data: GlobalRenderData;
+@group(#{MATERIAL_BIND_GROUP}) @binding(101) var<uniform> texturing_scale: f32;
 
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
@@ -57,7 +56,7 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
 
     out.position = position_view_to_clip(view_position);
 
-    // Added this to pass the local 3d position.
+    // Added this to pass the camera-relative position.
 
     out.cam_relative_pos = out.world_position.xyz;
     out.cam_relative_pos -= view_bindings::view.world_position;

@@ -1,7 +1,8 @@
 #import bevy_pbr::{
     forward_io::VertexOutput,
     mesh_functions,
-    view_transformations::position_world_to_clip,
+    view_transformations::position_world_to_view,
+    view_transformations::position_view_to_clip,
     pbr_fragment::pbr_input_from_standard_material,
     pbr_functions::{
         alpha_discard,
@@ -12,8 +13,13 @@
     lighting,
 }
 #import "shaders/util_noise.wgsl"::simplex_noise_3d;
+#import "shaders/global_render_data.wgsl"::GlobalRenderData;
+#import "shaders/sky.wgsl"::sky_without_sun_and_stars;
+#import "shaders/sky.wgsl"::FOG_START;
+#import "shaders/sky.wgsl"::FOG_END;
 
-@group(#{MATERIAL_BIND_GROUP}) @binding(100) var<uniform> texturing_scale: f32;
+@group(#{MATERIAL_BIND_GROUP}) @binding(100) var<storage, read> global_render_data: GlobalRenderData;
+@group(#{MATERIAL_BIND_GROUP}) @binding(101) var<uniform> texturing_scale: f32;
 
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
@@ -24,9 +30,11 @@ struct Vertex {
 struct CustomVertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) world_position: vec4<f32>,
-    @location(1) lposition: vec3<f32>,
-    @location(2) color: vec4<f32>,
-    @location(3) @interpolate(flat) instance_index: u32,
+    @location(1) cam_relative_pos: vec3<f32>,
+    @location(2) fog_amount: f32,
+    @location(3) lposition: vec3<f32>,
+    @location(4) color: vec4<f32>,
+    @location(5) @interpolate(flat) instance_index: u32,
 }
 
 fn to_pbr_vertex_output(og: CustomVertexOutput) -> VertexOutput {
@@ -48,7 +56,19 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
     let world_mat = mesh_functions::get_world_from_local(in.instance_index);
     out.world_position = mesh_functions::mesh_position_local_to_world(world_mat, vec4<f32>(in.position, 1.0));
 
-    out.position = position_world_to_clip(out.world_position.xyz);
+    let view_position = position_world_to_view(out.world_position.xyz);
+
+    out.position = position_view_to_clip(view_position);
+
+    // Added this to pass the camera-relative position.
+
+    out.cam_relative_pos = out.world_position.xyz;
+    out.cam_relative_pos -= view_bindings::view.world_position;
+
+    // Fog.
+
+    out.fog_amount = (-view_position.z - 0.5 - FOG_START) / (FOG_END - FOG_START);
+    out.fog_amount = clamp(out.fog_amount, 0.0, 1.0);
 
     // Added this to pass the local 3d position.
     out.lposition = in.position;
@@ -104,6 +124,11 @@ fn fragment(
     // Boilerplate.
 
     out = main_pass_post_lighting_processing(pbr_input, out);
+
+    // Fog.
+
+    let fog_color = sky_without_sun_and_stars(global_render_data, in.cam_relative_pos, in.position.xy);
+    out = vec4((1.0 - in.fog_amount) * out.rgb + (in.fog_amount) * fog_color, 1.0);
 
     // Return value.
 

@@ -6,8 +6,9 @@ use rand_distr::num_traits::Pow;
 use crate::game::{
     core::states::OverallState,
     geometry::dodec::dodec_mesh,
-    graphics::primary_material::plugin::{
-        PrimaryMaterial, PrimaryMaterialProps, primary_material,
+    graphics::{
+        global_render_data::resources::GlobalRenderDataHandle,
+        primary_material::plugin::{PrimaryMaterial, PrimaryMaterialProps, primary_material},
     },
     playing_state::{
         coord_rebasing::world_space_transf,
@@ -103,14 +104,16 @@ fn spawn_some_stuff(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials1: ResMut<Assets<PrimaryMaterial>>,
     mut materials2: ResMut<Assets<StandardMaterial>>,
+    global_render_data_handle: Res<GlobalRenderDataHandle>,
 ) {
     commands.spawn((
         PlayingStateEntity,
         Mesh3d(meshes.add(dodec_mesh())),
         MeshMaterial3d(materials1.add(primary_material(
             PrimaryMaterialProps::default(),
+            global_render_data_handle.get_handle(),
         ))),
-        world_space_transf(Transform::from_xyz(3., 0., -9.)),
+        world_space_transf(Transform::from_xyz(3., 0., -9.).with_scale(Vec3::splat(500.))),
     ));
 
     // Layer of water.
