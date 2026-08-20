@@ -12,12 +12,16 @@
     mesh_view_bindings as view_bindings,
     lighting,
 }
-#import "shaders/util_noise.wgsl"::simplex_noise_3d;
 #import "shaders/global_render_data.wgsl"::GlobalRenderData;
-#import "shaders/sky.wgsl"::sky_without_sun_and_stars;
+#import "shaders/sky.wgsl"::{sky_without_sun_and_stars, sky};
 #import "shaders/sky.wgsl"::FOG_START;
 #import "shaders/sky.wgsl"::FOG_END;
+#import bevy_core_pipeline::oit::oit_draw
+#import "shaders/util_noise.wgsl"::simplex_noise_3d;
 #import "shaders/water.wgsl"::{
+    WATER_WAVES_SCALE,
+    WATER_WAVES_TIME_SCALE,
+    WATER_WAVES_HEIGHT,
     WATER_FOG_START,
     WATER_FOG_END,
     WATER_FOG_REFRACTION_OFFSET,
@@ -103,10 +107,15 @@ fn fragment(
 
     // Compute normal (only allows for flat shading).
 
-    let world_pos = in.world_position.xyz;
-    pbr_vertex_output.world_normal = normalize(cross(dpdy(world_pos), dpdx(world_pos)));
+    var world_pos = in.world_position.xyz;
+
+    // Water stuff.
+
+    world_pos.y += WATER_WAVES_HEIGHT * simplex_noise_3d(vec3(WATER_WAVES_SCALE * world_pos.x, WATER_WAVES_SCALE * world_pos.z, WATER_WAVES_TIME_SCALE * global_render_data.time_elapsed));
 
     // Boilerplate.
+
+    pbr_vertex_output.world_normal = normalize(cross(dpdy(world_pos), dpdx(world_pos)));
     
     var pbr_input = pbr_input_from_standard_material(pbr_vertex_output, is_front);
 
@@ -117,39 +126,35 @@ fn fragment(
     pbr_input.material.base_color = alpha_discard(pbr_input.material, pbr_input.material.base_color);
 
     var out = vec4<f32>(0.0);
-    out = apply_pbr_lighting(pbr_input);
 
-    // Could modify color here too. // TODOr
-
-    // let n_directional_lights = view_bindings::lights.n_directional_lights;
-    // for (var i: u32 = 0u; i < n_directional_lights; i = i + 1u) {
-    // }
-
-    // Boilerplate.
-
-    out = main_pass_post_lighting_processing(pbr_input, out);
+    // Water stuff.
+    
+    let reflected_cam_relative_pos = reflect(in.cam_relative_pos, pbr_vertex_output.world_normal);
+    let sky_reflection = sky_without_sun_and_stars(
+        global_render_data,
+        vec3(reflected_cam_relative_pos.x, -reflected_cam_relative_pos.y, reflected_cam_relative_pos.z),
+        in.position.xy,
+    );
+    out = vec4(sky_reflection, pbr_input.material.base_color.a);
 
     // Fog.
 
     let fog_color = sky_without_sun_and_stars(global_render_data, in.cam_relative_pos, in.position.xy);
-    out = vec4((1.0 - in.fog_amount) * out.rgb + (in.fog_amount) * fog_color, 1.0);
+    out = vec4((1.0 - in.fog_amount) * out.rgb + (in.fog_amount) * fog_color, out.a);
 
-    // Water fog. TODO: do for the other shaders as well.
+    // Water fog.
 
-    if bool(global_render_data.cam_is_underwater) {
-        let water_fog_color = sky_without_sun_and_stars(
-            global_render_data,
-            vec3(
-                in.cam_relative_pos.x,
-                in.cam_relative_pos.y + WATER_FOG_REFRACTION_OFFSET,
-                in.cam_relative_pos.z,
-            ),
-            in.position.xy
-        );
-        out = vec4((1.0 - in.water_fog_amount) * out.rgb + (in.water_fog_amount) * water_fog_color, 1.0);
-
-        out = vec4(WATER_FOG_DARKNESS_FACTOR * out.rgb, 1.0);
-    }
+    let water_fog_color = sky_without_sun_and_stars(
+        global_render_data,
+        vec3(
+            in.cam_relative_pos.x,
+            in.cam_relative_pos.y + WATER_FOG_REFRACTION_OFFSET,
+            in.cam_relative_pos.z,
+        ),
+        in.position.xy
+    );
+    out = vec4((1.0 - in.water_fog_amount) * out.rgb + (in.water_fog_amount) * water_fog_color, 1.0);
+    out = vec4(WATER_FOG_DARKNESS_FACTOR * out.rgb, 1.0);
 
     // Return value.
 

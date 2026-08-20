@@ -27,6 +27,7 @@ use crate::game::{
         states::PauseState,
         tags::PlayingStateEntity,
         terrain::plugin::TerrainPlugin,
+        water_layer::plugin::WaterLayerPlugin,
     },
     util::{alrrs, get_entity_components},
 };
@@ -83,6 +84,7 @@ impl Plugin for PlayingStatePlugin {
             .add_plugins(PauseMenuPlugin)
             .add_plugins(PlayerPlugin)
             .add_plugins(CoordRebasingPlugin)
+            .add_plugins(WaterLayerPlugin)
         ;
     }
 }

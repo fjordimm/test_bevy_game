@@ -18,6 +18,11 @@
 #import "shaders/sky.wgsl"::FOG_END;
 #import bevy_core_pipeline::oit::oit_draw
 #import "shaders/util_noise.wgsl"::simplex_noise_3d;
+#import "shaders/water.wgsl"::{
+    WATER_WAVES_SCALE,
+    WATER_WAVES_TIME_SCALE,
+    WATER_WAVES_HEIGHT,
+}
 
 @group(#{MATERIAL_BIND_GROUP}) @binding(100) var<storage, read> global_render_data: GlobalRenderData;
 @group(#{MATERIAL_BIND_GROUP}) @binding(101) var<uniform> texturing_scale: f32;
@@ -96,8 +101,7 @@ fn fragment(
 
     // Water stuff.
 
-    const SCALE: f32 = 0.1;
-    world_pos.y += 0.1 * simplex_noise_3d(vec3(SCALE * world_pos.x, SCALE * world_pos.z, global_render_data.time_elapsed));
+    world_pos.y += WATER_WAVES_HEIGHT * simplex_noise_3d(vec3(WATER_WAVES_SCALE * world_pos.x, WATER_WAVES_SCALE * world_pos.z, WATER_WAVES_TIME_SCALE * global_render_data.time_elapsed));
 
     // Boilerplate.
 

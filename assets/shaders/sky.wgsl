@@ -39,7 +39,7 @@ const SUNSET_TIME_RANGE_OFFSET: f32 = 0.17;
 const STARS_COLOR = 0.2 * vec3<f32>(1.0, 1.0, 1.0);
 const STARS_SCALE: f32 = 230.0;
 const STARS_DENSITY_INV: f32 = 0.995;
-const STARS_TIME_RANGE_FACTOR: f32 = 10.0;
+const STARS_TIME_RANGE_FACTOR: f32 = 2.5;
 
 fn sky(global_render_data: GlobalRenderData, cam_relative_pos: vec3<f32>, clip_position_xy: vec2<f32>) -> vec3<f32> {
     var color = vec3<f32>(0.0, 0.0, 0.0);

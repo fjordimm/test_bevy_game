@@ -10,3 +10,4 @@ pub mod skybox;
 pub mod states;
 pub mod tags;
 pub mod terrain;
+pub mod water_layer;

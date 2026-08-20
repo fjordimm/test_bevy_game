@@ -5,11 +5,10 @@ use rand_distr::num_traits::Pow;
 
 use crate::game::{
     core::states::OverallState,
-    geometry::{dodec::dodec_mesh, water_layer::water_layer},
+    geometry::dodec::dodec_mesh,
     graphics::{
         global_render_data::resources::GlobalRenderDataHandle,
         primary_material::plugin::{PrimaryMaterial, primary_material},
-        water_material::plugin::{WaterMaterial, water_material},
     },
     playing_state::{
         coord_rebasing::world_space_transf,
@@ -103,28 +102,16 @@ fn move_player_body_to_cam(
 fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials1: ResMut<Assets<PrimaryMaterial>>,
-    mut materials2: ResMut<Assets<WaterMaterial>>,
+    mut materials: ResMut<Assets<PrimaryMaterial>>,
     global_render_data_handle: Res<GlobalRenderDataHandle>,
 ) {
     commands.spawn((
         PlayingStateEntity,
         Mesh3d(meshes.add(dodec_mesh())),
-        MeshMaterial3d(materials1.add(primary_material(
+        MeshMaterial3d(materials.add(primary_material(
             default(),
             global_render_data_handle.get_handle(),
         ))),
         world_space_transf(Transform::from_xyz(3., 0., -9.)),
-    ));
-
-    // Water layer.
-    commands.spawn((
-        PlayingStateEntity,
-        Mesh3d(meshes.add(water_layer())),
-        MeshMaterial3d(materials2.add(water_material(
-            default(),
-            global_render_data_handle.get_handle(),
-        ))),
-        Transform::from_xyz(0., 25., 0.).with_scale(Vec3::splat(15_000.)),
     ));
 }
