@@ -130,11 +130,11 @@ fn on_enter(
                 fov: 60f32.to_radians(),
                 ..default()
             }),
-            world_space_transf(Transform::from_xyz(0., 3., 7.)),
             AmbientLight {
                 brightness: 0.,
                 ..default()
             },
+            world_space_transf(Transform::from_xyz(0., 3., 7.)),
         ));
 
         let final_render_pass_layer = RenderLayers::layer(1);

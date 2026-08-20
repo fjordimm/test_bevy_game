@@ -15,7 +15,7 @@ const DAY_ZENITH_COLOR = vec3<f32>(0.19, 0.58, 0.97);
 const DAY_HORIZON_COLOR = vec3<f32>(0.32, 0.69, 1.0);
 const DAY_HORIZON_SQUISH_FACTOR: f32 = 2.9;
 const NIGHT_ZENITH_COLOR = vec3<f32>(0.0001, 0.002, 0.003);
-const NIGHT_HORIZON_COLOR = vec3<f32>(0.002, 0.004, 0.006);
+const NIGHT_HORIZON_COLOR = vec3<f32>(0.0016, 0.003, 0.0045);
 const NIGHT_HORIZON_SQUISH_FACTOR: f32 = 1.7;
 
 // This must match environment_light::plugin::AMBIENT_LIGHT_Y_LEVEL_OF_MIN
@@ -36,10 +36,10 @@ const SUNSET_CURVE_INV: f32 = 0.31;
 const SUNSET_TIME_RANGE_INV: f32 = 2.9;
 const SUNSET_TIME_RANGE_OFFSET: f32 = 0.17;
 
-const STARS_COLOR = vec3<f32>(1.0, 1.0, 1.0);
+const STARS_COLOR = 0.2 * vec3<f32>(1.0, 1.0, 1.0);
 const STARS_SCALE: f32 = 230.0;
 const STARS_DENSITY_INV: f32 = 0.995;
-const STARS_TIME_RANGE_FACTOR: f32 = 80.0;
+const STARS_TIME_RANGE_FACTOR: f32 = 10.0;
 
 fn sky(global_render_data: GlobalRenderData, cam_relative_pos: vec3<f32>, clip_position_xy: vec2<f32>) -> vec3<f32> {
     var color = vec3<f32>(0.0, 0.0, 0.0);
