@@ -41,7 +41,8 @@ pub fn water_material(
 ) -> WaterMaterial {
     WaterMaterial {
         base: StandardMaterial {
-            base_color: Color::WHITE,
+            base_color: Color::WHITE.with_alpha(0.3),
+            alpha_mode: AlphaMode::Blend,
             perceptual_roughness: 1.,
             metallic: 0.,
             reflectance: 0.,

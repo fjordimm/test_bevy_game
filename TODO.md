@@ -43,6 +43,7 @@
 - Just pass three f32s for vertex colors, not four. Actually, you should get rid of vertices being individually colored and have like 8 colors or something passed in as a uniform, and each vertex has an index to that color.
 - The function that generates the mesh for terrain chunks could be optimized. Most notably, it makes a big 2d array that is then discarded.
 - `terrain_mesh::quantized_position` could be optimized. Each call to `quantized_position` in `create_terrain_mesh` computes the same value multiple times.
+- Don't even use Bevy's pbr. Just make your own (phong?) calculations based on lights.
 
 ## Features
 - Add TabGroups to gui stuff

@@ -12,12 +12,12 @@
     mesh_view_bindings as view_bindings,
     lighting,
 }
-#import "shaders/util_noise.wgsl"::simplex_noise_3d;
 #import "shaders/global_render_data.wgsl"::GlobalRenderData;
-#import "shaders/sky.wgsl"::sky_without_sun_and_stars;
+#import "shaders/sky.wgsl"::{sky_without_sun_and_stars, sky};
 #import "shaders/sky.wgsl"::FOG_START;
 #import "shaders/sky.wgsl"::FOG_END;
-#import "shaders/util_noise.wgsl"::simplex_noise_2d;
+#import bevy_core_pipeline::oit::oit_draw
+#import "shaders/util_noise.wgsl"::simplex_noise_3d;
 
 @group(#{MATERIAL_BIND_GROUP}) @binding(100) var<storage, read> global_render_data: GlobalRenderData;
 @group(#{MATERIAL_BIND_GROUP}) @binding(101) var<uniform> texturing_scale: f32;
@@ -93,39 +93,36 @@ fn fragment(
     // Compute normal (only allows for flat shading).
 
     var world_pos = in.world_position.xyz;
-    world_pos.y += 0.1 * simplex_noise_2d(vec2(world_pos.x, world_pos.z));
-    pbr_vertex_output.world_normal = normalize(cross(dpdy(world_pos), dpdx(world_pos)));
+
+    // Water stuff.
+
+    const SCALE: f32 = 0.1;
+    world_pos.y += 0.1 * simplex_noise_3d(vec3(SCALE * world_pos.x, SCALE * world_pos.z, global_render_data.time_elapsed));
 
     // Boilerplate.
+
+    pbr_vertex_output.world_normal = normalize(cross(dpdy(world_pos), dpdx(world_pos)));
     
     var pbr_input = pbr_input_from_standard_material(pbr_vertex_output, is_front);
 
     // Could modify color here too. // TODOr
-
-    // TODOr
-    pbr_input.material.base_color = vec4(0.0, 0.0, 1.0, 1.0);
 
     // Boilerplate.
 
     pbr_input.material.base_color = alpha_discard(pbr_input.material, pbr_input.material.base_color);
 
     var out = vec4<f32>(0.0);
-    out = apply_pbr_lighting(pbr_input);
 
-    // Could modify color here too. // TODOr
-
-    // let n_directional_lights = view_bindings::lights.n_directional_lights;
-    // for (var i: u32 = 0u; i < n_directional_lights; i = i + 1u) {
-    // }
-
-    // Boilerplate.
-
-    out = main_pass_post_lighting_processing(pbr_input, out);
+    // Water stuff.
+    
+    let reflected_cam_relative_pos = reflect(in.cam_relative_pos, pbr_vertex_output.world_normal);
+    let sky_reflection = sky(global_render_data, reflected_cam_relative_pos, in.position.xy);
+    out = vec4(sky_reflection, pbr_input.material.base_color.a);
 
     // Fog.
 
     let fog_color = sky_without_sun_and_stars(global_render_data, in.cam_relative_pos, in.position.xy);
-    out = vec4((1.0 - in.fog_amount) * out.rgb + (in.fog_amount) * fog_color, 1.0);
+    out = vec4((1.0 - in.fog_amount) * out.rgb + (in.fog_amount) * fog_color, out.a);
 
     // Return value.
 
