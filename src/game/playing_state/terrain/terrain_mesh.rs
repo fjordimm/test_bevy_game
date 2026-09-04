@@ -46,18 +46,15 @@ pub(super) fn create_terrain_mesh(
     off_z: i64,
     lod: usize,
 ) -> (Mesh, Mesh, Vec<Vec<[f32; 3]>>) {
-    // TODO: get rid of the colors.
-
     let off_x_real = CW as f32 * scale * off_x as f32;
     let off_z_real = CW as f32 * scale * off_z as f32;
 
     let mut inner_positions =
         Vec::<[f32; 3]>::with_capacity((CW - 1) * (CW - 1) + (CW - 2) * (CW - 2));
-    // TODO: is the capacity for `inner_triangles` (and the other ones) correct?
-    let mut inner_triangles = Vec::<u32>::with_capacity(4 * (CW - 2));
+    let mut inner_triangles = Vec::<u32>::with_capacity(3 * 4 * (CW - 2) * (CW - 2));
 
     let mut outer_positions = Vec::<[f32; 3]>::with_capacity(4 * CW + 4 * (CW - 2) + 4 * (CW - 1));
-    let mut outer_triangles = Vec::<u32>::with_capacity(4 * 4 * (CW - 1));
+    let mut outer_triangles = Vec::<u32>::with_capacity(3 * 4 * 4 * (CW - 1));
 
     // To keep track of the index of (Corner) vertices given a 2D index.
     let mut inner_indices_c = [[0u32; CW + 1]; CW + 1];

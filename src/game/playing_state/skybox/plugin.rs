@@ -9,7 +9,7 @@ use crate::game::{
         skybox_material::plugin::SkyboxMaterial,
     },
     playing_state::{
-        environment_light::{SeasonOfYear, TimeOfDay},
+        environment_light::resources::{SkyRotationS, SkyRotationT},
         player::tags::CameraForPlayer,
         sets::{DuringPlayingUnpaused, OnEnterPlaying},
         tags::PlayingStateEntity,
@@ -42,8 +42,8 @@ fn spawn_skybox(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<SkyboxMaterial>>,
-    time_of_day: Res<TimeOfDay>,
-    season_of_year: Res<SeasonOfYear>,
+    time_of_day: Res<SkyRotationT>,
+    season_of_year: Res<SkyRotationS>,
     mut global_render_data: ResMut<GlobalRenderData>,
     global_render_data_handle: Res<GlobalRenderDataHandle>,
 ) {
@@ -65,8 +65,8 @@ fn spawn_skybox(
 fn update_skybox(
     camera_transf_q: Option<Single<&Transform, With<CameraForPlayer>>>,
     skybox_transf_q: Option<Single<&mut Transform, (With<SkyboxTag>, Without<CameraForPlayer>)>>,
-    time_of_day: Res<TimeOfDay>,
-    season_of_year: Res<SeasonOfYear>,
+    time_of_day: Res<SkyRotationT>,
+    season_of_year: Res<SkyRotationS>,
     mut global_render_data: ResMut<GlobalRenderData>,
 ) {
     // Move it to be the same position as the camera.

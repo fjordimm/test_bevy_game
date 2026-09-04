@@ -2,9 +2,9 @@
 # Todo List
 
 ## Currently Working On
-- Water shader.
 - Switch back to `1.0` instead of `1.`.
 - Terrain.
+    - Generate uv normal textures for larger LODs to make them look like the smaller LODs.
     - Add hysteresis for changing LODs.
 - Texturing?? Texturing scale thing?
 - Maybe: instead of using plain `Without<>`s when you need to resolve query conflicts, you should make a type alias for it.

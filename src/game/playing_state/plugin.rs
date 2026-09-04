@@ -74,10 +74,6 @@ impl Plugin for PlayingStatePlugin {
                 toggle_pause
                     .in_set(DuringPlaying)
             )
-            .add_systems(Update,
-                playing_state_entity_check
-                    .in_set(DuringPlaying)
-            ) // TODO: only do this in debug mode
             .add_plugins(SkyboxPlugin)
             .add_plugins(EnvironmentLightPlugin)
             .add_plugins(TerrainPlugin)
@@ -85,6 +81,15 @@ impl Plugin for PlayingStatePlugin {
             .add_plugins(PlayerPlugin)
             .add_plugins(CoordRebasingPlugin)
             .add_plugins(WaterLayerPlugin)
+        ;
+
+        #[cfg(debug_assertions)]
+        #[rustfmt::skip]
+        app
+            .add_systems(Update,
+                playing_state_entity_check
+                    .in_set(DuringPlaying)
+            )
         ;
     }
 }

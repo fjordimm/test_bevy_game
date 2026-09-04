@@ -119,7 +119,7 @@ fn apply_style(
     textcolor: &mut TextColor,
     textlayout: &mut TextLayout,
 ) {
-    text.0 = state.content.clone(); // TODO: could be more efficient
+    text.0 = state.content.clone();
 
     *textfont = TextFont {
         font: match &attribs.font {
@@ -150,7 +150,7 @@ fn modify_style_from_state(
     state: &GuiTextState,
     text: &mut Text,
 ) {
-    text.0 = state.content.clone(); // TODO: could be more efficient
+    text.0 = state.content.clone();
 }
 
 pub struct GuiTextPlugin;

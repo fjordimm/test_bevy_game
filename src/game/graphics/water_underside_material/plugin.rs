@@ -41,7 +41,7 @@ pub fn water_underside_material(
 ) -> WaterUndersideMaterial {
     WaterUndersideMaterial {
         base: StandardMaterial {
-            base_color: Color::WHITE.with_alpha(0.9),
+            base_color: Color::WHITE.with_alpha(0.6),
             alpha_mode: AlphaMode::Blend,
             perceptual_roughness: 1.,
             metallic: 0.,

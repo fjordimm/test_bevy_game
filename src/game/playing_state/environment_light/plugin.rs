@@ -4,7 +4,7 @@ use crate::game::{
     core::states::OverallState,
     graphics::global_render_data::resources::GlobalRenderData,
     playing_state::{
-        environment_light::{SeasonOfYear, TimeOfDay},
+        environment_light::resources::{SkyRotationS, SkyRotationT},
         sets::{DuringPlayingUnpaused, OnEnterPlaying},
         tags::PlayingStateEntity,
     },
@@ -17,8 +17,8 @@ impl Plugin for EnvironmentLightPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .insert_resource(TimeOfDay(0.))
-            .insert_resource(SeasonOfYear(0.))
+            .insert_resource(SkyRotationT(0.))
+            .insert_resource(SkyRotationS(0.))
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
                     .in_set(OnEnterPlaying::General)
@@ -53,8 +53,8 @@ pub struct BelowAmbientLightTag;
 
 fn on_enter(
     mut commands: Commands,
-    mut time_of_day: ResMut<TimeOfDay>,
-    mut season_of_year: ResMut<SeasonOfYear>,
+    mut time_of_day: ResMut<SkyRotationT>,
+    mut season_of_year: ResMut<SkyRotationS>,
 ) {
     // Sunlight.
 

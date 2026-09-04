@@ -12,7 +12,7 @@ use crate::game::{
     },
     playing_state::{
         coord_rebasing::world_space_transf,
-        environment_light::{SeasonOfYear, TimeOfDay},
+        environment_light::resources::{SkyRotationS, SkyRotationT},
         player::{
             resources::PlayerMovementSettings,
             tags::{CameraForPlayer, PlayerTransf},
@@ -56,8 +56,8 @@ fn after_a_sec(/* mut gui_scale: ResMut<GuiScale> */) {
 fn scrolling(
     keys: Res<ButtonInput<KeyCode>>,
     mut mouse_wheel_reader: MessageReader<MouseWheel>,
-    mut time_of_day: ResMut<TimeOfDay>,
-    mut season_of_year: ResMut<SeasonOfYear>,
+    mut time_of_day: ResMut<SkyRotationT>,
+    mut season_of_year: ResMut<SkyRotationS>,
     mut movement_settings: ResMut<PlayerMovementSettings>,
 ) {
     for mouse_wheel_msg in mouse_wheel_reader.read() {
