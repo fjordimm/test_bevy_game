@@ -50,7 +50,7 @@ impl Plugin for QuickDevTestPlugin {
 }
 
 fn after_a_sec(/* mut gui_scale: ResMut<GuiScale> */) {
-    // gui_scale.0 = 5.;
+    // gui_scale.0 = 5.0;
 }
 
 fn scrolling(
@@ -72,13 +72,13 @@ fn scrolling(
         } else {
             // Change movement speed.
 
-            movement_settings.speed = movement_settings.speed.pow(1. - 0.01 * mouse_wheel_msg.y);
+            movement_settings.speed = movement_settings.speed.pow(1.0 - 0.01 * mouse_wheel_msg.y);
 
             if movement_settings.speed < 0.05 {
                 movement_settings.speed = 0.05;
             }
-            if movement_settings.speed > 10_000. {
-                movement_settings.speed = 10_000.;
+            if movement_settings.speed > 10_000.0 {
+                movement_settings.speed = 10_000.0;
             }
         }
     }
@@ -112,6 +112,6 @@ fn spawn_some_stuff(
             default(),
             global_render_data_handle.get_handle(),
         ))),
-        world_space_transf(Transform::from_xyz(3., 0., -9.)),
+        world_space_transf(Transform::from_xyz(3.0, 0.0, -9.0)),
     ));
 }

@@ -138,10 +138,10 @@ fn on_enter(
                 ..default()
             }),
             AmbientLight {
-                brightness: 0.,
+                brightness: 0.0,
                 ..default()
             },
-            world_space_transf(Transform::from_xyz(0., 3., 7.)),
+            world_space_transf(Transform::from_xyz(0.0, 3.0, 7.0)),
         ));
 
         let final_render_pass_layer = RenderLayers::layer(1);
@@ -160,7 +160,7 @@ fn on_enter(
             FinalRenderingSpriteTag,
             Sprite {
                 image: prerender_target_texture.clone(),
-                custom_size: Some(Vec2::new(1., 1.)),
+                custom_size: Some(Vec2::new(1.0, 1.0)),
                 ..default()
             },
             final_render_pass_layer.clone(),

@@ -13,7 +13,7 @@ use crate::game::{
     random::{Prng, plugin::RandomPlugin},
 };
 
-const DEBUG_BACKGROUND_COLOR: Color = Color::linear_rgb(1., 1., 0.);
+const DEBUG_BACKGROUND_COLOR: Color = Color::linear_rgb(1.0, 1.0, 0.0);
 
 pub fn build_bevy_app() -> App {
     let mut app = App::new();

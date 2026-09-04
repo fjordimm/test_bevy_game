@@ -35,23 +35,23 @@ impl TerrainFunc {
         let x = x as f64;
         let z = z as f64;
 
-        let mut h = 0.;
+        let mut h = 0.0;
 
         let mountains_placement = {
-            let mut val = 0.;
+            let mut val = 0.0;
 
-            val += sigmoid(20. * (self.mountains_placement_overall.sample(x, z) - 0.2))
-                * (230f64.powf(1. - self.mountains_placement_detail.sample(x, z).abs()) / 230.);
+            val += sigmoid(20.0 * (self.mountains_placement_overall.sample(x, z) - 0.2))
+                * (230f64.powf(1.0 - self.mountains_placement_detail.sample(x, z).abs()) / 230.0);
 
             val
         };
         let mountains_detail = {
-            let mut val = 0.;
+            let mut val = 0.0;
 
-            let rough = lerp_remap(self.mountains_rough.sample(x, z), -1., 1., 0.87, 1.);
+            let rough = lerp_remap(self.mountains_rough.sample(x, z), -1.0, 1.0, 0.87, 1.0);
 
             let mut frq = 0.0007;
-            let mut amp = 500.;
+            let mut amp = 500.0;
             self.mountains_w.iter().for_each(|worley| {
                 val += amp * rough * worley.value_2d(x * frq, z * frq);
 
@@ -65,15 +65,15 @@ impl TerrainFunc {
         h += mountains;
 
         let rivers = {
-            let mut val = 0.;
+            let mut val = 0.0;
 
-            let skinniness = 21_000_000.;
+            let skinniness = 21_000_000.0;
             let river_inp = self.rivers.sample(x, z) + 0.01 * mountains_placement;
-            val += 1. - 1. / (1. + skinniness * river_inp.powi(4));
+            val += 1.0 - 1.0 / (1.0 + skinniness * river_inp.powi(4));
 
             val
         };
-        h = rivers * (h + 35.);
+        h = rivers * (h + 35.0);
 
         h += 12.9 * self.ground_rough.sample(x, z);
 
@@ -100,16 +100,16 @@ impl OctavedNoiseSampler {
     }
 
     fn sample(&self, x: f64, z: f64) -> f64 {
-        let mut h = 0.;
-        let mut final_amp = 1.;
+        let mut h = 0.0;
+        let mut final_amp = 1.0;
 
         let mut frq = self.frequency;
-        let mut amp = 1.;
+        let mut amp = 1.0;
         for i in 0..self.octaves.len() {
             h += amp * self.octaves[i].get([frq * x, frq * z]);
             final_amp += amp;
 
-            frq *= 2.;
+            frq *= 2.0;
             amp *= 0.5;
         }
 

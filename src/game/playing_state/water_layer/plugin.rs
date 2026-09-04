@@ -36,7 +36,7 @@ impl Plugin for WaterLayerPlugin {
     }
 }
 
-const WATER_LAYER_HEIGHT: f32 = 25.;
+const WATER_LAYER_HEIGHT: f32 = 25.0;
 
 fn on_enter(
     mut commands: Commands,
@@ -52,7 +52,7 @@ fn on_enter(
             default(),
             global_render_data_handle.get_handle(),
         ))),
-        Transform::from_xyz(0., WATER_LAYER_HEIGHT, 0.).with_scale(Vec3::splat(15_000.)),
+        Transform::from_xyz(0.0, WATER_LAYER_HEIGHT, 0.0).with_scale(Vec3::splat(15_000.0)),
     ));
     commands.spawn((
         PlayingStateEntity,
@@ -61,8 +61,8 @@ fn on_enter(
             default(),
             global_render_data_handle.get_handle(),
         ))),
-        Transform::from_xyz(0., WATER_LAYER_HEIGHT, 0.)
-            .with_scale(Vec3::splat(15_000.).rotate_x(PI)),
+        Transform::from_xyz(0.0, WATER_LAYER_HEIGHT, 0.0)
+            .with_scale(Vec3::splat(15_000.0).rotate_x(PI)),
     ));
 }
 

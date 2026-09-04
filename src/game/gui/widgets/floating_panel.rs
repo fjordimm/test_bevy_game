@@ -36,8 +36,8 @@ impl Default for GuiFloatingPanelProps {
             starts_minimized: false,
             starting_pos_x: 10.0,
             starting_pos_y: 10.0,
-            starting_content_width: 0.,
-            starting_content_height: 0.,
+            starting_content_width: 0.0,
+            starting_content_height: 0.0,
         }
     }
 }
@@ -179,7 +179,7 @@ fn apply_style(
         .entity(*title_bar_entity)
         .insert(BackgroundColor(theme.0.title_bar_color));
 
-    title_bar_main_part_node.flex_grow = 1.;
+    title_bar_main_part_node.flex_grow = 1.0;
     title_bar_main_part_node.display = Display::Flex;
     title_bar_node.border_radius = what_border_radius_for_title_bar(&theme, &state);
     title_bar_main_part_node.overflow = Overflow::hidden();
@@ -245,7 +245,7 @@ fn apply_style(
     main_content_node.justify_content = JustifyContent::FlexStart;
     main_content_node.align_items = AlignItems::FlexStart;
 
-    main_content_inner_node.flex_grow = 1.;
+    main_content_inner_node.flex_grow = 1.0;
     main_content_inner_node.align_self = AlignSelf::Stretch;
     main_content_inner_node.overflow = Overflow::hidden();
     main_content_inner_node.display = Display::Flex;
@@ -937,11 +937,11 @@ fn update_panel_dragged(
         });
 
     if let Some(target_panel) = *panel_being_dragged {
-        let mut delta_x = 0.;
-        let mut delta_y = 0.;
+        let mut delta_x = 0.0;
+        let mut delta_y = 0.0;
         mouse_motion.read().for_each(|msg| {
-            delta_x += msg.delta.map(|d| d.x).unwrap_or(0.);
-            delta_y += msg.delta.map(|d| d.y).unwrap_or(0.);
+            delta_x += msg.delta.map(|d| d.x).unwrap_or(0.0);
+            delta_y += msg.delta.map(|d| d.y).unwrap_or(0.0);
         });
 
         if let Ok(mut panel_state) = panel_q.get_mut(target_panel) {

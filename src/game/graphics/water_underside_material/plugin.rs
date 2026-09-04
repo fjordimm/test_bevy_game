@@ -33,7 +33,8 @@ impl Default for WaterUndersideMaterialProps {
     }
 }
 
-pub type WaterUndersideMaterial = ExtendedMaterial<StandardMaterial, __WaterUndersideMaterialExtension>;
+pub type WaterUndersideMaterial =
+    ExtendedMaterial<StandardMaterial, __WaterUndersideMaterialExtension>;
 
 pub fn water_underside_material(
     _props: WaterUndersideMaterialProps,
@@ -43,12 +44,12 @@ pub fn water_underside_material(
         base: StandardMaterial {
             base_color: Color::WHITE.with_alpha(0.6),
             alpha_mode: AlphaMode::Blend,
-            perceptual_roughness: 1.,
-            metallic: 0.,
-            reflectance: 0.,
-            diffuse_transmission: 0.,
-            specular_transmission: 0.,
-            thickness: 0.,
+            perceptual_roughness: 1.0,
+            metallic: 0.0,
+            reflectance: 0.0,
+            diffuse_transmission: 0.0,
+            specular_transmission: 0.0,
+            thickness: 0.0,
             ior: 1.5,
             attenuation_distance: 1.0,
             double_sided: false,
@@ -58,7 +59,7 @@ pub fn water_underside_material(
         },
         extension: __WaterUndersideMaterialExtension {
             global_render_data_handle: global_render_data_handle,
-            texturing_scale: 1.,
+            texturing_scale: 1.0,
         },
     }
 }

@@ -32,7 +32,7 @@ pub struct PrimaryMaterialProps {
 impl Default for PrimaryMaterialProps {
     fn default() -> Self {
         Self {
-            texturing_scale: 1.,
+            texturing_scale: 1.0,
         }
     }
 }
@@ -46,12 +46,12 @@ pub fn primary_material(
     PrimaryMaterial {
         base: StandardMaterial {
             base_color: Color::WHITE,
-            perceptual_roughness: 1.,
-            metallic: 0.,
-            reflectance: 0.,
-            diffuse_transmission: 0.,
-            specular_transmission: 0.,
-            thickness: 0.,
+            perceptual_roughness: 1.0,
+            metallic: 0.0,
+            reflectance: 0.0,
+            diffuse_transmission: 0.0,
+            specular_transmission: 0.0,
+            thickness: 0.0,
             ior: 1.5,
             attenuation_distance: 1.0,
             double_sided: false,

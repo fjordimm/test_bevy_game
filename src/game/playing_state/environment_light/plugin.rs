@@ -17,8 +17,8 @@ impl Plugin for EnvironmentLightPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .insert_resource(SkyRotationT(0.))
-            .insert_resource(SkyRotationS(0.))
+            .insert_resource(SkyRotationT(0.0))
+            .insert_resource(SkyRotationS(0.0))
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
                     .in_set(OnEnterPlaying::General)
@@ -31,12 +31,12 @@ impl Plugin for EnvironmentLightPlugin {
     }
 }
 
-const SUNLIGHT_ILLUMINANCE: f32 = 1000.;
+const SUNLIGHT_ILLUMINANCE: f32 = 1000.0;
 
-const ABOVE_AMBIENT_LIGHT_ILLUMINANCE: f32 = 250.;
-const ABOVE_AMBIENT_LIGHT_COLOR: Color = Color::hsv(228., 0.18, 1.);
-const BELOW_AMBIENT_LIGHT_ILLUMINANCE: f32 = 100.;
-const BELOW_AMBIENT_LIGHT_COLOR: Color = Color::hsv(169., 0.05, 1.);
+const ABOVE_AMBIENT_LIGHT_ILLUMINANCE: f32 = 250.0;
+const ABOVE_AMBIENT_LIGHT_COLOR: Color = Color::hsv(228.0, 0.18, 1.0);
+const BELOW_AMBIENT_LIGHT_ILLUMINANCE: f32 = 100.0;
+const BELOW_AMBIENT_LIGHT_COLOR: Color = Color::hsv(169.0, 0.05, 1.0);
 
 const SUNLIGHT_Y_LEVEL_OF_MIN: f32 = -0.1;
 const AMBIENT_LIGHT_MIN_FACTOR: f32 = 0.05;
@@ -62,12 +62,12 @@ fn on_enter(
         PlayingStateEntity,
         SunlightTag,
         DirectionalLight {
-            color: Color::hsv(0., 0., 1.),
+            color: Color::hsv(0.0, 0.0, 1.0),
             shadows_enabled: false,
             illuminance: SUNLIGHT_ILLUMINANCE,
             ..default()
         },
-        Transform::default().looking_at(vec3(0., -1., 0.), Dir3::Y),
+        Transform::default().looking_at(vec3(0.0, -1.0, 0.0), Dir3::Y),
     ));
 
     // "Ambient" light, coming from four directions (pointed towards the vertices of a tetrahedron).
@@ -82,7 +82,7 @@ fn on_enter(
             illuminance: ABOVE_AMBIENT_LIGHT_ILLUMINANCE,
             ..default()
         },
-        Transform::default().looking_at(vec3(1., -1., -1.), Dir3::Y),
+        Transform::default().looking_at(vec3(1.0, -1.0, -1.0), Dir3::Y),
     ));
     commands.spawn((
         PlayingStateEntity,
@@ -93,7 +93,7 @@ fn on_enter(
             illuminance: ABOVE_AMBIENT_LIGHT_ILLUMINANCE,
             ..default()
         },
-        Transform::default().looking_at(vec3(-1., -1., 1.), Dir3::Y),
+        Transform::default().looking_at(vec3(-1.0, -1.0, 1.0), Dir3::Y),
     ));
     // Warm(er) lighting from below:
     commands.spawn((
@@ -105,7 +105,7 @@ fn on_enter(
             illuminance: BELOW_AMBIENT_LIGHT_ILLUMINANCE,
             ..default()
         },
-        Transform::default().looking_at(vec3(-1., 1., -1.), Dir3::Y),
+        Transform::default().looking_at(vec3(-1.0, 1.0, -1.0), Dir3::Y),
     ));
     commands.spawn((
         PlayingStateEntity,
@@ -116,7 +116,7 @@ fn on_enter(
             illuminance: BELOW_AMBIENT_LIGHT_ILLUMINANCE,
             ..default()
         },
-        Transform::default().looking_at(vec3(1., 1., 1.), Dir3::Y),
+        Transform::default().looking_at(vec3(1.0, 1.0, 1.0), Dir3::Y),
     ));
 
     // Reset sun position.
@@ -148,11 +148,11 @@ fn update_environment_lights(
         sunlight.1.illuminance = lerp_remap(
             global_render_data.sun_position.y,
             SUNLIGHT_Y_LEVEL_OF_MIN,
-            1.,
-            0.,
-            1.,
+            1.0,
+            0.0,
+            1.0,
         )
-        .clamp(0., 1.)
+        .clamp(0.0, 1.0)
             * SUNLIGHT_ILLUMINANCE;
     }
 
@@ -160,11 +160,11 @@ fn update_environment_lights(
         global_render_data
             .sun_position
             .y
-            .clamp(AMBIENT_LIGHT_Y_LEVEL_OF_MIN, 1.),
+            .clamp(AMBIENT_LIGHT_Y_LEVEL_OF_MIN, 1.0),
         AMBIENT_LIGHT_Y_LEVEL_OF_MIN,
-        1.,
+        1.0,
         AMBIENT_LIGHT_MIN_FACTOR,
-        1.,
+        1.0,
     );
 
     above_ambient_light_q.iter_mut().for_each(|mut light| {

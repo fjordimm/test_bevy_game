@@ -21,7 +21,7 @@ impl Default for GuiScreenDivProps {
             align_items: AlignItems::FlexStart,
             bg_color: Color::BLACK,
             padding: UiRect::ZERO,
-            gap: 0.,
+            gap: 0.0,
             starts_active: true,
         }
     }

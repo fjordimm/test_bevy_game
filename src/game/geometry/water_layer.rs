@@ -5,7 +5,7 @@ use bevy_mesh::{Indices, PrimitiveTopology};
 
 const N: u32 = 16; // Should be even.
 const HALF_N: u32 = N / 2;
-const SQUARE_SIZE: f32 = 1. / (HALF_N as f32);
+const SQUARE_SIZE: f32 = 1.0 / (HALF_N as f32);
 
 #[allow(unused)]
 pub fn water_layer() -> Mesh {

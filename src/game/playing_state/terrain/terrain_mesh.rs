@@ -11,7 +11,7 @@ const RAND_VERTEX_OFFSET: f32 = 0.2;
 
 // TODOr
 // fn temp_vertex_color(_scale: f32, _off_x: f32, _off_z: f32) -> [f32; 4] {
-//     let pre_checkerboard_color = Color::hsv((scale.log2().abs() * 222.) % 360., 1., 1.);
+//     let pre_checkerboard_color = Color::hsv((scale.log2().abs() * 222.0) % 360.0, 1.0, 1.0);
 
 //     let mut off_x_i = (off_x / (scale * CW as f32) - 0.5).round() as i32;
 //     let mut off_z_i = (off_z / (scale * CW as f32) - 0.5).round() as i32;
@@ -24,13 +24,13 @@ const RAND_VERTEX_OFFSET: f32 = 0.2;
 //     }
 
 //     let color = if ((off_x_i + off_z_i) % 2) == 0 {
-//         Color::hsv(pre_checkerboard_color.hue(), 0.9, 1.)
+//         Color::hsv(pre_checkerboard_color.hue(), 0.9, 1.0)
 //     } else {
-//         Color::hsv(pre_checkerboard_color.hue(), 1., 0.75)
+//         Color::hsv(pre_checkerboard_color.hue(), 1.0, 0.75)
 //     };
 
 //     let color = color.to_srgba();
-//     [color.red, color.green, color.blue, 1.]
+//     [color.red, color.green, color.blue, 1.0]
 // }
 
 // Generates three things: 1) the inner mesh, 2) the outer mesh (perimeter), which together with the inner mesh make up a CWxCW grid of squares,
@@ -103,7 +103,7 @@ pub(super) fn create_terrain_mesh(
             let c = i;
             let r = 0;
 
-            outer_positions.push([0., 0., 0.]);
+            outer_positions.push([0.0, 0.0, 0.0]);
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -114,7 +114,7 @@ pub(super) fn create_terrain_mesh(
             let c = CW;
             let r = i;
 
-            outer_positions.push([0., 0., 0.]);
+            outer_positions.push([0.0, 0.0, 0.0]);
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -125,7 +125,7 @@ pub(super) fn create_terrain_mesh(
             let c = i;
             let r = CW;
 
-            outer_positions.push([0., 0., 0.]);
+            outer_positions.push([0.0, 0.0, 0.0]);
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -136,7 +136,7 @@ pub(super) fn create_terrain_mesh(
             let c = 0;
             let r = i;
 
-            outer_positions.push([0., 0., 0.]);
+            outer_positions.push([0.0, 0.0, 0.0]);
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -422,7 +422,7 @@ fn quantized_position(
 
         let h_q0 = terrain_func.at(cf + off_x_real, rf_q0 + off_z_real);
         let h_q1 = terrain_func.at(cf + off_x_real, rf_q1 + off_z_real);
-        let h = (1. - lerp_pos) * h_q0 + (lerp_pos) * h_q1;
+        let h = (1.0 - lerp_pos) * h_q0 + (lerp_pos) * h_q1;
 
         [cf, h, rf]
     }
@@ -445,7 +445,7 @@ fn quantized_position(
 
         let h_q0 = terrain_func.at(cf_q0 + off_x_real, rf + off_z_real);
         let h_q1 = terrain_func.at(cf_q1 + off_x_real, rf + off_z_real);
-        let h = (1. - lerp_pos) * h_q0 + (lerp_pos) * h_q1;
+        let h = (1.0 - lerp_pos) * h_q0 + (lerp_pos) * h_q1;
 
         [cf, h, rf]
     }

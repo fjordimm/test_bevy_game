@@ -15,7 +15,7 @@ pub struct GlobalRenderData {
 impl Default for GlobalRenderData {
     fn default() -> Self {
         Self {
-            time_elapsed: 0.,
+            time_elapsed: 0.0,
             sun_position: Vec3::Y,
             sky_rotation_inv: Mat3::IDENTITY,
             cam_is_underwater: 0,

@@ -208,6 +208,6 @@ pub mod mathf64 {
     }
 
     pub fn sigmoid(x: f64) -> f64 {
-        1. / (1. + 2f64.powf(-x))
+        1.0 / (1.0 + 2f64.powf(-x))
     }
 }

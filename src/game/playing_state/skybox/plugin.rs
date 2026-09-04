@@ -51,7 +51,7 @@ fn spawn_skybox(
         PlayingStateEntity,
         SkyboxTag,
         Mesh3d(meshes.add(alrro!(
-            Mesh::from(Cuboid::new(1_000_000., 1_000_000., 1_000_000.)).with_inverted_winding()
+            Mesh::from(Cuboid::new(1_000_000.0, 1_000_000.0, 1_000_000.0)).with_inverted_winding()
         ))),
         MeshMaterial3d(materials.add(SkyboxMaterial {
             global_render_data_handle: global_render_data_handle.get_handle(),
@@ -86,9 +86,9 @@ fn compute_global_render_data_vals(
     global_render_data: &mut ResMut<GlobalRenderData>,
 ) {
     global_render_data.sun_position = Vec3::NEG_Z
-        .rotate_x(time_of_day * 2. * PI)
-        .rotate_z(season_of_year * 2. * PI);
+        .rotate_x(time_of_day * 2.0 * PI)
+        .rotate_z(season_of_year * 2.0 * PI);
 
-    global_render_data.sky_rotation_inv = Mat3::from_rotation_x(-time_of_day * 2. * PI)
-        * Mat3::from_rotation_z(-season_of_year * 2. * PI);
+    global_render_data.sky_rotation_inv = Mat3::from_rotation_x(-time_of_day * 2.0 * PI)
+        * Mat3::from_rotation_z(-season_of_year * 2.0 * PI);
 }

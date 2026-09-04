@@ -25,6 +25,8 @@ impl Plugin for WaterMaterialPlugin {
     }
 }
 
+const WATER_OPACITY: f32 = 0.4;
+
 pub struct WaterMaterialProps {}
 
 impl Default for WaterMaterialProps {
@@ -41,14 +43,14 @@ pub fn water_material(
 ) -> WaterMaterial {
     WaterMaterial {
         base: StandardMaterial {
-            base_color: Color::WHITE.with_alpha(0.6),
+            base_color: Color::WHITE.with_alpha(WATER_OPACITY),
             alpha_mode: AlphaMode::Blend,
-            perceptual_roughness: 1.,
-            metallic: 0.,
-            reflectance: 0.,
-            diffuse_transmission: 0.,
-            specular_transmission: 0.,
-            thickness: 0.,
+            perceptual_roughness: 1.0,
+            metallic: 0.0,
+            reflectance: 0.0,
+            diffuse_transmission: 0.0,
+            specular_transmission: 0.0,
+            thickness: 0.0,
             ior: 1.5,
             attenuation_distance: 1.0,
             double_sided: false,
@@ -58,7 +60,7 @@ pub fn water_material(
         },
         extension: __WaterMaterialExtension {
             global_render_data_handle: global_render_data_handle,
-            texturing_scale: 1.,
+            texturing_scale: 1.0,
         },
     }
 }

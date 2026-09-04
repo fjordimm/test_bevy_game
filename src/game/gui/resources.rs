@@ -72,22 +72,22 @@ impl GuiTheme {
                 Val::ZERO,
                 px(5),
             ),
-            padding_main: 10.,
-            padding_minor: 5.,
-            border_radius: 5.,
-            font_size_p: 12.,
-            font_size_h1: 20.,
-            font_size_h2: 16.,
+            padding_main: 10.0,
+            padding_minor: 5.0,
+            border_radius: 5.0,
+            font_size_p: 12.0,
+            font_size_h1: 20.0,
+            font_size_h2: 16.0,
             button_color_normal: Color::hsv(185.0, 0.3, 0.25),
             button_color_hovered: Color::hsv(185.0, 0.3, 0.2),
             button_color_pressed: Color::hsv(185.0, 0.3, 0.15),
             title_bar_color: Color::hsv(185.0, 0.3, 0.25),
-            title_bar_button_padding: 2.,
-            title_bar_button_icon_size: 16.,
-            corner_resizer_padding: 3.,
-            corner_resizer_size: 10.,
-            floating_panel_content_min_height: 20.,
-            primary_debug_menu_starting_height: 200.,
+            title_bar_button_padding: 2.0,
+            title_bar_button_icon_size: 16.0,
+            corner_resizer_padding: 3.0,
+            corner_resizer_size: 10.0,
+            floating_panel_content_min_height: 20.0,
+            primary_debug_menu_starting_height: 200.0,
             pause_menu_bg_color: Color::hsva(0.0, 0.0, 0.0, 0.75),
         }
     }
@@ -101,7 +101,7 @@ pub struct GuiScale(pub f32);
 
 impl Default for GuiScale {
     fn default() -> Self {
-        Self(1.)
+        Self(1.0)
     }
 }
 

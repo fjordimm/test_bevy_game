@@ -49,7 +49,7 @@ const UPDATE_CHUNKS_INTERVAL: u64 = 800; // In milliseconds.
 
 pub(super) const CW: usize = 16; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
 const MAX_LOD: usize = 4;
-const LL_CHUNK_SCALE: f32 = 6.; // LL stands for Last-LOD (the highest LOD).
+const LL_CHUNK_SCALE: f32 = 6.0; // LL stands for Last-LOD (the highest LOD).
 const L0_CHUNK_SCALE: f32 = LL_CHUNK_SCALE * 2u32.pow(MAX_LOD as u32) as f32;
 const L0_RENDER_DIST: i64 = 10;
 
@@ -105,7 +105,7 @@ fn chunk_bundle(
         world_space_transf(Transform::from_translation(
             Vec3::new(
                 scale * CW as f32 * off_x as f32,
-                0.,
+                0.0,
                 scale * CW as f32 * off_z as f32,
             ) - coord_rebasing_origin,
         )),

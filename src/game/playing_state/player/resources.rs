@@ -10,7 +10,7 @@ impl Default for PlayerMovementSettings {
     fn default() -> Self {
         Self {
             look_sensitivity: 0.2,
-            speed: 100.,
+            speed: 100.0,
         }
     }
 }

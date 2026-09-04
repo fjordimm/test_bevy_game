@@ -16,7 +16,7 @@ impl Default for GuiDivCustomStyle {
         Self {
             border_radius: BorderRadius::ZERO,
             padding: UiRect::ZERO,
-            gap: 0.,
+            gap: 0.0,
             bg_color: Color::NONE,
             box_shadow: false,
         }
@@ -123,10 +123,10 @@ fn apply_style(
     }
     match attribs.expands_along_main_axis {
         true => {
-            node.flex_grow = 1.;
+            node.flex_grow = 1.0;
         }
         false => {
-            node.flex_grow = 0.;
+            node.flex_grow = 0.0;
         }
     }
     match attribs.expands_along_cross_axis {
