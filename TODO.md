@@ -2,7 +2,6 @@
 # Todo List
 
 ## Currently Working On
-- Switch back to `1.0` instead of `1.`.
 - Terrain.
     - Generate uv normal textures for larger LODs to make them look like the smaller LODs.
     - Add hysteresis for changing LODs.
