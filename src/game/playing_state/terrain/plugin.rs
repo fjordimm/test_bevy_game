@@ -1,11 +1,10 @@
 use std::{collections::HashMap, hash::Hash, time::Duration};
 
 use bevy::{
+    image::{ImageAddressMode, ImageSampler, ImageSamplerDescriptor},
     prelude::*,
-    render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     time::common_conditions::on_timer,
 };
-use bytemuck::cast_slice;
 use priority_queue::PriorityQueue;
 
 use crate::game::{
@@ -23,6 +22,7 @@ use crate::game::{
             mesh::{change_mesh_from_perim_lod_vertices, create_terrain_mesh},
             resources::{TerrainLodProportion, TheTerrainFunc},
             terrain_func::TerrainFunc,
+            texture::create_terrain_texture,
         },
     },
     util::{alrmo, alrms, alrrs, seed_from_u64},
@@ -583,6 +583,7 @@ fn gen_next_mesh_in_queue(
     mut materials: ResMut<Assets<TerrainMaterial>>,
     mut images: ResMut<Assets<Image>>,
     global_render_data_handle: Res<GlobalRenderDataHandle>,
+    asset_server: Res<AssetServer>,
 ) {
     if let Some((entity, _)) = mesh_gen_queue.0.pop() {
         if let Some((mut cc, is_active_chunk)) = alrmo!(chunk_q.get_mut(entity)) {
@@ -599,19 +600,20 @@ fn gen_next_mesh_in_queue(
                     .entity(entity)
                     .insert(Mesh3d(meshes.add(main_mesh)));
 
+                // TODOd
+                let test_image = asset_server.load("test.png");
+                if let Some(img) = images.get_mut(test_image.id()) {
+                    img.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor {
+                        address_mode_u: ImageAddressMode::Repeat,
+                        address_mode_v: ImageAddressMode::Repeat,
+                        ..default()
+                    });
+                }
+
                 let material = materials.add(terrain_material(
                     default(),
-                    images.add(Image::new(
-                        Extent3d {
-                            width: 1,
-                            height: 1,
-                            ..default()
-                        },
-                        TextureDimension::D2,
-                        cast_slice::<f32, u8>(&vec![1.0, 0.0, 1.0, 1.0]).to_vec(),
-                        TextureFormat::Rgba32Float,
-                        default(),
-                    )),
+                    // images.add(create_terrain_texture()),
+                    test_image,
                     global_render_data_handle.get_handle(),
                 ));
 

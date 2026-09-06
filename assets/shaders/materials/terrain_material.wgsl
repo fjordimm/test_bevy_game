@@ -26,20 +26,22 @@
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
     @location(0) position: vec3<f32>,
+    @location(1) uv: vec2<f32>,
 #ifdef FEATURE_TERRAIN_DEBUG_COLS
-    @location(1) color: vec4<f32>,
+    @location(2) color: vec4<f32>,
 #endif
 }
 
 struct CustomVertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) world_position: vec4<f32>,
-    @location(1) cam_relative_pos: vec3<f32>,
-    @location(2) fog_amount: f32,
+    @location(1) uv: vec2<f32>,
+    @location(2) cam_relative_pos: vec3<f32>,
+    @location(3) fog_amount: f32,
 #ifdef FEATURE_TERRAIN_DEBUG_COLS
-    @location(3) color: vec4<f32>,
+    @location(4) color: vec4<f32>,
 #endif
-    @location(4) @interpolate(flat) instance_index: u32,
+    @location(5) @interpolate(flat) instance_index: u32,
 }
 
 fn to_pbr_vertex_output(og: CustomVertexOutput) -> VertexOutput {
@@ -66,6 +68,8 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
     let view_position = position_world_to_view(out.world_position.xyz);
 
     out.position = position_view_to_clip(view_position);
+
+    out.uv = in.uv;
 
     // Added this to pass the camera-relative position.
 
@@ -99,9 +103,6 @@ fn fragment(
     in: CustomVertexOutput,
     @builtin(front_facing) is_front: bool,
 ) -> @location(0) vec4<f32> {
-    // TODOd
-    return textureSample(texture, texture_sampler, vec2(0.0, 0.0));
-
     // Boilerplate.
 
     var pbr_vertex_output = to_pbr_vertex_output(in);
@@ -116,14 +117,15 @@ fn fragment(
     var pbr_input = pbr_input_from_standard_material(pbr_vertex_output, is_front);
 
 #ifndef FEATURE_TERRAIN_DEBUG_COLS
-    let inv_steepness = clamp(smoothstep_skew_right(0.0, 1.0, 2.5, pbr_vertex_output.world_normal.y), 0.0, 1.0);
+    // let inv_steepness = clamp(smoothstep_skew_right(0.0, 1.0, 2.5, pbr_vertex_output.world_normal.y), 0.0, 1.0);
 
-    let grass_color = vec3(0.2, 0.7, 0.05);
-    let stone_color = vec3(0.5, 0.5, 0.5);
+    // let grass_color = vec3(0.2, 0.7, 0.05);
+    // let stone_color = vec3(0.5, 0.5, 0.5);
 
-    let color = (inv_steepness) * grass_color + (1.0 - inv_steepness) * stone_color;
+    // let color = (inv_steepness) * grass_color + (1.0 - inv_steepness) * stone_color;
 
-    pbr_input.material.base_color = vec4(color, 1.0);
+    // pbr_input.material.base_color = vec4(color, 1.0);
+    pbr_input.material.base_color = textureSample(texture, texture_sampler, in.uv);
 #endif
 
     // Could modify color here too. // TODOr

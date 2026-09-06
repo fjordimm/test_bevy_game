@@ -94,8 +94,9 @@ impl MaterialExtension for __TerrainMaterialExtension {
     ) -> Result<(), SpecializedMeshPipelineError> {
         let vertex_layout = layout.0.get_layout(&[
             Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
+            Mesh::ATTRIBUTE_UV_0.at_shader_location(1),
             #[cfg(feature = "terrain_debug_cols")]
-            Mesh::ATTRIBUTE_COLOR.at_shader_location(1),
+            Mesh::ATTRIBUTE_COLOR.at_shader_location(2),
         ])?;
 
         descriptor.vertex.buffers = vec![vertex_layout];

@@ -27,9 +27,11 @@ pub(super) fn create_terrain_mesh(
 
     let mut inner_positions =
         Vec::<[f32; 3]>::with_capacity((CW - 1) * (CW - 1) + (CW - 2) * (CW - 2));
+    let mut inner_uvs = Vec::<[f32; 2]>::with_capacity((CW - 1) * (CW - 1) + (CW - 2) * (CW - 2));
     let mut inner_triangles = Vec::<u32>::with_capacity(3 * 4 * (CW - 2) * (CW - 2));
 
     let mut outer_positions = Vec::<[f32; 3]>::with_capacity(4 * CW + 4 * (CW - 2) + 4 * (CW - 1));
+    let mut outer_uvs = Vec::<[f32; 2]>::with_capacity(4 * CW + 4 * (CW - 2) + 4 * (CW - 1));
     let mut outer_triangles = Vec::<u32>::with_capacity(3 * 4 * 4 * (CW - 1));
 
     // To keep track of the index of (Corner) vertices given a 2D index.
@@ -60,6 +62,7 @@ pub(super) fn create_terrain_mesh(
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             inner_positions.push([cf, h, rf]);
+            inner_uvs.push([(cf / scale) / (CW as f32), (rf / scale) / (CW as f32)]);
 
             inner_indices_c[c][r] = inner_vc;
             inner_vc += 1;
@@ -71,7 +74,7 @@ pub(super) fn create_terrain_mesh(
     {
         // The outermost corner vertices.
 
-        // Note that they don't actually calculate the vertex position yet, since
+        // Note that they don't actually calculate the vertex positions yet, since
         //   they will all be replaced with the lod connecting perimeter vertices.
 
         // North.
@@ -80,6 +83,7 @@ pub(super) fn create_terrain_mesh(
             let r = 0;
 
             outer_positions.push([0.0, 0.0, 0.0]);
+            outer_uvs.push([(c as f32) / (CW as f32), (r as f32) / (CW as f32)]);
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -91,6 +95,7 @@ pub(super) fn create_terrain_mesh(
             let r = i;
 
             outer_positions.push([0.0, 0.0, 0.0]);
+            outer_uvs.push([(c as f32) / (CW as f32), (r as f32) / (CW as f32)]);
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -102,6 +107,7 @@ pub(super) fn create_terrain_mesh(
             let r = CW;
 
             outer_positions.push([0.0, 0.0, 0.0]);
+            outer_uvs.push([(c as f32) / (CW as f32), (r as f32) / (CW as f32)]);
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -113,6 +119,7 @@ pub(super) fn create_terrain_mesh(
             let r = i;
 
             outer_positions.push([0.0, 0.0, 0.0]);
+            outer_uvs.push([(c as f32) / (CW as f32), (r as f32) / (CW as f32)]);
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -138,6 +145,7 @@ pub(super) fn create_terrain_mesh(
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
+            outer_uvs.push([(cf / scale) / (CW as f32), (rf / scale) / (CW as f32)]);
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -161,6 +169,7 @@ pub(super) fn create_terrain_mesh(
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
+            outer_uvs.push([(cf / scale) / (CW as f32), (rf / scale) / (CW as f32)]);
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -184,6 +193,7 @@ pub(super) fn create_terrain_mesh(
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
+            outer_uvs.push([(cf / scale) / (CW as f32), (rf / scale) / (CW as f32)]);
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -207,6 +217,7 @@ pub(super) fn create_terrain_mesh(
             let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
+            outer_uvs.push([(cf / scale) / (CW as f32), (rf / scale) / (CW as f32)]);
 
             outer_indices_c[c][r] = outer_vc;
             outer_vc += 1;
@@ -231,6 +242,7 @@ pub(super) fn create_terrain_mesh(
             // Inner vertices.
             if c > 0 && c < CW - 1 && r > 0 && r < CW - 1 {
                 inner_positions.push([cf, h, rf]);
+                inner_uvs.push([(cf / scale) / (CW as f32), (rf / scale) / (CW as f32)]);
 
                 inner_indices_m[c][r] = inner_vc;
 
@@ -240,6 +252,7 @@ pub(super) fn create_terrain_mesh(
             // Outer vertices.
             if c == 0 || c == CW - 1 || r == 0 || r == CW - 1 {
                 outer_positions.push([cf, h, rf]);
+                outer_uvs.push([(cf / scale) / (CW as f32), (rf / scale) / (CW as f32)]);
 
                 outer_indices_m[c][r] = outer_vc;
 
@@ -355,6 +368,7 @@ pub(super) fn create_terrain_mesh(
         RenderAssetUsages::RENDER_WORLD,
     )
     .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, inner_positions)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, inner_uvs)
     .with_inserted_indices(Indices::U32(inner_triangles));
 
     #[cfg(feature = "terrain_debug_cols")]
@@ -369,6 +383,7 @@ pub(super) fn create_terrain_mesh(
         RenderAssetUsages::RENDER_WORLD | RenderAssetUsages::MAIN_WORLD,
     )
     .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, outer_positions)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, outer_uvs)
     .with_inserted_indices(Indices::U32(outer_triangles));
 
     #[cfg(feature = "terrain_debug_cols")]

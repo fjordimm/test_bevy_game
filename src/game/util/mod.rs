@@ -1,6 +1,9 @@
 #![allow(unused)]
 
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    render::render_resource::{Extent3d, TextureDimension, TextureFormat},
+};
 
 // "Alerted Make-Sure-It-Is Ok"
 // Takes a Result and...
@@ -91,6 +94,7 @@ macro_rules! alrrs {
 }
 
 pub(crate) use alrrs;
+use bytemuck::cast_slice;
 
 // For when you need to use an event, but don't want it to do anything.
 // That means you should never observe this event, as it may be unpredictable.
@@ -210,4 +214,18 @@ pub mod mathf64 {
     pub fn sigmoid(x: f64) -> f64 {
         1.0 / (1.0 + 2f64.powf(-x))
     }
+}
+
+pub fn make_image_from_array2d<const W: usize, const H: usize>(inp: &[[[f32; 4]; H]; W]) -> Image {
+    Image::new(
+        Extent3d {
+            width: W as u32,
+            height: H as u32,
+            ..default()
+        },
+        TextureDimension::D2,
+        cast_slice(inp).to_vec(),
+        TextureFormat::Rgba32Float,
+        default(),
+    )
 }

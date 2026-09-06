@@ -2,6 +2,7 @@
 # Todo List
 
 ## Currently Working On
+- In mesh::create_terrain_mesh, add off_x_real and off_z_real to the input for pseudorand_float2_series.
 - First person controller.
 - Texturing?? Texturing scale thing?
 - Maybe: instead of using plain `Without<>`s when you need to resolve query conflicts, you should make a type alias for it.
