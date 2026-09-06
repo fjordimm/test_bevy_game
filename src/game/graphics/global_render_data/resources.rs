@@ -1,6 +1,9 @@
 use bevy::{
     prelude::*,
-    render::{render_resource::ShaderType, storage::ShaderStorageBuffer},
+    render::{
+        extract_resource::ExtractResource, render_resource::ShaderType,
+        storage::ShaderStorageBuffer,
+    },
 };
 
 #[derive(Resource, ShaderType, Clone)]
@@ -24,7 +27,7 @@ impl Default for GlobalRenderData {
     }
 }
 
-#[derive(Resource)]
+#[derive(Resource, Clone, ExtractResource)]
 pub struct GlobalRenderDataHandle(pub(super) Handle<ShaderStorageBuffer>);
 
 impl GlobalRenderDataHandle {

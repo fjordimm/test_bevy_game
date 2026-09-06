@@ -10,6 +10,7 @@ use bevy::{
             ComponentUniforms, DynamicUniformIndex, ExtractComponent, ExtractComponentPlugin,
             UniformComponentPlugin,
         },
+        render_asset::RenderAssets,
         render_graph::{
             NodeRunError, RenderGraphContext, RenderGraphExt, RenderLabel, ViewNode, ViewNodeRunner,
         },
@@ -19,18 +20,19 @@ use bevy::{
             PipelineCache, RenderPassColorAttachment, RenderPassDescriptor,
             RenderPipelineDescriptor, Sampler, SamplerBindingType, SamplerDescriptor, ShaderStages,
             ShaderType, TextureFormat, TextureSampleType,
-            binding_types::{sampler, texture_2d, uniform_buffer},
+            binding_types::{sampler, storage_buffer_read_only, texture_2d, uniform_buffer},
         },
         renderer::{RenderContext, RenderDevice},
-        storage::ShaderStorageBuffer,
+        storage::GpuShaderStorageBuffer,
         view::ViewTarget,
     },
 };
 use bevy_ecs::query::QueryItem;
 
 use crate::game::{
-    graphics::global_render_data::resources::GlobalRenderDataHandle,
-    playing_state::player::tags::CameraForPlayer, util::alrms,
+    graphics::global_render_data::resources::{GlobalRenderData, GlobalRenderDataHandle},
+    playing_state::player::tags::CameraForPlayer,
+    util::alrms,
 };
 
 pub struct PostProcessorPlugin;
@@ -99,6 +101,13 @@ impl ViewNode for PostProcessorNode {
             return Ok(());
         };
 
+        let global_render_data_handle = world.resource::<GlobalRenderDataHandle>();
+        let gpu_buffers = world.resource::<RenderAssets<GpuShaderStorageBuffer>>();
+        let Some(global_render_data) = gpu_buffers.get(&global_render_data_handle.get_handle())
+        else {
+            return Ok(());
+        };
+
         let post_process = view_target.post_process_write();
 
         let bind_group = render_context.render_device().create_bind_group(
@@ -108,6 +117,7 @@ impl ViewNode for PostProcessorNode {
                 post_process.source,
                 &post_process_pipeline.sampler,
                 settings_binding.clone(),
+                global_render_data.buffer.as_entire_buffer_binding(),
             )),
         );
 
@@ -154,6 +164,7 @@ fn init_post_process_pipeline(
                 texture_2d(TextureSampleType::Float { filterable: true }),
                 sampler(SamplerBindingType::Filtering),
                 uniform_buffer::<PostProcessorSettings>(true),
+                storage_buffer_read_only::<GlobalRenderData>(false),
             ),
         ),
     );
@@ -189,11 +200,7 @@ struct PostProcessorSettings {
     _unused: Vec4,
 }
 
-fn add_to_camera(
-    mut commands: Commands,
-    camera_q: Query<Entity, Added<CameraForPlayer>>,
-    global_render_data_handle: Res<GlobalRenderDataHandle>,
-) {
+fn add_to_camera(mut commands: Commands, camera_q: Query<Entity, Added<CameraForPlayer>>) {
     camera_q.iter().for_each(|camera| {
         commands
             .entity(camera)

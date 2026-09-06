@@ -1,4 +1,7 @@
-use bevy::{prelude::*, render::storage::ShaderStorageBuffer};
+use bevy::{
+    prelude::*,
+    render::{extract_resource::ExtractResourcePlugin, storage::ShaderStorageBuffer},
+};
 
 use crate::game::{
     graphics::global_render_data::resources::{GlobalRenderData, GlobalRenderDataHandle},
@@ -12,6 +15,7 @@ impl Plugin for GlobalRenderDataPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
+            .add_plugins(ExtractResourcePlugin::<GlobalRenderDataHandle>::default())
             .add_systems(Startup,
                 create_global_render_data_resources
             )

@@ -111,9 +111,9 @@ fn fragment(
     var pbr_input = pbr_input_from_standard_material(pbr_vertex_output, is_front);
 
 #ifndef FEATURE_TERRAIN_DEBUG_COLS
-    let color = vec4(pbr_vertex_output.world_normal.y, 0.0, 0.0, 1.0);
+    // let color = vec4(pbr_vertex_output.world_normal.y, 0.0, 0.0, 1.0);
 
-    pbr_input.material.base_color = color;
+    // pbr_input.material.base_color = color;
 #endif
 
     // Could modify color here too. // TODOr
