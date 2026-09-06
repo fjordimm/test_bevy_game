@@ -10,7 +10,7 @@ use crate::game::{
     core::{resources::KeyBindings, states::OverallState},
     graphics::{
         global_render_data::resources::GlobalRenderDataHandle,
-        primary_material::plugin::PrimaryMaterial, terrain_material::plugin::TerrainMaterial,
+        primary_material::plugin::PrimaryMaterial,
     },
     playing_state::{
         coord_rebasing::{plugin::CoordRebasingPlugin, world_space_transf},
@@ -98,7 +98,6 @@ fn on_enter(
     mut commands: Commands,
     global_render_data_handle: Res<GlobalRenderDataHandle>,
     mut materials_primary: ResMut<Assets<PrimaryMaterial>>,
-    mut materials_terrain: ResMut<Assets<TerrainMaterial>>,
     mut images: ResMut<Assets<Image>>,
     mut update_prerendering_stuff_messages: MessageWriter<UpdatePrerenderingStuff>,
     window: Single<&Window>,
@@ -107,7 +106,6 @@ fn on_enter(
     commands.insert_resource(ReusableMaterials::new(
         global_render_data_handle.get_handle(),
         &mut materials_primary,
-        &mut materials_terrain,
     ));
 
     commands.insert_resource(RenderingResolutionScale(0.5));

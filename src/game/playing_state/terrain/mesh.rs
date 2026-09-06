@@ -479,6 +479,7 @@ pub(super) fn change_mesh_from_perim_lod_vertices(
     }
 }
 
+// TODO: delete this whole thing
 #[cfg(feature = "terrain_debug_cols")]
 fn vertex_color(scale: f32, off_x: f32, off_z: f32) -> [f32; 4] {
     let pre_checkerboard_color = Color::hsv((scale.log2().abs() * 222.0) % 360.0, 1.0, 1.0);

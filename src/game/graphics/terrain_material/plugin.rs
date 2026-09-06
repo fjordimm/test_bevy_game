@@ -30,22 +30,19 @@ impl Plugin for TerrainMaterialPlugin {
 
 const SHADER_ASSET_PATH: &str = "shaders/materials/terrain_material.wgsl";
 
-pub struct TerrainMaterialProps {
-    pub texturing_scale: f32,
-}
+pub struct TerrainMaterialProps {}
 
 impl Default for TerrainMaterialProps {
     fn default() -> Self {
-        Self {
-            texturing_scale: 1.0,
-        }
+        Self {}
     }
 }
 
 pub type TerrainMaterial = ExtendedMaterial<StandardMaterial, __TerrainMaterialExtension>;
 
 pub fn terrain_material(
-    props: TerrainMaterialProps,
+    _props: TerrainMaterialProps,
+    texture: Handle<Image>,
     global_render_data_handle: Handle<ShaderStorageBuffer>,
 ) -> TerrainMaterial {
     TerrainMaterial {
@@ -66,7 +63,7 @@ pub fn terrain_material(
         },
         extension: __TerrainMaterialExtension {
             global_render_data_handle: global_render_data_handle,
-            texturing_scale: props.texturing_scale,
+            texture: texture,
         },
     }
 }
@@ -75,8 +72,9 @@ pub fn terrain_material(
 pub struct __TerrainMaterialExtension {
     #[storage(100, read_only)]
     pub global_render_data_handle: Handle<ShaderStorageBuffer>,
-    #[uniform(101)]
-    texturing_scale: f32,
+    #[texture(101)]
+    #[sampler(102)]
+    texture: Handle<Image>,
 }
 
 impl MaterialExtension for __TerrainMaterialExtension {

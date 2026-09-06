@@ -20,7 +20,8 @@
 #import "shaders/helpers/util.wgsl"::{smoothstep_skew_left, smoothstep_skew_right}
 
 @group(#{MATERIAL_BIND_GROUP}) @binding(100) var<storage, read> global_render_data: GlobalRenderData;
-@group(#{MATERIAL_BIND_GROUP}) @binding(101) var<uniform> texturing_scale: f32;
+@group(#{MATERIAL_BIND_GROUP}) @binding(101) var texture: texture_2d<f32>;
+@group(#{MATERIAL_BIND_GROUP}) @binding(102) var texture_sampler: sampler;
 
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
@@ -98,6 +99,9 @@ fn fragment(
     in: CustomVertexOutput,
     @builtin(front_facing) is_front: bool,
 ) -> @location(0) vec4<f32> {
+    // TODOd
+    return textureSample(texture, texture_sampler, vec2(0.0, 0.0));
+
     // Boilerplate.
 
     var pbr_vertex_output = to_pbr_vertex_output(in);
