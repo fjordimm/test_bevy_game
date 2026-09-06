@@ -1,5 +1,5 @@
 #import bevy_core_pipeline::fullscreen_vertex_shader::FullscreenVertexOutput
-#import "shaders/util_noise.wgsl"::simplex_noise_2d
+#import "shaders/helpers/util_noise.wgsl"::simplex_noise_2d
 
 const BLUR_RADIUS: f32 = 0.002;
 

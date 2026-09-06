@@ -12,11 +12,16 @@
     mesh_view_bindings as view_bindings,
     lighting,
 }
-#import "shaders/util_noise.wgsl"::simplex_noise_3d;
 #import "shaders/global_render_data.wgsl"::GlobalRenderData;
-#import "shaders/sky.wgsl"::sky_without_sun_and_stars;
-#import "shaders/sky.wgsl"::FOG_START;
-#import "shaders/sky.wgsl"::FOG_END;
+#import "shaders/helpers/sky.wgsl"::{sky_without_sun_and_stars, sky};
+#import "shaders/helpers/sky.wgsl"::FOG_START;
+#import "shaders/helpers/sky.wgsl"::FOG_END;
+#import "shaders/helpers/util_noise.wgsl"::simplex_noise_3d;
+#import "shaders/helpers/water.wgsl"::{
+    WATER_WAVES_SCALE,
+    WATER_WAVES_TIME_SCALE,
+    WATER_WAVES_HEIGHT,
+}
 
 @group(#{MATERIAL_BIND_GROUP}) @binding(100) var<storage, read> global_render_data: GlobalRenderData;
 @group(#{MATERIAL_BIND_GROUP}) @binding(101) var<uniform> texturing_scale: f32;
@@ -24,7 +29,6 @@
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
     @location(0) position: vec3<f32>,
-    @location(1) color: vec4<f32>,
 }
 
 struct CustomVertexOutput {
@@ -32,16 +36,13 @@ struct CustomVertexOutput {
     @location(0) world_position: vec4<f32>,
     @location(1) cam_relative_pos: vec3<f32>,
     @location(2) fog_amount: f32,
-    @location(3) lposition: vec3<f32>,
-    @location(4) color: vec4<f32>,
-    @location(5) @interpolate(flat) instance_index: u32,
+    @location(3) @interpolate(flat) instance_index: u32,
 }
 
 fn to_pbr_vertex_output(og: CustomVertexOutput) -> VertexOutput {
     var ret: VertexOutput;
     ret.position = og.position;
     ret.world_position = og.world_position;
-    ret.color = og.color;
     ret.instance_index = og.instance_index;
 
     return ret;
@@ -70,12 +71,8 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
     out.fog_amount = (-view_position.z - 0.5 - FOG_START) / (FOG_END - FOG_START);
     out.fog_amount = clamp(out.fog_amount, 0.0, 1.0);
 
-    // Added this to pass the local 3d position.
-    out.lposition = in.position;
-
     // Boilerplate.
 
-    out.color = in.color;
     // out.visibility_range_dither = mesh_functions::get_visibility_range_dither_level(
     //     in.instance_index,
     //     world_mat[3]
@@ -99,10 +96,15 @@ fn fragment(
 
     // Compute normal (only allows for flat shading).
 
-    let world_pos = in.world_position.xyz;
-    pbr_vertex_output.world_normal = normalize(cross(dpdy(world_pos), dpdx(world_pos)));
+    var world_pos = in.world_position.xyz;
+
+    // Water stuff.
+
+    world_pos.y += WATER_WAVES_HEIGHT * simplex_noise_3d(vec3(WATER_WAVES_SCALE * world_pos.x, WATER_WAVES_SCALE * world_pos.z, WATER_WAVES_TIME_SCALE * global_render_data.time_elapsed));
 
     // Boilerplate.
+
+    pbr_vertex_output.world_normal = normalize(cross(dpdy(world_pos), dpdx(world_pos)));
     
     var pbr_input = pbr_input_from_standard_material(pbr_vertex_output, is_front);
 
@@ -113,22 +115,17 @@ fn fragment(
     pbr_input.material.base_color = alpha_discard(pbr_input.material, pbr_input.material.base_color);
 
     var out = vec4<f32>(0.0);
-    out = apply_pbr_lighting(pbr_input);
 
-    // Could modify color here too. // TODOr
-
-    // let n_directional_lights = view_bindings::lights.n_directional_lights;
-    // for (var i: u32 = 0u; i < n_directional_lights; i = i + 1u) {
-    // }
-
-    // Boilerplate.
-
-    out = main_pass_post_lighting_processing(pbr_input, out);
+    // Water stuff.
+    
+    let reflected_cam_relative_pos = reflect(in.cam_relative_pos, pbr_vertex_output.world_normal);
+    let sky_reflection = sky(global_render_data, reflected_cam_relative_pos, in.position.xy);
+    out = vec4(sky_reflection, pbr_input.material.base_color.a);
 
     // Fog.
 
     let fog_color = sky_without_sun_and_stars(global_render_data, in.cam_relative_pos, in.position.xy);
-    out = vec4((1.0 - in.fog_amount) * out.rgb + (in.fog_amount) * fog_color, 1.0);
+    out = vec4((1.0 - in.fog_amount) * out.rgb + (in.fog_amount) * fog_color, out.a);
 
     // Return value.
 

@@ -25,6 +25,8 @@ impl Plugin for WaterMaterialPlugin {
     }
 }
 
+const SHADER_ASSET_PATH: &str = "shaders/materials/water_material.wgsl";
+
 pub const WATER_OPACITY: f32 = 0.4;
 
 pub struct WaterMaterialProps {}
@@ -75,11 +77,11 @@ pub struct __WaterMaterialExtension {
 
 impl MaterialExtension for __WaterMaterialExtension {
     fn vertex_shader() -> ShaderRef {
-        "shaders/water_material.wgsl".into()
+        SHADER_ASSET_PATH.into()
     }
 
     fn fragment_shader() -> ShaderRef {
-        "shaders/water_material.wgsl".into()
+        SHADER_ASSET_PATH.into()
     }
 
     fn specialize(

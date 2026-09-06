@@ -28,6 +28,8 @@ impl Plugin for TerrainMaterialPlugin {
     }
 }
 
+const SHADER_ASSET_PATH: &str = "shaders/materials/terrain_material.wgsl";
+
 pub struct TerrainMaterialProps {
     pub texturing_scale: f32,
 }
@@ -79,11 +81,11 @@ pub struct __TerrainMaterialExtension {
 
 impl MaterialExtension for __TerrainMaterialExtension {
     fn vertex_shader() -> ShaderRef {
-        "shaders/terrain_material.wgsl".into()
+        SHADER_ASSET_PATH.into()
     }
 
     fn fragment_shader() -> ShaderRef {
-        "shaders/terrain_material.wgsl".into()
+        SHADER_ASSET_PATH.into()
     }
 
     fn specialize(

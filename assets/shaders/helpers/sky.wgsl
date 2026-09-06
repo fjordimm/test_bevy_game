@@ -1,11 +1,11 @@
-#import "shaders/util.wgsl"::PI;
-#import "shaders/util.wgsl"::gradient_noise;
-#import "shaders/util.wgsl"::reduce_banding;
-#import "shaders/util.wgsl"::smoothstep_skew_left;
-#import "shaders/util.wgsl"::smoothstep_skew_right;
-#import "shaders/util.wgsl"::arc_step_up;
-#import "shaders/util.wgsl"::hash3;
-#import "shaders/util.wgsl"::bell;
+#import "shaders/helpers/util.wgsl"::PI;
+#import "shaders/helpers/util.wgsl"::gradient_noise;
+#import "shaders/helpers/util.wgsl"::reduce_banding;
+#import "shaders/helpers/util.wgsl"::smoothstep_skew_left;
+#import "shaders/helpers/util.wgsl"::smoothstep_skew_right;
+#import "shaders/helpers/util.wgsl"::arc_step_up;
+#import "shaders/helpers/util.wgsl"::hash3;
+#import "shaders/helpers/util.wgsl"::bell;
 #import "shaders/global_render_data.wgsl"::GlobalRenderData;
 
 const FOG_START: f32 = 1000.0;

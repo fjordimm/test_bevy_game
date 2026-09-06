@@ -13,12 +13,11 @@
     lighting,
 }
 #import "shaders/global_render_data.wgsl"::GlobalRenderData;
-#import "shaders/sky.wgsl"::{sky_without_sun_and_stars, sky};
-#import "shaders/sky.wgsl"::FOG_START;
-#import "shaders/sky.wgsl"::FOG_END;
-#import bevy_core_pipeline::oit::oit_draw
-#import "shaders/util_noise.wgsl"::simplex_noise_3d;
-#import "shaders/water.wgsl"::{
+#import "shaders/helpers/sky.wgsl"::{sky_without_sun_and_stars, sky};
+#import "shaders/helpers/sky.wgsl"::FOG_START;
+#import "shaders/helpers/sky.wgsl"::FOG_END;
+#import "shaders/helpers/util_noise.wgsl"::simplex_noise_3d;
+#import "shaders/helpers/water.wgsl"::{
     WATER_WAVES_SCALE,
     WATER_WAVES_TIME_SCALE,
     WATER_WAVES_HEIGHT,

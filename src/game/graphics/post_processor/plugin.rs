@@ -59,7 +59,7 @@ impl Plugin for PostProcessorPlugin {
     }
 }
 
-const SHADER_ASSET_PATH: &str = "shaders/post_processor.wgsl";
+const SHADER_ASSET_PATH: &str = "shaders/materials/post_processor.wgsl";
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, RenderLabel)]
 struct PostProcessorLabel;

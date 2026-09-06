@@ -27,6 +27,8 @@ impl Plugin for WaterUndersideMaterialPlugin {
     }
 }
 
+const SHADER_ASSET_PATH: &str = "shaders/materials/water_underside_material.wgsl";
+
 pub struct WaterUndersideMaterialProps {}
 
 impl Default for WaterUndersideMaterialProps {
@@ -76,11 +78,11 @@ pub struct __WaterUndersideMaterialExtension {
 
 impl MaterialExtension for __WaterUndersideMaterialExtension {
     fn vertex_shader() -> ShaderRef {
-        "shaders/water_underside_material.wgsl".into()
+        SHADER_ASSET_PATH.into()
     }
 
     fn fragment_shader() -> ShaderRef {
-        "shaders/water_underside_material.wgsl".into()
+        SHADER_ASSET_PATH.into()
     }
 
     fn specialize(

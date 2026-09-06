@@ -25,6 +25,8 @@ impl Plugin for PrimaryMaterialPlugin {
     }
 }
 
+const SHADER_ASSET_PATH: &str = "shaders/materials/primary_material.wgsl";
+
 pub struct PrimaryMaterialProps {
     pub texturing_scale: f32,
 }
@@ -76,11 +78,11 @@ pub struct __PrimaryMaterialExtension {
 
 impl MaterialExtension for __PrimaryMaterialExtension {
     fn vertex_shader() -> ShaderRef {
-        "shaders/primary_material.wgsl".into()
+        SHADER_ASSET_PATH.into()
     }
 
     fn fragment_shader() -> ShaderRef {
-        "shaders/primary_material.wgsl".into()
+        SHADER_ASSET_PATH.into()
     }
 
     fn specialize(

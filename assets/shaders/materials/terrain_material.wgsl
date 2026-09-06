@@ -12,11 +12,11 @@
     mesh_view_bindings as view_bindings,
     lighting,
 }
-#import "shaders/util_noise.wgsl"::simplex_noise_3d;
+#import "shaders/helpers/util_noise.wgsl"::simplex_noise_3d;
 #import "shaders/global_render_data.wgsl"::GlobalRenderData;
-#import "shaders/sky.wgsl"::sky_without_sun_and_stars;
-#import "shaders/sky.wgsl"::FOG_START;
-#import "shaders/sky.wgsl"::FOG_END;
+#import "shaders/helpers/sky.wgsl"::sky_without_sun_and_stars;
+#import "shaders/helpers/sky.wgsl"::FOG_START;
+#import "shaders/helpers/sky.wgsl"::FOG_END;
 
 @group(#{MATERIAL_BIND_GROUP}) @binding(100) var<storage, read> global_render_data: GlobalRenderData;
 @group(#{MATERIAL_BIND_GROUP}) @binding(101) var<uniform> texturing_scale: f32;

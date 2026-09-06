@@ -23,6 +23,8 @@ impl Plugin for SkyboxMaterialPlugin {
     }
 }
 
+const SHADER_ASSET_PATH: &str = "shaders/materials/skybox_material.wgsl";
+
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct SkyboxMaterial {
     #[storage(0, read_only)]
@@ -31,11 +33,11 @@ pub struct SkyboxMaterial {
 
 impl Material for SkyboxMaterial {
     fn vertex_shader() -> ShaderRef {
-        "shaders/skybox_material.wgsl".into()
+        SHADER_ASSET_PATH.into()
     }
 
     fn fragment_shader() -> ShaderRef {
-        "shaders/skybox_material.wgsl".into()
+        SHADER_ASSET_PATH.into()
     }
 
     fn alpha_mode(&self) -> AlphaMode {

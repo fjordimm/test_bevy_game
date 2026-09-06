@@ -3,7 +3,7 @@
     view_transformations::position_world_to_clip,
 }
 #import "shaders/global_render_data.wgsl"::GlobalRenderData;
-#import "shaders/sky.wgsl"::sky;
+#import "shaders/helpers/sky.wgsl"::sky;
 
 @group(#{MATERIAL_BIND_GROUP}) @binding(0) var<storage, read> global_render_data: GlobalRenderData;
 
