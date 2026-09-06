@@ -59,7 +59,7 @@ pub(super) fn create_terrain_mesh(
             cf += pseudorand_offset.0;
             rf += pseudorand_offset.1;
 
-            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
+            let h: f32 = terrain_func.elevation_at(cf + off_x_real, rf + off_z_real);
 
             inner_positions.push([cf, h, rf]);
             inner_uvs.push([(cf / scale) / (CW as f32), (rf / scale) / (CW as f32)]);
@@ -142,7 +142,7 @@ pub(super) fn create_terrain_mesh(
             cf += pseudorand_offset.0;
             rf += pseudorand_offset.1;
 
-            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
+            let h: f32 = terrain_func.elevation_at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
             outer_uvs.push([(cf / scale) / (CW as f32), (rf / scale) / (CW as f32)]);
@@ -166,7 +166,7 @@ pub(super) fn create_terrain_mesh(
             cf += pseudorand_offset.0;
             rf += pseudorand_offset.1;
 
-            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
+            let h: f32 = terrain_func.elevation_at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
             outer_uvs.push([(cf / scale) / (CW as f32), (rf / scale) / (CW as f32)]);
@@ -190,7 +190,7 @@ pub(super) fn create_terrain_mesh(
             cf += pseudorand_offset.0;
             rf += pseudorand_offset.1;
 
-            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
+            let h: f32 = terrain_func.elevation_at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
             outer_uvs.push([(cf / scale) / (CW as f32), (rf / scale) / (CW as f32)]);
@@ -214,7 +214,7 @@ pub(super) fn create_terrain_mesh(
             cf += pseudorand_offset.0;
             rf += pseudorand_offset.1;
 
-            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
+            let h: f32 = terrain_func.elevation_at(cf + off_x_real, rf + off_z_real);
 
             outer_positions.push([cf, h, rf]);
             outer_uvs.push([(cf / scale) / (CW as f32), (rf / scale) / (CW as f32)]);
@@ -237,7 +237,7 @@ pub(super) fn create_terrain_mesh(
             cf += pseudorand_offset.0;
             rf += pseudorand_offset.1;
 
-            let h: f32 = terrain_func.at(cf + off_x_real, rf + off_z_real);
+            let h: f32 = terrain_func.elevation_at(cf + off_x_real, rf + off_z_real);
 
             // Inner vertices.
             if c > 0 && c < CW - 1 && r > 0 && r < CW - 1 {
@@ -425,8 +425,8 @@ fn quantized_position(
         let cf = scale * c as f32;
         let rf = scale * r as f32;
 
-        let h_q0 = terrain_func.at(cf + off_x_real, rf_q0 + off_z_real);
-        let h_q1 = terrain_func.at(cf + off_x_real, rf_q1 + off_z_real);
+        let h_q0 = terrain_func.elevation_at(cf + off_x_real, rf_q0 + off_z_real);
+        let h_q1 = terrain_func.elevation_at(cf + off_x_real, rf_q1 + off_z_real);
         let h = (1.0 - lerp_pos) * h_q0 + (lerp_pos) * h_q1;
 
         [cf, h, rf]
@@ -448,8 +448,8 @@ fn quantized_position(
         let cf = scale * c as f32;
         let rf = scale * r as f32;
 
-        let h_q0 = terrain_func.at(cf_q0 + off_x_real, rf + off_z_real);
-        let h_q1 = terrain_func.at(cf_q1 + off_x_real, rf + off_z_real);
+        let h_q0 = terrain_func.elevation_at(cf_q0 + off_x_real, rf + off_z_real);
+        let h_q1 = terrain_func.elevation_at(cf_q1 + off_x_real, rf + off_z_real);
         let h = (1.0 - lerp_pos) * h_q0 + (lerp_pos) * h_q1;
 
         [cf, h, rf]

@@ -31,7 +31,7 @@ impl TerrainFunc {
         }
     }
 
-    pub fn at(&self, x: f32, z: f32) -> f32 {
+    pub fn elevation_at(&self, x: f32, z: f32) -> f32 {
         let x = x as f64;
         let z = z as f64;
 
@@ -78,6 +78,28 @@ impl TerrainFunc {
         h += 12.9 * self.ground_rough.sample(x, z);
 
         h as f32
+    }
+
+    pub fn color_at(&self, x: f32, z: f32) -> Color {
+        let steepness = {
+            let l = self.elevation_at(x - 0.1, z);
+            let r = self.elevation_at(x + 0.1, z);
+            let dx = r - l;
+            let t = self.elevation_at(x, z - 0.1);
+            let b = self.elevation_at(x, z + 0.1);
+            let dz = b - t;
+
+            ((dx * dx + dz * dz).sqrt() * 3.5).clamp(0.0, 1.0)
+        };
+
+        const GRASS: Srgba = Srgba::new(0.2, 0.6, 0.1, 1.0);
+        const ROCK: Srgba = Srgba::new(0.75, 0.75, 0.75, 1.0);
+
+        Color::srgb(
+            (1.0 - steepness) * GRASS.red + (steepness) * ROCK.red,
+            (1.0 - steepness) * GRASS.green + (steepness) * ROCK.green,
+            (1.0 - steepness) * GRASS.blue + (steepness) * ROCK.blue,
+        )
     }
 }
 

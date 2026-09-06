@@ -217,6 +217,13 @@ pub mod mathf64 {
 }
 
 pub fn make_image_from_array2d<const W: usize, const H: usize>(inp: &[[[f32; 4]; H]; W]) -> Image {
+    let mut data: Vec<u8> = Vec::new();
+    for r in 0..H {
+        for c in 0..W {
+            data.extend_from_slice(cast_slice::<f32, u8>(&inp[c][r]));
+        }
+    }
+
     Image::new(
         Extent3d {
             width: W as u32,
@@ -224,7 +231,7 @@ pub fn make_image_from_array2d<const W: usize, const H: usize>(inp: &[[[f32; 4];
             ..default()
         },
         TextureDimension::D2,
-        cast_slice(inp).to_vec(),
+        data,
         TextureFormat::Rgba32Float,
         default(),
     )

@@ -3,6 +3,7 @@
 
 ## Currently Working On
 - In mesh::create_terrain_mesh, add off_x_real and off_z_real to the input for pseudorand_float2_series.
+- Make the terrain debug color thing work using the texture, not vertex colors.
 - First person controller.
 - Texturing?? Texturing scale thing?
 - Maybe: instead of using plain `Without<>`s when you need to resolve query conflicts, you should make a type alias for it.
@@ -35,6 +36,7 @@
 - Terrain.
     - Generate uv normal textures for larger LODs to make them look like the smaller LODs.
     - Add hysteresis for changing LODs.
+- Get rid of test.png.
 
 ## Optimizations
 - If I don't need uv coords or anything for my primary shader, than try implementing meshes that don't use repeated vertices, while still keeping flat shading.
