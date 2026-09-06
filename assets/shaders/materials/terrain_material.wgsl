@@ -17,6 +17,7 @@
 #import "shaders/helpers/sky.wgsl"::sky_without_sun_and_stars;
 #import "shaders/helpers/sky.wgsl"::FOG_START;
 #import "shaders/helpers/sky.wgsl"::FOG_END;
+#import "shaders/helpers/util.wgsl"::{smoothstep_skew_left, smoothstep_skew_right}
 
 @group(#{MATERIAL_BIND_GROUP}) @binding(100) var<storage, read> global_render_data: GlobalRenderData;
 @group(#{MATERIAL_BIND_GROUP}) @binding(101) var<uniform> texturing_scale: f32;
@@ -111,9 +112,14 @@ fn fragment(
     var pbr_input = pbr_input_from_standard_material(pbr_vertex_output, is_front);
 
 #ifndef FEATURE_TERRAIN_DEBUG_COLS
-    // let color = vec4(pbr_vertex_output.world_normal.y, 0.0, 0.0, 1.0);
+    let inv_steepness = clamp(smoothstep_skew_right(0.0, 1.0, 2.5, pbr_vertex_output.world_normal.y), 0.0, 1.0);
 
-    // pbr_input.material.base_color = color;
+    let grass_color = vec3(0.2, 0.7, 0.05);
+    let stone_color = vec3(0.5, 0.5, 0.5);
+
+    let color = (inv_steepness) * grass_color + (1.0 - inv_steepness) * stone_color;
+
+    pbr_input.material.base_color = vec4(color, 1.0);
 #endif
 
     // Could modify color here too. // TODOr
