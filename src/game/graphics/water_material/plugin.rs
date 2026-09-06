@@ -25,7 +25,7 @@ impl Plugin for WaterMaterialPlugin {
     }
 }
 
-const WATER_OPACITY: f32 = 0.4;
+pub const WATER_OPACITY: f32 = 0.4;
 
 pub struct WaterMaterialProps {}
 

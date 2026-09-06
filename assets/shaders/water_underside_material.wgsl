@@ -153,8 +153,7 @@ fn fragment(
         ),
         in.position.xy
     );
-    out = vec4((1.0 - in.water_fog_amount) * out.rgb + (in.water_fog_amount) * water_fog_color, 1.0);
-    out = vec4(WATER_FOG_DARKNESS_FACTOR * out.rgb, 1.0);
+    out = vec4(WATER_FOG_DARKNESS_FACTOR * out.rgb, out.a);
 
     // Return value.
 

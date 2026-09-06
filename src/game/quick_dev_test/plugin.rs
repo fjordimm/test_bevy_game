@@ -1,11 +1,12 @@
 use std::time::Duration;
 
+use avian3d::{collision::collider::Collider, dynamics::rigid_body::RigidBody};
 use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_timer};
 use rand_distr::num_traits::Pow;
 
 use crate::game::{
     core::states::OverallState,
-    geometry::dodec::dodec_mesh,
+    geometry::{cube::cube_mesh, dodec::dodec_mesh},
     graphics::{
         global_render_data::resources::GlobalRenderDataHandle,
         primary_material::plugin::{PrimaryMaterial, primary_material},
@@ -113,5 +114,37 @@ fn spawn_some_stuff(
             global_render_data_handle.get_handle(),
         ))),
         world_space_transf(Transform::from_xyz(3.0, 0.0, -9.0)),
+    ));
+
+    commands.spawn((
+        PlayingStateEntity,
+        Mesh3d(meshes.add(cube_mesh())),
+        MeshMaterial3d(materials.add(primary_material(
+            default(),
+            global_render_data_handle.get_handle(),
+        ))),
+        world_space_transf(
+            Transform::from_xyz(0.0, 50.0, -20.0).with_scale(Vec3::new(100.0, 1.0, 100.0)),
+        ),
+        RigidBody::Static,
+        Collider::cuboid(100.0, 1.0, 100.0),
+    ));
+
+    commands.spawn((
+        PlayingStateEntity,
+        Mesh3d(meshes.add(cube_mesh())),
+        MeshMaterial3d(materials.add(primary_material(
+            default(),
+            global_render_data_handle.get_handle(),
+        ))),
+        world_space_transf({
+            let mut transf = Transform::from_xyz(0.0, 70.0, -20.0);
+            transf.rotate_z(0.1);
+            transf.rotate_x(0.15);
+
+            transf
+        }),
+        RigidBody::Dynamic,
+        Collider::cuboid(1.0, 1.0, 1.0),
     ));
 }

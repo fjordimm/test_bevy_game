@@ -11,6 +11,8 @@ use bevy::{
 };
 use bevy_mesh::MeshVertexBufferLayoutRef;
 
+use crate::game::graphics::water_material::plugin::WATER_OPACITY;
+
 pub struct WaterUndersideMaterialPlugin;
 
 impl Plugin for WaterUndersideMaterialPlugin {
@@ -42,7 +44,7 @@ pub fn water_underside_material(
 ) -> WaterUndersideMaterial {
     WaterUndersideMaterial {
         base: StandardMaterial {
-            base_color: Color::WHITE.with_alpha(0.6),
+            base_color: Color::WHITE.with_alpha(WATER_OPACITY),
             alpha_mode: AlphaMode::Blend,
             perceptual_roughness: 1.0,
             metallic: 0.0,

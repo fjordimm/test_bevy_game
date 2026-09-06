@@ -7,6 +7,11 @@ To run in dev mode, do:
 .\run.bat
 ```
 
+To use any of these features, run `cargo run --features="bevy/dynamic_linking"`, but with any of the following inserted into the quotes and separated with commas:
+- `terrain_debug_cols`: Recolores terrain chunks based on their LOD.
+
+---
+
 Currently no release option.
 
 ## Development Environment

@@ -1,3 +1,4 @@
+use avian3d::PhysicsPlugins;
 use bevy::{log::LogPlugin, prelude::*, window::PrimaryWindow};
 use bevy_rand::plugin::EntropyPlugin;
 
@@ -54,6 +55,7 @@ pub fn build_bevy_app() -> App {
         .add_plugins(QuickDevTestPlugin)
         .add_plugins(PrimaryDebugMenuPlugin)
         .add_plugins(DiagnosisPlugin)
+        .add_plugins(PhysicsPlugins::default())
     ;
 
     app

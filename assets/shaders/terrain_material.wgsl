@@ -30,6 +30,9 @@
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
     @location(0) position: vec3<f32>,
+#ifdef FEATURE_TERRAIN_DEBUG_COLS
+    @location(1) color: vec4<f32>,
+#endif
 }
 
 struct CustomVertexOutput {
@@ -38,13 +41,19 @@ struct CustomVertexOutput {
     @location(1) cam_relative_pos: vec3<f32>,
     @location(2) fog_amount: f32,
     @location(3) water_fog_amount: f32,
-    @location(4) @interpolate(flat) instance_index: u32,
+#ifdef FEATURE_TERRAIN_DEBUG_COLS
+    @location(4) color: vec4<f32>,
+#endif
+    @location(5) @interpolate(flat) instance_index: u32,
 }
 
 fn to_pbr_vertex_output(og: CustomVertexOutput) -> VertexOutput {
     var ret: VertexOutput;
     ret.position = og.position;
     ret.world_position = og.world_position;
+#ifdef FEATURE_TERRAIN_DEBUG_COLS
+    ret.color = og.color;
+#endif
     ret.instance_index = og.instance_index;
 
     return ret;
@@ -80,6 +89,9 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
 
     // Boilerplate.
 
+#ifdef FEATURE_TERRAIN_DEBUG_COLS
+    out.color = in.color;
+#endif
     // out.visibility_range_dither = mesh_functions::get_visibility_range_dither_level(
     //     in.instance_index,
     //     world_mat[3]
@@ -109,6 +121,10 @@ fn fragment(
     // Boilerplate.
     
     var pbr_input = pbr_input_from_standard_material(pbr_vertex_output, is_front);
+
+#ifndef FEATURE_TERRAIN_DEBUG_COLS
+    pbr_input.material.base_color = vec4(1.0, 1.0, 1.0, 1.0);
+#endif
 
     // Could modify color here too. // TODOr
 

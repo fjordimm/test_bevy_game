@@ -2,9 +2,8 @@
 # Todo List
 
 ## Currently Working On
-- Terrain.
-    - Generate uv normal textures for larger LODs to make them look like the smaller LODs.
-    - Add hysteresis for changing LODs.
+- Get rid of water fog.
+- First person controller.
 - Texturing?? Texturing scale thing?
 - Maybe: instead of using plain `Without<>`s when you need to resolve query conflicts, you should make a type alias for it.
 
@@ -33,6 +32,9 @@
 - When dragging floating panels around, they should order themselves correctly (most recently dragged goes on top).
 - Get rid of post-processor if not using it.
 - Instead of having the Z-Indexing stuff in gui/usage.md, just have a few sub-divs under the gui root which you add things to.
+- Terrain.
+    - Generate uv normal textures for larger LODs to make them look like the smaller LODs.
+    - Add hysteresis for changing LODs.
 
 ## Optimizations
 - If I don't need uv coords or anything for my primary shader, than try implementing meshes that don't use repeated vertices, while still keeping flat shading.
