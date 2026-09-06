@@ -47,11 +47,12 @@ impl Plugin for TerrainPlugin {
 
 const UPDATE_CHUNKS_INTERVAL: u64 = 800; // In milliseconds.
 
-pub(super) const CW: usize = 16; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
-const MAX_LOD: usize = 4;
+pub(super) const CW: usize = 8; // Chunk Width (and height). Minimum value: 3 (because of the perimeter).
+const MAX_LOD: usize = 7; // Number of LODs - 1.
 const LL_CHUNK_SCALE: f32 = 6.0; // LL stands for Last-LOD (the highest LOD).
 const L0_CHUNK_SCALE: f32 = LL_CHUNK_SCALE * 2u32.pow(MAX_LOD as u32) as f32;
-const L0_RENDER_DIST: i64 = 10;
+const L0_RENDER_DIST: i64 = 2;
+// Another 'constant' you might be looking for here is the Resource `TerrainLodProportion`, which is initialized in `on_enter2`.
 
 fn on_enter1(world: &mut World) {
     // TODO: change the seed to not be this arbitrary number.
@@ -59,7 +60,7 @@ fn on_enter1(world: &mut World) {
 }
 
 fn on_enter2(mut commands: Commands) {
-    commands.insert_resource(TerrainLodProportion(0.15));
+    commands.insert_resource(TerrainLodProportion(0.75));
     commands.insert_resource(ChunkDicts(std::array::from_fn(|_| {
         ChunkDict(HashMap::new())
     })));

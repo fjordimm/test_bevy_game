@@ -110,7 +110,7 @@ fn on_enter(
         &mut materials_terrain,
     ));
 
-    commands.insert_resource(RenderingResolutionScale(1.0));
+    commands.insert_resource(RenderingResolutionScale(0.5));
 
     // Prerendering stuff (so that screen resolution can be changed).
     {

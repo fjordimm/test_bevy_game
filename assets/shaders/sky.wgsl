@@ -9,7 +9,7 @@
 #import "shaders/global_render_data.wgsl"::GlobalRenderData;
 
 const FOG_START: f32 = 1000.0;
-const FOG_END: f32 = 10000.0;
+const FOG_END: f32 = 8000.0;
 
 const DAY_ZENITH_COLOR = vec3<f32>(0.19, 0.58, 0.97);
 const DAY_HORIZON_COLOR = vec3<f32>(0.32, 0.69, 1.0);
