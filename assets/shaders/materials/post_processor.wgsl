@@ -12,5 +12,9 @@ struct PostProcessorSettings {
 
 @fragment
 fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
+    if in.uv.x < 0.1 {
+        return vec4(0.0, 1.0, 0.0, 1.0);
+    }
+
     return textureSample(screen_texture, texture_sampler, in.uv);
 }

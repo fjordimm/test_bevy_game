@@ -22,12 +22,16 @@ use bevy::{
             binding_types::{sampler, texture_2d, uniform_buffer},
         },
         renderer::{RenderContext, RenderDevice},
+        storage::ShaderStorageBuffer,
         view::ViewTarget,
     },
 };
 use bevy_ecs::query::QueryItem;
 
-use crate::game::{playing_state::player::tags::CameraForPlayer, util::alrms};
+use crate::game::{
+    graphics::global_render_data::resources::GlobalRenderDataHandle,
+    playing_state::player::tags::CameraForPlayer, util::alrms,
+};
 
 pub struct PostProcessorPlugin;
 
@@ -185,7 +189,11 @@ struct PostProcessorSettings {
     _unused: Vec4,
 }
 
-fn add_to_camera(mut commands: Commands, camera_q: Query<Entity, Added<CameraForPlayer>>) {
+fn add_to_camera(
+    mut commands: Commands,
+    camera_q: Query<Entity, Added<CameraForPlayer>>,
+    global_render_data_handle: Res<GlobalRenderDataHandle>,
+) {
     camera_q.iter().for_each(|camera| {
         commands
             .entity(camera)

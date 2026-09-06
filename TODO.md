@@ -2,7 +2,6 @@
 # Todo List
 
 ## Currently Working On
-- Get rid of water fog.
 - First person controller.
 - Texturing?? Texturing scale thing?
 - Maybe: instead of using plain `Without<>`s when you need to resolve query conflicts, you should make a type alias for it.
