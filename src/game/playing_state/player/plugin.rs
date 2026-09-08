@@ -8,13 +8,10 @@ use crate::game::{
         states::{MouseMode, OverallState},
     },
     playing_state::{
-        player::{
-            resources::PlayerMovementSettings,
-            tags::{CameraForPlayer, PlayerTransf},
-        },
+        player::{resources::PlayerMovementSettings, tags::PlayerTransf},
         sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying, OnExitPlaying},
         states::PauseState,
-        tags::PlayingStateEntity,
+        tags::{PlayingStateEntity, PrimaryCamera},
     },
     util::alrms,
 };
@@ -74,7 +71,7 @@ fn rotate_and_move(
     keys: Res<ButtonInput<KeyCode>>,
     key_bindings: Res<KeyBindings>,
     mut mouse_motion: MessageReader<MouseMotion>,
-    camera_transf_q: Option<Single<&mut Transform, With<CameraForPlayer>>>,
+    camera_transf_q: Option<Single<&mut Transform, With<PrimaryCamera>>>,
     mut rot_o: ResMut<RotO>,
 ) {
     if let Some(mut camera_transf) = alrms!(camera_transf_q) {

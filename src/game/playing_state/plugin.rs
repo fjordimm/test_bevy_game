@@ -16,7 +16,7 @@ use crate::game::{
         coord_rebasing::{plugin::CoordRebasingPlugin, world_space_transf},
         environment_light::plugin::EnvironmentLightPlugin,
         pause_menu::plugin::PauseMenuPlugin,
-        player::{plugin::PlayerPlugin, tags::CameraForPlayer},
+        player::plugin::PlayerPlugin,
         resources::RenderingResolutionScale,
         reusable_materials::ReusableMaterials,
         sets::{
@@ -25,7 +25,7 @@ use crate::game::{
         },
         skybox::plugin::SkyboxPlugin,
         states::PauseState,
-        tags::PlayingStateEntity,
+        tags::{PlayingStateEntity, PrimaryCamera},
         terrain::plugin::TerrainPlugin,
         water_layer::plugin::WaterLayerPlugin,
     },
@@ -124,7 +124,7 @@ fn on_enter(
         //   renders it to prerender_target_texture.
         commands.spawn((
             PlayingStateEntity,
-            CameraForPlayer,
+            PrimaryCamera,
             Camera3d::default(),
             Camera {
                 order: -1,

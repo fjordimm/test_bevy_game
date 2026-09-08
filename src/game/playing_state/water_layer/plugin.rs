@@ -11,9 +11,8 @@ use crate::game::{
         water_underside_material::plugin::{WaterUndersideMaterial, water_underside_material},
     },
     playing_state::{
-        player::tags::CameraForPlayer,
         sets::{DuringPlayingUnpaused, OnEnterPlaying},
-        tags::PlayingStateEntity,
+        tags::{PlayingStateEntity, PrimaryCamera},
     },
     util::alrms,
 };
@@ -67,7 +66,7 @@ fn on_enter(
 }
 
 fn update_cam_is_underwater(
-    camera_q: Option<Single<&Transform, With<CameraForPlayer>>>,
+    camera_q: Option<Single<&Transform, With<PrimaryCamera>>>,
     mut global_render_data: ResMut<GlobalRenderData>,
 ) {
     if let Some(camera_transf) = alrms!(camera_q) {

@@ -14,12 +14,9 @@ use crate::game::{
     playing_state::{
         coord_rebasing::world_space_transf,
         environment_light::resources::{SkyRotationS, SkyRotationT},
-        player::{
-            resources::PlayerMovementSettings,
-            tags::{CameraForPlayer, PlayerTransf},
-        },
+        player::{resources::PlayerMovementSettings, tags::PlayerTransf},
         sets::{DuringPlayingUnpaused, OnEnterPlaying},
-        tags::PlayingStateEntity,
+        tags::{PlayingStateEntity, PrimaryCamera},
     },
     util::alrms,
 };
@@ -88,7 +85,7 @@ fn scrolling(
 fn move_player_body_to_cam(
     keys: Res<ButtonInput<KeyCode>>,
     player_body_q: Option<Single<&mut Transform, With<PlayerTransf>>>,
-    camera_q: Option<Single<&Transform, (With<CameraForPlayer>, Without<PlayerTransf>)>>,
+    camera_q: Option<Single<&Transform, (With<PrimaryCamera>, Without<PlayerTransf>)>>,
 ) {
     if keys.pressed(KeyCode::BracketLeft) {
         if let Some(mut player_body) = alrms!(player_body_q) {

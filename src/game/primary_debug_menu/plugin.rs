@@ -20,7 +20,7 @@ use crate::game::{
             text::{GuiTextInterface, gui_text_h2, gui_text_m},
         },
     },
-    playing_state::{coord_rebasing::WorldSpaceEntity, player::tags::CameraForPlayer},
+    playing_state::{coord_rebasing::WorldSpaceEntity, tags::PrimaryCamera},
 };
 
 pub struct PrimaryDebugMenuPlugin;
@@ -248,7 +248,7 @@ fn update(
             Without<WorldSpaceEntityCountText>,
         ),
     >,
-    camera_q: Option<Single<&Transform, With<CameraForPlayer>>>,
+    camera_q: Option<Single<&Transform, With<PrimaryCamera>>>,
 ) {
     fps_text.iter_mut().for_each(|mut text| {
         text.set_content(

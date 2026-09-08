@@ -10,9 +10,8 @@ use crate::game::{
     },
     playing_state::{
         environment_light::resources::{SkyRotationS, SkyRotationT},
-        player::tags::CameraForPlayer,
         sets::{DuringPlayingUnpaused, OnEnterPlaying},
-        tags::PlayingStateEntity,
+        tags::{PlayingStateEntity, PrimaryCamera},
     },
     util::{alrms, alrro},
 };
@@ -63,8 +62,8 @@ fn spawn_skybox(
 }
 
 fn update_skybox(
-    camera_transf_q: Option<Single<&Transform, With<CameraForPlayer>>>,
-    skybox_transf_q: Option<Single<&mut Transform, (With<SkyboxTag>, Without<CameraForPlayer>)>>,
+    camera_transf_q: Option<Single<&Transform, With<PrimaryCamera>>>,
+    skybox_transf_q: Option<Single<&mut Transform, (With<SkyboxTag>, Without<PrimaryCamera>)>>,
     time_of_day: Res<SkyRotationT>,
     season_of_year: Res<SkyRotationS>,
     mut global_render_data: ResMut<GlobalRenderData>,

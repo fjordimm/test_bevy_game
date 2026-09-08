@@ -31,7 +31,7 @@ use bevy_ecs::query::QueryItem;
 
 use crate::game::{
     graphics::global_render_data::resources::{GlobalRenderData, GlobalRenderDataHandle},
-    playing_state::player::tags::CameraForPlayer,
+    playing_state::tags::PrimaryCamera,
     util::alrms,
 };
 
@@ -200,7 +200,7 @@ struct PostProcessorSettings {
     _unused: Vec4,
 }
 
-fn add_to_camera(mut commands: Commands, camera_q: Query<Entity, Added<CameraForPlayer>>) {
+fn add_to_camera(mut commands: Commands, camera_q: Query<Entity, Added<PrimaryCamera>>) {
     camera_q.iter().for_each(|camera| {
         commands
             .entity(camera)
