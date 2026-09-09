@@ -2,7 +2,8 @@
 # Todo List
 
 ## Currently Working On
-- In mesh::create_terrain_mesh, add off_x_real and off_z_real to the input for pseudorand_float2_series.
+- Cheat menu.
+- Make floating panels order themselves correctly.
 - Make the terrain debug color thing work using the texture, not vertex colors.
 - First person controller.
 - Texturing?? Texturing scale thing?

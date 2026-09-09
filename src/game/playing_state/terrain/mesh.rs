@@ -52,7 +52,7 @@ pub(super) fn create_terrain_mesh(
             let mut cf = scale * c as f32;
             let mut rf = scale * r as f32;
             let pseudorand_offset = pseudorand_float2_series(
-                &[cf, rf],
+                &[cf + off_x_real, rf + off_z_real],
                 -RAND_VERTEX_OFFSET * scale,
                 RAND_VERTEX_OFFSET * scale,
             );
@@ -135,7 +135,7 @@ pub(super) fn create_terrain_mesh(
             let mut cf = scale * c as f32;
             let mut rf = scale * r as f32;
             let pseudorand_offset = pseudorand_float2_series(
-                &[cf, rf],
+                &[cf + off_x_real, rf + off_z_real],
                 -RAND_VERTEX_OFFSET * scale,
                 RAND_VERTEX_OFFSET * scale,
             );
@@ -159,7 +159,7 @@ pub(super) fn create_terrain_mesh(
             let mut cf = scale * c as f32;
             let mut rf = scale * r as f32;
             let pseudorand_offset = pseudorand_float2_series(
-                &[cf, rf],
+                &[cf + off_x_real, rf + off_z_real],
                 -RAND_VERTEX_OFFSET * scale,
                 RAND_VERTEX_OFFSET * scale,
             );
@@ -183,7 +183,7 @@ pub(super) fn create_terrain_mesh(
             let mut cf = scale * c as f32;
             let mut rf = scale * r as f32;
             let pseudorand_offset = pseudorand_float2_series(
-                &[cf, rf],
+                &[cf + off_x_real, rf + off_z_real],
                 -RAND_VERTEX_OFFSET * scale,
                 RAND_VERTEX_OFFSET * scale,
             );
@@ -207,7 +207,7 @@ pub(super) fn create_terrain_mesh(
             let mut cf = scale * c as f32;
             let mut rf = scale * r as f32;
             let pseudorand_offset = pseudorand_float2_series(
-                &[cf, rf],
+                &[cf + off_x_real, rf + off_z_real],
                 -RAND_VERTEX_OFFSET * scale,
                 RAND_VERTEX_OFFSET * scale,
             );
@@ -230,7 +230,7 @@ pub(super) fn create_terrain_mesh(
             let mut cf = scale * (0.5 + c as f32);
             let mut rf = scale * (0.5 + r as f32);
             let pseudorand_offset = pseudorand_float2_series(
-                &[cf, rf],
+                &[cf + off_x_real, rf + off_z_real],
                 -RAND_VERTEX_OFFSET * scale,
                 RAND_VERTEX_OFFSET * scale,
             );

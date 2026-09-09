@@ -13,6 +13,7 @@ use crate::game::{
         primary_material::plugin::PrimaryMaterial,
     },
     playing_state::{
+        cheats_menu::plugin::CheatsMenuPlugin,
         coord_rebasing::{plugin::CoordRebasingPlugin, world_space_transf},
         environment_light::plugin::EnvironmentLightPlugin,
         pause_menu::plugin::PauseMenuPlugin,
@@ -81,6 +82,7 @@ impl Plugin for PlayingStatePlugin {
             .add_plugins(PlayerPlugin)
             .add_plugins(CoordRebasingPlugin)
             .add_plugins(WaterLayerPlugin)
+            .add_plugins(CheatsMenuPlugin)
         ;
 
         #[cfg(debug_assertions)]
