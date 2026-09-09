@@ -4,7 +4,6 @@
 ## Currently Working On
 - Cheat menu.
 - Make floating panels order themselves correctly.
-- Make the terrain debug color thing work using the texture, not vertex colors.
 - First person controller.
 - Texturing?? Texturing scale thing?
 - Maybe: instead of using plain `Without<>`s when you need to resolve query conflicts, you should make a type alias for it.
