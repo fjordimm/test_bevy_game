@@ -371,13 +371,6 @@ pub(super) fn create_terrain_mesh(
     .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, inner_uvs)
     .with_inserted_indices(Indices::U32(inner_triangles));
 
-    #[cfg(feature = "terrain_debug_cols")]
-    let inner_mesh = inner_mesh.with_inserted_attribute(
-        Mesh::ATTRIBUTE_COLOR,
-        [vertex_color(scale, off_x_real, off_z_real); (CW - 1) * (CW - 1) + (CW - 2) * (CW - 2)]
-            .to_vec(),
-    );
-
     let outer_mesh = Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::RENDER_WORLD | RenderAssetUsages::MAIN_WORLD,
@@ -385,13 +378,6 @@ pub(super) fn create_terrain_mesh(
     .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, outer_positions)
     .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, outer_uvs)
     .with_inserted_indices(Indices::U32(outer_triangles));
-
-    #[cfg(feature = "terrain_debug_cols")]
-    let outer_mesh = outer_mesh.with_inserted_attribute(
-        Mesh::ATTRIBUTE_COLOR,
-        [vertex_color(scale, off_x_real, off_z_real); 4 * CW + 4 * (CW - 2) + 4 * (CW - 1)]
-            .to_vec(),
-    );
 
     (inner_mesh, outer_mesh, lod_connecting_perimeters)
 }
@@ -492,29 +478,4 @@ pub(super) fn change_mesh_from_perim_lod_vertices(
     } else {
         error!("Positions attribute was not in an expected form.");
     }
-}
-
-// TODO: delete this whole thing
-#[cfg(feature = "terrain_debug_cols")]
-fn vertex_color(scale: f32, off_x: f32, off_z: f32) -> [f32; 4] {
-    let pre_checkerboard_color = Color::hsv((scale.log2().abs() * 222.0) % 360.0, 1.0, 1.0);
-
-    let mut off_x_i = (off_x / (scale * CW as f32) - 0.5).round() as i32;
-    let mut off_z_i = (off_z / (scale * CW as f32) - 0.5).round() as i32;
-
-    if off_x_i < 0 {
-        off_x_i += 1;
-    }
-    if off_z_i < 0 {
-        off_z_i += 1;
-    }
-
-    let color = if ((off_x_i + off_z_i) % 2) == 0 {
-        Color::hsv(pre_checkerboard_color.hue(), 0.9, 1.0)
-    } else {
-        Color::hsv(pre_checkerboard_color.hue(), 1.0, 0.75)
-    };
-
-    let color = color.to_srgba();
-    [color.red, color.green, color.blue, 1.0]
 }

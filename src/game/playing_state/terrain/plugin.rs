@@ -16,9 +16,9 @@ use crate::game::{
         tags::PlayingStateEntity,
         terrain::{
             mesh::{change_mesh_from_perim_lod_vertices, create_terrain_mesh},
-            resources::{TerrainLodProportion, TheTerrainFunc},
+            resources::{TerrainLodProportion, TheTerrainFunc, UseDebugTerrainColors},
             terrain_func::TerrainFunc,
-            texture::create_terrain_texture,
+            texture::{create_debug_terrain_texture, create_terrain_texture},
         },
     },
     util::{alrmo, alrms, alrrs, seed_from_u64},
@@ -64,7 +64,8 @@ fn on_enter1(world: &mut World) {
 }
 
 fn on_enter2(mut commands: Commands) {
-    commands.insert_resource(TerrainLodProportion(0.75));
+    commands.insert_resource(TerrainLodProportion::default());
+    commands.insert_resource(UseDebugTerrainColors::default());
     commands.insert_resource(ChunkDicts(std::array::from_fn(|_| {
         ChunkDict(HashMap::new())
     })));
@@ -579,6 +580,7 @@ fn gen_next_mesh_in_queue(
     mut materials: ResMut<Assets<TerrainMaterial>>,
     mut images: ResMut<Assets<Image>>,
     global_render_data_handle: Res<GlobalRenderDataHandle>,
+    use_debug_terrain_colors: Res<UseDebugTerrainColors>,
 ) {
     if let Some((entity, _)) = mesh_gen_queue.0.pop() {
         if let Some((mut cc, is_active_chunk)) = alrmo!(chunk_q.get_mut(entity)) {
@@ -597,12 +599,17 @@ fn gen_next_mesh_in_queue(
 
                 let material = materials.add(terrain_material(
                     default(),
-                    images.add(create_terrain_texture(
-                        &terrain_func.0,
-                        cc.scale,
-                        cc.off_x,
-                        cc.off_z,
-                    )),
+                    images.add(match use_debug_terrain_colors.0 {
+                        false => {
+                            create_terrain_texture(&terrain_func.0, cc.scale, cc.off_x, cc.off_z)
+                        }
+                        true => create_debug_terrain_texture(
+                            &terrain_func.0,
+                            cc.scale,
+                            cc.off_x,
+                            cc.off_z,
+                        ),
+                    }),
                     global_render_data_handle.get_handle(),
                 ));
 

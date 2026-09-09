@@ -11,9 +11,6 @@ use bevy::{
 };
 use bevy_mesh::MeshVertexBufferLayoutRef;
 
-#[cfg(feature = "terrain_debug_cols")]
-use crate::game::util::alrmo;
-
 pub struct TerrainMaterialPlugin;
 
 impl Plugin for TerrainMaterialPlugin {
@@ -95,24 +92,9 @@ impl MaterialExtension for __TerrainMaterialExtension {
         let vertex_layout = layout.0.get_layout(&[
             Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
             Mesh::ATTRIBUTE_UV_0.at_shader_location(1),
-            #[cfg(feature = "terrain_debug_cols")]
-            Mesh::ATTRIBUTE_COLOR.at_shader_location(2),
         ])?;
 
         descriptor.vertex.buffers = vec![vertex_layout];
-
-        #[cfg(feature = "terrain_debug_cols")]
-        {
-            descriptor
-                .vertex
-                .shader_defs
-                .push("FEATURE_TERRAIN_DEBUG_COLS".into());
-            if let Some(fragment) = alrmo!(descriptor.fragment_mut()) {
-                fragment
-                    .shader_defs
-                    .push("FEATURE_TERRAIN_DEBUG_COLS".into());
-            }
-        }
 
         Ok(())
     }

@@ -11,11 +11,6 @@ opt-level = 1
 [profile.dev.package."*"]
 opt-level = 3
 
-# Features
-
-[features]
-terrain_debug_cols = []
-
 # Dependencies
 
 [dependencies]

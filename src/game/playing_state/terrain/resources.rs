@@ -9,3 +9,18 @@ pub struct TheTerrainFunc(pub TerrainFunc);
 // Can be higher than 1.0, meaning L0 chunks might not ever render (which isn't a problem).
 #[derive(Resource)]
 pub struct TerrainLodProportion(pub f32);
+
+impl Default for TerrainLodProportion {
+    fn default() -> Self {
+        Self(0.75)
+    }
+}
+
+#[derive(Resource)]
+pub struct UseDebugTerrainColors(pub bool);
+
+impl Default for UseDebugTerrainColors {
+    fn default() -> Self {
+        Self(false)
+    }
+}

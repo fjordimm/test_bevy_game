@@ -12,10 +12,7 @@ use crate::game::{
             text::gui_text_p,
         },
     },
-    playing_state::{
-        sets::{OnEnterPlaying, OnExitPlaying},
-        states::PauseState,
-    },
+    playing_state::sets::{OnEnterPlaying, OnExitPlaying},
 };
 
 pub struct CheatsMenuPlugin;

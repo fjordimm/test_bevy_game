@@ -38,6 +38,7 @@
     - Generate uv normal textures for larger LODs to make them look like the smaller LODs.
     - Add hysteresis for changing LODs.
 - Get rid of test.png.
+- Make an option for increasing the speed at which it generates terrain, at the cost of lag. So `gen_next_mesh_in_queue` would process multiple items in the queue per frame rather than just one.
 
 ## Optimizations
 - If I don't need uv coords or anything for my primary shader, than try implementing meshes that don't use repeated vertices, while still keeping flat shading.

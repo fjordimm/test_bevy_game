@@ -27,9 +27,6 @@ struct Vertex {
     @builtin(instance_index) instance_index: u32,
     @location(0) position: vec3<f32>,
     @location(1) uv: vec2<f32>,
-#ifdef FEATURE_TERRAIN_DEBUG_COLS
-    @location(2) color: vec4<f32>,
-#endif
 }
 
 struct CustomVertexOutput {
@@ -38,9 +35,6 @@ struct CustomVertexOutput {
     @location(1) uv: vec2<f32>,
     @location(2) cam_relative_pos: vec3<f32>,
     @location(3) fog_amount: f32,
-#ifdef FEATURE_TERRAIN_DEBUG_COLS
-    @location(4) color: vec4<f32>,
-#endif
     @location(5) @interpolate(flat) instance_index: u32,
 }
 
@@ -48,9 +42,6 @@ fn to_pbr_vertex_output(og: CustomVertexOutput) -> VertexOutput {
     var ret: VertexOutput;
     ret.position = og.position;
     ret.world_position = og.world_position;
-#ifdef FEATURE_TERRAIN_DEBUG_COLS
-    ret.color = og.color;
-#endif
     ret.instance_index = og.instance_index;
 
     return ret;
@@ -83,9 +74,6 @@ fn vertex(in: Vertex) -> CustomVertexOutput {
 
     // Boilerplate.
 
-#ifdef FEATURE_TERRAIN_DEBUG_COLS
-    out.color = in.color;
-#endif
     // out.visibility_range_dither = mesh_functions::get_visibility_range_dither_level(
     //     in.instance_index,
     //     world_mat[3]
@@ -116,17 +104,17 @@ fn fragment(
     
     var pbr_input = pbr_input_from_standard_material(pbr_vertex_output, is_front);
 
-#ifndef FEATURE_TERRAIN_DEBUG_COLS
-    // let inv_steepness = clamp(smoothstep_skew_right(0.0, 1.0, 2.5, pbr_vertex_output.world_normal.y), 0.0, 1.0);
+    {
+        // let inv_steepness = clamp(smoothstep_skew_right(0.0, 1.0, 2.5, pbr_vertex_output.world_normal.y), 0.0, 1.0);
 
-    // let grass_color = vec3(0.2, 0.7, 0.05);
-    // let stone_color = vec3(0.5, 0.5, 0.5);
+        // let grass_color = vec3(0.2, 0.7, 0.05);
+        // let stone_color = vec3(0.5, 0.5, 0.5);
 
-    // let color = (inv_steepness) * grass_color + (1.0 - inv_steepness) * stone_color;
+        // let color = (inv_steepness) * grass_color + (1.0 - inv_steepness) * stone_color;
 
-    // pbr_input.material.base_color = vec4(color, 1.0);
-    pbr_input.material.base_color = textureSample(texture, texture_sampler, in.uv);
-#endif
+        // pbr_input.material.base_color = vec4(color, 1.0);
+        pbr_input.material.base_color = textureSample(texture, texture_sampler, in.uv);
+    }
 
     // Could modify color here too. // TODOr
 

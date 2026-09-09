@@ -34,3 +34,42 @@ pub(super) fn create_terrain_texture(
 
     make_image_from_array2d(&pixels)
 }
+
+const DEBUG_TEXTURE_SIZE: usize = 1;
+
+pub(super) fn create_debug_terrain_texture(
+    _terrain_func: &TerrainFunc,
+    scale: f32,
+    off_x: i64,
+    off_z: i64,
+) -> Image {
+    let off_x_real = CW as f32 * scale * off_x as f32;
+    let off_z_real = CW as f32 * scale * off_z as f32;
+
+    let color = {
+        let pre_checkerboard_color = Color::hsv((scale.log2().abs() * 222.0) % 360.0, 1.0, 1.0);
+
+        let mut off_x_i = (off_x_real / (scale * CW as f32) - 0.5).round() as i32;
+        let mut off_z_i = (off_z_real / (scale * CW as f32) - 0.5).round() as i32;
+
+        if off_x_i < 0 {
+            off_x_i += 1;
+        }
+        if off_z_i < 0 {
+            off_z_i += 1;
+        }
+
+        let color = if ((off_x_i + off_z_i) % 2) == 0 {
+            Color::hsv(pre_checkerboard_color.hue(), 0.9, 1.0)
+        } else {
+            Color::hsv(pre_checkerboard_color.hue(), 1.0, 0.75)
+        };
+
+        color.to_srgba()
+    };
+
+    let pixels: [[[f32; 4]; DEBUG_TEXTURE_SIZE]; DEBUG_TEXTURE_SIZE] =
+        [[[color.red, color.green, color.blue, 1.0]; DEBUG_TEXTURE_SIZE]; DEBUG_TEXTURE_SIZE];
+
+    make_image_from_array2d(&pixels)
+}
