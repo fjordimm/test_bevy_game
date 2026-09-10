@@ -10,10 +10,10 @@ use crate::game::{
     core::resources::{GlobalGuiRoot, KeyBindings},
     diagnosis::resources::LagSpikeDiag,
     gui::{
-        gui_children,
+        gui_child, gui_children,
         resources::GuiThemeComputed,
         widgets::{
-            checkbox::{bind_checkbox_with_resource, gui_checkbox},
+            button::gui_button,
             div::{GuiDivCustomStyle, GuiDivProps, GuiDivStyle, gui_div, gui_div_p},
             floating_panel::{
                 GuiFloatingPanelInterface, GuiFloatingPanelProps, gui_floating_panel,
@@ -21,8 +21,9 @@ use crate::game::{
             text::{GuiTextInterface, gui_text_h2, gui_text_m, gui_text_p},
         },
     },
-    playing_state::{coord_rebasing::WorldSpaceEntity, tags::PrimaryCamera},
-    primary_debug_menu::resources::ShowCheatsMenu,
+    playing_state::{
+        cheats_menu::plugin::CheatsMenuTag, coord_rebasing::WorldSpaceEntity, tags::PrimaryCamera,
+    },
 };
 
 pub struct PrimaryDebugMenuPlugin;
@@ -31,13 +32,11 @@ impl Plugin for PrimaryDebugMenuPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .insert_resource(ShowCheatsMenu(false))
             .add_systems(Update,
                 spawn_primary_debug_menu
                     .run_if(run_once)
             )
             .add_systems(Update, toggle_debug_menu)
-            .add_systems(Update, bind_checkbox_with_resource!(ShowCheatsMenuCheckbox, ShowCheatsMenu))
             .add_systems(Update,
                 update
                     .run_if(on_timer(Duration::from_millis(100)))
@@ -63,9 +62,6 @@ struct EntityCountText;
 
 #[derive(Component)]
 struct PlayingStateSection;
-
-#[derive(Component)]
-struct ShowCheatsMenuCheckbox;
 
 #[derive(Component)]
 struct TransformCountText;
@@ -148,10 +144,19 @@ fn spawn_primary_debug_menu(
                 .insert(gui_children(move |p| {
                     p.spawn(gui_text_h2("Playing State"));
 
-                    p.spawn(gui_div_p()).insert(gui_children(move |p| {
-                        p.spawn(gui_text_p("Show Cheats Menu "));
-                        p.spawn((ShowCheatsMenuCheckbox, gui_checkbox(default())));
-                    }));
+                    p.spawn(gui_button(default()))
+                        .insert(gui_child(gui_text_p("Show Cheats Menu")))
+                        .observe(
+                            |_: On<Pointer<Click>>,
+                             mut cheats_menu_q: Query<
+                                GuiFloatingPanelInterface,
+                                With<CheatsMenuTag>,
+                            >| {
+                                cheats_menu_q.iter_mut().for_each(|mut cheats_menu| {
+                                    cheats_menu.set_is_active(true);
+                                });
+                            },
+                        );
 
                     p.spawn(gui_div_p()).insert(gui_children(|p| {
                         p.spawn(gui_text_p("Transform Count: "));

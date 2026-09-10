@@ -45,9 +45,11 @@ pub fn gui_checkbox(props: GuiCheckboxProps) -> impl Bundle {
 }
 
 // Updates the checkbox state with the resource value automatically, and vice-versa.
+// To use this, do `app.add_systems(Update, bind_checkbox_with_resource!(..., ...))`.
 // The first argument is a tag (component) that the actual checkbox entity has.
 // The second argument, the resource to which the checkbox will be binded, must
 //   be a tuple struct with one bool element, and must derive `Resource`.
+#[allow(unused)]
 macro_rules! bind_checkbox_with_resource {
     ($CheckboxTag:ident, $ResourceToBind:ident) => {
         (
@@ -77,6 +79,7 @@ macro_rules! bind_checkbox_with_resource {
     };
 }
 
+#[allow(unused)]
 pub(crate) use bind_checkbox_with_resource;
 
 fn apply_style(
