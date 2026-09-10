@@ -11,7 +11,7 @@ use crate::game::{
     },
     playing_state::{
         coord_rebasing::{CoordRebasingOrigin, world_space_transf},
-        player::tags::PlayerTransf,
+        player::tags::ThePlayer,
         sets::{DuringPlaying, OnEnterPlaying},
         tags::PlayingStateEntity,
         terrain::{
@@ -164,7 +164,7 @@ fn inactivate_all_chunks(
 fn activate_chunks(
     mut commands: Commands,
     coord_rebasing_origin: Res<CoordRebasingOrigin>,
-    player_q: Option<Single<&Transform, With<PlayerTransf>>>,
+    player_q: Option<Single<&Transform, With<ThePlayer>>>,
     mut chunk_dicts: ResMut<ChunkDicts>,
     mut chunk_q: Query<(Entity, &mut Chunk, &mut Visibility)>,
     lod_proportion: Res<TerrainLodProportion>,
@@ -458,7 +458,7 @@ fn activate_chunk_or_subchunks(
 
     if not_doing_subchunks {
         if let Some((_, _, mut visibility)) = alrmo!(chunk_q.get_mut(entity)) {
-            *visibility = Visibility::Visible;
+            *visibility = Visibility::Inherited;
         }
     } else {
         commands.entity(entity).remove::<ActiveOrQueued>();
@@ -472,7 +472,7 @@ fn update_chunk_perimeters(
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
     chunk_q.iter().for_each(|(cc, visibility)| {
-        if *visibility == Visibility::Visible {
+        if *visibility == Visibility::Inherited {
             if let Some(perim_entity) = alrms!(cc.perimeter_entity) {
                 let surrounding_lods =
                     get_surrounding_chunk_lods(&chunk_dicts, &chunk_q, cc.lod, cc.off_x, cc.off_z);
@@ -538,7 +538,7 @@ fn get_active_chunk_lod_at(
     loop {
         if let Some(entity) = chunk_dicts.0[lod].0.get(&ChunkDictKey::new(x, z)) {
             if let Ok((cc, visibility)) = chunk_q.get(*entity) {
-                if *visibility == Visibility::Visible {
+                if *visibility == Visibility::Inherited {
                     return Some(cc.lod);
                 }
             }

@@ -7,8 +7,12 @@ use crate::game::{
         resources::KeyBindings,
         states::{MouseMode, OverallState},
     },
+    geometry::cube::cube_mesh,
     playing_state::{
-        player::{resources::PlayerMovementSettings, tags::PlayerTransf},
+        player::{
+            resources::{FreecamEnabled, PlayerMovementSettings},
+            tags::ThePlayer,
+        },
         sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying, OnExitPlaying},
         states::PauseState,
         tags::{PlayingStateEntity, PrimaryCamera},
@@ -63,6 +67,7 @@ struct RotO(Option<(f32, f32)>); // (yaw, pitch)
 fn on_enter(mut commands: Commands) {
     commands.insert_resource(PlayerMovementSettings::default());
     commands.insert_resource(RotO(None));
+    commands.insert_resource(FreecamEnabled(false));
 }
 
 fn rotate_and_move(
@@ -120,7 +125,8 @@ fn rotate_and_move(
 
             velocity = velocity.normalize_or(Vec3::ZERO);
 
-            camera_transf.translation += velocity * movement_settings.speed * time.delta_secs();
+            camera_transf.translation +=
+                velocity * movement_settings.freecam_speed * time.delta_secs();
         }
     }
 }
@@ -132,8 +138,8 @@ fn spawn_player_body(
 ) {
     commands.spawn((
         PlayingStateEntity,
-        PlayerTransf,
-        Mesh3d(meshes.add(Capsule3d::new(0.25, 1000.0))),
+        ThePlayer,
+        Mesh3d(meshes.add(cube_mesh())),
         MeshMaterial3d(materials.add(Color::linear_rgb(1.0, 0.0, 1.0))),
         Transform::from_xyz(0.0, 0.0, 0.0),
     ));

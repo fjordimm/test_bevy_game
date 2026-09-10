@@ -14,11 +14,10 @@ use crate::game::{
     playing_state::{
         coord_rebasing::world_space_transf,
         environment_light::resources::{SkyRotationS, SkyRotationT},
-        player::{resources::PlayerMovementSettings, tags::PlayerTransf},
+        player::resources::PlayerMovementSettings,
         sets::{DuringPlayingUnpaused, OnEnterPlaying},
-        tags::{PlayingStateEntity, PrimaryCamera},
+        tags::PlayingStateEntity,
     },
-    util::alrms,
 };
 
 pub struct QuickDevTestPlugin;
@@ -33,10 +32,6 @@ impl Plugin for QuickDevTestPlugin {
             )
             .add_systems(Update,
                 scrolling
-                    .in_set(DuringPlayingUnpaused::General)
-            )
-            .add_systems(Update,
-                move_player_body_to_cam
                     .in_set(DuringPlayingUnpaused::General)
             )
             .add_systems(OnEnter(OverallState::Playing),
@@ -70,28 +65,13 @@ fn scrolling(
         } else {
             // Change movement speed.
 
-            movement_settings.speed = movement_settings.speed.pow(1.0 - 0.05 * mouse_wheel_msg.y);
+            movement_settings.freecam_speed = movement_settings.freecam_speed.pow(1.0 - 0.05 * mouse_wheel_msg.y);
 
-            if movement_settings.speed < 0.05 {
-                movement_settings.speed = 0.05;
+            if movement_settings.freecam_speed < 0.05 {
+                movement_settings.freecam_speed = 0.05;
             }
-            if movement_settings.speed > 10_000.0 {
-                movement_settings.speed = 10_000.0;
-            }
-        }
-    }
-}
-
-fn move_player_body_to_cam(
-    keys: Res<ButtonInput<KeyCode>>,
-    player_body_q: Option<Single<&mut Transform, With<PlayerTransf>>>,
-    camera_q: Option<Single<&Transform, (With<PrimaryCamera>, Without<PlayerTransf>)>>,
-) {
-    if keys.pressed(KeyCode::BracketLeft) {
-        if let Some(mut player_body) = alrms!(player_body_q) {
-            if let Some(camera) = alrms!(camera_q) {
-                player_body.translation.x = camera.translation.x;
-                player_body.translation.z = camera.translation.z;
+            if movement_settings.freecam_speed > 10_000.0 {
+                movement_settings.freecam_speed = 10_000.0;
             }
         }
     }
