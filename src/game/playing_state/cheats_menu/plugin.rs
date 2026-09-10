@@ -3,9 +3,10 @@ use bevy::prelude::*;
 use crate::game::{
     core::{resources::GlobalGuiRoot, states::OverallState},
     gui::{
-        gui_children,
+        gui_child, gui_children,
         resources::GuiThemeComputed,
         widgets::{
+            button::gui_button,
             checkbox::{bind_checkbox_with_resource, gui_checkbox},
             div::{GuiDivCustomStyle, GuiDivProps, GuiDivStyle, gui_div, gui_div_p},
             floating_panel::{GuiFloatingPanelProps, gui_floating_panel},
@@ -13,9 +14,11 @@ use crate::game::{
         },
     },
     playing_state::{
-        player::resources::FreecamEnabled,
+        player::{resources::FreecamEnabled, tags::PlayerBody},
         sets::{OnEnterPlaying, OnExitPlaying},
+        tags::PrimaryCamera,
     },
+    util::alrrs,
 };
 
 pub struct CheatsMenuPlugin;
@@ -77,6 +80,10 @@ fn spawn_cheats_menu(
                     p.spawn(gui_text_p("Enable flycam: "));
                     p.spawn((EnableFlycamCheckbox, gui_checkbox(default())));
                 }));
+
+                p.spawn(gui_button(default()))
+                    .insert(gui_child(gui_text_p("Player to cam")))
+                    .observe(player_to_cam_button_observer);
             }));
         }))
         .insert(CheatsMenuTag)
@@ -90,4 +97,15 @@ fn despawn_cheats_menu(mut commands: Commands, cheats_menu_q: Query<Entity, With
     cheats_menu_q.iter().for_each(|entity| {
         commands.entity(entity).despawn();
     });
+}
+
+fn player_to_cam_button_observer(
+    _: On<Pointer<Click>>,
+    camera_q: Option<Single<&Transform, With<PrimaryCamera>>>,
+    player_body_q: Option<Single<&mut Transform, (With<PlayerBody>, Without<PrimaryCamera>)>>,
+) {
+    let camera = alrrs!(camera_q);
+    let mut player_body = alrrs!(player_body_q);
+
+    player_body.translation = camera.translation;
 }

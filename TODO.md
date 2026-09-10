@@ -2,6 +2,7 @@
 # Todo List
 
 ## Currently Working On
+- Fix bug with terrain chunks and rebasing.
 - Cheat menu.
 - First person controller.
 - Texturing?? Texturing scale thing?
