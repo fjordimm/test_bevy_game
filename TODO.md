@@ -2,7 +2,6 @@
 # Todo List
 
 ## Currently Working On
-- Make the terrain offload chunks (when outside of render distance?), because right now there is a lot of lag after loading lots of different chunks.
 - Cheat menu.
 - First person controller.
 - Texturing?? Texturing scale thing?
