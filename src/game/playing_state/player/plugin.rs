@@ -3,10 +3,7 @@ use std::f32::consts::PI;
 use bevy::{input::mouse::MouseMotion, prelude::*};
 
 use crate::game::{
-    core::{
-        resources::KeyBindings,
-        states::{MouseMode, OverallState},
-    },
+    core::{resources::KeyBindings, states::OverallState},
     geometry::cube::cube_mesh,
     graphics::{
         global_render_data::resources::GlobalRenderDataHandle,
@@ -17,8 +14,7 @@ use crate::game::{
             resources::{FreecamEnabled, PlayerMovementSettings},
             tags::PlayerBody,
         },
-        sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying, OnExitPlaying},
-        states::PauseState,
+        sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
         tags::{PlayingStateEntity, PrimaryCamera},
     },
     util::{alrms, alrrs},
@@ -30,24 +26,14 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
-            .add_systems(OnEnter(PauseState::Unpaused),
-                grab_cursor
-                    .in_set(DuringPlaying)
-            )
-            .add_systems(OnExit(PauseState::Unpaused),
-                free_cursor
-            )
-            .add_systems(OnExit(OverallState::Playing),
-                free_cursor
-                    .in_set(OnExitPlaying::General)
-            )
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
                     .in_set(OnEnterPlaying::ResourceSetup)
             )
             .add_systems(Update,
                 rotate_and_move
-                    .in_set(DuringPlayingUnpaused::General)
+                    .in_set(DuringPlaying::General)
+                    .in_set(DuringPlayingUnpaused)
             )
             .add_systems(OnEnter(OverallState::Playing),
                 spawn_player_body
@@ -55,14 +41,6 @@ impl Plugin for PlayerPlugin {
             )
         ;
     }
-}
-
-fn grab_cursor(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
-    next_mouse_mode.set(MouseMode::Grabbed);
-}
-
-fn free_cursor(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
-    next_mouse_mode.set(MouseMode::Free);
 }
 
 #[derive(Resource)]

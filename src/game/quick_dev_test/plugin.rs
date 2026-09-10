@@ -15,7 +15,7 @@ use crate::game::{
         coord_rebasing::world_space_transf,
         environment_light::resources::{SkyRotationS, SkyRotationT},
         player::resources::PlayerMovementSettings,
-        sets::{DuringPlayingUnpaused, OnEnterPlaying},
+        sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
         tags::PlayingStateEntity,
     },
 };
@@ -32,7 +32,8 @@ impl Plugin for QuickDevTestPlugin {
             )
             .add_systems(Update,
                 scrolling
-                    .in_set(DuringPlayingUnpaused::General)
+                    .in_set(DuringPlaying::General)
+                    .in_set(DuringPlayingUnpaused)
             )
             .add_systems(OnEnter(OverallState::Playing),
                 spawn_some_stuff
@@ -65,7 +66,9 @@ fn scrolling(
         } else {
             // Change movement speed.
 
-            movement_settings.freecam_speed = movement_settings.freecam_speed.pow(1.0 - 0.05 * mouse_wheel_msg.y);
+            movement_settings.freecam_speed = movement_settings
+                .freecam_speed
+                .pow(1.0 - 0.05 * mouse_wheel_msg.y);
 
             if movement_settings.freecam_speed < 0.05 {
                 movement_settings.freecam_speed = 0.05;

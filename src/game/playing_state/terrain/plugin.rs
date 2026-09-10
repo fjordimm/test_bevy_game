@@ -1,6 +1,6 @@
 use std::{collections::HashMap, hash::Hash, time::Duration};
 
-use bevy::{prelude::*, time::common_conditions::on_timer};
+use bevy::{math::DVec3, prelude::*, time::common_conditions::on_timer};
 use priority_queue::PriorityQueue;
 
 use crate::game::{
@@ -10,7 +10,7 @@ use crate::game::{
         terrain_material::plugin::{TerrainMaterial, terrain_material},
     },
     playing_state::{
-        coord_rebasing::{CoordRebasingOrigin, world_space_transf},
+        coord_rebasing::{CoordRebasingOrigin, to_transf_space, world_space_transf},
         player::tags::PlayerBody,
         sets::{DuringPlaying, OnEnterPlaying},
         tags::PlayingStateEntity,
@@ -37,12 +37,12 @@ impl Plugin for TerrainPlugin {
             .add_systems(Update,
                 (inactivate_all_chunks, activate_chunks, update_chunk_perimeters)
                     .chain()
-                    .in_set(DuringPlaying)
+                    .in_set(DuringPlaying::General)
                     .run_if(on_timer(Duration::from_millis(UPDATE_CHUNKS_INTERVAL)))
             )
             .add_systems(Update,
                 gen_next_mesh_in_queue
-                    .in_set(DuringPlaying)
+                    .in_set(DuringPlaying::General)
                     .after(update_chunk_perimeters)
             )
         ;
@@ -92,7 +92,7 @@ impl ChunkDictKey {
 fn chunk_bundle(
     lod: usize,
     scale: f32,
-    coord_rebasing_origin: &Vec3,
+    coord_rebasing_origin: &CoordRebasingOrigin,
     off_x: i64,
     off_z: i64,
 ) -> impl Bundle {
@@ -107,13 +107,14 @@ fn chunk_bundle(
             has_mesh: false,
             perimeter_entity: None,
         },
-        world_space_transf(Transform::from_translation(
-            Vec3::new(
-                scale * CW as f32 * off_x as f32,
+        world_space_transf(Transform::from_translation(to_transf_space(
+            DVec3::new(
+                scale as f64 * CW as f64 * off_x as f64,
                 0.0,
-                scale * CW as f32 * off_z as f32,
-            ) - coord_rebasing_origin,
-        )),
+                scale as f64 * CW as f64 * off_z as f64,
+            ),
+            coord_rebasing_origin,
+        ))),
         Visibility::Hidden,
     )
 }
@@ -170,9 +171,7 @@ fn activate_chunks(
     lod_proportion: Res<TerrainLodProportion>,
     mut mesh_gen_queue: ResMut<MeshGenQueue>,
 ) {
-    let coord_rebasing_origin = &coord_rebasing_origin.0.as_vec3();
-
-    let player_pos = alrrs!(player_q).translation + coord_rebasing_origin;
+    let player_pos = alrrs!(player_q).translation + coord_rebasing_origin.0.as_vec3();
     let x_center = (player_pos.x / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i64;
     let z_center = (player_pos.z / (L0_CHUNK_SCALE * CW as f32) - 0.5).round() as i64;
 
@@ -209,14 +208,20 @@ fn activate_chunks(
                             lod_proportion.0,
                             &player_pos,
                             &mut mesh_gen_queue,
-                            coord_rebasing_origin,
+                            &coord_rebasing_origin,
                             l0_chunk_entity,
                         );
                     }
                 }
             } else {
                 let entity = commands
-                    .spawn(chunk_bundle(0, L0_CHUNK_SCALE, coord_rebasing_origin, x, z))
+                    .spawn(chunk_bundle(
+                        0,
+                        L0_CHUNK_SCALE,
+                        &coord_rebasing_origin,
+                        x,
+                        z,
+                    ))
                     .id();
 
                 chunk_dicts.0[0].0.insert(ChunkDictKey::new(x, z), entity);
@@ -262,7 +267,7 @@ fn activate_chunk_or_subchunks(
     lod_proportion: f32,
     player_pos: &Vec3,
     mesh_gen_queue: &mut ResMut<MeshGenQueue>,
-    coord_rebasing_origin: &Vec3,
+    coord_rebasing_origin: &CoordRebasingOrigin,
     entity: Entity,
 ) {
     let mut not_doing_subchunks = true;

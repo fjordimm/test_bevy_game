@@ -7,7 +7,10 @@ use bevy::{
 use bevy_ecs::entity::Entities;
 
 use crate::game::{
-    core::{resources::KeyBindings, states::OverallState},
+    core::{
+        resources::KeyBindings,
+        states::{MouseMode, OverallState},
+    },
     graphics::{
         global_render_data::resources::GlobalRenderDataHandle,
         primary_material::plugin::PrimaryMaterial,
@@ -21,11 +24,11 @@ use crate::game::{
         resources::RenderingResolutionScale,
         reusable_materials::ReusableMaterials,
         sets::{
-            DURING_PLAYING_UNPAUSED_LIST, DuringPlaying, ON_ENTER_PLAYING_LIST,
-            ON_EXIT_PLAYING_LIST, OnEnterPlaying, OnExitPlaying,
+            DURING_PLAYING_LIST, DuringPlaying, DuringPlayingNotLoading, DuringPlayingUnpaused,
+            ON_ENTER_PLAYING_LIST, ON_EXIT_PLAYING_LIST, OnEnterPlaying, OnExitPlaying,
         },
         skybox::plugin::SkyboxPlugin,
-        states::PauseState,
+        states::{GameLoadingState, PauseState},
         tags::{PlayingStateEntity, PrimaryCamera},
         terrain::plugin::TerrainPlugin,
         water_layer::plugin::WaterLayerPlugin,
@@ -40,12 +43,16 @@ impl Plugin for PlayingStatePlugin {
         #[rustfmt::skip]
         app
             .configure_sets(Update, (
-                DuringPlaying
+                DURING_PLAYING_LIST
                     .run_if(in_state(OverallState::Playing)),
-                DURING_PLAYING_UNPAUSED_LIST
-                    .in_set(DuringPlaying)
-                    .run_if(in_state(PauseState::Unpaused)),
-                DURING_PLAYING_UNPAUSED_LIST.chain(),
+                DURING_PLAYING_LIST.chain(),
+                DuringPlayingUnpaused
+                    .run_if(in_state(OverallState::Playing))
+                    .run_if(in_state(PauseState::Unpaused))
+                    .run_if(in_state(GameLoadingState::NotLoading)),
+                DuringPlayingNotLoading
+                    .run_if(in_state(OverallState::Playing))
+                    .run_if(in_state(GameLoadingState::NotLoading)),
             ))
             .configure_sets(OnEnter(OverallState::Playing),
                 ON_ENTER_PLAYING_LIST.chain()
@@ -54,6 +61,7 @@ impl Plugin for PlayingStatePlugin {
                 ON_EXIT_PLAYING_LIST.chain()
             )
             .init_state::<PauseState>()
+            .init_state::<GameLoadingState>()
             .add_message::<UpdatePrerenderingStuff>()
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
@@ -65,15 +73,26 @@ impl Plugin for PlayingStatePlugin {
             )
             .add_systems(Update,
                 handle_update_prerendering_stuff
-                    .in_set(DuringPlaying)
+                    .in_set(DuringPlaying::General)
             )
             .add_systems(Update,
                 update_prerendering_stuff_on_window_resize
-                    .in_set(DuringPlaying)
+                    .in_set(DuringPlaying::General)
             )
             .add_systems(Update,
                 toggle_pause
-                    .in_set(DuringPlaying)
+                    .in_set(DuringPlaying::General)
+            )
+            .add_systems(OnEnter(PauseState::Unpaused),
+                grab_cursor
+                    .in_set(DuringPlaying::General)
+            )
+            .add_systems(OnExit(PauseState::Unpaused),
+                free_cursor
+            )
+            .add_systems(OnExit(OverallState::Playing),
+                free_cursor
+                    .in_set(OnExitPlaying::General)
             )
             .add_plugins(SkyboxPlugin)
             .add_plugins(EnvironmentLightPlugin)
@@ -90,7 +109,7 @@ impl Plugin for PlayingStatePlugin {
         app
             .add_systems(Update,
                 playing_state_entity_check
-                    .in_set(DuringPlaying)
+                    .in_set(DuringPlaying::General)
             )
         ;
     }
@@ -104,6 +123,7 @@ fn on_enter(
     mut update_prerendering_stuff_messages: MessageWriter<UpdatePrerenderingStuff>,
     window: Single<&Window>,
     mut next_pause_state: ResMut<NextState<PauseState>>,
+    mut next_game_loading_state: ResMut<NextState<GameLoadingState>>,
 ) {
     commands.insert_resource(ReusableMaterials::new(
         global_render_data_handle.get_handle(),
@@ -172,6 +192,7 @@ fn on_enter(
     }
 
     next_pause_state.set(PauseState::Unpaused);
+    next_game_loading_state.set(GameLoadingState::NotLoading);
 }
 
 fn on_exit(
@@ -252,6 +273,14 @@ fn toggle_pause(
             PauseState::Paused => PauseState::Unpaused,
         });
     }
+}
+
+fn grab_cursor(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
+    next_mouse_mode.set(MouseMode::Grabbed);
+}
+
+fn free_cursor(mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
+    next_mouse_mode.set(MouseMode::Free);
 }
 
 fn playing_state_entity_check(

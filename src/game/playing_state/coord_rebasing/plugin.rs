@@ -24,11 +24,13 @@ impl Plugin for CoordRebasingPlugin {
             )
             .add_systems(Update,
                 on_new_transform
-                    .in_set(DuringPlaying)
+                    .in_set(DuringPlaying::CoordRebasing)
+                    .before(perform_rebase)
             )
             .add_systems(Update,
                 perform_rebase
-                    .in_set(DuringPlayingUnpaused::CoordRebasing)
+                    .in_set(DuringPlaying::CoordRebasing)
+                    .in_set(DuringPlayingUnpaused)
                     .run_if(on_timer(Duration::from_millis(REBASE_INTERVAL)))
             )
         ;

@@ -5,7 +5,7 @@ use bevy::{
 
 use crate::game::{
     graphics::global_render_data::resources::{GlobalRenderData, GlobalRenderDataHandle},
-    playing_state::sets::DuringPlayingUnpaused,
+    playing_state::sets::{DuringPlaying, DuringPlayingUnpaused},
     util::alrrs,
 };
 
@@ -25,7 +25,8 @@ impl Plugin for GlobalRenderDataPlugin {
             )
             .add_systems(Update,
                 update_some_data
-                    .in_set(DuringPlayingUnpaused::General)
+                    .in_set(DuringPlaying::General)
+                    .in_set(DuringPlayingUnpaused)
             )
         ;
     }

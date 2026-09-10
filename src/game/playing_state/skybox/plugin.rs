@@ -10,7 +10,7 @@ use crate::game::{
     },
     playing_state::{
         environment_light::resources::{SkyRotationS, SkyRotationT},
-        sets::{DuringPlayingUnpaused, OnEnterPlaying},
+        sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
         tags::{PlayingStateEntity, PrimaryCamera},
     },
     util::{alrms, alrro},
@@ -28,7 +28,8 @@ impl Plugin for SkyboxPlugin {
             )
             .add_systems(Update,
                 update_skybox
-                    .in_set(DuringPlayingUnpaused::General)
+                    .in_set(DuringPlaying::General)
+                    .in_set(DuringPlayingUnpaused)
             )
         ;
     }

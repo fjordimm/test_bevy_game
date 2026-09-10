@@ -1,24 +1,21 @@
 use bevy::prelude::*;
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct DuringPlaying;
-
-#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
-pub enum DuringPlayingUnpaused {
+pub enum DuringPlaying {
     General,
-    Ui,
     CoordRebasing,
 }
 
-pub(super) const DURING_PLAYING_UNPAUSED_LIST: (
-    DuringPlayingUnpaused,
-    DuringPlayingUnpaused,
-    DuringPlayingUnpaused,
-) = (
-    DuringPlayingUnpaused::General,
-    DuringPlayingUnpaused::Ui,
-    DuringPlayingUnpaused::CoordRebasing,
-);
+pub(super) const DURING_PLAYING_LIST: (DuringPlaying, DuringPlaying) =
+    (DuringPlaying::General, DuringPlaying::CoordRebasing);
+
+/// PauseState is Unpaused and GameLoadingState is NotLoading.
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct DuringPlayingUnpaused;
+
+/// GameLoadingState is NotLoading, but PauseState may be Paused or Unpaused.
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct DuringPlayingNotLoading;
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum OnEnterPlaying {

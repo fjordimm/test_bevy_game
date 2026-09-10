@@ -15,7 +15,7 @@ use crate::game::{
             CoordRebasingOrigin, to_transf_space, to_world_space, world_space_transf,
         },
         player::tags::PlayerBody,
-        sets::{DuringPlayingUnpaused, OnEnterPlaying},
+        sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
         tags::{PlayingStateEntity, PrimaryCamera},
     },
     util::{alrms, alrrs},
@@ -33,12 +33,14 @@ impl Plugin for WaterLayerPlugin {
             )
             .add_systems(Update,
                 relocate_to_player_xz
-                    .in_set(DuringPlayingUnpaused::General)
+                    .in_set(DuringPlaying::General)
+                    .in_set(DuringPlayingUnpaused)
                     .run_if(on_timer(Duration::from_millis(RELOCATE_INTERVAL)))
             )
             .add_systems(Update,
                 update_cam_is_underwater
-                    .in_set(DuringPlayingUnpaused::General)
+                    .in_set(DuringPlaying::General)
+                    .in_set(DuringPlayingUnpaused)
             )
         ;
     }

@@ -2,7 +2,6 @@
 # Todo List
 
 ## Currently Working On
-- Fix bug with terrain chunks and rebasing.
 - Cheat menu.
 - First person controller.
 - Texturing?? Texturing scale thing?
@@ -15,7 +14,7 @@
 - Add systems using proper sets (DuringPlaying/DuringPlayingUnpaused, OnEnterPlaying, OnExitPlaying).
 - Prefer using resources rather than consts for constant arbitrary values.
 - Be consistent on when to use the 'Tag' suffix.
-- Put more `#[allow(unused)]` where you need them.
+- Sort out when to use `#[allow(unused)]`. Right now it's just kind of whatever.
 
 ### Tests
 
