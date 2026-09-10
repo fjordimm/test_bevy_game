@@ -2,8 +2,6 @@
 # Todo List
 
 ## Currently Working On
-- Checkbox.
-    - Make a macro for the Resource you choose to associate with it.
 - Cheat menu.
 - First person controller.
 - Texturing?? Texturing scale thing?
