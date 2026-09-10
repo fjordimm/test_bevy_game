@@ -1,9 +1,22 @@
 use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology};
 
+use crate::game::util::col_to_array4;
+
+#[allow(unused)]
+pub enum CubeMeshColors {
+    All(Color),
+}
+
+impl Default for CubeMeshColors {
+    fn default() -> Self {
+        CubeMeshColors::All(Color::WHITE)
+    }
+}
+
 #[allow(unused)]
 #[rustfmt::skip]
-pub fn cube_mesh() -> Mesh {
+pub fn cube_mesh(colors: CubeMeshColors) -> Mesh {
     Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::RENDER_WORLD,
@@ -23,16 +36,7 @@ pub fn cube_mesh() -> Mesh {
     )
     .with_inserted_attribute(
         Mesh::ATTRIBUTE_COLOR,
-        vec![
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-        ],
+        color_data(colors),
     )
     .with_inserted_indices(Indices::U32(vec![
         // Bottom
@@ -54,4 +58,24 @@ pub fn cube_mesh() -> Mesh {
         7, 3, 5,
         1, 5, 3,
     ]))
+}
+
+fn color_data(colors: CubeMeshColors) -> Vec<[f32; 4]> {
+    match colors {
+        #[rustfmt::skip]
+        CubeMeshColors::All(color) => {
+            let color_all = col_to_array4(color);
+
+            vec![
+                color_all,
+                color_all,
+                color_all,
+                color_all,
+                color_all,
+                color_all,
+                color_all,
+                color_all,
+            ]
+        }
+    }
 }

@@ -7,6 +7,7 @@ use rand_distr::num_traits::Pow;
 use crate::game::{
     core::states::OverallState,
     geometry::{
+        cdodec::{CDodecMeshColors, cdodec_mesh},
         cube::cube_mesh,
         dodec::{DodecMeshColors, dodec_mesh},
     },
@@ -105,7 +106,7 @@ fn spawn_some_stuff(
 
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(meshes.add(cube_mesh())),
+        Mesh3d(meshes.add(cube_mesh(default()))),
         MeshMaterial3d(materials.add(primary_material(
             default(),
             global_render_data_handle.get_handle(),
@@ -119,7 +120,10 @@ fn spawn_some_stuff(
 
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(meshes.add(cube_mesh())),
+        Mesh3d(meshes.add(cdodec_mesh(CDodecMeshColors::Gradient {
+            bottom: Color::hsv(0.0, 1.0, 1.0),
+            top: Color::hsv(180.0, 1.0, 1.0),
+        }))),
         MeshMaterial3d(materials.add(primary_material(
             default(),
             global_render_data_handle.get_handle(),

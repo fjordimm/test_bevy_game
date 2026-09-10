@@ -3,6 +3,8 @@
 use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology};
 
+use crate::game::util::col_to_array4;
+
 #[allow(unused)]
 pub enum DodecMeshColors {
     All(Color),
@@ -84,9 +86,9 @@ pub fn dodec_mesh(colors: DodecMeshColors) -> Mesh {
 
 fn color_data(colors: DodecMeshColors) -> Vec<[f32; 4]> {
     match colors {
+        #[rustfmt::skip]
         DodecMeshColors::All(color) => {
-            let color_all = color.to_linear();
-            let color_all = [color_all.red, color_all.green, color_all.blue, 1.0];
+            let color_all = col_to_array4(color);
 
             vec![
                 // Bottom pentagon

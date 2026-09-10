@@ -4,7 +4,7 @@ use bevy::{input::mouse::MouseMotion, prelude::*};
 
 use crate::game::{
     core::{resources::KeyBindings, states::OverallState},
-    geometry::cube::cube_mesh,
+    geometry::cube::{CubeMeshColors, cube_mesh},
     graphics::{
         global_render_data::resources::GlobalRenderDataHandle,
         primary_material::plugin::{PrimaryMaterial, primary_material},
@@ -139,11 +139,13 @@ fn spawn_player_body(
     commands.spawn((
         PlayingStateEntity,
         PlayerBody,
-        Mesh3d(meshes.add(cube_mesh())),
+        Mesh3d(meshes.add(cube_mesh(CubeMeshColors::All(Color::linear_rgb(
+            1.0, 0.0, 0.0,
+        ))))),
         MeshMaterial3d(materials.add(primary_material(
             default(),
             global_render_data_handle.get_handle(),
         ))),
-        Transform::from_xyz(0.0, 0.0, 0.0),
+        Transform::from_xyz(0.0, 60.0, 0.0),
     ));
 }

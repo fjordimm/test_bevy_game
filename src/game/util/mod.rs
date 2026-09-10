@@ -1,6 +1,7 @@
 #![allow(unused)]
 
 use bevy::{
+    math::VectorSpace,
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
@@ -214,6 +215,18 @@ pub mod mathf64 {
     pub fn sigmoid(x: f64) -> f64 {
         1.0 / (1.0 + 2f64.powf(-x))
     }
+}
+
+pub fn lerp_colors(col1: Color, col2: Color, x: f32) -> Color {
+    let col1 = col_to_array4(col1);
+    let col2 = col_to_array4(col2);
+
+    Color::linear_rgba(
+        bevy::prelude::FloatExt::lerp(col1[0], col2[0], x),
+        bevy::prelude::FloatExt::lerp(col1[1], col2[1], x),
+        bevy::prelude::FloatExt::lerp(col1[2], col2[2], x),
+        bevy::prelude::FloatExt::lerp(col1[3], col2[3], x),
+    )
 }
 
 pub fn make_image_from_array2d<const W: usize, const H: usize>(inp: &[[[f32; 4]; H]; W]) -> Image {

@@ -3,9 +3,34 @@
 use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology};
 
+use crate::game::util::{col_to_array4, lerp_colors};
+
+#[allow(unused)]
+pub enum CDodecMeshColors {
+    All(Color),
+    Layers {
+        first: Color,
+        second: Color,
+        third: Color,
+        fourth: Color,
+        fifth: Color,
+        sixth: Color,
+    },
+    Gradient {
+        bottom: Color,
+        top: Color,
+    },
+}
+
+impl Default for CDodecMeshColors {
+    fn default() -> Self {
+        CDodecMeshColors::All(Color::WHITE)
+    }
+}
+
 #[allow(unused)]
 #[rustfmt::skip]
-pub fn cdodec_mesh() -> Mesh {
+pub fn cdodec_mesh(colors: CDodecMeshColors) -> Mesh {
     Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::RENDER_WORLD,
@@ -57,48 +82,7 @@ pub fn cdodec_mesh() -> Mesh {
     )
     .with_inserted_attribute(
         Mesh::ATTRIBUTE_COLOR,
-        vec![
-            // Bottom central vertex
-            [1.0, 1.0, 1.0, 1.0],
-            // Bottom pentagon
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            // First middle ring of central vertices
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            // First middle ring of corner vertices
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            // Second middle ring of corner vertices
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            // Second middle ring of central vertices
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            // Top pentagon
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            // Top central vertex
-            [1.0, 1.0, 1.0, 1.0],
-        ],
+        color_data(colors),
     )
     .with_inserted_indices(Indices::U32(vec![
         // Bottom pentagon
@@ -126,4 +110,95 @@ pub fn cdodec_mesh() -> Mesh {
         // Top pentagon
         31, 30, 26, 31, 26, 27, 31, 27, 28, 31, 28, 29, 31, 29, 30,
     ]))
+}
+
+fn color_data(colors: CDodecMeshColors) -> Vec<[f32; 4]> {
+    match colors {
+        #[rustfmt::skip]
+        CDodecMeshColors::All(color) => {
+            let color_all = col_to_array4(color);
+
+            vec![
+                // Bottom central vertex
+                color_all,
+                // Bottom pentagon
+                color_all, color_all, color_all, color_all, color_all,
+                // First middle ring of central vertices
+                color_all, color_all, color_all, color_all, color_all,
+                // First middle ring of corner vertices
+                color_all, color_all, color_all, color_all, color_all,
+                // Second middle ring of corner vertices
+                color_all, color_all, color_all, color_all, color_all,
+                // Second middle ring of central vertices
+                color_all, color_all, color_all, color_all, color_all,
+                // Top pentagon
+                color_all, color_all, color_all, color_all, color_all,
+                // Top central vertex
+                color_all,
+            ]
+        }
+        #[rustfmt::skip]
+        CDodecMeshColors::Layers {
+            first,
+            second,
+            third,
+            fourth,
+            fifth,
+            sixth,
+        } => {
+            let color_first = col_to_array4(first);
+            let color_second = col_to_array4(second);
+            let color_third = col_to_array4(third);
+            let color_fourth = col_to_array4(fourth);
+            let color_fifth = col_to_array4(fifth);
+            let color_sixth = col_to_array4(sixth);
+
+            vec![
+                // Bottom central vertex
+                color_first,
+                // Bottom pentagon
+                color_first, color_first, color_first, color_first, color_first,
+                // First middle ring of central vertices
+                color_second, color_second, color_second, color_second, color_second,
+                // First middle ring of corner vertices
+                color_third, color_third, color_third, color_third, color_third,
+                // Second middle ring of corner vertices
+                color_fourth, color_fourth, color_fourth, color_fourth, color_fourth,
+                // Second middle ring of central vertices
+                color_fifth, color_fifth, color_fifth, color_fifth, color_fifth,
+                // Top pentagon
+                color_sixth, color_sixth, color_sixth, color_sixth, color_sixth,
+                // Top central vertex
+                color_sixth,
+            ]
+        }
+        #[rustfmt::skip]
+        CDodecMeshColors::Gradient { bottom, top } => {
+            let color_first = col_to_array4(lerp_colors(bottom, top, 0.0));
+            let color_second = col_to_array4(lerp_colors(bottom, top, 0.5 - 0.22360681845592284));
+            let color_third = col_to_array4(lerp_colors(bottom, top, 0.5 - 0.11803409227961423));
+            let color_fourth = col_to_array4(lerp_colors(bottom, top, 0.5 + 0.11803409227961423));
+            let color_fifth = col_to_array4(lerp_colors(bottom, top, 0.5 + 0.22360681845592287));
+            let color_sixth = col_to_array4(lerp_colors(bottom, top, 1.0));
+
+            vec![
+                // Bottom central vertex
+                color_first,
+                // Bottom pentagon
+                color_first, color_first, color_first, color_first, color_first,
+                // First middle ring of central vertices
+                color_second, color_second, color_second, color_second, color_second,
+                // First middle ring of corner vertices
+                color_third, color_third, color_third, color_third, color_third,
+                // Second middle ring of corner vertices
+                color_fourth, color_fourth, color_fourth, color_fourth, color_fourth,
+                // Second middle ring of central vertices
+                color_fifth, color_fifth, color_fifth, color_fifth, color_fifth,
+                // Top pentagon
+                color_sixth, color_sixth, color_sixth, color_sixth, color_sixth,
+                // Top central vertex
+                color_sixth,
+            ]
+        }
+    }
 }
