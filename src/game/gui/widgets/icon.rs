@@ -10,6 +10,7 @@ pub enum GuiIconIcon {
     X,
     Minimize,
     CornerResizer,
+    Check,
 }
 
 #[allow(unused)]
@@ -63,6 +64,7 @@ fn what_icon_handle(icon_handles: &UiIconHandles, icon: &GuiIconIcon) -> Handle<
         GuiIconIcon::X => icon_handles.x.clone(),
         GuiIconIcon::Minimize => icon_handles.minimize.clone(),
         GuiIconIcon::CornerResizer => icon_handles.corner_resizer.clone(),
+        GuiIconIcon::Check => icon_handles.check.clone(),
     }
 }
 
@@ -74,12 +76,12 @@ impl Plugin for GuiIconPlugin {
         app
             .add_systems(Update,
                 update_style_on_init_or_attrib_change
-                    .in_set(GuiSystemsOrdering::UpdateStyle)
+                    .in_set(GuiSystemsOrdering::UpdateStylePrimative)
             )
             .add_systems(Update,
                 update_style_on_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)
-                    .in_set(GuiSystemsOrdering::UpdateStyle)
+                    .in_set(GuiSystemsOrdering::UpdateStylePrimative)
             )
         ;
     }

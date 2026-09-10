@@ -8,10 +8,12 @@ pub(super) enum GuiSystemsOrdering {
     UpdateState,
     PostUpdateState,
     UpdateStyle,
+    UpdateStylePrimative, // For use by stuff like icons, so that they can be updated in a better order. Kind of a hacky solution.
     PostUpdateStyle,
 }
 
 pub(super) const GUI_SYSTEMS_ORDERING_ORDER: (
+    GuiSystemsOrdering,
     GuiSystemsOrdering,
     GuiSystemsOrdering,
     GuiSystemsOrdering,
@@ -26,5 +28,6 @@ pub(super) const GUI_SYSTEMS_ORDERING_ORDER: (
     GuiSystemsOrdering::UpdateState,
     GuiSystemsOrdering::PostUpdateState,
     GuiSystemsOrdering::UpdateStyle,
+    GuiSystemsOrdering::UpdateStylePrimative,
     GuiSystemsOrdering::PostUpdateStyle,
 );

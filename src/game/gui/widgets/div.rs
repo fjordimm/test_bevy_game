@@ -97,7 +97,7 @@ pub fn gui_div_p() -> impl Bundle {
     gui_div(GuiDivProps {
         flex_direction: FlexDirection::Row,
         justify_content: JustifyContent::FlexStart,
-        align_items: AlignItems::FlexStart,
+        align_items: AlignItems::Center,
         ..default()
     })
 }

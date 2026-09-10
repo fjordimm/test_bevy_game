@@ -13,14 +13,16 @@ use crate::game::{
         gui_children,
         resources::GuiThemeComputed,
         widgets::{
+            checkbox::{bind_checkbox_with_resource, gui_checkbox},
             div::{GuiDivCustomStyle, GuiDivProps, GuiDivStyle, gui_div, gui_div_p},
             floating_panel::{
                 GuiFloatingPanelInterface, GuiFloatingPanelProps, gui_floating_panel,
             },
-            text::{GuiTextInterface, gui_text_h2, gui_text_m},
+            text::{GuiTextInterface, gui_text_h2, gui_text_m, gui_text_p},
         },
     },
     playing_state::{coord_rebasing::WorldSpaceEntity, tags::PrimaryCamera},
+    primary_debug_menu::resources::ShowCheatsMenu,
 };
 
 pub struct PrimaryDebugMenuPlugin;
@@ -29,11 +31,13 @@ impl Plugin for PrimaryDebugMenuPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
+            .insert_resource(ShowCheatsMenu(false))
             .add_systems(Update,
                 spawn_primary_debug_menu
                     .run_if(run_once)
             )
             .add_systems(Update, toggle_debug_menu)
+            .add_systems(Update, bind_checkbox_with_resource!(ShowCheatsMenuCheckbox, ShowCheatsMenu))
             .add_systems(Update,
                 update
                     .run_if(on_timer(Duration::from_millis(100)))
@@ -58,7 +62,10 @@ struct LagSpikeText;
 struct EntityCountText;
 
 #[derive(Component)]
-struct OverallStatePlayingSection;
+struct PlayingStateSection;
+
+#[derive(Component)]
+struct ShowCheatsMenuCheckbox;
 
 #[derive(Component)]
 struct TransformCountText;
@@ -98,7 +105,7 @@ fn spawn_primary_debug_menu(
                 expands_along_cross_axis: true,
                 ..default()
             }))
-            .insert(gui_children(|p| {
+            .insert(gui_children(move |p| {
                 p.spawn((
                     CoreSection,
                     gui_div(GuiDivProps {
@@ -110,25 +117,25 @@ fn spawn_primary_debug_menu(
                         ..default()
                     }),
                 ))
-                .insert(gui_children(|p| {
+                .insert(gui_children(move |p| {
                     p.spawn(gui_div_p()).insert(gui_children(|p| {
-                        p.spawn(gui_text_m("FPS: "));
+                        p.spawn(gui_text_p("FPS: "));
                         p.spawn((FpsText, gui_text_m("-")));
                     }));
 
                     p.spawn(gui_div_p()).insert(gui_children(|p| {
-                        p.spawn(gui_text_m("Recent Stutter (ms): "));
+                        p.spawn(gui_text_p("Recent Stutter (ms): "));
                         p.spawn((LagSpikeText, gui_text_m("-")));
                     }));
 
                     p.spawn(gui_div_p()).insert(gui_children(|p| {
-                        p.spawn(gui_text_m("Entity Count: "));
+                        p.spawn(gui_text_p("Entity Count: "));
                         p.spawn((EntityCountText, gui_text_m("-")));
                     }));
                 }));
 
                 p.spawn((
-                    OverallStatePlayingSection,
+                    PlayingStateSection,
                     gui_div(GuiDivProps {
                         flex_direction: FlexDirection::Column,
                         justify_content: JustifyContent::FlexStart,
@@ -138,21 +145,26 @@ fn spawn_primary_debug_menu(
                         ..default()
                     }),
                 ))
-                .insert(gui_children(|p| {
-                    p.spawn(gui_text_h2("OverallState::Playing"));
+                .insert(gui_children(move |p| {
+                    p.spawn(gui_text_h2("Playing State"));
+
+                    p.spawn(gui_div_p()).insert(gui_children(move |p| {
+                        p.spawn(gui_text_p("Show Cheats Menu "));
+                        p.spawn((ShowCheatsMenuCheckbox, gui_checkbox(default())));
+                    }));
 
                     p.spawn(gui_div_p()).insert(gui_children(|p| {
-                        p.spawn(gui_text_m("Transform Count: "));
+                        p.spawn(gui_text_p("Transform Count: "));
                         p.spawn((TransformCountText, gui_text_m("-")));
                     }));
 
                     p.spawn(gui_div_p()).insert(gui_children(|p| {
-                        p.spawn(gui_text_m("WorldSpaceEntity Count: "));
+                        p.spawn(gui_text_p("WorldSpaceEntity Count: "));
                         p.spawn((WorldSpaceEntityCountText, gui_text_m("-")));
                     }));
 
                     p.spawn(gui_div_p()).insert(gui_children(|p| {
-                        p.spawn(gui_text_m("Cam Position: "));
+                        p.spawn(gui_text_p("Cam Position: "));
                         p.spawn((CamPositionText, gui_text_m("-")));
                     }));
                 }));

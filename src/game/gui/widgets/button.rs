@@ -128,11 +128,11 @@ impl Plugin for GuiButtonPlugin {
                     .in_set(GuiSystemsOrdering::HandleGuiChildren)
             )
             .add_systems(Update,
-                update_style_from_init_or_attrib_change
+                update_style_on_init_or_attrib_change
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
             .add_systems(Update,
-                update_style_from_theme_change
+                update_style_on_theme_change
                     .run_if(resource_changed::<GuiThemeComputed>)
                     .in_set(GuiSystemsOrdering::UpdateStyle)
             )
@@ -162,7 +162,7 @@ fn handle_gui_children(
     });
 }
 
-fn update_style_from_init_or_attrib_change(
+fn update_style_on_init_or_attrib_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
     mut entity_q: Query<
@@ -177,7 +177,7 @@ fn update_style_from_init_or_attrib_change(
         });
 }
 
-fn update_style_from_theme_change(
+fn update_style_on_theme_change(
     mut commands: Commands,
     theme: Res<GuiThemeComputed>,
     mut entity_q: Query<(&GuiButtonAttribs, &GuiButtonState, Entity, &mut Node)>,

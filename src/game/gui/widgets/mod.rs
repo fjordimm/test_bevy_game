@@ -1,4 +1,5 @@
 pub mod button;
+pub mod checkbox;
 pub mod div;
 pub mod floating_panel;
 pub mod icon;

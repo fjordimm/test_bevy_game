@@ -30,6 +30,8 @@ pub struct UiIconHandles {
     pub minimize: Handle<Image>,
     #[allow(unused)]
     pub corner_resizer: Handle<Image>,
+    #[allow(unused)]
+    pub check: Handle<Image>,
 }
 
 impl UiIconHandles {
@@ -38,6 +40,7 @@ impl UiIconHandles {
             x: asset_server.load("gui/icons/material-symbols--close.png"),
             minimize: asset_server.load("gui/icons/material-symbols--minimize.png"),
             corner_resizer: asset_server.load("gui/icons/material-symbols--resize-window.png"),
+            check: asset_server.load("gui/icons/material-symbols--check.png"),
         }
     }
 }

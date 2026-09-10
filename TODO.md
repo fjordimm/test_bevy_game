@@ -2,8 +2,9 @@
 # Todo List
 
 ## Currently Working On
+- Checkbox.
+    - Make a macro for the Resource you choose to associate with it.
 - Cheat menu.
-- Make floating panels order themselves correctly.
 - First person controller.
 - Texturing?? Texturing scale thing?
 - Maybe: instead of using plain `Without<>`s when you need to resolve query conflicts, you should make a type alias for it.

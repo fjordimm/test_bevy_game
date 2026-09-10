@@ -8,11 +8,14 @@ use crate::game::{
         widgets::{
             button::gui_button,
             div::{GuiDivCustomStyle, GuiDivProps, GuiDivStyle, gui_div},
-            floating_panel::{GuiFloatingPanelProps, gui_floating_panel},
+            floating_panel::{
+                GuiFloatingPanelInterface, GuiFloatingPanelProps, gui_floating_panel,
+            },
             text::gui_text_p,
         },
     },
     playing_state::sets::{OnEnterPlaying, OnExitPlaying},
+    primary_debug_menu::resources::ShowCheatsMenu,
 };
 
 pub struct CheatsMenuPlugin;
@@ -28,6 +31,10 @@ impl Plugin for CheatsMenuPlugin {
             .add_systems(OnExit(OverallState::Playing),
                 despawn_cheats_menu
                     .in_set(OnExitPlaying::General)
+            )
+            .add_systems(Update,
+                update_cheats_menu_from_resource
+                    .run_if(resource_changed::<ShowCheatsMenu>)
             )
         ;
     }
@@ -47,7 +54,7 @@ fn spawn_cheats_menu(
         .spawn(gui_floating_panel(
             "Cheats",
             GuiFloatingPanelProps {
-                starts_active: true,
+                starts_active: false,
                 starting_content_height: theme.0.primary_debug_menu_starting_height,
                 ..default()
             },
@@ -83,5 +90,14 @@ fn spawn_cheats_menu(
 fn despawn_cheats_menu(mut commands: Commands, cheats_menu_q: Query<Entity, With<CheatsMenuTag>>) {
     cheats_menu_q.iter().for_each(|entity| {
         commands.entity(entity).despawn();
+    });
+}
+
+fn update_cheats_menu_from_resource(
+    mut cheats_menu_q: Query<GuiFloatingPanelInterface, With<CheatsMenuTag>>,
+    res: Res<ShowCheatsMenu>,
+) {
+    cheats_menu_q.iter_mut().for_each(|mut cheats_menu| {
+        cheats_menu.set_is_active(res.0);
     });
 }

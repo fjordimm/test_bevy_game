@@ -10,8 +10,9 @@ use crate::game::{
         resources::{CursorIconHandler, GuiScale, GuiTheme, GuiThemeComputed, GuiThemeUncomputed},
         sets::GUI_SYSTEMS_ORDERING_ORDER,
         widgets::{
-            button::GuiButtonPlugin, div::GuiDivPlugin, floating_panel::GuiFloatingPanelPlugin,
-            icon::GuiIconPlugin, screen_div::GuiScreenDivPlugin, text::GuiTextPlugin,
+            button::GuiButtonPlugin, checkbox::GuiCheckboxPlugin, div::GuiDivPlugin,
+            floating_panel::GuiFloatingPanelPlugin, icon::GuiIconPlugin,
+            screen_div::GuiScreenDivPlugin, text::GuiTextPlugin,
         },
     },
     util::alrms,
@@ -38,6 +39,7 @@ impl Plugin for GuiPlugin {
             .add_plugins(GuiTextPlugin)
             .add_plugins(GuiIconPlugin)
             .add_plugins(GuiButtonPlugin)
+            .add_plugins(GuiCheckboxPlugin)
             .add_plugins(GuiFloatingPanelPlugin)
         ;
     }

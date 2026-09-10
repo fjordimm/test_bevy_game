@@ -48,6 +48,8 @@ pub struct GuiTheme {
     pub button_color_normal: Color,
     pub button_color_hovered: Color,
     pub button_color_pressed: Color,
+    pub checkbox_icon_size: f32,
+    pub checkbox_padding: f32,
     pub title_bar_color: Color,
     pub title_bar_button_padding: f32,
     pub title_bar_button_icon_size: f32,
@@ -81,6 +83,8 @@ impl GuiTheme {
             button_color_normal: Color::hsv(185.0, 0.3, 0.25),
             button_color_hovered: Color::hsv(185.0, 0.3, 0.2),
             button_color_pressed: Color::hsv(185.0, 0.3, 0.15),
+            checkbox_icon_size: 12.0,
+            checkbox_padding: 1.0,
             title_bar_color: Color::hsv(185.0, 0.3, 0.25),
             title_bar_button_padding: 2.0,
             title_bar_button_icon_size: 16.0,
@@ -117,6 +121,8 @@ impl GuiThemeComputed {
         ret.font_size_p *= scale.0;
         ret.font_size_h1 *= scale.0;
         ret.font_size_h2 *= scale.0;
+        ret.checkbox_icon_size *= scale.0;
+        ret.checkbox_padding *= scale.0;
         ret.title_bar_button_padding *= scale.0;
         ret.title_bar_button_icon_size *= scale.0;
         ret.corner_resizer_padding *= scale.0;
