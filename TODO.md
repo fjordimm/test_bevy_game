@@ -26,6 +26,7 @@
 
 ## Should Do At Some Point
 - Make dev vs release profiles in Cargo.toml.
+- Use doc comments (triple `/`) for items that don't already use them.
 - Get rid of the yellow background color.
 - Test out when there are multiple floating panels and if you drag the window or drag the resizer over each other.
 - Make floating panels move correctly when the window is resized.

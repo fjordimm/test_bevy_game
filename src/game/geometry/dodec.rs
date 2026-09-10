@@ -4,8 +4,19 @@ use bevy::{asset::RenderAssetUsages, prelude::*};
 use bevy_mesh::{Indices, PrimitiveTopology};
 
 #[allow(unused)]
+pub enum DodecMeshColors {
+    All(Color),
+}
+
+impl Default for DodecMeshColors {
+    fn default() -> Self {
+        DodecMeshColors::All(Color::WHITE)
+    }
+}
+
+#[allow(unused)]
 #[rustfmt::skip]
-pub fn dodec_mesh() -> Mesh {
+pub fn dodec_mesh(colors: DodecMeshColors) -> Mesh {
     Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::RENDER_WORLD,
@@ -41,32 +52,7 @@ pub fn dodec_mesh() -> Mesh {
     )
     .with_inserted_attribute(
         Mesh::ATTRIBUTE_COLOR,
-        vec![
-            // Bottom pentagon
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            // First middle ring of vertices
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            // Second middle ring of vertices
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            // Top pentagon
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-            [1.0, 1.0, 1.0, 1.0],
-        ],
+        color_data(colors),
     )
     .with_inserted_indices(Indices::U32(vec![
         // Bottom pentagon
@@ -94,4 +80,24 @@ pub fn dodec_mesh() -> Mesh {
         // Top pentagon
         17, 18, 15, 15, 18, 19, 15, 16, 17,
     ]))
+}
+
+fn color_data(colors: DodecMeshColors) -> Vec<[f32; 4]> {
+    match colors {
+        DodecMeshColors::All(color) => {
+            let color_all = color.to_linear();
+            let color_all = [color_all.red, color_all.green, color_all.blue, 1.0];
+
+            vec![
+                // Bottom pentagon
+                color_all, color_all, color_all, color_all, color_all,
+                // First middle ring of vertices
+                color_all, color_all, color_all, color_all, color_all,
+                // Second middle ring of vertices
+                color_all, color_all, color_all, color_all, color_all,
+                // Top pentagon
+                color_all, color_all, color_all, color_all, color_all,
+            ]
+        }
+    }
 }

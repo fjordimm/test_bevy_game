@@ -6,7 +6,10 @@ use rand_distr::num_traits::Pow;
 
 use crate::game::{
     core::states::OverallState,
-    geometry::{cube::cube_mesh, dodec::dodec_mesh},
+    geometry::{
+        cube::cube_mesh,
+        dodec::{DodecMeshColors, dodec_mesh},
+    },
     graphics::{
         global_render_data::resources::GlobalRenderDataHandle,
         primary_material::plugin::{PrimaryMaterial, primary_material},
@@ -68,7 +71,7 @@ fn scrolling(
 
             movement_settings.freecam_speed = movement_settings
                 .freecam_speed
-                .pow(1.0 - 0.05 * mouse_wheel_msg.y);
+                .pow(1.0 + 0.05 * mouse_wheel_msg.y);
 
             if movement_settings.freecam_speed < 0.05 {
                 movement_settings.freecam_speed = 0.05;
@@ -88,7 +91,11 @@ fn spawn_some_stuff(
 ) {
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(meshes.add(dodec_mesh())),
+        Mesh3d(
+            meshes.add(dodec_mesh(DodecMeshColors::All(Color::linear_rgb(
+                0.0, 0.0, 1.0,
+            )))),
+        ),
         MeshMaterial3d(materials.add(primary_material(
             default(),
             global_render_data_handle.get_handle(),

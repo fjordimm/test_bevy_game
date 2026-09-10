@@ -35,15 +35,15 @@ impl Plugin for TerrainPlugin {
                     .in_set(OnEnterPlaying::ResourceSetup)
             )
             .add_systems(Update,
-                (inactivate_all_chunks, activate_chunks, update_chunk_perimeters)
+                (inactivate_all_chunks, activate_chunks, update_chunk_perimeters, offload_distant_chunks)
                     .chain()
                     .in_set(DuringPlaying::General)
                     .run_if(on_timer(Duration::from_millis(UPDATE_CHUNKS_INTERVAL)))
+                    .before(gen_next_mesh_in_queue)
             )
             .add_systems(Update,
                 gen_next_mesh_in_queue
                     .in_set(DuringPlaying::General)
-                    .after(update_chunk_perimeters)
             )
         ;
     }
@@ -148,9 +148,46 @@ struct ChunkPerimeter {
     perim_lod_verticies: Vec<Vec<[f32; 3]>>,
 }
 
-// Has a mesh and is visible, or is in queue for a mesh.
+/// Has a mesh and is visible, or is in queue for a mesh.
 #[derive(Component)]
 struct ActiveOrQueued;
+
+// TODOr
+fn offload_distant_chunks(
+    mut commands: Commands,
+    mut chunk_q: Query<(Entity, &Chunk, &mut Visibility), (With<Chunk>, Without<ActiveOrQueued>)>,
+    player_q: Option<Single<&Transform, With<PlayerBody>>>,
+    coord_rebasing_origin: Res<CoordRebasingOrigin>,
+    lod_proportion: Res<TerrainLodProportion>,
+    mut chunk_dicts: ResMut<ChunkDicts>,
+) {
+    let player_pos = alrrs!(player_q).translation + coord_rebasing_origin.0.as_vec3();
+
+    chunk_q.iter_mut().for_each(|(entity, cc, mut visibility)| {
+        *visibility = Visibility::Hidden;
+        commands.entity(entity).remove::<ActiveOrQueued>();
+
+        let shouldnt_be_offloaded = {
+            let real_x = (cc.off_x as f32 + 0.5) * cc.scale * CW as f32;
+            let real_z = (cc.off_z as f32 + 0.5) * cc.scale * CW as f32;
+            let dist_to_player =
+                ((player_pos.x - real_x).powi(2) + (player_pos.z - real_z).powi(2)).sqrt();
+
+            dist_to_player < 2.0 * L0_RENDER_DIST as f32 * lod_proportion.0 * cc.scale * CW as f32
+        };
+
+        if !shouldnt_be_offloaded {
+            // TODO: Before removing the chunk, store any of its data that needs to be.
+            // TODO: Also remove associated data if it's not stored in the chunk itself.
+
+            chunk_dicts.0[cc.lod]
+                .0
+                .remove(&ChunkDictKey::new(cc.off_x, cc.off_z));
+
+            commands.entity(entity).despawn();
+        }
+    });
+}
 
 fn inactivate_all_chunks(
     mut commands: Commands,

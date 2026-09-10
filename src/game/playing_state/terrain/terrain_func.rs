@@ -92,8 +92,8 @@ impl TerrainFunc {
             ((dx * dx + dz * dz).sqrt() * 3.5).clamp(0.0, 1.0)
         };
 
-        const GRASS: Srgba = Srgba::new(0.2, 0.6, 0.1, 1.0);
-        const ROCK: Srgba = Srgba::new(0.75, 0.75, 0.75, 1.0);
+        const GRASS: LinearRgba = LinearRgba::new(0.2, 0.6, 0.1, 1.0);
+        const ROCK: LinearRgba = LinearRgba::new(0.75, 0.75, 0.75, 1.0);
 
         Color::srgb(
             (1.0 - steepness) * GRASS.red + (steepness) * ROCK.red,

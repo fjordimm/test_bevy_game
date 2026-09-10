@@ -26,7 +26,7 @@ pub(super) fn create_terrain_texture(
 
             let color = terrain_func
                 .color_at(cf + off_x_real, rf + off_z_real)
-                .to_srgba();
+                .to_linear();
 
             pixels[c][r] = [color.red, color.green, color.blue, 1.0];
         }
@@ -65,7 +65,7 @@ pub(super) fn create_debug_terrain_texture(
             Color::hsv(pre_checkerboard_color.hue(), 1.0, 0.75)
         };
 
-        color.to_srgba()
+        color.to_linear()
     };
 
     let pixels: [[[f32; 4]; DEBUG_TEXTURE_SIZE]; DEBUG_TEXTURE_SIZE] =
