@@ -51,33 +51,41 @@ pub fn gui_checkbox(props: GuiCheckboxProps) -> impl Bundle {
 //   be a tuple struct with one bool element, and must derive `Resource`.
 #[allow(unused)]
 macro_rules! bind_checkbox_with_resource {
-    ($checkbox_tag:ident, $resource:ident) => {
-        (
-            (|mut checkbox_q: Query<
+    ($checkbox_tag:ident, $resource:ident) => {{
+        fn resource_to_gui_state(
+            mut checkbox_q: Query<
                 crate::game::gui::widgets::checkbox::GuiCheckboxInterface,
                 With<$checkbox_tag>,
             >,
-              res: Res<$resource>| {
-                checkbox_q.iter_mut().for_each(|mut checkbox| {
-                    checkbox.set_checked(res.0);
-                });
-            })
-            .run_if(resource_exists_and_changed::<$resource>),
-            (|checkbox_q: Query<
+            res: Res<$resource>,
+        ) {
+            checkbox_q.iter_mut().for_each(|mut checkbox| {
+                checkbox.set_checked(res.0);
+            });
+        }
+
+        fn gui_state_to_resource(
+            checkbox_q: Query<
                 crate::game::gui::widgets::checkbox::GuiCheckboxInterface,
                 (
                     With<$checkbox_tag>,
                     Changed<crate::game::gui::widgets::checkbox::GuiCheckboxState>,
                 ),
             >,
-              mut res: ResMut<$resource>| {
-                checkbox_q.iter().for_each(|checkbox| {
-                    res.0 = checkbox.checked();
-                });
-            })
-            .run_if(resource_exists::<$resource>),
+            mut res: ResMut<$resource>,
+        ) {
+            checkbox_q.iter().for_each(|checkbox| {
+                res.0 = checkbox.checked();
+            });
+        }
+
+        (
+            gui_state_to_resource
+                .run_if(resource_exists::<$resource>)
+                .before(resource_to_gui_state),
+            resource_to_gui_state.run_if(resource_exists_and_changed::<$resource>),
         )
-    };
+    }};
 }
 
 #[allow(unused)]

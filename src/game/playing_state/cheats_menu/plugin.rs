@@ -35,7 +35,7 @@ impl Plugin for CheatsMenuPlugin {
                 despawn_cheats_menu
                     .in_set(OnExitPlaying::General)
             )
-            .add_systems(Update, bind_checkbox_with_resource!(EnableFlycamCheckbox, FreecamEnabled))
+            .add_systems(Update, bind_checkbox_with_resource!(EnableFreecamCheckbox, FreecamEnabled))
         ;
     }
 }
@@ -44,7 +44,7 @@ impl Plugin for CheatsMenuPlugin {
 pub struct CheatsMenuTag;
 
 #[derive(Component)]
-struct EnableFlycamCheckbox;
+struct EnableFreecamCheckbox;
 
 fn spawn_cheats_menu(
     mut commands: Commands,
@@ -77,8 +77,8 @@ fn spawn_cheats_menu(
             }))
             .insert(gui_children(|p| {
                 p.spawn(gui_div_p()).insert(gui_children(|p| {
-                    p.spawn(gui_text_p("Enable flycam: "));
-                    p.spawn((EnableFlycamCheckbox, gui_checkbox(default())));
+                    p.spawn(gui_text_p("Enable freecam: "));
+                    p.spawn((EnableFreecamCheckbox, gui_checkbox(default())));
                 }));
 
                 p.spawn(gui_button(default()))
