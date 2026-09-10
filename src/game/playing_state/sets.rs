@@ -7,10 +7,18 @@ pub struct DuringPlaying;
 pub enum DuringPlayingUnpaused {
     General,
     Ui,
+    CoordRebasing,
 }
 
-pub(super) const DURING_PLAYING_UNPAUSED_LIST: (DuringPlayingUnpaused, DuringPlayingUnpaused) =
-    (DuringPlayingUnpaused::General, DuringPlayingUnpaused::Ui);
+pub(super) const DURING_PLAYING_UNPAUSED_LIST: (
+    DuringPlayingUnpaused,
+    DuringPlayingUnpaused,
+    DuringPlayingUnpaused,
+) = (
+    DuringPlayingUnpaused::General,
+    DuringPlayingUnpaused::Ui,
+    DuringPlayingUnpaused::CoordRebasing,
+);
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum OnEnterPlaying {

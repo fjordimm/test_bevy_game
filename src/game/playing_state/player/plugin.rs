@@ -8,16 +8,20 @@ use crate::game::{
         states::{MouseMode, OverallState},
     },
     geometry::cube::cube_mesh,
+    graphics::{
+        global_render_data::resources::GlobalRenderDataHandle,
+        primary_material::plugin::{PrimaryMaterial, primary_material},
+    },
     playing_state::{
         player::{
             resources::{FreecamEnabled, PlayerMovementSettings},
-            tags::ThePlayer,
+            tags::PlayerBody,
         },
         sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying, OnExitPlaying},
         states::PauseState,
         tags::{PlayingStateEntity, PrimaryCamera},
     },
-    util::alrms,
+    util::{alrms, alrrs},
 };
 
 pub struct PlayerPlugin;
@@ -78,6 +82,8 @@ fn rotate_and_move(
     mut mouse_motion: MessageReader<MouseMotion>,
     camera_transf_q: Option<Single<&mut Transform, With<PrimaryCamera>>>,
     mut rot_o: ResMut<RotO>,
+    freecam_enabled: Res<FreecamEnabled>,
+    player_body_q: Option<Single<&mut Transform, (With<PlayerBody>, Without<PrimaryCamera>)>>,
 ) {
     if let Some(mut camera_transf) = alrms!(camera_transf_q) {
         if let None = rot_o.0 {
@@ -86,6 +92,8 @@ fn rotate_and_move(
         }
 
         if let Some(rot) = alrms!(&mut rot_o.0) {
+            let mut player_body = alrrs!(player_body_q);
+
             // Rotation
 
             mouse_motion.read().for_each(|ev| {
@@ -94,8 +102,15 @@ fn rotate_and_move(
 
                 rot.1 = rot.1.clamp(-0.5 * PI, 0.5 * PI);
 
-                camera_transf.rotation =
+                let rotation =
                     Quat::from_axis_angle(Vec3::Y, rot.0) * Quat::from_axis_angle(Vec3::X, rot.1);
+
+                if freecam_enabled.0 {
+                    camera_transf.rotation = rotation;
+                } else {
+                    player_body.rotation = rotation;
+                    camera_transf.rotation = rotation;
+                }
             });
 
             // Movement
@@ -125,8 +140,14 @@ fn rotate_and_move(
 
             velocity = velocity.normalize_or(Vec3::ZERO);
 
-            camera_transf.translation +=
-                velocity * movement_settings.freecam_speed * time.delta_secs();
+            let translation_offset = velocity * movement_settings.freecam_speed * time.delta_secs();
+
+            if freecam_enabled.0 {
+                camera_transf.translation += translation_offset;
+            } else {
+                player_body.translation += translation_offset;
+                camera_transf.translation = player_body.translation;
+            }
         }
     }
 }
@@ -134,13 +155,17 @@ fn rotate_and_move(
 fn spawn_player_body(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<PrimaryMaterial>>,
+    global_render_data_handle: Res<GlobalRenderDataHandle>,
 ) {
     commands.spawn((
         PlayingStateEntity,
-        ThePlayer,
+        PlayerBody,
         Mesh3d(meshes.add(cube_mesh())),
-        MeshMaterial3d(materials.add(Color::linear_rgb(1.0, 0.0, 1.0))),
+        MeshMaterial3d(materials.add(primary_material(
+            default(),
+            global_render_data_handle.get_handle(),
+        ))),
         Transform::from_xyz(0.0, 0.0, 0.0),
     ));
 }

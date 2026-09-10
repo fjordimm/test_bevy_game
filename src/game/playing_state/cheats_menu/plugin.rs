@@ -3,16 +3,19 @@ use bevy::prelude::*;
 use crate::game::{
     core::{resources::GlobalGuiRoot, states::OverallState},
     gui::{
-        gui_child, gui_children,
+        gui_children,
         resources::GuiThemeComputed,
         widgets::{
-            button::gui_button,
-            div::{GuiDivCustomStyle, GuiDivProps, GuiDivStyle, gui_div},
+            checkbox::{bind_checkbox_with_resource, gui_checkbox},
+            div::{GuiDivCustomStyle, GuiDivProps, GuiDivStyle, gui_div, gui_div_p},
             floating_panel::{GuiFloatingPanelProps, gui_floating_panel},
             text::gui_text_p,
         },
     },
-    playing_state::sets::{OnEnterPlaying, OnExitPlaying},
+    playing_state::{
+        player::resources::FreecamEnabled,
+        sets::{OnEnterPlaying, OnExitPlaying},
+    },
 };
 
 pub struct CheatsMenuPlugin;
@@ -29,12 +32,16 @@ impl Plugin for CheatsMenuPlugin {
                 despawn_cheats_menu
                     .in_set(OnExitPlaying::General)
             )
+            .add_systems(Update, bind_checkbox_with_resource!(EnableFlycamCheckbox, FreecamEnabled))
         ;
     }
 }
 
 #[derive(Component)]
 pub struct CheatsMenuTag;
+
+#[derive(Component)]
+struct EnableFlycamCheckbox;
 
 fn spawn_cheats_menu(
     mut commands: Commands,
@@ -66,11 +73,10 @@ fn spawn_cheats_menu(
                 ..default()
             }))
             .insert(gui_children(|p| {
-                p.spawn(gui_button(default()))
-                    .insert(gui_child(gui_text_p("Bruh")))
-                    .observe(|_: On<Pointer<Click>>| {
-                        debug!("ahahahahaa");
-                    });
+                p.spawn(gui_div_p()).insert(gui_children(|p| {
+                    p.spawn(gui_text_p("Enable flycam: "));
+                    p.spawn((EnableFlycamCheckbox, gui_checkbox(default())));
+                }));
             }));
         }))
         .insert(CheatsMenuTag)

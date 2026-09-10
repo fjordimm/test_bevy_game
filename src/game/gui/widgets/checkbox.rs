@@ -62,19 +62,20 @@ macro_rules! bind_checkbox_with_resource {
                     checkbox.set_checked(res.0);
                 });
             })
-            .run_if(resource_changed::<$ResourceToBind>),
-            |checkbox_q: Query<
+            .run_if(resource_exists_and_changed::<$ResourceToBind>),
+            (|checkbox_q: Query<
                 crate::game::gui::widgets::checkbox::GuiCheckboxInterface,
                 (
                     With<$CheckboxTag>,
                     Changed<crate::game::gui::widgets::checkbox::GuiCheckboxState>,
                 ),
             >,
-             mut res: ResMut<$ResourceToBind>| {
+              mut res: ResMut<$ResourceToBind>| {
                 checkbox_q.iter().for_each(|checkbox| {
                     res.0 = checkbox.checked();
                 });
-            },
+            })
+            .run_if(resource_exists::<$ResourceToBind>),
         )
     };
 }

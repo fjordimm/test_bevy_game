@@ -6,7 +6,7 @@ use crate::game::{
     core::states::OverallState,
     playing_state::{
         coord_rebasing::{CoordRebasingOrigin, WorldSpaceEntity},
-        player::tags::ThePlayer,
+        player::tags::PlayerBody,
         sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
     },
     util::alrms,
@@ -28,7 +28,7 @@ impl Plugin for CoordRebasingPlugin {
             )
             .add_systems(Update,
                 perform_rebase
-                    .in_set(DuringPlayingUnpaused::General)
+                    .in_set(DuringPlayingUnpaused::CoordRebasing)
                     .run_if(on_timer(Duration::from_millis(REBASE_INTERVAL)))
             )
         ;
@@ -50,13 +50,13 @@ struct WorldSpacePosition(DVec3);
 fn on_new_transform(
     mut commands: Commands,
     new_wse_q: Query<(Entity, &Transform, Option<&ChildOf>), Added<WorldSpaceEntity>>,
-    any_ws_q: Query<(), With<WorldSpaceEntity>>,
+    any_wse_q: Query<(), With<WorldSpaceEntity>>,
     rebase_origin: Res<CoordRebasingOrigin>,
 ) {
     new_wse_q.iter().for_each(|(entity, transf, parent)| {
         let mut doesnt_have_parent_wse = true;
         if let Some(parent) = parent {
-            if let Ok(_) = any_ws_q.get(parent.0) {
+            if let Ok(_) = any_wse_q.get(parent.0) {
                 doesnt_have_parent_wse = false;
             }
         }
@@ -76,7 +76,7 @@ fn on_new_transform(
 //   Although, maybe non-active entities should just be despawned.
 
 fn perform_rebase(
-    player_q: Option<Single<&mut Transform, With<ThePlayer>>>,
+    player_q: Option<Single<&mut Transform, With<PlayerBody>>>,
     mut rebase_origin: ResMut<CoordRebasingOrigin>,
     mut wse_q: Query<
         (
@@ -84,7 +84,7 @@ fn perform_rebase(
             &mut LastTransfPosition,
             &mut WorldSpacePosition,
         ),
-        (With<WorldSpaceEntity>, Without<ThePlayer>),
+        (With<WorldSpaceEntity>, Without<PlayerBody>),
     >,
 ) {
     if let Some(mut player_transf) = alrms!(player_q) {

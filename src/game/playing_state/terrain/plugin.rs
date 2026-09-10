@@ -11,7 +11,7 @@ use crate::game::{
     },
     playing_state::{
         coord_rebasing::{CoordRebasingOrigin, world_space_transf},
-        player::tags::ThePlayer,
+        player::tags::PlayerBody,
         sets::{DuringPlaying, OnEnterPlaying},
         tags::PlayingStateEntity,
         terrain::{
@@ -164,7 +164,7 @@ fn inactivate_all_chunks(
 fn activate_chunks(
     mut commands: Commands,
     coord_rebasing_origin: Res<CoordRebasingOrigin>,
-    player_q: Option<Single<&Transform, With<ThePlayer>>>,
+    player_q: Option<Single<&Transform, With<PlayerBody>>>,
     mut chunk_dicts: ResMut<ChunkDicts>,
     mut chunk_q: Query<(Entity, &mut Chunk, &mut Visibility)>,
     lod_proportion: Res<TerrainLodProportion>,
