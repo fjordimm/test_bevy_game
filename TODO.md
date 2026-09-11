@@ -2,6 +2,7 @@
 # Todo List
 
 ## Currently Working On
+- Move stuff like font stuff out of `core` and into a better spot.
 - Cheat menu.
 - First person controller.
 - Texturing?? Texturing scale thing?

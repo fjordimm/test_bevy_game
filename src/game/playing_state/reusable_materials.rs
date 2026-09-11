@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::storage::ShaderStorageBuffer};
+use bevy::{prelude::*, render::storage::ShaderBuffer};
 
 use crate::game::graphics::primary_material::plugin::PrimaryMaterial;
 
@@ -7,7 +7,7 @@ pub struct ReusableMaterials {}
 
 impl ReusableMaterials {
     pub fn new(
-        _global_render_data_handle: Handle<ShaderStorageBuffer>,
+        _global_render_data_handle: Handle<ShaderBuffer>,
         _materials_primary: &mut ResMut<Assets<PrimaryMaterial>>,
     ) -> Self {
         Self {}

@@ -14,13 +14,13 @@ impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
+            .add_plugins(PostProcessorPlugin)
             .add_plugins(GlobalRenderDataPlugin)
             .add_plugins(SkyboxMaterialPlugin)
             .add_plugins(PrimaryMaterialPlugin)
             .add_plugins(TerrainMaterialPlugin)
             .add_plugins(WaterMaterialPlugin)
             .add_plugins(WaterUndersideMaterialPlugin)
-            .add_plugins(PostProcessorPlugin)
         ;
     }
 }

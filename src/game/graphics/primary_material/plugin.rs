@@ -5,7 +5,7 @@ use bevy::{
         render_resource::{
             AsBindGroup, Face, RenderPipelineDescriptor, SpecializedMeshPipelineError,
         },
-        storage::ShaderStorageBuffer,
+        storage::ShaderBuffer,
     },
     shader::ShaderRef,
 };
@@ -43,7 +43,7 @@ pub type PrimaryMaterial = ExtendedMaterial<StandardMaterial, __PrimaryMaterialE
 
 pub fn primary_material(
     props: PrimaryMaterialProps,
-    global_render_data_handle: Handle<ShaderStorageBuffer>,
+    global_render_data_handle: Handle<ShaderBuffer>,
 ) -> PrimaryMaterial {
     PrimaryMaterial {
         base: StandardMaterial {
@@ -71,7 +71,7 @@ pub fn primary_material(
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct __PrimaryMaterialExtension {
     #[storage(100, read_only)]
-    pub global_render_data_handle: Handle<ShaderStorageBuffer>,
+    pub global_render_data_handle: Handle<ShaderBuffer>,
     #[uniform(101)]
     texturing_scale: f32,
 }

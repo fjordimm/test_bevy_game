@@ -1,6 +1,6 @@
 use bevy::{
     prelude::*,
-    render::{extract_resource::ExtractResourcePlugin, storage::ShaderStorageBuffer},
+    render::{extract_resource::ExtractResourcePlugin, storage::ShaderBuffer},
 };
 
 use crate::game::{
@@ -34,20 +34,20 @@ impl Plugin for GlobalRenderDataPlugin {
 
 fn create_global_render_data_resources(
     mut commands: Commands,
-    mut buffers: ResMut<Assets<ShaderStorageBuffer>>,
+    mut buffers: ResMut<Assets<ShaderBuffer>>,
 ) {
     let data = GlobalRenderData::default();
 
     commands.insert_resource(data.clone());
     commands.insert_resource(GlobalRenderDataHandle(
-        buffers.add(ShaderStorageBuffer::from(data.clone())),
+        buffers.add(ShaderBuffer::from(data.clone())),
     ));
 }
 
 fn update_global_render_data_handle(
     data: Res<GlobalRenderData>,
     handle: Res<GlobalRenderDataHandle>,
-    mut buffers: ResMut<Assets<ShaderStorageBuffer>>,
+    mut buffers: ResMut<Assets<ShaderBuffer>>,
 ) {
     alrrs!(buffers.get_mut(handle.0.id())).set_data((*data).clone());
 }

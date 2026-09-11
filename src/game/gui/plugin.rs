@@ -31,7 +31,7 @@ impl Plugin for GuiPlugin {
             )
             .add_systems(Update,
                 update_gui_theme_computed
-                    .run_if(resource_changed::<GuiScale>.or(resource_changed::<GuiThemeUncomputed>))
+                    .run_if(resource_changed::<GuiScale>.or_else(resource_changed::<GuiThemeUncomputed>))
             )
             .add_systems(Update, update_cursor_icon)
             .add_plugins(GuiDivPlugin)

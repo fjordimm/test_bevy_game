@@ -60,7 +60,7 @@ const L0_RENDER_DIST: i64 = 2;
 
 fn on_enter1(world: &mut World) {
     // TODO: change the seed to not be this arbitrary number.
-    world.insert_non_send_resource(TheTerrainFunc(TerrainFunc::new(seed_from_u64(123))));
+    world.insert_non_send(TheTerrainFunc(TerrainFunc::new(seed_from_u64(123))));
 }
 
 fn on_enter2(mut commands: Commands) {
@@ -152,7 +152,6 @@ struct ChunkPerimeter {
 #[derive(Component)]
 struct ActiveOrQueued;
 
-// TODOr
 fn offload_distant_chunks(
     mut commands: Commands,
     mut chunk_q: Query<(Entity, &Chunk, &mut Visibility), (With<Chunk>, Without<ActiveOrQueued>)>,
@@ -536,9 +535,9 @@ fn update_chunk_perimeters(
                 };
 
                 if let Some((cpc, mesh3d)) = alrmo!(chunk_perim_q.get(perim_entity)) {
-                    if let Some(mesh) = alrms!(meshes.get_mut(mesh3d.0.id())) {
+                    if let Some(mut mesh) = alrms!(meshes.get_mut(mesh3d.0.id())) {
                         change_mesh_from_perim_lod_vertices(
-                            mesh,
+                            &mut mesh,
                             &cpc.perim_lod_verticies,
                             north_lod,
                             east_lod,

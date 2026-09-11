@@ -24,7 +24,7 @@ impl Plugin for SkyboxPlugin {
         app
             .add_systems(OnEnter(OverallState::Playing),
                 spawn_skybox
-                    .in_set(OnEnterPlaying::General)
+                    .in_set(OnEnterPlaying::SpawnThings)
             )
             .add_systems(Update,
                 update_skybox

@@ -29,7 +29,7 @@ impl Plugin for WaterLayerPlugin {
         app
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
-                    .in_set(OnEnterPlaying::General)
+                    .in_set(OnEnterPlaying::SpawnThings)
             )
             .add_systems(Update,
                 relocate_to_player_xz

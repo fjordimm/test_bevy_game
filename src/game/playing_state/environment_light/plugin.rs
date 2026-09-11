@@ -21,7 +21,7 @@ impl Plugin for EnvironmentLightPlugin {
             .insert_resource(SkyRotationS(0.0))
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
-                    .in_set(OnEnterPlaying::General)
+                    .in_set(OnEnterPlaying::SpawnThings)
             )
             .add_systems(Update,
                 update_environment_lights
@@ -64,7 +64,8 @@ fn on_enter(
         SunlightTag,
         DirectionalLight {
             color: Color::hsv(0.0, 0.0, 1.0),
-            shadows_enabled: false,
+            shadow_maps_enabled: false,
+            contact_shadows_enabled: false,
             illuminance: SUNLIGHT_ILLUMINANCE,
             ..default()
         },
@@ -79,7 +80,8 @@ fn on_enter(
         AboveAmbientLightTag,
         DirectionalLight {
             color: ABOVE_AMBIENT_LIGHT_COLOR,
-            shadows_enabled: false,
+            shadow_maps_enabled: false,
+            contact_shadows_enabled: false,
             illuminance: ABOVE_AMBIENT_LIGHT_ILLUMINANCE,
             ..default()
         },
@@ -90,7 +92,8 @@ fn on_enter(
         AboveAmbientLightTag,
         DirectionalLight {
             color: ABOVE_AMBIENT_LIGHT_COLOR,
-            shadows_enabled: false,
+            shadow_maps_enabled: false,
+            contact_shadows_enabled: false,
             illuminance: ABOVE_AMBIENT_LIGHT_ILLUMINANCE,
             ..default()
         },
@@ -102,7 +105,8 @@ fn on_enter(
         BelowAmbientLightTag,
         DirectionalLight {
             color: BELOW_AMBIENT_LIGHT_COLOR,
-            shadows_enabled: false,
+            shadow_maps_enabled: false,
+            contact_shadows_enabled: false,
             illuminance: BELOW_AMBIENT_LIGHT_ILLUMINANCE,
             ..default()
         },
@@ -113,7 +117,8 @@ fn on_enter(
         BelowAmbientLightTag,
         DirectionalLight {
             color: BELOW_AMBIENT_LIGHT_COLOR,
-            shadows_enabled: false,
+            shadow_maps_enabled: false,
+            contact_shadows_enabled: false,
             illuminance: BELOW_AMBIENT_LIGHT_ILLUMINANCE,
             ..default()
         },

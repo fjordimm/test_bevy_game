@@ -3,7 +3,7 @@ use bevy::{
     prelude::*,
     render::{
         render_resource::{AsBindGroup, RenderPipelineDescriptor, SpecializedMeshPipelineError},
-        storage::ShaderStorageBuffer,
+        storage::ShaderBuffer,
     },
     shader::ShaderRef,
 };
@@ -28,7 +28,7 @@ const SHADER_ASSET_PATH: &str = "shaders/materials/skybox_material.wgsl";
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct SkyboxMaterial {
     #[storage(0, read_only)]
-    pub global_render_data_handle: Handle<ShaderStorageBuffer>,
+    pub global_render_data_handle: Handle<ShaderBuffer>,
 }
 
 impl Material for SkyboxMaterial {

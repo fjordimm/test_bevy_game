@@ -21,12 +21,19 @@ pub struct DuringPlayingNotLoading;
 pub enum OnEnterPlaying {
     PlayingStatePluginUseOnly,
     ResourceSetup, // Any systems running here or before should not assume any resources have been inserted yet.
+    SpawnThings, // Things may be spawned in General or something, but stuff like the primary camera should be spawned here.
     General,
 }
 
-pub(super) const ON_ENTER_PLAYING_LIST: (OnEnterPlaying, OnEnterPlaying, OnEnterPlaying) = (
+pub(super) const ON_ENTER_PLAYING_LIST: (
+    OnEnterPlaying,
+    OnEnterPlaying,
+    OnEnterPlaying,
+    OnEnterPlaying,
+) = (
     OnEnterPlaying::PlayingStatePluginUseOnly,
     OnEnterPlaying::ResourceSetup,
+    OnEnterPlaying::SpawnThings,
     OnEnterPlaying::General,
 );
 

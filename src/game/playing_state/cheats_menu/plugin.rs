@@ -29,7 +29,7 @@ impl Plugin for CheatsMenuPlugin {
         app
             .add_systems(OnEnter(OverallState::Playing),
                 spawn_cheats_menu
-                    .in_set(OnEnterPlaying::General)
+                    .in_set(OnEnterPlaying::SpawnThings)
             )
             .add_systems(OnExit(OverallState::Playing),
                 despawn_cheats_menu

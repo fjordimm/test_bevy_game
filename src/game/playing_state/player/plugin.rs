@@ -37,7 +37,7 @@ impl Plugin for PlayerPlugin {
             )
             .add_systems(OnEnter(OverallState::Playing),
                 spawn_player_body
-                    .in_set(OnEnterPlaying::General)
+                    .in_set(OnEnterPlaying::SpawnThings)
             )
         ;
     }

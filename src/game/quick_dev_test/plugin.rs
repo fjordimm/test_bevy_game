@@ -32,7 +32,7 @@ impl Plugin for QuickDevTestPlugin {
         app
             .add_systems(Update,
                 after_a_sec
-                    .run_if(on_timer(Duration::from_secs(1)).and(run_once))
+                    .run_if(run_once.and_then(on_timer(Duration::from_secs(1))))
             )
             .add_systems(Update,
                 scrolling

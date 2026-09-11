@@ -5,7 +5,7 @@ use bevy::{
         render_resource::{
             AsBindGroup, Face, RenderPipelineDescriptor, SpecializedMeshPipelineError,
         },
-        storage::ShaderStorageBuffer,
+        storage::ShaderBuffer,
     },
     shader::ShaderRef,
 };
@@ -41,7 +41,7 @@ pub type WaterMaterial = ExtendedMaterial<StandardMaterial, __WaterMaterialExten
 
 pub fn water_material(
     _props: WaterMaterialProps,
-    global_render_data_handle: Handle<ShaderStorageBuffer>,
+    global_render_data_handle: Handle<ShaderBuffer>,
 ) -> WaterMaterial {
     WaterMaterial {
         base: StandardMaterial {
@@ -70,7 +70,7 @@ pub fn water_material(
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct __WaterMaterialExtension {
     #[storage(100, read_only)]
-    pub global_render_data_handle: Handle<ShaderStorageBuffer>,
+    pub global_render_data_handle: Handle<ShaderBuffer>,
     #[uniform(101)]
     texturing_scale: f32,
 }

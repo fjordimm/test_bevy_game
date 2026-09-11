@@ -123,15 +123,15 @@ fn apply_style(
 
     *textfont = TextFont {
         font: match &attribs.font {
-            GuiTextFont::Primary => theme.0.font_primary.clone(),
-            GuiTextFont::Mono => theme.0.font_mono.clone(),
-            GuiTextFont::Custom(font_handle) => font_handle.clone(),
+            GuiTextFont::Primary => theme.0.font_primary.clone().into(),
+            GuiTextFont::Mono => theme.0.font_mono.clone().into(),
+            GuiTextFont::Custom(font_handle) => font_handle.clone().into(),
         },
         font_size: match attribs.size {
-            GuiTextSize::Custom(val) => val,
-            GuiTextSize::P => theme.0.font_size_p,
-            GuiTextSize::H1 => theme.0.font_size_h1,
-            GuiTextSize::H2 => theme.0.font_size_h2,
+            GuiTextSize::Custom(val) => val.into(),
+            GuiTextSize::P => theme.0.font_size_p.into(),
+            GuiTextSize::H1 => theme.0.font_size_h1.into(),
+            GuiTextSize::H2 => theme.0.font_size_h2.into(),
         },
         ..default()
     };

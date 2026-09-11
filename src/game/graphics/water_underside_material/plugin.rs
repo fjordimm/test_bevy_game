@@ -5,7 +5,7 @@ use bevy::{
         render_resource::{
             AsBindGroup, Face, RenderPipelineDescriptor, SpecializedMeshPipelineError,
         },
-        storage::ShaderStorageBuffer,
+        storage::ShaderBuffer,
     },
     shader::ShaderRef,
 };
@@ -42,7 +42,7 @@ pub type WaterUndersideMaterial =
 
 pub fn water_underside_material(
     _props: WaterUndersideMaterialProps,
-    global_render_data_handle: Handle<ShaderStorageBuffer>,
+    global_render_data_handle: Handle<ShaderBuffer>,
 ) -> WaterUndersideMaterial {
     WaterUndersideMaterial {
         base: StandardMaterial {
@@ -71,7 +71,7 @@ pub fn water_underside_material(
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct __WaterUndersideMaterialExtension {
     #[storage(100, read_only)]
-    pub global_render_data_handle: Handle<ShaderStorageBuffer>,
+    pub global_render_data_handle: Handle<ShaderBuffer>,
     #[uniform(101)]
     texturing_scale: f32,
 }

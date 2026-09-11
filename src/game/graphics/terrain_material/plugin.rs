@@ -5,7 +5,7 @@ use bevy::{
         render_resource::{
             AsBindGroup, Face, RenderPipelineDescriptor, SpecializedMeshPipelineError,
         },
-        storage::ShaderStorageBuffer,
+        storage::ShaderBuffer,
     },
     shader::ShaderRef,
 };
@@ -40,7 +40,7 @@ pub type TerrainMaterial = ExtendedMaterial<StandardMaterial, __TerrainMaterialE
 pub fn terrain_material(
     _props: TerrainMaterialProps,
     texture: Handle<Image>,
-    global_render_data_handle: Handle<ShaderStorageBuffer>,
+    global_render_data_handle: Handle<ShaderBuffer>,
 ) -> TerrainMaterial {
     TerrainMaterial {
         base: StandardMaterial {
@@ -68,7 +68,7 @@ pub fn terrain_material(
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct __TerrainMaterialExtension {
     #[storage(100, read_only)]
-    pub global_render_data_handle: Handle<ShaderStorageBuffer>,
+    pub global_render_data_handle: Handle<ShaderBuffer>,
     #[texture(101)]
     #[sampler(102)]
     texture: Handle<Image>,
