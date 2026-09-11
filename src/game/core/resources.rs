@@ -2,49 +2,6 @@ use bevy::input::keyboard::KeyCode;
 use bevy::prelude::*;
 use bevy_ecs::resource::Resource;
 
-#[derive(Resource)]
-pub struct FontHandles {
-    #[allow(unused)]
-    pub cabin: Handle<Font>,
-    #[allow(unused)]
-    pub sorts_mill_goudy: Handle<Font>,
-    #[allow(unused)]
-    pub ibm_plex_mono: Handle<Font>,
-}
-
-impl FontHandles {
-    pub fn make(asset_server: &AssetServer) -> Self {
-        Self {
-            cabin: asset_server.load("fonts/Cabin-VariableFont_wdth,wght.ttf"),
-            sorts_mill_goudy: asset_server.load("fonts/SortsMillGoudy-Regular.ttf"),
-            ibm_plex_mono: asset_server.load("fonts/IBMPlexMono-Regular.ttf"),
-        }
-    }
-}
-
-#[derive(Resource)]
-pub struct UiIconHandles {
-    #[allow(unused)]
-    pub x: Handle<Image>,
-    #[allow(unused)]
-    pub minimize: Handle<Image>,
-    #[allow(unused)]
-    pub corner_resizer: Handle<Image>,
-    #[allow(unused)]
-    pub check: Handle<Image>,
-}
-
-impl UiIconHandles {
-    pub fn make(asset_server: &AssetServer) -> Self {
-        Self {
-            x: asset_server.load("gui/icons/material-symbols--close.png"),
-            minimize: asset_server.load("gui/icons/material-symbols--minimize.png"),
-            corner_resizer: asset_server.load("gui/icons/material-symbols--resize-window.png"),
-            check: asset_server.load("gui/icons/material-symbols--check.png"),
-        }
-    }
-}
-
 #[allow(unused)]
 #[derive(Resource, Debug)]
 pub struct KeyBindings {

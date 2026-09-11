@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-use crate::game::{
-    core::resources::UiIconHandles,
-    gui::{resources::GuiThemeComputed, sets::GuiSystemsOrdering},
+use crate::game::gui::{
+    resources::{GuiThemeComputed, UiIconHandles},
+    sets::GuiSystemsOrdering,
 };
 
 #[allow(unused)]

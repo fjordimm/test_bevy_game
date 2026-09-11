@@ -32,6 +32,7 @@ impl Plugin for TerrainPlugin {
         app
             .add_systems(OnEnter(OverallState::Playing),
                 (on_enter1, on_enter2)
+                    .chain()
                     .in_set(OnEnterPlaying::ResourceSetup)
             )
             .add_systems(Update,

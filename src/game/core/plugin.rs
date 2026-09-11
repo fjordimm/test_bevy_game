@@ -5,11 +5,10 @@ use bevy::{
 
 use crate::game::{
     core::{
-        resources::{FontHandles, GlobalGuiRoot, KeyBindings, UiIconHandles},
-        sets::{GLOBAL_STARTUP_ORDERING_ORDER, GlobalStartupOrdering},
+        resources::KeyBindings,
+        sets::GLOBAL_STARTUP_ORDERING_ORDER,
         states::{MouseMode, OverallState},
     },
-    gui::make_global_gui_root,
     util::alrms,
 };
 
@@ -24,10 +23,6 @@ impl Plugin for CorePlugin {
             .init_state::<MouseMode>()
             .init_state::<OverallState>()
             .configure_sets(Startup, GLOBAL_STARTUP_ORDERING_ORDER.chain())
-            .add_systems(Startup,
-                startup
-                    .in_set(GlobalStartupOrdering::CoreUseOnly)
-            )
             .add_systems(Update,
                 start_game
                     .run_if(run_once)
@@ -36,14 +31,6 @@ impl Plugin for CorePlugin {
             .add_systems(OnExit(MouseMode::Grabbed), on_exit_mouse_grabbed)
         ;
     }
-}
-
-fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.insert_resource(FontHandles::make(&asset_server));
-    commands.insert_resource(UiIconHandles::make(&asset_server));
-
-    let gui_root = commands.spawn(make_global_gui_root()).id();
-    commands.insert_resource(GlobalGuiRoot(gui_root));
 }
 
 fn start_game(mut next_overall_state: ResMut<NextState<OverallState>>) {

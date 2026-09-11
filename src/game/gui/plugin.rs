@@ -5,9 +5,13 @@ use bevy::{
 };
 
 use crate::game::{
-    core::{resources::FontHandles, sets::GlobalStartupOrdering},
+    core::{resources::GlobalGuiRoot, sets::GlobalStartupOrdering},
     gui::{
-        resources::{CursorIconHandler, GuiScale, GuiTheme, GuiThemeComputed, GuiThemeUncomputed},
+        make_global_gui_root,
+        resources::{
+            CursorIconHandler, FontHandles, GuiScale, GuiTheme, GuiThemeComputed,
+            GuiThemeUncomputed, UiIconHandles,
+        },
         sets::GUI_SYSTEMS_ORDERING_ORDER,
         widgets::{
             button::GuiButtonPlugin, checkbox::GuiCheckboxPlugin, div::GuiDivPlugin,
@@ -26,8 +30,9 @@ impl Plugin for GuiPlugin {
         app
             .configure_sets(Update, GUI_SYSTEMS_ORDERING_ORDER.chain())
             .add_systems(Startup,
-                startup
-                    .in_set(GlobalStartupOrdering::Regular)
+                (startup1, startup2)
+                    .chain()
+                    .in_set(GlobalStartupOrdering::GuiUseOnly)
             )
             .add_systems(Update,
                 update_gui_theme_computed
@@ -45,7 +50,15 @@ impl Plugin for GuiPlugin {
     }
 }
 
-fn startup(mut commands: Commands, font_handles: Res<FontHandles>) {
+fn startup1(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(FontHandles::make(&asset_server));
+    commands.insert_resource(UiIconHandles::make(&asset_server));
+
+    let gui_root = commands.spawn(make_global_gui_root()).id();
+    commands.insert_resource(GlobalGuiRoot(gui_root));
+}
+
+fn startup2(mut commands: Commands, font_handles: Res<FontHandles>) {
     let gui_theme_uncomputed = GuiThemeUncomputed(GuiTheme::make(&font_handles));
     let gui_scale = GuiScale::default();
 

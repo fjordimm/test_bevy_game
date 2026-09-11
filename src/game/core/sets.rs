@@ -4,7 +4,7 @@ use bevy::prelude::*;
 pub enum GlobalStartupOrdering {
     BuildBevyAppUseOnly,
     RandomUseOnly,
-    CoreUseOnly,
+    GuiUseOnly,
     Regular,
 }
 
@@ -16,6 +16,6 @@ pub const GLOBAL_STARTUP_ORDERING_ORDER: (
 ) = (
     GlobalStartupOrdering::BuildBevyAppUseOnly,
     GlobalStartupOrdering::RandomUseOnly,
-    GlobalStartupOrdering::CoreUseOnly,
+    GlobalStartupOrdering::GuiUseOnly,
     GlobalStartupOrdering::Regular,
 );
