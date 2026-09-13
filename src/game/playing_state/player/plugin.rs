@@ -1,5 +1,6 @@
 use std::f32::consts::PI;
 
+use avian3d::{collision::collider::Collider, dynamics::rigid_body::RigidBody};
 use bevy::{input::mouse::MouseMotion, prelude::*};
 
 use crate::game::{
@@ -139,6 +140,7 @@ fn spawn_player_body(
     commands.spawn((
         PlayingStateEntity,
         PlayerBody,
+        Transform::from_xyz(0.0, 60.0, 0.0),
         Mesh3d(meshes.add(cube_mesh(CubeMeshColors::All(Color::linear_rgb(
             1.0, 0.0, 0.0,
         ))))),
@@ -146,6 +148,7 @@ fn spawn_player_body(
             default(),
             global_render_data_handle.get_handle(),
         ))),
-        Transform::from_xyz(0.0, 60.0, 0.0),
+        RigidBody::Static,
+        Collider::cuboid(1.0, 1.0, 1.0),
     ));
 }

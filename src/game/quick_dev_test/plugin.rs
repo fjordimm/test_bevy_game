@@ -1,6 +1,9 @@
 use std::time::Duration;
 
-use avian3d::{collision::collider::Collider, dynamics::rigid_body::RigidBody};
+use avian3d::{
+    collision::collider::Collider,
+    dynamics::{joints::SphericalJoint, rigid_body::RigidBody},
+};
 use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_timer};
 use rand_distr::num_traits::Pow;
 
@@ -8,16 +11,13 @@ use crate::game::{
     core::states::OverallState,
     geometry::{
         cdodec::{CDodecMeshColors, cdodec_mesh},
-        cube::cube_mesh,
-    },
-    graphics::{
-        global_render_data::resources::GlobalRenderDataHandle,
-        primary_material::plugin::{PrimaryMaterial, primary_material},
+        cube::{CubeMeshColors, cube_mesh},
     },
     playing_state::{
         coord_rebasing::world_space_transf,
         environment_light::resources::{SkyRotationS, SkyRotationT},
         player::resources::PlayerMovementSettings,
+        reusable_materials::ReusableMaterials,
         sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
         tags::PlayingStateEntity,
     },
@@ -86,16 +86,12 @@ fn scrolling(
 fn spawn_some_stuff(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<PrimaryMaterial>>,
-    global_render_data_handle: Res<GlobalRenderDataHandle>,
+    reusable_primary_mat: Res<ReusableMaterials>,
 ) {
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(meshes.add(cube_mesh(default()))),
-        MeshMaterial3d(materials.add(primary_material(
-            default(),
-            global_render_data_handle.get_handle(),
-        ))),
+        Mesh3d(meshes.add(cube_mesh(CubeMeshColors::All(Color::hsv(60.0, 1.0, 1.0))))),
+        MeshMaterial3d(reusable_primary_mat.primary.clone()),
         world_space_transf(
             Transform::from_xyz(0.0, 50.0, -20.0).with_scale(Vec3::new(100.0, 1.0, 100.0)),
         ),
@@ -109,10 +105,7 @@ fn spawn_some_stuff(
             bottom: Color::hsv(0.0, 1.0, 1.0),
             top: Color::hsv(180.0, 1.0, 1.0),
         }))),
-        MeshMaterial3d(materials.add(primary_material(
-            default(),
-            global_render_data_handle.get_handle(),
-        ))),
+        MeshMaterial3d(reusable_primary_mat.primary.clone()),
         world_space_transf({
             let mut transf = Transform::from_xyz(0.0, 70.0, -20.0);
             transf.rotate_z(0.1);
@@ -124,8 +117,79 @@ fn spawn_some_stuff(
         Collider::cuboid(1.0, 1.0, 1.0),
     ));
 
-    commands.spawn_scene(bsn! {
-        Transform::from_xyz(0.0, 0.0, 0.0)
-        template_value(RigidBody::Dynamic)
-    });
+    /*
+    commands
+        .spawn((
+            PlayingStateEntity,
+            world_space_transf(Transform::from_xyz(10.0, 70.0, -30.0)),
+            Visibility::Inherited,
+        ))
+        .with_children(|p| {
+            let parent = p.target_entity();
+
+            let torso = p
+                .commands_mut()
+                .spawn((
+                    PlayingStateEntity,
+                    world_space_transf(
+                        Transform::from_xyz(0.0, 0.0, 0.0).with_scale(Vec3::new(1.0, 1.0, 1.0)),
+                    ),
+                    Mesh3d(meshes.add(cube_mesh(default()))),
+                    MeshMaterial3d(reusable_primary_mat.primary.clone()),
+                    RigidBody::Dynamic,
+                    Collider::cuboid(1.0, 1.0, 1.0),
+                ))
+                .id();
+
+            let head = p
+                .commands_mut()
+                .spawn((
+                    PlayingStateEntity,
+                    world_space_transf(
+                        Transform::from_xyz(0.0, 1.1, 0.0).with_scale(Vec3::new(1.0, 1.0, 1.0)),
+                    ),
+                    Mesh3d(meshes.add(cube_mesh(default()))),
+                    MeshMaterial3d(reusable_primary_mat.primary.clone()),
+                    RigidBody::Dynamic,
+                    Collider::cuboid(1.0, 1.0, 1.0),
+                ))
+                .id();
+
+            p.commands_mut()
+                .entity(torso)
+                .insert(SphericalJoint::new(torso, head).with_anchor(Vec3::new(0.0, 1.05, 0.0)));
+        });
+        */
+
+    let torso = commands
+        .spawn((
+            PlayingStateEntity,
+            world_space_transf(
+                Transform::from_xyz(10.0, 70.0, -30.0).with_scale(Vec3::new(1.0, 1.0, 1.0)),
+            ),
+            Mesh3d(meshes.add(cube_mesh(default()))),
+            MeshMaterial3d(reusable_primary_mat.primary.clone()),
+            RigidBody::Dynamic,
+            Collider::cuboid(1.0, 1.0, 1.0),
+        ))
+        .id();
+
+    let head = commands
+        .spawn((
+            PlayingStateEntity,
+            world_space_transf(
+                Transform::from_xyz(10.0, 71.1, -30.0).with_scale(Vec3::new(1.0, 1.0, 1.0)),
+            ),
+            Mesh3d(meshes.add(cube_mesh(default()))),
+            MeshMaterial3d(reusable_primary_mat.primary.clone()),
+            RigidBody::Dynamic,
+            Collider::cuboid(1.0, 1.0, 1.0),
+        ))
+        .id();
+
+    commands.spawn(
+        SphericalJoint::new(torso, head)
+            .with_local_anchor1(Vec3::new(0.0, 0.55, 0.0))
+            .with_local_anchor2(Vec3::new(0.0, -0.55, 0.0)),
+    );
 }

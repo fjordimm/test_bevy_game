@@ -6,7 +6,7 @@ pub mod plugin;
 #[derive(Resource)]
 pub struct CoordRebasingOrigin(pub DVec3);
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 pub struct WorldSpaceEntity;
 
 /// Input should be in transform space rather than world space.
