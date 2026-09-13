@@ -9,7 +9,6 @@ use crate::game::{
     geometry::{
         cdodec::{CDodecMeshColors, cdodec_mesh},
         cube::cube_mesh,
-        dodec::{DodecMeshColors, dodec_mesh},
     },
     graphics::{
         global_render_data::resources::GlobalRenderDataHandle,
@@ -92,20 +91,6 @@ fn spawn_some_stuff(
 ) {
     commands.spawn((
         PlayingStateEntity,
-        Mesh3d(
-            meshes.add(dodec_mesh(DodecMeshColors::All(Color::linear_rgb(
-                0.0, 0.0, 1.0,
-            )))),
-        ),
-        MeshMaterial3d(materials.add(primary_material(
-            default(),
-            global_render_data_handle.get_handle(),
-        ))),
-        world_space_transf(Transform::from_xyz(3.0, 0.0, -9.0)),
-    ));
-
-    commands.spawn((
-        PlayingStateEntity,
         Mesh3d(meshes.add(cube_mesh(default()))),
         MeshMaterial3d(materials.add(primary_material(
             default(),
@@ -138,4 +123,9 @@ fn spawn_some_stuff(
         RigidBody::Dynamic,
         Collider::cuboid(1.0, 1.0, 1.0),
     ));
+
+    commands.spawn_scene(bsn! {
+        Transform::from_xyz(0.0, 0.0, 0.0)
+        template_value(RigidBody::Dynamic)
+    });
 }

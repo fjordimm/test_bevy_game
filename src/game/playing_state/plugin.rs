@@ -232,6 +232,11 @@ fn handle_update_prerendering_stuff(
         let width = (msg.window_size.x * scale.0) as u32;
         let height = (msg.window_size.y * scale.0) as u32;
 
+        if width == 0 || height == 0 {
+            warn!("Window width or height is too small, not running code in `handle_update_prerendering_stuff`.");
+            return;
+        }
+
         images
             .get_mut(&prerender_target_texture.0)
             .unwrap()
