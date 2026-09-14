@@ -14,7 +14,7 @@ use crate::game::{
         coord_rebasing::{
             CoordRebasingOrigin, to_transf_space, to_world_space, world_space_transf,
         },
-        player::tags::PlayerBodyTag,
+        player::tags::PlayerBody,
         sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
         tags::{PlayingStateEntity, PrimaryCamera},
     },
@@ -97,13 +97,13 @@ fn on_enter(
 }
 
 fn relocate_to_player_xz(
-    player_body_q: Option<Single<&Transform, With<PlayerBodyTag>>>,
+    player_body_q: Option<Single<&Transform, With<PlayerBody>>>,
     water_layer_topside_q: Option<
         Single<
             &mut Transform,
             (
                 With<WaterLayerTopside>,
-                Without<PlayerBodyTag>,
+                Without<PlayerBody>,
                 Without<WaterLayerUnderside>,
             ),
         >,
@@ -113,7 +113,7 @@ fn relocate_to_player_xz(
             &mut Transform,
             (
                 With<WaterLayerUnderside>,
-                Without<PlayerBodyTag>,
+                Without<PlayerBody>,
                 Without<WaterLayerTopside>,
             ),
         >,

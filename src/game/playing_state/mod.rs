@@ -2,6 +2,7 @@ pub mod cheats_menu;
 pub mod coord_rebasing;
 pub mod environment_light;
 pub mod pause_menu;
+pub mod physics;
 pub mod player;
 pub mod plugin;
 pub mod resources;

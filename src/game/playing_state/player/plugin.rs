@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use avian3d::{collision::collider::Collider, dynamics::rigid_body::RigidBody};
+use avian3d::prelude::*;
 use bevy::{input::mouse::MouseMotion, prelude::*};
 
 use crate::game::{
@@ -10,7 +10,7 @@ use crate::game::{
     playing_state::{
         player::{
             resources::{FreecamEnabled, PlayerMovementSettings},
-            tags::PlayerBodyTag,
+            tags::PlayerBody,
         },
         reusable_materials::ReusableMaterials,
         sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
@@ -60,7 +60,7 @@ fn rotate_and_move(
     camera_transf_q: Option<Single<&mut Transform, With<PrimaryCamera>>>,
     mut rot_o: ResMut<RotO>,
     freecam_enabled: Res<FreecamEnabled>,
-    player_body_q: Option<Single<&mut Transform, (With<PlayerBodyTag>, Without<PrimaryCamera>)>>,
+    player_body_q: Option<Single<&mut Transform, (With<PlayerBody>, Without<PrimaryCamera>)>>,
 ) {
     if let Some(mut camera_transf) = alrms!(camera_transf_q) {
         if let None = rot_o.0 {
@@ -139,6 +139,6 @@ fn spawn_player_body(mut commands: Commands, reusable_materials: Res<ReusableMat
         MeshMaterial3d::<PrimaryMaterial>({ reusable_materials.primary_plain.clone() })
         template_value(RigidBody::Static)
         Collider::cuboid(1.0, 1.0, 1.0)
-        PlayerBodyTag
+        PlayerBody
     });
 }

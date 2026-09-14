@@ -1,24 +1,23 @@
 use std::time::Duration;
 
-use avian3d::{collision::collider::Collider, dynamics::rigid_body::RigidBody};
+use avian3d::prelude::*;
 use bevy::{input::mouse::MouseWheel, prelude::*, time::common_conditions::on_timer};
+use rand::RngExt;
 use rand_distr::num_traits::Pow;
 
 use crate::game::{
-    core::states::OverallState,
-    geometry::{
-        cdodec::{CDodecMeshColors, cdodec_mesh},
-        cube::{CubeMeshColors, cube_mesh},
-    },
+    geometry::cube::cube_mesh,
     graphics::primary_material::plugin::PrimaryMaterial,
     playing_state::{
         coord_rebasing::world_space_transf,
         environment_light::resources::{SkyRotationS, SkyRotationT},
-        player::resources::PlayerMovementSettings,
+        player::{resources::PlayerMovementSettings, tags::PlayerBody},
         reusable_materials::ReusableMaterials,
-        sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
+        sets::{DuringPlaying, DuringPlayingUnpaused},
         tags::PlayingStateEntity,
     },
+    random::{Prng, rands::GeneralRand},
+    util::alrrs,
 };
 
 pub struct QuickDevTestPlugin;
@@ -29,16 +28,17 @@ impl Plugin for QuickDevTestPlugin {
         app
             .add_systems(Update,
                 after_a_sec
-                    .run_if(run_once.and_then(on_timer(Duration::from_secs(1))))
+                    .run_if(on_timer(Duration::from_secs(1)).and_then(run_once))
             )
             .add_systems(Update,
                 scrolling
                     .in_set(DuringPlaying::General)
                     .in_set(DuringPlayingUnpaused)
             )
-            .add_systems(OnEnter(OverallState::Playing),
-                spawn_some_stuff
-                    .in_set(OnEnterPlaying::General)
+            .add_systems(Update,
+                test_cubes
+                    .in_set(DuringPlaying::General)
+                    .in_set(DuringPlayingUnpaused)
             )
         ;
     }
@@ -81,33 +81,29 @@ fn scrolling(
     }
 }
 
-fn spawn_some_stuff(mut commands: Commands, reusable_materials: Res<ReusableMaterials>) {
-    commands.spawn_scene(bsn! {
-        PlayingStateEntity
-        Mesh3d(asset_value(cube_mesh(CubeMeshColors::All(Color::hsv(60.0, 1.0, 1.0)))))
-        MeshMaterial3d::<PrimaryMaterial>({ reusable_materials.primary_plain.clone() })
-        world_space_transf(
-            Transform::from_xyz(0.0, 50.0, -20.0).with_scale(Vec3::new(100.0, 1.0, 100.0)),
-        )
-        template_value(RigidBody::Static)
-        Collider::cuboid(100.0, 1.0, 100.0)
-    });
+fn test_cubes(
+    mut commands: Commands,
+    keys: Res<ButtonInput<KeyCode>>,
+    player_q: Option<Single<&Transform, With<PlayerBody>>>,
+    mut rand: Single<&mut Prng, With<GeneralRand>>,
+    reusable_materials: Res<ReusableMaterials>,
+) {
+    if keys.just_pressed(KeyCode::KeyT) {
+        let player_pos = alrrs!(player_q).translation;
 
-    commands.spawn_scene(bsn! {
-        PlayingStateEntity
-        Mesh3d(asset_value(cdodec_mesh(CDodecMeshColors::Gradient {
-            bottom: Color::hsv(0.0, 1.0, 1.0),
-            top: Color::hsv(180.0, 1.0, 1.0),
-        })))
-        MeshMaterial3d::<PrimaryMaterial>({ reusable_materials.primary_plain.clone() })
-        world_space_transf({
-            let mut transf = Transform::from_xyz(0.0, 70.0, -20.0);
-            transf.rotate_z(0.1);
-            transf.rotate_x(0.15);
-
-            transf
-        })
-        template_value(RigidBody::Dynamic)
-        Collider::cuboid(1.0, 1.0, 1.0)
-    });
+        for _ in 0..100 {
+            commands.spawn_scene(bsn! {
+                PlayingStateEntity
+                world_space_transf(Transform::from_xyz(
+                    player_pos.x + rand.random_range(-20.0..20.0),
+                    player_pos.y + 30.0 + rand.random_range(-20.0..20.0),
+                    player_pos.z + rand.random_range(-20.0..20.0),
+                ))
+                Mesh3d(asset_value(cube_mesh(default())))
+                MeshMaterial3d::<PrimaryMaterial>({ reusable_materials.primary_plain.clone() })
+                template_value(RigidBody::Dynamic)
+                Collider::cuboid(1.0, 1.0, 1.0)
+            });
+        }
+    }
 }

@@ -20,6 +20,7 @@ use crate::game::{
         coord_rebasing::{plugin::CoordRebasingPlugin, world_space_transf},
         environment_light::plugin::EnvironmentLightPlugin,
         pause_menu::plugin::PauseMenuPlugin,
+        physics::plugin::PhysicsPlugin,
         player::plugin::PlayerPlugin,
         resources::RenderingResolutionScale,
         reusable_materials::ReusableMaterials,
@@ -102,6 +103,7 @@ impl Plugin for PlayingStatePlugin {
             .add_plugins(CoordRebasingPlugin)
             .add_plugins(WaterLayerPlugin)
             .add_plugins(CheatsMenuPlugin)
+            .add_plugins(PhysicsPlugin)
         ;
 
         #[cfg(debug_assertions)]

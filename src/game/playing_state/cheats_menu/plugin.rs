@@ -14,7 +14,7 @@ use crate::game::{
         },
     },
     playing_state::{
-        player::{resources::FreecamEnabled, tags::PlayerBodyTag},
+        player::{resources::FreecamEnabled, tags::PlayerBody},
         sets::{OnEnterPlaying, OnExitPlaying},
         tags::PrimaryCamera,
     },
@@ -102,7 +102,7 @@ fn despawn_cheats_menu(mut commands: Commands, cheats_menu_q: Query<Entity, With
 fn player_to_cam_button_observer(
     _: On<Pointer<Click>>,
     camera_q: Option<Single<&Transform, With<PrimaryCamera>>>,
-    player_body_q: Option<Single<&mut Transform, (With<PlayerBodyTag>, Without<PrimaryCamera>)>>,
+    player_body_q: Option<Single<&mut Transform, (With<PlayerBody>, Without<PrimaryCamera>)>>,
 ) {
     let camera = alrrs!(camera_q);
     let mut player_body = alrrs!(player_body_q);

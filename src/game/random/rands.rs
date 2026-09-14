@@ -5,7 +5,7 @@ use bevy_rand::prelude::ForkableRng;
 macro_rules! make_components {
     ( $( $name:ident ),* $(,)? ) => {
         $(
-            #[derive(Component, FromTemplate)]
+            #[derive(Component)]
             pub struct $name;
         )*
     };

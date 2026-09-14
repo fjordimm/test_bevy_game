@@ -1,4 +1,4 @@
-use avian3d::PhysicsPlugins;
+use avian3d::prelude::*;
 use bevy::{log::LogPlugin, prelude::*, window::PrimaryWindow};
 use bevy_rand::plugin::EntropyPlugin;
 

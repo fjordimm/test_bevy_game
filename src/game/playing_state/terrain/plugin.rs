@@ -11,7 +11,7 @@ use crate::game::{
     },
     playing_state::{
         coord_rebasing::{CoordRebasingOrigin, to_transf_space, world_space_transf},
-        player::tags::PlayerBodyTag,
+        player::tags::PlayerBody,
         sets::{DuringPlaying, OnEnterPlaying},
         tags::PlayingStateEntity,
         terrain::{
@@ -61,7 +61,7 @@ const L0_RENDER_DIST: i64 = 2;
 
 fn on_enter1(world: &mut World) {
     // TODO: change the seed to not be this arbitrary number.
-    world.insert_non_send(TheTerrainFunc(TerrainFunc::new(seed_from_u64(123))));
+    world.insert_non_send(TheTerrainFunc(TerrainFunc::new(seed_from_u64(123456))));
 }
 
 fn on_enter2(mut commands: Commands) {
@@ -156,7 +156,7 @@ struct ActiveOrQueued;
 fn offload_distant_chunks(
     mut commands: Commands,
     mut chunk_q: Query<(Entity, &Chunk, &mut Visibility), (With<Chunk>, Without<ActiveOrQueued>)>,
-    player_q: Option<Single<&Transform, With<PlayerBodyTag>>>,
+    player_q: Option<Single<&Transform, With<PlayerBody>>>,
     coord_rebasing_origin: Res<CoordRebasingOrigin>,
     lod_proportion: Res<TerrainLodProportion>,
     mut chunk_dicts: ResMut<ChunkDicts>,
@@ -202,7 +202,7 @@ fn inactivate_all_chunks(
 fn activate_chunks(
     mut commands: Commands,
     coord_rebasing_origin: Res<CoordRebasingOrigin>,
-    player_q: Option<Single<&Transform, With<PlayerBodyTag>>>,
+    player_q: Option<Single<&Transform, With<PlayerBody>>>,
     mut chunk_dicts: ResMut<ChunkDicts>,
     mut chunk_q: Query<(Entity, &mut Chunk, &mut Visibility)>,
     lod_proportion: Res<TerrainLodProportion>,

@@ -10,4 +10,7 @@ All `WorldSpaceEntity`s, upon creation, will be assigned a world space position 
 
 ## What It Means
 
-You can use `Transform`s as you would regularly, as long as you don't rely on stationary objects to have a consistent position across frames. If you want the true world space position of something, then use `to_world_space` on the `Transform`'s translation.
+You can use `Transform`s as you would regularly, as long as you don't treat the `translation` of a `Transform` as absolute. That means...
+1. Don't rely on stationary objects to have a consistent position (of the `Transform`) across frames.
+2. Spawn things relative to other things.
+If you want the true world space position of something, then use `to_world_space` on the `Transform`'s translation.
