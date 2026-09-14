@@ -25,7 +25,10 @@ struct MainMenuStateCamera;
 fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseMode>>) {
     next_mouse_mode.set(MouseMode::Free);
 
-    commands.spawn((MainMenuStateCamera, Camera2d::default()));
+    commands.spawn_scene(bsn! {
+        MainMenuStateCamera
+        Camera2d::default()
+    });
 }
 
 fn despawn_camera(

@@ -144,47 +144,47 @@ fn on_enter(
 
         // The camera that sees all the actual stuff in the world and
         //   renders it to prerender_target_texture.
-        commands.spawn((
-            PlayingStateEntity,
-            PrimaryCamera,
-            Camera3d::default(),
-            Camera {
-                order: -1,
-                ..default()
-            },
-            RenderTarget::Image(prerender_target_texture.clone().into()),
-            Projection::Perspective(PerspectiveProjection {
-                fov: 60f32.to_radians(),
-                ..default()
-            }),
-            AmbientLight {
-                brightness: 0.0,
-                ..default()
-            },
-            world_space_transf(Transform::from_xyz(0.0, 3.0, 7.0)),
-        ));
+        commands
+            .spawn_scene(bsn! {
+                PlayingStateEntity
+                PrimaryCamera
+                Camera3d
+                template_value(Camera {
+                    order: -1,
+                    ..default()
+                })
+                template_value(Projection::Perspective(PerspectiveProjection {
+                    fov: 60f32.to_radians(),
+                    ..default()
+                }))
+                template_value(AmbientLight {
+                    brightness: 0.0,
+                    ..default()
+                })
+                world_space_transf(Transform::from_xyz(0.0, 3.0, 7.0))
+            })
+            .insert(RenderTarget::Image(prerender_target_texture.clone().into()));
 
         let final_render_pass_layer = RenderLayers::layer(1);
 
         // The camera that only sees the final rendering sprite.
         // Is that camera that actually displays to the real screen (in OverallState::Playing).
-        commands.spawn((
-            PlayingStateEntity,
-            Camera2d::default(),
-            final_render_pass_layer.clone(),
-        ));
+        commands.spawn_scene(bsn! {
+            PlayingStateEntity
+            Camera2d
+            template_value(final_render_pass_layer.clone())
+        });
 
         // The final rendering sprite (just displays the prerender_target_texture).
-        commands.spawn((
-            PlayingStateEntity,
-            FinalRenderingSpriteTag,
+        commands.spawn_scene(bsn! {
+            PlayingStateEntity
             Sprite {
-                image: prerender_target_texture.clone(),
-                custom_size: Some(Vec2::new(1.0, 1.0)),
-                ..default()
-            },
-            final_render_pass_layer.clone(),
-        ));
+                image: { prerender_target_texture.clone() },
+                custom_size: { Some(Vec2::new(1.0, 1.0)) },
+            }
+            template_value(final_render_pass_layer.clone())
+            FinalRenderingSpriteTag
+        });
 
         update_prerendering_stuff_messages.write(UpdatePrerenderingStuff {
             window_size: Vec2::new(window.width(), window.height()),

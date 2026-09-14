@@ -11,7 +11,7 @@ use crate::game::{
     },
     playing_state::{
         coord_rebasing::{CoordRebasingOrigin, to_transf_space, world_space_transf},
-        player::tags::PlayerBody,
+        player::tags::PlayerBodyTag,
         sets::{DuringPlaying, OnEnterPlaying},
         tags::PlayingStateEntity,
         terrain::{
@@ -90,15 +90,15 @@ impl ChunkDictKey {
     }
 }
 
-fn chunk_bundle(
+fn chunk_scene(
     lod: usize,
     scale: f32,
     coord_rebasing_origin: &CoordRebasingOrigin,
     off_x: i64,
     off_z: i64,
-) -> impl Bundle {
-    (
-        PlayingStateEntity,
+) -> impl Scene {
+    bsn! {
+        PlayingStateEntity
         Chunk {
             lod,
             scale: scale,
@@ -107,7 +107,7 @@ fn chunk_bundle(
             has_been_queued_for_mesh: false,
             has_mesh: false,
             perimeter_entity: None,
-        },
+        }
         world_space_transf(Transform::from_translation(to_transf_space(
             DVec3::new(
                 scale as f64 * CW as f64 * off_x as f64,
@@ -115,9 +115,9 @@ fn chunk_bundle(
                 scale as f64 * CW as f64 * off_z as f64,
             ),
             coord_rebasing_origin,
-        ))),
-        Visibility::Hidden,
-    )
+        )))
+        Visibility::Hidden
+    }
 }
 
 #[derive(Component, FromTemplate)]
@@ -156,7 +156,7 @@ struct ActiveOrQueued;
 fn offload_distant_chunks(
     mut commands: Commands,
     mut chunk_q: Query<(Entity, &Chunk, &mut Visibility), (With<Chunk>, Without<ActiveOrQueued>)>,
-    player_q: Option<Single<&Transform, With<PlayerBody>>>,
+    player_q: Option<Single<&Transform, With<PlayerBodyTag>>>,
     coord_rebasing_origin: Res<CoordRebasingOrigin>,
     lod_proportion: Res<TerrainLodProportion>,
     mut chunk_dicts: ResMut<ChunkDicts>,
@@ -202,7 +202,7 @@ fn inactivate_all_chunks(
 fn activate_chunks(
     mut commands: Commands,
     coord_rebasing_origin: Res<CoordRebasingOrigin>,
-    player_q: Option<Single<&Transform, With<PlayerBody>>>,
+    player_q: Option<Single<&Transform, With<PlayerBodyTag>>>,
     mut chunk_dicts: ResMut<ChunkDicts>,
     mut chunk_q: Query<(Entity, &mut Chunk, &mut Visibility)>,
     lod_proportion: Res<TerrainLodProportion>,
@@ -252,13 +252,7 @@ fn activate_chunks(
                 }
             } else {
                 let entity = commands
-                    .spawn(chunk_bundle(
-                        0,
-                        L0_CHUNK_SCALE,
-                        &coord_rebasing_origin,
-                        x,
-                        z,
-                    ))
+                    .spawn_scene(chunk_scene(0, L0_CHUNK_SCALE, &coord_rebasing_origin, x, z))
                     .id();
 
                 chunk_dicts.0[0].0.insert(ChunkDictKey::new(x, z), entity);
@@ -336,7 +330,7 @@ fn activate_chunk_or_subchunks(
                         *subchunk_entity
                     } else {
                         let subchunk_entity = commands
-                            .spawn(chunk_bundle(
+                            .spawn_scene(chunk_scene(
                                 cc.lod + 1,
                                 sscale,
                                 coord_rebasing_origin,
@@ -358,7 +352,7 @@ fn activate_chunk_or_subchunks(
                         *subchunk_entity
                     } else {
                         let subchunk_entity = commands
-                            .spawn(chunk_bundle(
+                            .spawn_scene(chunk_scene(
                                 cc.lod + 1,
                                 sscale,
                                 coord_rebasing_origin,
@@ -380,7 +374,7 @@ fn activate_chunk_or_subchunks(
                         *subchunk_entity
                     } else {
                         let subchunk_entity = commands
-                            .spawn(chunk_bundle(
+                            .spawn_scene(chunk_scene(
                                 cc.lod + 1,
                                 sscale,
                                 coord_rebasing_origin,
@@ -402,7 +396,7 @@ fn activate_chunk_or_subchunks(
                         *subchunk_entity
                     } else {
                         let subchunk_entity = commands
-                            .spawn(chunk_bundle(
+                            .spawn_scene(chunk_scene(
                                 cc.lod + 1,
                                 sscale,
                                 coord_rebasing_origin,
@@ -660,16 +654,16 @@ fn gen_next_mesh_in_queue(
                     .insert(MeshMaterial3d(material.clone()));
 
                 let perimeter = commands
-                    .spawn((
-                        PlayingStateEntity,
+                    .spawn_scene(bsn! {
+                        PlayingStateEntity
+                        Transform::default()
+                        Mesh3d(asset_value(perim_mesh))
+                        MeshMaterial3d::<TerrainMaterial>({ material.clone() })
+                        Visibility::Inherited
                         ChunkPerimeter {
                             perim_lod_verticies: perim_lod_vertices,
-                        },
-                        Transform::default(),
-                        Mesh3d(meshes.add(perim_mesh)),
-                        MeshMaterial3d(material.clone()),
-                        Visibility::Inherited,
-                    ))
+                        }
+                    })
                     .id();
                 commands.entity(entity).add_child(perimeter);
                 cc.perimeter_entity = Some(perimeter);

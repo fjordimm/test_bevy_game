@@ -59,71 +59,66 @@ fn on_enter(
 ) {
     // Sunlight.
 
-    commands.spawn((
-        PlayingStateEntity,
-        SunlightTag,
+    commands.spawn_scene(bsn! {
+        PlayingStateEntity
+        template_value(Transform::default().looking_at(vec3(0.0, -1.0, 0.0), Dir3::Y))
         DirectionalLight {
             color: Color::hsv(0.0, 0.0, 1.0),
             shadow_maps_enabled: false,
             contact_shadows_enabled: false,
             illuminance: SUNLIGHT_ILLUMINANCE,
-            ..default()
-        },
-        Transform::default().looking_at(vec3(0.0, -1.0, 0.0), Dir3::Y),
-    ));
+        }
+        SunlightTag
+    });
 
     // "Ambient" light, coming from four directions (pointed towards the vertices of a tetrahedron).
 
     // Cool lighting from above:
-    commands.spawn((
-        PlayingStateEntity,
-        AboveAmbientLightTag,
+    commands.spawn_scene(bsn! {
+        PlayingStateEntity
+        template_value(Transform::default().looking_at(vec3(1.0, -1.0, -1.0), Dir3::Y))
         DirectionalLight {
             color: ABOVE_AMBIENT_LIGHT_COLOR,
             shadow_maps_enabled: false,
             contact_shadows_enabled: false,
             illuminance: ABOVE_AMBIENT_LIGHT_ILLUMINANCE,
-            ..default()
-        },
-        Transform::default().looking_at(vec3(1.0, -1.0, -1.0), Dir3::Y),
-    ));
-    commands.spawn((
-        PlayingStateEntity,
-        AboveAmbientLightTag,
+        }
+        AboveAmbientLightTag
+    });
+    commands.spawn_scene(bsn! {
+        PlayingStateEntity
+        template_value(Transform::default().looking_at(vec3(-1.0, -1.0, 1.0), Dir3::Y))
         DirectionalLight {
             color: ABOVE_AMBIENT_LIGHT_COLOR,
             shadow_maps_enabled: false,
             contact_shadows_enabled: false,
             illuminance: ABOVE_AMBIENT_LIGHT_ILLUMINANCE,
-            ..default()
-        },
-        Transform::default().looking_at(vec3(-1.0, -1.0, 1.0), Dir3::Y),
-    ));
+        }
+        AboveAmbientLightTag
+    });
     // Warm(er) lighting from below:
-    commands.spawn((
-        PlayingStateEntity,
-        BelowAmbientLightTag,
+    commands.spawn_scene(bsn! {
+        PlayingStateEntity
+        template_value(Transform::default().looking_at(vec3(-1.0, 1.0, -1.0), Dir3::Y))
         DirectionalLight {
             color: BELOW_AMBIENT_LIGHT_COLOR,
             shadow_maps_enabled: false,
             contact_shadows_enabled: false,
             illuminance: BELOW_AMBIENT_LIGHT_ILLUMINANCE,
-            ..default()
-        },
-        Transform::default().looking_at(vec3(-1.0, 1.0, -1.0), Dir3::Y),
-    ));
-    commands.spawn((
-        PlayingStateEntity,
-        BelowAmbientLightTag,
+        }
+        BelowAmbientLightTag
+    });
+    commands.spawn_scene(bsn! {
+        PlayingStateEntity
+        template_value(Transform::default().looking_at(vec3(1.0, 1.0, 1.0), Dir3::Y))
         DirectionalLight {
             color: BELOW_AMBIENT_LIGHT_COLOR,
             shadow_maps_enabled: false,
             contact_shadows_enabled: false,
             illuminance: BELOW_AMBIENT_LIGHT_ILLUMINANCE,
-            ..default()
-        },
-        Transform::default().looking_at(vec3(1.0, 1.0, 1.0), Dir3::Y),
-    ));
+        }
+        BelowAmbientLightTag
+    });
 
     // Reset sun position.
 

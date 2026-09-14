@@ -10,8 +10,11 @@ pub struct CoordRebasingOrigin(pub DVec3);
 pub struct WorldSpaceEntity;
 
 /// Input should be in transform space rather than world space.
-pub fn world_space_transf(t: Transform) -> impl Bundle {
-    (WorldSpaceEntity, t)
+pub fn world_space_transf(t: Transform) -> impl Scene {
+    bsn! {
+        WorldSpaceEntity
+        template_value(t)
+    }
 }
 
 pub fn to_world_space(inp: Vec3, coord_rebasing_origin: &CoordRebasingOrigin) -> DVec3 {

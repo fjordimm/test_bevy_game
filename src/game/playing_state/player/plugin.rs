@@ -6,15 +6,13 @@ use bevy::{input::mouse::MouseMotion, prelude::*};
 use crate::game::{
     core::{resources::KeyBindings, states::OverallState},
     geometry::cube::{CubeMeshColors, cube_mesh},
-    graphics::{
-        global_render_data::resources::GlobalRenderDataHandle,
-        primary_material::plugin::{PrimaryMaterial, primary_material},
-    },
+    graphics::primary_material::plugin::PrimaryMaterial,
     playing_state::{
         player::{
             resources::{FreecamEnabled, PlayerMovementSettings},
-            tags::PlayerBody,
+            tags::PlayerBodyTag,
         },
+        reusable_materials::ReusableMaterials,
         sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
         tags::{PlayingStateEntity, PrimaryCamera},
     },
@@ -62,7 +60,7 @@ fn rotate_and_move(
     camera_transf_q: Option<Single<&mut Transform, With<PrimaryCamera>>>,
     mut rot_o: ResMut<RotO>,
     freecam_enabled: Res<FreecamEnabled>,
-    player_body_q: Option<Single<&mut Transform, (With<PlayerBody>, Without<PrimaryCamera>)>>,
+    player_body_q: Option<Single<&mut Transform, (With<PlayerBodyTag>, Without<PrimaryCamera>)>>,
 ) {
     if let Some(mut camera_transf) = alrms!(camera_transf_q) {
         if let None = rot_o.0 {
@@ -131,24 +129,16 @@ fn rotate_and_move(
     }
 }
 
-fn spawn_player_body(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<PrimaryMaterial>>,
-    global_render_data_handle: Res<GlobalRenderDataHandle>,
-) {
-    commands.spawn((
-        PlayingStateEntity,
-        PlayerBody,
-        Transform::from_xyz(0.0, 60.0, 0.0),
-        Mesh3d(meshes.add(cube_mesh(CubeMeshColors::All(Color::linear_rgb(
+fn spawn_player_body(mut commands: Commands, reusable_materials: Res<ReusableMaterials>) {
+    commands.spawn_scene(bsn! {
+        PlayingStateEntity
+        Transform::from_xyz(0.0, 60.0, 0.0)
+        Mesh3d(asset_value(cube_mesh(CubeMeshColors::All(Color::linear_rgb(
             1.0, 0.0, 0.0,
-        ))))),
-        MeshMaterial3d(materials.add(primary_material(
-            default(),
-            global_render_data_handle.get_handle(),
-        ))),
-        RigidBody::Static,
-        Collider::cuboid(1.0, 1.0, 1.0),
-    ));
+        )))))
+        MeshMaterial3d::<PrimaryMaterial>({ reusable_materials.primary_plain.clone() })
+        template_value(RigidBody::Static)
+        Collider::cuboid(1.0, 1.0, 1.0)
+        PlayerBodyTag
+    });
 }

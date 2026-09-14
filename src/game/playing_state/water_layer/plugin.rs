@@ -14,7 +14,7 @@ use crate::game::{
         coord_rebasing::{
             CoordRebasingOrigin, to_transf_space, to_world_space, world_space_transf,
         },
-        player::tags::PlayerBody,
+        player::tags::PlayerBodyTag,
         sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
         tags::{PlayingStateEntity, PrimaryCamera},
     },
@@ -58,54 +58,52 @@ struct WaterLayerUnderside;
 
 fn on_enter(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials_w: ResMut<Assets<WaterMaterial>>,
-    mut materials_wu: ResMut<Assets<WaterUndersideMaterial>>,
     global_render_data_handle: Res<GlobalRenderDataHandle>,
     coord_rebasing_origin: Res<CoordRebasingOrigin>,
 ) {
-    commands.spawn((
-        PlayingStateEntity,
-        Mesh3d(meshes.add(water_layer())),
-        MeshMaterial3d(materials_w.add(water_material(
+    commands.spawn_scene(bsn! {
+        PlayingStateEntity
+        Mesh3d(asset_value(water_layer()))
+        MeshMaterial3d::<WaterMaterial>(asset_value(water_material(
             default(),
             global_render_data_handle.get_handle(),
-        ))),
+        )))
         world_space_transf(
             Transform::from_translation(to_transf_space(
                 DVec3::new(0.0, WATER_LAYER_HEIGHT, 0.0),
                 &coord_rebasing_origin,
             ))
             .with_scale(Vec3::splat(15_000.0)),
-        ),
-        WaterLayerTopside,
-    ));
-    commands.spawn((
-        PlayingStateEntity,
-        Mesh3d(meshes.add(water_layer())),
-        MeshMaterial3d(materials_wu.add(water_underside_material(
+        )
+        WaterLayerTopside
+    });
+
+    commands.spawn_scene(bsn! {
+        PlayingStateEntity
+        Mesh3d(asset_value(water_layer()))
+        MeshMaterial3d::<WaterUndersideMaterial>(asset_value(water_underside_material(
             default(),
             global_render_data_handle.get_handle(),
-        ))),
+        )))
         world_space_transf(
             Transform::from_translation(to_transf_space(
                 DVec3::new(0.0, WATER_LAYER_HEIGHT, 0.0),
                 &coord_rebasing_origin,
             ))
             .with_scale(Vec3::splat(15_000.0).rotate_x(PI)),
-        ),
-        WaterLayerUnderside,
-    ));
+        )
+        WaterLayerUnderside
+    });
 }
 
 fn relocate_to_player_xz(
-    player_body_q: Option<Single<&Transform, With<PlayerBody>>>,
+    player_body_q: Option<Single<&Transform, With<PlayerBodyTag>>>,
     water_layer_topside_q: Option<
         Single<
             &mut Transform,
             (
                 With<WaterLayerTopside>,
-                Without<PlayerBody>,
+                Without<PlayerBodyTag>,
                 Without<WaterLayerUnderside>,
             ),
         >,
@@ -115,7 +113,7 @@ fn relocate_to_player_xz(
             &mut Transform,
             (
                 With<WaterLayerUnderside>,
-                Without<PlayerBody>,
+                Without<PlayerBodyTag>,
                 Without<WaterLayerTopside>,
             ),
         >,

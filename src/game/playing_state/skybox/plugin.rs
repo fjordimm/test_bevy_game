@@ -4,6 +4,7 @@ use bevy::prelude::*;
 
 use crate::game::{
     core::states::OverallState,
+    geometry::cube::cube_mesh,
     graphics::{
         global_render_data::resources::{GlobalRenderData, GlobalRenderDataHandle},
         skybox_material::plugin::SkyboxMaterial,
@@ -40,24 +41,20 @@ pub struct SkyboxTag;
 
 fn spawn_skybox(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<SkyboxMaterial>>,
     time_of_day: Res<SkyRotationT>,
     season_of_year: Res<SkyRotationS>,
     mut global_render_data: ResMut<GlobalRenderData>,
     global_render_data_handle: Res<GlobalRenderDataHandle>,
 ) {
-    commands.spawn((
-        PlayingStateEntity,
-        SkyboxTag,
-        Mesh3d(meshes.add(alrro!(
-            Mesh::from(Cuboid::new(1_000_000.0, 1_000_000.0, 1_000_000.0)).with_inverted_winding()
-        ))),
-        MeshMaterial3d(materials.add(SkyboxMaterial {
+    commands.spawn_scene(bsn! {
+        PlayingStateEntity
+        Mesh3d(asset_value(alrro!(cube_mesh(default()).with_inverted_winding())))
+        MeshMaterial3d::<SkyboxMaterial>(asset_value(SkyboxMaterial {
             global_render_data_handle: global_render_data_handle.get_handle(),
-        })),
-        Transform::default(),
-    ));
+        }))
+        Transform::from_scale(Vec3::splat(1_000_000.0))
+        SkyboxTag
+    });
 
     compute_global_render_data_vals(time_of_day.0, season_of_year.0, &mut global_render_data);
 }

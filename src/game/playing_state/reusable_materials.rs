@@ -4,7 +4,7 @@ use crate::game::graphics::primary_material::plugin::{PrimaryMaterial, primary_m
 
 #[derive(Resource)]
 pub struct ReusableMaterials {
-    pub primary: Handle<PrimaryMaterial>,
+    pub primary_plain: Handle<PrimaryMaterial>,
 }
 
 impl ReusableMaterials {
@@ -13,7 +13,7 @@ impl ReusableMaterials {
         primary_mat: &mut ResMut<Assets<PrimaryMaterial>>,
     ) -> Self {
         Self {
-            primary: primary_mat.add(primary_material(default(), global_render_data_handle)),
+            primary_plain: primary_mat.add(primary_material(default(), global_render_data_handle)),
         }
     }
 }

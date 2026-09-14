@@ -6,7 +6,7 @@ use crate::game::{
     core::states::OverallState,
     playing_state::{
         coord_rebasing::{CoordRebasingOrigin, WorldSpaceEntity},
-        player::tags::PlayerBody,
+        player::tags::PlayerBodyTag,
         sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
     },
     util::alrms,
@@ -78,7 +78,7 @@ fn on_new_transform(
 //   Although, maybe non-active entities should just be despawned.
 
 fn perform_rebase(
-    player_q: Option<Single<&mut Transform, With<PlayerBody>>>,
+    player_q: Option<Single<&mut Transform, With<PlayerBodyTag>>>,
     mut rebase_origin: ResMut<CoordRebasingOrigin>,
     mut wse_q: Query<
         (
@@ -86,7 +86,7 @@ fn perform_rebase(
             &mut LastTransfPosition,
             &mut WorldSpacePosition,
         ),
-        (With<WorldSpaceEntity>, Without<PlayerBody>),
+        (With<WorldSpaceEntity>, Without<PlayerBodyTag>),
     >,
 ) {
     if let Some(mut player_transf) = alrms!(player_q) {

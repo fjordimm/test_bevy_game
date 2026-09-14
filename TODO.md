@@ -38,6 +38,7 @@
     - Add hysteresis for changing LODs.
 - Get rid of test.png.
 - Make an option for increasing the speed at which it generates terrain, at the cost of lag. So `gen_next_mesh_in_queue` would process multiple items in the queue per frame rather than just one.
+- Rework gui to use Scenes (using bsn) rather than Bundles.
 
 ## Optimizations
 - If I don't need uv coords or anything for my primary shader, than try implementing meshes that don't use repeated vertices, while still keeping flat shading.
@@ -48,6 +49,7 @@
 - The function that generates the mesh for terrain chunks could be optimized. Most notably, it makes a big 2d array that is then discarded.
 - `terrain_mesh::quantized_position` could be optimized. Each call to `quantized_position` in `create_terrain_mesh` computes the same value multiple times.
 - Don't even use Bevy's pbr. Just make your own (phong?) calculations based on lights.
+- Use more shared meshes.
 
 ## Features
 - Add TabGroups to gui stuff
