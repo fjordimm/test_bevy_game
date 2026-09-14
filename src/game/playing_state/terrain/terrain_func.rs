@@ -32,8 +32,8 @@ impl TerrainFunc {
     }
 
     pub fn elevation_at(&self, x: f32, z: f32) -> f32 {
-        let x = x as f64 - 4500.0;
-        let z = z as f64 - 4500.0;
+        let x = x as f64 /* TODOr */ - 4500.0;
+        let z = z as f64 /* TODOr */ - 4500.0;
 
         let mut h = 0.0;
 

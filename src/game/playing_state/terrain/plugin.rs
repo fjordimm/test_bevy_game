@@ -1,5 +1,6 @@
 use std::{collections::HashMap, hash::Hash, time::Duration};
 
+use avian3d::{collision::collider::Collider, dynamics::rigid_body::RigidBody};
 use bevy::{math::DVec3, prelude::*, time::common_conditions::on_timer};
 use priority_queue::PriorityQueue;
 
@@ -612,14 +613,13 @@ fn gen_next_mesh_in_queue(
     mut mesh_gen_queue: ResMut<MeshGenQueue>,
     mut chunk_q: Query<(&mut Chunk, Option<&ActiveOrQueued>)>,
     terrain_func: NonSend<TheTerrainFunc>,
-    mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<TerrainMaterial>>,
     mut images: ResMut<Assets<Image>>,
     global_render_data_handle: Res<GlobalRenderDataHandle>,
     use_debug_terrain_colors: Res<UseDebugTerrainColors>,
 ) {
     if let Some((entity, _)) = mesh_gen_queue.0.pop() {
-        if let Some((mut cc, is_active_chunk)) = alrmo!(chunk_q.get_mut(entity)) {
+        if let Ok((mut cc, is_active_chunk)) = chunk_q.get_mut(entity) {
             if let Some(_) = is_active_chunk {
                 let (main_mesh, perim_mesh, perim_lod_vertices) = create_terrain_mesh(
                     &terrain_func.0,
@@ -629,9 +629,16 @@ fn gen_next_mesh_in_queue(
                     cc.lod as usize,
                 );
 
-                commands
-                    .entity(entity)
-                    .insert(Mesh3d(meshes.add(main_mesh)));
+                if cc.lod == MAX_LOD {
+                    commands.entity(entity).apply_scene(bsn! {
+                        template_value(RigidBody::Static)
+                        template_value(alrrs!(Collider::trimesh_from_mesh(&main_mesh)))
+                    });
+                }
+
+                commands.entity(entity).apply_scene(bsn! {
+                    Mesh3d(asset_value(main_mesh))
+                });
 
                 let material = materials.add(terrain_material(
                     default(),
@@ -653,18 +660,39 @@ fn gen_next_mesh_in_queue(
                     .entity(entity)
                     .insert(MeshMaterial3d(material.clone()));
 
-                let perimeter = commands
-                    .spawn_scene(bsn! {
-                        PlayingStateEntity
-                        Transform::default()
-                        Mesh3d(asset_value(perim_mesh))
-                        MeshMaterial3d::<TerrainMaterial>({ material.clone() })
-                        Visibility::Inherited
-                        ChunkPerimeter {
-                            perim_lod_verticies: perim_lod_vertices,
-                        }
-                    })
-                    .id();
+                let mut perimeter = commands.spawn_scene(bsn! {
+                    PlayingStateEntity
+                    Transform::default()
+                });
+                match cc.lod == MAX_LOD {
+                    false => {}
+                    true => {
+                        let mut plain_perim_mesh = perim_mesh.clone();
+                        change_mesh_from_perim_lod_vertices(
+                            &mut plain_perim_mesh,
+                            &perim_lod_vertices,
+                            MAX_LOD,
+                            MAX_LOD,
+                            MAX_LOD,
+                            MAX_LOD,
+                        );
+
+                        perimeter.apply_scene(bsn! {
+                            template_value(RigidBody::Static)
+                            template_value(alrrs!(Collider::trimesh_from_mesh(&plain_perim_mesh)))
+                        });
+                    }
+                }
+                // This is down here so that a few things can be borrowed before being moved.
+                perimeter.apply_scene(bsn! {
+                    Mesh3d(asset_value(perim_mesh))
+                    MeshMaterial3d::<TerrainMaterial>({ material.clone() })
+                    Visibility::Inherited
+                    ChunkPerimeter {
+                        perim_lod_verticies: perim_lod_vertices,
+                    }
+                });
+                let perimeter = perimeter.id();
                 commands.entity(entity).add_child(perimeter);
                 cc.perimeter_entity = Some(perimeter);
 
