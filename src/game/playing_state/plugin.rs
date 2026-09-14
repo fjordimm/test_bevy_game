@@ -213,7 +213,7 @@ fn on_exit(
 #[derive(Resource)]
 struct PrerenderTargetTexture(Handle<Image>);
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct FinalRenderingSpriteTag;
 
 #[derive(Message)]

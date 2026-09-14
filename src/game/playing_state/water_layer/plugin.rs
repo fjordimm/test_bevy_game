@@ -50,10 +50,10 @@ const WATER_LAYER_HEIGHT: f64 = 25.0;
 
 const RELOCATE_INTERVAL: u64 = 5000;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct WaterLayerTopside;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct WaterLayerUnderside;
 
 fn on_enter(

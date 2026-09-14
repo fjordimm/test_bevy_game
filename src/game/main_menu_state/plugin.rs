@@ -19,7 +19,7 @@ impl Plugin for MainMenuStatePlugin {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct MainMenuStateCamera;
 
 fn on_enter(mut commands: Commands, mut next_mouse_mode: ResMut<NextState<MouseMode>>) {

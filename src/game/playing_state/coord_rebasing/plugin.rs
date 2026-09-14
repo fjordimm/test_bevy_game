@@ -43,10 +43,10 @@ fn on_enter(mut commands: Commands) {
     commands.insert_resource(CoordRebasingOrigin(DVec3::new(0.0, 0.0, 0.0)));
 }
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct LastTransfPosition(Vec3);
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct WorldSpacePosition(DVec3);
 
 fn on_new_transform(

@@ -35,7 +35,7 @@ impl Plugin for SkyboxPlugin {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 pub struct SkyboxTag;
 
 fn spawn_skybox(

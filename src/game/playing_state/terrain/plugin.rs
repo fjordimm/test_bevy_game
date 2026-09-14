@@ -120,7 +120,7 @@ fn chunk_bundle(
     )
 }
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct Chunk {
     lod: usize,
     scale: f32,
@@ -144,13 +144,13 @@ impl Chunk {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct ChunkPerimeter {
     perim_lod_verticies: Vec<Vec<[f32; 3]>>,
 }
 
 /// Has a mesh and is visible, or is in queue for a mesh.
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct ActiveOrQueued;
 
 fn offload_distant_chunks(

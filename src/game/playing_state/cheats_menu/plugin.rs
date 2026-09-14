@@ -40,10 +40,10 @@ impl Plugin for CheatsMenuPlugin {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 pub struct CheatsMenuTag;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct EnableFreecamCheckbox;
 
 fn spawn_cheats_menu(

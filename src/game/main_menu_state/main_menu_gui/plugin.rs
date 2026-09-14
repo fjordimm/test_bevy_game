@@ -26,7 +26,7 @@ impl Plugin for MainMenuGuiPlugin {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct MainMenuGuiTag;
 
 fn spawn_main_menu_gui(

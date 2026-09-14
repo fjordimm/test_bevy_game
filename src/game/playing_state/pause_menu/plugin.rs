@@ -27,7 +27,7 @@ impl Plugin for PauseMenuPlugin {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct PauseMenuTag;
 
 fn spawn_pause_menu(

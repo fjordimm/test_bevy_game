@@ -45,31 +45,31 @@ impl Plugin for PrimaryDebugMenuPlugin {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct PrimaryDebugMenuTag;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct CoreSection;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct FpsText;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct LagSpikeText;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct EntityCountText;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct PlayingStateSection;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct TransformCountText;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct WorldSpaceEntityCountText;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 struct CamPositionText;
 
 fn spawn_primary_debug_menu(

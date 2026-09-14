@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
 // Will be despawned when exiting OverallState::Playing.
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 pub struct PlayingStateEntity;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 pub struct PrimaryCamera;

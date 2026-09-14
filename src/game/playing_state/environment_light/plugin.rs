@@ -43,13 +43,13 @@ const SUNLIGHT_Y_LEVEL_OF_MIN: f32 = -0.1;
 const AMBIENT_LIGHT_MIN_FACTOR: f32 = 0.05;
 const AMBIENT_LIGHT_Y_LEVEL_OF_MIN: f32 = -0.4; // This must match "shaders/sky.wgsl"::TWILIGHT_OFFSET
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 pub struct SunlightTag;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 pub struct AboveAmbientLightTag;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 pub struct BelowAmbientLightTag;
 
 fn on_enter(

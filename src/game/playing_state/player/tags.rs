@@ -1,4 +1,4 @@
 use bevy::prelude::*;
 
-#[derive(Component)]
+#[derive(Component, FromTemplate)]
 pub struct PlayerBody;

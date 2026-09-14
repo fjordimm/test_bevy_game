@@ -58,7 +58,7 @@ impl Plugin for PostProcessorPlugin {
 
 const SHADER_ASSET_PATH: &str = "shaders/materials/post_processor.wgsl";
 
-#[derive(Component, Default, Clone, Copy, ExtractComponent, ShaderType)]
+#[derive(Component, FromTemplate, Default, Clone, Copy, ExtractComponent, ShaderType)]
 struct PostProcessorSettings {
     _unused: Vec4,
 }
