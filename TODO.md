@@ -2,9 +2,10 @@
 # Todo List
 
 ## Currently Working On
+- Things that can set GameLoadingState to Loading.
 - Cheat menu.
 - First person controller.
-- Texturing?? Texturing scale thing?
+- Texturing?? Texturing scale thing? (no textures actually)
 - Maybe: instead of using plain `Without<>`s when you need to resolve query conflicts, you should make a type alias for it.
 
 ## Reminders
@@ -15,6 +16,7 @@
 - Prefer using resources rather than consts for constant arbitrary values.
 - Be consistent on when to use the 'Tag' suffix.
 - Sort out when to use `#[allow(unused)]`. Right now it's just kind of whatever.
+- For the most part, derive `FromTemplate` when deriving `Component`.
 
 ### Tests
 

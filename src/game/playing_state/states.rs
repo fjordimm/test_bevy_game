@@ -8,6 +8,7 @@ pub enum PauseState {
     Paused,
 }
 
+/// Not to be set by anything other than 
 #[derive(States, Debug, Clone, Eq, PartialEq, Hash, Default)]
 pub enum GameLoadingState {
     #[default]

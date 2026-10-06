@@ -29,14 +29,14 @@ impl Plugin for PlayerPlugin {
                 on_enter
                     .in_set(OnEnterPlaying::ResourceSetup)
             )
+            .add_systems(OnEnter(OverallState::Playing),
+                spawn_player_body
+                    .in_set(OnEnterPlaying::SpawnThings)
+            )
             .add_systems(Update,
                 rotate_and_move
                     .in_set(DuringPlaying::General)
                     .in_set(DuringPlayingUnpaused)
-            )
-            .add_systems(OnEnter(OverallState::Playing),
-                spawn_player_body
-                    .in_set(OnEnterPlaying::SpawnThings)
             )
         ;
     }
@@ -51,6 +51,23 @@ fn on_enter(mut commands: Commands) {
     commands.insert_resource(FreecamEnabled(false));
 }
 
+fn spawn_player_body(mut commands: Commands, reusable_materials: Res<ReusableMaterials>) {
+    commands.spawn_scene(bsn! {
+        PlayingStateEntity
+        Transform::from_xyz(0.0, 90.0, 0.0)
+        Mesh3d(asset_value(cube_mesh(CubeMeshColors::All(Color::linear_rgb(
+            1.0, 0.0, 0.0,
+        )))))
+        MeshMaterial3d::<PrimaryMaterial>({ reusable_materials.primary_plain.clone() })
+        template_value(RigidBody::Dynamic)
+        template_value(LockedAxes::new().lock_rotation_x().lock_rotation_z())
+        Collider::cuboid(1.0, 1.0, 1.0)
+        PlayerBody
+    });
+
+    // TODO: Make the camera a child of the player body.
+}
+
 fn rotate_and_move(
     time: Res<Time>,
     movement_settings: Res<PlayerMovementSettings>,
@@ -60,7 +77,9 @@ fn rotate_and_move(
     camera_transf_q: Option<Single<&mut Transform, With<PrimaryCamera>>>,
     mut rot_o: ResMut<RotO>,
     freecam_enabled: Res<FreecamEnabled>,
-    player_body_q: Option<Single<&mut Transform, (With<PlayerBody>, Without<PrimaryCamera>)>>,
+    player_body_q: Option<
+        Single<(&mut Transform, &RigidBody), (With<PlayerBody>, Without<PrimaryCamera>)>,
+    >,
 ) {
     if let Some(mut camera_transf) = alrms!(camera_transf_q) {
         if let None = rot_o.0 {
@@ -69,7 +88,11 @@ fn rotate_and_move(
         }
 
         if let Some(rot) = alrms!(&mut rot_o.0) {
-            let mut player_body = alrrs!(player_body_q);
+            let (mut player_body_transf, player_body_rb) = alrrs!(player_body_q).into_inner();
+
+            // if freecam_enabled.0 {
+            //     if
+            // }
 
             // Rotation
 
@@ -85,7 +108,7 @@ fn rotate_and_move(
                 if freecam_enabled.0 {
                     camera_transf.rotation = rotation;
                 } else {
-                    player_body.rotation = rotation;
+                    player_body_transf.rotation = rotation;
                     camera_transf.rotation = rotation;
                 }
             });
@@ -95,50 +118,58 @@ fn rotate_and_move(
             let forward = -Quat::from_euler(EulerRot::YXZ, rot.0, 0.0, 0.0).mul_vec3(Vec3::Z);
             let right = forward.rotate_y(-0.5 * PI);
 
-            let mut velocity = Vec3::ZERO;
-            if keys.pressed(key_bindings.move_forward) {
-                velocity += forward;
-            }
-            if keys.pressed(key_bindings.move_backward) {
-                velocity -= forward;
-            }
-            if keys.pressed(key_bindings.move_right) {
-                velocity += right;
-            }
-            if keys.pressed(key_bindings.move_left) {
-                velocity -= right;
-            }
-            if keys.pressed(key_bindings.move_up) {
-                velocity += Vec3::Y;
-            }
-            if keys.pressed(key_bindings.move_down) {
-                velocity -= Vec3::Y;
+            let mut movement_vector = Vec3::ZERO;
+            if freecam_enabled.0 {
+                if keys.pressed(key_bindings.move_forward) {
+                    movement_vector += forward;
+                }
+                if keys.pressed(key_bindings.move_backward) {
+                    movement_vector -= forward;
+                }
+                if keys.pressed(key_bindings.move_right) {
+                    movement_vector += right;
+                }
+                if keys.pressed(key_bindings.move_left) {
+                    movement_vector -= right;
+                }
+                if keys.pressed(key_bindings.move_up) {
+                    movement_vector += Vec3::Y;
+                }
+                if keys.pressed(key_bindings.move_down) {
+                    movement_vector -= Vec3::Y;
+                }
+            } else {
+                if keys.pressed(key_bindings.move_forward) {
+                    movement_vector += forward;
+                }
+                if keys.pressed(key_bindings.move_backward) {
+                    movement_vector -= forward;
+                }
+                if keys.pressed(key_bindings.move_right) {
+                    movement_vector += right;
+                }
+                if keys.pressed(key_bindings.move_left) {
+                    movement_vector -= right;
+                }
+                if keys.pressed(key_bindings.move_up) {
+                    movement_vector += Vec3::Y;
+                }
+                if keys.pressed(key_bindings.move_down) {
+                    movement_vector -= Vec3::Y;
+                }
             }
 
-            velocity = velocity.normalize_or(Vec3::ZERO);
+            movement_vector = movement_vector.normalize_or(Vec3::ZERO);
 
-            let translation_offset = velocity * movement_settings.freecam_speed * time.delta_secs();
+            let translation_offset =
+                movement_vector * movement_settings.freecam_speed * time.delta_secs();
 
             if freecam_enabled.0 {
                 camera_transf.translation += translation_offset;
             } else {
-                player_body.translation += translation_offset;
-                camera_transf.translation = player_body.translation;
+                player_body_transf.translation += translation_offset;
+                camera_transf.translation = player_body_transf.translation;
             }
         }
     }
-}
-
-fn spawn_player_body(mut commands: Commands, reusable_materials: Res<ReusableMaterials>) {
-    commands.spawn_scene(bsn! {
-        PlayingStateEntity
-        Transform::from_xyz(0.0, 60.0, 0.0)
-        Mesh3d(asset_value(cube_mesh(CubeMeshColors::All(Color::linear_rgb(
-            1.0, 0.0, 0.0,
-        )))))
-        MeshMaterial3d::<PrimaryMaterial>({ reusable_materials.primary_plain.clone() })
-        template_value(RigidBody::Static)
-        Collider::cuboid(1.0, 1.0, 1.0)
-        PlayerBody
-    });
 }
