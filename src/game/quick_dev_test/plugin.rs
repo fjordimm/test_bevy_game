@@ -27,7 +27,7 @@ impl Plugin for QuickDevTestPlugin {
         #[rustfmt::skip]
         app
             .add_systems(Update,
-                after_a_sec
+                todor1
                     .run_if(on_timer(Duration::from_secs(1)).and_then(run_once))
             )
             .add_systems(Update,
@@ -44,7 +44,7 @@ impl Plugin for QuickDevTestPlugin {
     }
 }
 
-fn after_a_sec() {}
+fn todor1() {}
 
 fn scrolling(
     keys: Res<ButtonInput<KeyCode>>,

@@ -74,7 +74,7 @@ fn spawn_pause_menu(
             }));
         }))
         .insert(PauseMenuTag)
-        .insert(ZIndex(3000))
+        .insert(ZIndex(3500))
         .id();
 
     commands.entity(gui_root.0).add_child(pause_menu);

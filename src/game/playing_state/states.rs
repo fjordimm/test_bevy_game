@@ -12,7 +12,7 @@ pub enum PauseState {
 #[derive(States, Debug, Clone, Eq, PartialEq, Hash, Default)]
 pub enum GameLoadingState {
     #[default]
+    Limbo,
     NotLoading,
-    #[allow(unused)]
     Loading,
 }

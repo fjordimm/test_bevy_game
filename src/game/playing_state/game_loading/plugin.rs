@@ -1,11 +1,19 @@
 use bevy::prelude::*;
 
 use crate::game::{
-    core::states::OverallState,
+    core::{resources::GlobalGuiRoot, states::OverallState},
+    gui::{
+        gui_children,
+        resources::GuiThemeComputed,
+        widgets::{
+            screen_div::{GuiScreenDivProps, gui_screen_div},
+            text::gui_text_h1,
+        },
+    },
     playing_state::{
         game_loading::resources::GameLoadingInhibition,
         sets::{DuringPlaying, OnEnterPlaying},
-        states::GameLoadingState,
+        states::{GameLoadingState, PauseState},
     },
 };
 
@@ -23,6 +31,10 @@ impl Plugin for GameLoadingPlugin {
                 update_game_loading_state
                     .in_set(DuringPlaying::Final)
             )
+            .add_systems(OnEnter(GameLoadingState::Loading), spawn_loading_overlay)
+            .add_systems(OnEnter(PauseState::Unpaused), spawn_loading_overlay)
+            .add_systems(OnExit(GameLoadingState::Loading), despawn_loading_overlay)
+            .add_systems(OnEnter(PauseState::Paused), despawn_loading_overlay)
         ;
     }
 }
@@ -41,4 +53,45 @@ fn update_game_loading_state(
     } else {
         next_game_loading_state.set(GameLoadingState::Loading);
     }
+}
+
+#[derive(Component, FromTemplate)]
+struct LoadingOverlayTag;
+
+fn spawn_loading_overlay(
+    mut commands: Commands,
+    game_loading_state: Res<State<GameLoadingState>>,
+    pause_state: Res<State<PauseState>>,
+    gui_root: Res<GlobalGuiRoot>,
+    theme: Res<GuiThemeComputed>,
+) {
+    if let GameLoadingState::Loading = game_loading_state.get()
+        && let PauseState::Unpaused = pause_state.get()
+    {
+        let overlay = commands
+            .spawn(gui_screen_div(GuiScreenDivProps {
+                flex_direction: FlexDirection::Column,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                bg_color: theme.0.pause_menu_bg_color,
+                ..default()
+            }))
+            .insert(gui_children(|p| {
+                p.spawn(gui_text_h1("Loading..."));
+            }))
+            .insert(LoadingOverlayTag)
+            .insert(ZIndex(3010))
+            .id();
+
+        commands.entity(gui_root.0).add_child(overlay);
+    }
+}
+
+fn despawn_loading_overlay(
+    mut commands: Commands,
+    overlay_q: Query<Entity, With<LoadingOverlayTag>>,
+) {
+    overlay_q.iter().for_each(|entity| {
+        commands.entity(entity).despawn();
+    });
 }

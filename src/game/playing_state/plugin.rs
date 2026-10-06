@@ -204,6 +204,7 @@ fn on_exit(
     entities: &Entities,
     all_entities_q: Query<Entity, With<PlayingStateEntity>>,
     mut next_pause_state: ResMut<NextState<PauseState>>,
+    mut next_game_loading_state: ResMut<NextState<GameLoadingState>>,
 ) {
     all_entities_q.iter().for_each(|entity| {
         if entities.contains(entity) {
@@ -212,6 +213,7 @@ fn on_exit(
     });
 
     next_pause_state.set(PauseState::Limbo);
+    next_game_loading_state.set(GameLoadingState::Limbo);
 }
 
 #[derive(Resource)]

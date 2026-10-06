@@ -4,6 +4,7 @@ use bevy::prelude::*;
 pub enum DuringPlaying {
     General,
     CoordRebasing,
+    /// TODO: This value is kind of a placeholder. It should probably be subdivided.
     Final,
 }
 

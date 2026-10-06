@@ -73,7 +73,7 @@ fn spawn_main_menu_gui(
             }));
         }))
         .insert(MainMenuGuiTag)
-        .insert(ZIndex(3001))
+        .insert(ZIndex(3510))
         .id();
 
     commands.entity(gui_root.0).add_child(main_menu_gui);
