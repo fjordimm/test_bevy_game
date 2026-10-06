@@ -19,7 +19,7 @@ use crate::game::{
         cheats_menu::plugin::CheatsMenuPlugin,
         coord_rebasing::{plugin::CoordRebasingPlugin, world_space_transf},
         environment_light::plugin::EnvironmentLightPlugin,
-        game_loading_inhibition::plugin::GameLoadingInhibitionPlugin,
+        game_loading::plugin::GameLoadingPlugin,
         pause_menu::plugin::PauseMenuPlugin,
         physics::plugin::PhysicsPlugin,
         player::plugin::PlayerPlugin,
@@ -105,7 +105,7 @@ impl Plugin for PlayingStatePlugin {
             .add_plugins(WaterLayerPlugin)
             .add_plugins(CheatsMenuPlugin)
             .add_plugins(PhysicsPlugin)
-            .add_plugins(GameLoadingInhibitionPlugin)
+            .add_plugins(GameLoadingPlugin)
         ;
 
         #[cfg(debug_assertions)]

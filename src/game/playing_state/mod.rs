@@ -1,7 +1,7 @@
 pub mod cheats_menu;
 pub mod coord_rebasing;
 pub mod environment_light;
-pub mod game_loading_inhibition;
+pub mod game_loading;
 pub mod pause_menu;
 pub mod physics;
 pub mod player;

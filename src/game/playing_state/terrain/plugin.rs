@@ -12,7 +12,7 @@ use crate::game::{
     },
     playing_state::{
         coord_rebasing::{CoordRebasingOrigin, to_transf_space, world_space_transf},
-        game_loading_inhibition::resources::GameLoadingInhibition,
+        game_loading::resources::GameLoadingInhibition,
         player::tags::PlayerBody,
         sets::{DuringPlaying, OnEnterPlaying},
         tags::PlayingStateEntity,

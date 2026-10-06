@@ -3,15 +3,15 @@ use bevy::prelude::*;
 use crate::game::{
     core::states::OverallState,
     playing_state::{
-        game_loading_inhibition::resources::GameLoadingInhibition,
+        game_loading::resources::GameLoadingInhibition,
         sets::{DuringPlaying, OnEnterPlaying},
         states::GameLoadingState,
     },
 };
 
-pub struct GameLoadingInhibitionPlugin;
+pub struct GameLoadingPlugin;
 
-impl Plugin for GameLoadingInhibitionPlugin {
+impl Plugin for GameLoadingPlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
