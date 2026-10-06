@@ -4,10 +4,14 @@ use bevy::prelude::*;
 pub enum DuringPlaying {
     General,
     CoordRebasing,
+    Final,
 }
 
-pub(super) const DURING_PLAYING_LIST: (DuringPlaying, DuringPlaying) =
-    (DuringPlaying::General, DuringPlaying::CoordRebasing);
+pub(super) const DURING_PLAYING_LIST: (DuringPlaying, DuringPlaying, DuringPlaying) = (
+    DuringPlaying::General,
+    DuringPlaying::CoordRebasing,
+    DuringPlaying::Final,
+);
 
 /// PauseState is Unpaused and GameLoadingState is NotLoading.
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]

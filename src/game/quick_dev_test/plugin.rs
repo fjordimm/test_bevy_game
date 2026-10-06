@@ -44,9 +44,7 @@ impl Plugin for QuickDevTestPlugin {
     }
 }
 
-fn after_a_sec(/* mut gui_scale: ResMut<GuiScale> */) {
-    // gui_scale.0 = 5.0;
-}
+fn after_a_sec() {}
 
 fn scrolling(
     keys: Res<ButtonInput<KeyCode>>,

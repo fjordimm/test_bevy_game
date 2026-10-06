@@ -21,6 +21,7 @@ pub struct UseDebugTerrainColors(pub bool);
 
 impl Default for UseDebugTerrainColors {
     fn default() -> Self {
-        Self(false)
+        // TODOc
+        Self(true)
     }
 }
