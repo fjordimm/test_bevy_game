@@ -7,7 +7,7 @@ use crate::game::{
     playing_state::{
         coord_rebasing::{CoordRebasingOrigin, WorldSpaceEntity},
         player::tags::PlayerBody,
-        sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
+        sets::{DuringPlaying, DuringPlayingRunning, OnEnterPlaying},
     },
     util::alrms,
 };
@@ -30,7 +30,7 @@ impl Plugin for CoordRebasingPlugin {
             .add_systems(Update,
                 perform_rebase
                     .in_set(DuringPlaying::CoordRebasing)
-                    .in_set(DuringPlayingUnpaused)
+                    .in_set(DuringPlayingRunning)
                     .run_if(on_timer(Duration::from_millis(REBASE_INTERVAL)))
             )
         ;

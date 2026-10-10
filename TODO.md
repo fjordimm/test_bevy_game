@@ -2,7 +2,7 @@
 # Todo List
 
 ## Currently Working On
-- Things that can set GameLoadingState to Loading.
+- Fix bug where physics isn't paused at the start.
 - Cheat menu.
 - First person controller.
 - Texturing?? Texturing scale thing? (no textures actually)

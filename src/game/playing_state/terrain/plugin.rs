@@ -38,7 +38,7 @@ impl Plugin for TerrainPlugin {
                     .in_set(OnEnterPlaying::ResourceSetup)
             )
             .add_systems(Update,
-                (inactivate_all_chunks, activate_chunks, update_chunk_perimeters, offload_distant_chunks, update_game_loading_inhibition)
+                (inactivate_all_chunks, activate_chunks, update_chunk_perimeters, offload_distant_chunks)
                     .chain()
                     .before(gen_next_mesh_in_queue)
                     .in_set(DuringPlaying::General)
@@ -47,6 +47,10 @@ impl Plugin for TerrainPlugin {
             .add_systems(Update,
                 gen_next_mesh_in_queue
                     .in_set(DuringPlaying::General)
+            )
+            .add_systems(Update,
+                update_game_loading_inhibition
+                    .in_set(DuringPlaying::PostPhysics)
             )
         ;
     }
@@ -597,29 +601,6 @@ fn offload_distant_chunks(
     });
 }
 
-struct GameLoadingInhibitorId;
-
-// TODO: optimize this? It's modifying game_loading_inhibition every frame.
-fn update_game_loading_inhibition(
-    coord_rebasing_origin: Res<CoordRebasingOrigin>,
-    player_q: Option<Single<&Transform, With<PlayerBody>>>,
-    chunk_dicts: Res<ChunkDicts>,
-    chunk_q: Query<(&Chunk, &Visibility), With<ActiveOrQueued>>,
-    mut game_loading_inhibition: ResMut<GameLoadingInhibition>,
-) {
-    let player_pos = alrrs!(player_q).translation + coord_rebasing_origin.0.as_vec3();
-    let player_x = (player_pos.x / (LL_CHUNK_SCALE * CW as f32) - 0.5).round() as i64;
-    let player_z = (player_pos.z / (LL_CHUNK_SCALE * CW as f32) - 0.5).round() as i64;
-
-    if let Some(lod) = get_active_chunk_lod_at(&chunk_dicts, &chunk_q, MAX_LOD, player_x, player_z)
-        && lod == MAX_LOD
-    {
-        game_loading_inhibition.remove_inhibitor::<GameLoadingInhibitorId>();
-    } else {
-        game_loading_inhibition.add_inhibitor::<GameLoadingInhibitorId>();
-    }
-}
-
 #[derive(Resource)]
 struct MeshGenQueue(PriorityQueue<Entity, usize>);
 
@@ -722,5 +703,28 @@ fn gen_next_mesh_in_queue(
                 cc.has_been_queued_for_mesh = false;
             }
         }
+    }
+}
+
+struct GameLoadingInhibitorId;
+
+// TODO: Optimize this? It's modifying game_loading_inhibition every frame.
+fn update_game_loading_inhibition(
+    coord_rebasing_origin: Res<CoordRebasingOrigin>,
+    player_q: Option<Single<&Transform, With<PlayerBody>>>,
+    chunk_dicts: Res<ChunkDicts>,
+    chunk_q: Query<(&Chunk, &Visibility), With<ActiveOrQueued>>,
+    mut game_loading_inhibition: ResMut<GameLoadingInhibition>,
+) {
+    let player_pos = alrrs!(player_q).translation + coord_rebasing_origin.0.as_vec3();
+    let player_x = (player_pos.x / (LL_CHUNK_SCALE * CW as f32) - 0.5).round() as i64;
+    let player_z = (player_pos.z / (LL_CHUNK_SCALE * CW as f32) - 0.5).round() as i64;
+
+    if let Some(lod) = get_active_chunk_lod_at(&chunk_dicts, &chunk_q, MAX_LOD, player_x, player_z)
+        && lod == MAX_LOD
+    {
+        game_loading_inhibition.remove_inhibitor::<GameLoadingInhibitorId>();
+    } else {
+        game_loading_inhibition.add_inhibitor::<GameLoadingInhibitorId>();
     }
 }

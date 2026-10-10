@@ -26,7 +26,7 @@ use crate::game::{
         resources::RenderingResolutionScale,
         reusable_materials::ReusableMaterials,
         sets::{
-            DURING_PLAYING_LIST, DuringPlaying, DuringPlayingNotLoading, DuringPlayingUnpaused,
+            DURING_PLAYING_LIST, DuringPlaying, DuringPlayingNotLoading, DuringPlayingRunning,
             ON_ENTER_PLAYING_LIST, ON_EXIT_PLAYING_LIST, OnEnterPlaying, OnExitPlaying,
         },
         skybox::plugin::SkyboxPlugin,
@@ -44,11 +44,14 @@ impl Plugin for PlayingStatePlugin {
     fn build(&self, app: &mut App) {
         #[rustfmt::skip]
         app
+            .add_sub_state::<PauseState>()
+            .add_sub_state::<GameLoadingState>()
+            .add_message::<UpdatePrerenderingStuff>()
             .configure_sets(Update, (
                 DURING_PLAYING_LIST
+                    .chain()
                     .run_if(in_state(OverallState::Playing)),
-                DURING_PLAYING_LIST.chain(),
-                DuringPlayingUnpaused
+                DuringPlayingRunning
                     .run_if(in_state(OverallState::Playing))
                     .run_if(in_state(PauseState::Unpaused))
                     .run_if(in_state(GameLoadingState::NotLoading)),
@@ -62,9 +65,6 @@ impl Plugin for PlayingStatePlugin {
             .configure_sets(OnExit(OverallState::Playing),
                 ON_EXIT_PLAYING_LIST.chain()
             )
-            .init_state::<PauseState>()
-            .init_state::<GameLoadingState>()
-            .add_message::<UpdatePrerenderingStuff>()
             .add_systems(OnEnter(OverallState::Playing),
                 on_enter
                     .in_set(OnEnterPlaying::PlayingStatePluginUseOnly)
@@ -203,17 +203,12 @@ fn on_exit(
     mut commands: Commands,
     entities: &Entities,
     all_entities_q: Query<Entity, With<PlayingStateEntity>>,
-    mut next_pause_state: ResMut<NextState<PauseState>>,
-    mut next_game_loading_state: ResMut<NextState<GameLoadingState>>,
 ) {
     all_entities_q.iter().for_each(|entity| {
         if entities.contains(entity) {
             commands.entity(entity).try_despawn();
         }
     });
-
-    next_pause_state.set(PauseState::Limbo);
-    next_game_loading_state.set(GameLoadingState::Limbo);
 }
 
 #[derive(Resource)]
@@ -276,10 +271,6 @@ fn toggle_pause(
 ) {
     if keys.just_pressed(key_bindings.pause) {
         next_pause_state.set(match pause_state.get() {
-            PauseState::Limbo => {
-                error!("PauseState was in Limbo. Setting it to Unpaused.");
-                PauseState::Unpaused
-            }
             PauseState::Unpaused => PauseState::Paused,
             PauseState::Paused => PauseState::Unpaused,
         });

@@ -13,7 +13,7 @@ use crate::game::{
         environment_light::resources::{SkyRotationS, SkyRotationT},
         player::{resources::PlayerMovementSettings, tags::PlayerBody},
         reusable_materials::ReusableMaterials,
-        sets::{DuringPlaying, DuringPlayingUnpaused},
+        sets::{DuringPlaying, DuringPlayingRunning},
         tags::PlayingStateEntity,
     },
     random::{Prng, rands::GeneralRand},
@@ -33,12 +33,12 @@ impl Plugin for QuickDevTestPlugin {
             .add_systems(Update,
                 scrolling
                     .in_set(DuringPlaying::General)
-                    .in_set(DuringPlayingUnpaused)
+                    .in_set(DuringPlayingRunning)
             )
             .add_systems(Update,
                 test_cubes
                     .in_set(DuringPlaying::General)
-                    .in_set(DuringPlayingUnpaused)
+                    .in_set(DuringPlayingRunning)
             )
         ;
     }

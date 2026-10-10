@@ -44,11 +44,13 @@ fn unpause_physics(
     if let PauseState::Unpaused = pause_state.get()
         && let GameLoadingState::NotLoading = game_loading_state.get()
     {
+        debug!("starting physics");
         toggle_physics_msg.write(TogglePhysics(true));
     }
 }
 
 fn pause_physics(mut toggle_physics_msg: MessageWriter<TogglePhysics>) {
+    debug!("stopping physics");
     toggle_physics_msg.write(TogglePhysics(false));
 }
 

@@ -46,12 +46,17 @@ fn on_enter(mut commands: Commands) {
 // TODO: This could be optimized. It is changing GameLoadingState every frame.
 fn update_game_loading_state(
     game_loading_inhibition: Res<GameLoadingInhibition>,
+    game_loading_state: Res<State<GameLoadingState>>,
     mut next_game_loading_state: ResMut<NextState<GameLoadingState>>,
 ) {
     if game_loading_inhibition.num_inhibitors() == 0 {
-        next_game_loading_state.set(GameLoadingState::NotLoading);
+        if *game_loading_state.get() != GameLoadingState::NotLoading {
+            next_game_loading_state.set(GameLoadingState::NotLoading);
+        }
     } else {
-        next_game_loading_state.set(GameLoadingState::Loading);
+        if *game_loading_state.get() != GameLoadingState::Loading {
+            next_game_loading_state.set(GameLoadingState::Loading);
+        }
     }
 }
 

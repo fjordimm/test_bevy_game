@@ -13,7 +13,7 @@ use crate::game::{
             tags::PlayerBody,
         },
         reusable_materials::ReusableMaterials,
-        sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
+        sets::{DuringPlaying, DuringPlayingRunning, OnEnterPlaying},
         tags::{PlayingStateEntity, PrimaryCamera},
     },
     util::{alrms, alrrs},
@@ -36,7 +36,7 @@ impl Plugin for PlayerPlugin {
             .add_systems(Update,
                 rotate_and_move
                     .in_set(DuringPlaying::General)
-                    .in_set(DuringPlayingUnpaused)
+                    .in_set(DuringPlayingRunning)
             )
         ;
     }

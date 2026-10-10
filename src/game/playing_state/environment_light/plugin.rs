@@ -5,7 +5,7 @@ use crate::game::{
     graphics::global_render_data::resources::GlobalRenderData,
     playing_state::{
         environment_light::resources::{SkyRotationS, SkyRotationT},
-        sets::{DuringPlaying, DuringPlayingUnpaused, OnEnterPlaying},
+        sets::{DuringPlaying, DuringPlayingRunning, OnEnterPlaying},
         tags::PlayingStateEntity,
     },
     util::{alrms, mathf32::lerp_remap},
@@ -26,7 +26,7 @@ impl Plugin for EnvironmentLightPlugin {
             .add_systems(Update,
                 update_environment_lights
                     .in_set(DuringPlaying::General)
-                    .in_set(DuringPlayingUnpaused)
+                    .in_set(DuringPlayingRunning)
             )
         ;
     }
